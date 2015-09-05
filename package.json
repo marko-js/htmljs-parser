@@ -1,0 +1,30 @@
+{
+  "name": "htmljs-parser",
+  "description": "An HTML-like parser that recognize attributes of various primitive types.",
+  "keywords": [
+    "HTML",
+    "Parser",
+    "JavaScript"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/.bin/jshint *.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philidem/htmljs-parser.git"
+  },
+  "author": "Phillip Gates-Idem <phillip.idem@gmail.com>",
+  "maintainers": "Phillip Gates-Idem <phillip.idem@gmail.com>",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "colors": "^1.1.2",
+    "jshint": "^2.8.0"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "version": "1.0.6"
+}
