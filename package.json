@@ -8,7 +8,7 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/.bin/jshint *.js"
+    "test": "node_modules/.bin/mocha --ui bdd --reporter spec ./test"
   },
   "repository": {
     "type": "git",
@@ -16,11 +16,12 @@
   },
   "author": "Phillip Gates-Idem <phillip.idem@gmail.com>",
   "maintainers": "Phillip Gates-Idem <phillip.idem@gmail.com>",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
+    "chai": "^3.2.0",
     "colors": "^1.1.2",
-    "jshint": "^2.8.0"
+    "jshint": "^2.8.0",
+    "mocha": "^2.3.0"
   },
   "license": "MIT",
   "publishConfig": {

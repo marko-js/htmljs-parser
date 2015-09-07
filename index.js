@@ -45,8 +45,7 @@ exports.createParser = function(listeners, options) {
         }
     }
 
-    var attributeName;
-    var attributeValue;
+    var attribute;
     var attributes;
     var stringDelimiter;
     var expressionStartDelimiter;
@@ -54,17 +53,36 @@ exports.createParser = function(listeners, options) {
     var expressionDepth;
 
     function _attribute() {
-        attributes.push({
-            name: attributeName,
-            value: attributeValue
-        });
+        attribute = {};
+        attributes.push(attribute);
+        return attribute;
     }
 
-    //var stateStack = [];
+    function _attributesToText() {
+        text = '';
+        for (var i = 0; i < attributes.length; i++) {
+            var attr = attributes[i];
+            text += ' ' + attr.name;
+            if (attr.value !== undefined) {
+                text += '=' + attr.value;
+            }
+        }
+        return text;
+    }
+
+    function _afterOpenTag() {
+        _notifyOpenTag(tagName, attributes);
+
+        if (tagName === 'script') {
+            parser.enterState(states.SCRIPT_TAG);
+        } else {
+            parser.enterState(states.INITIAL);
+        }
+    }
+
     var parentOfStringState;
     var parentOfCommentState;
     var parentOfExpressionState;
-    //var expressionDel
 
     function _enterStringState(delimiter) {
         stringDelimiter = delimiter;
@@ -249,25 +267,6 @@ exports.createParser = function(listeners, options) {
         // We enter the ELEMENT_NAME state after we encounter a "<"
         // followed by a non-special character
         ELEMENT_NAME: Parser.createState({
-
-            expression: {
-                eof: function() {
-                    _notifyText(text);
-                },
-
-                end: function() {
-                    _notifyText(text);
-
-                    // If we reach the end of the expression then return
-                    // back to the INITIAL state
-                    parser.enterState(states.INITIAL);
-                },
-
-                char: function(ch) {
-                    text += ch;
-                }
-            },
-
             enter: function() {
                 // reset attributes collection when we enter new element
                 attributes = [];
@@ -280,14 +279,7 @@ exports.createParser = function(listeners, options) {
 
             char: function(ch) {
                 if (ch === '>') {
-                    _notifyOpenTag(tagName, attributes);
-
-                    if (tagName === 'script') {
-                        text = '';
-                        _enterExpressionState();
-                    } else {
-                        parser.enterState(states.INITIAL);
-                    }
+                    _afterOpenTag();
                 } else if (ch === '/') {
                     parser.lookAtCharAhead(1, function(ch) {
                         parser.skip(1);
@@ -313,13 +305,13 @@ exports.createParser = function(listeners, options) {
         // read in the tag name and encountered the first space
         WITHIN_ELEMENT: Parser.createState({
             eof: function() {
-                _notifyOpenTag(tagName, attributes);
+                var text = '<' + tagName + _attributesToText(attributes);
+                _notifyText(text);
             },
 
             char: function(ch) {
                 if (ch === '>') {
-                    _notifyOpenTag(tagName, attributes);
-                    parser.enterState(states.INITIAL);
+                    _afterOpenTag();
                 } if (ch === '/') {
                     parser.lookAtCharAhead(1, function(ch) {
                         if (ch === '>') {
@@ -335,7 +327,7 @@ exports.createParser = function(listeners, options) {
                 } else {
                     // attribute name is initially the first non-whitespace
                     // character that we found
-                    attributeName = ch;
+                    _attribute().name = ch;
                     parser.enterState(states.ATTRIBUTE_NAME);
                 }
             }
@@ -344,25 +336,16 @@ exports.createParser = function(listeners, options) {
         // We enter the ATTRIBUTE_NAME state when we see a non-whitespace
         // character after reading the tag name
         ATTRIBUTE_NAME: Parser.createState({
-            enter: function() {
-                // attributeName is initialized to the first non-whitespace
-                // character that we found while in the WITHIN_ELEMENT state
-
-                // attributeValue is initially undefined
-                // When we see a "=" then we initialize attributeValue to
-                // empty string
-                attributeValue = undefined;
-            },
-
             eof: function() {
-                _attribute();
-                _notifyOpenTag(tagName, attributes);
+                states.WITHIN_ELEMENT.eof();
             },
 
             char: function(ch) {
                 if (ch === '=') {
-                    attributeValue = '';
+                    attribute.value = '';
                     parser.enterState(states.ATTRIBUTE_VALUE);
+                } else if (ch === '>') {
+                    _afterOpenTag();
                 } else if (ch === '/') {
                     parser.lookAtCharAhead(1, function(nextCh) {
                         if (nextCh === '>') {
@@ -375,7 +358,6 @@ exports.createParser = function(listeners, options) {
                         } else {
                             // ignore the extra "/" and stop looking
                             // for attribute value
-                            _attribute();
                             parser.enterState(states.WITHIN_ELEMENT);
                         }
                     });
@@ -383,10 +365,9 @@ exports.createParser = function(listeners, options) {
                     // when whitespace is encountered then we complete
                     // the current attribute and don't bother looking
                     // for attribute value
-                    _attribute();
                     parser.enterState(states.WITHIN_ELEMENT);
                 } else {
-                    attributeName += ch;
+                    attribute.name += ch;
                 }
             }
         }),
@@ -394,8 +375,7 @@ exports.createParser = function(listeners, options) {
         ATTRIBUTE_VALUE: Parser.createState({
             string: {
                 eof: function() {
-                    _attribute();
-                    _notifyOpenTag(tagName, attributes);
+                    states.WITHIN_ELEMENT.eof();
                 },
 
                 end: function() {
@@ -407,14 +387,13 @@ exports.createParser = function(listeners, options) {
                 char: function(ch) {
                     // char will be called for each character in the
                     // string (including the delimiters)
-                    attributeValue += ch;
+                    attribute.value += ch;
                 }
             },
 
             comment: {
                 eof: function() {
-                    _attribute();
-                    _notifyOpenTag(tagName, attributes);
+                    states.WITHIN_ELEMENT.eof();
                 },
 
                 end: function() {
@@ -424,14 +403,13 @@ exports.createParser = function(listeners, options) {
                 },
 
                 char: function(ch) {
-                    attributeValue += ch;
+                    attribute.value += ch;
                 }
             },
 
             expression: {
                 eof: function() {
-                    _attribute();
-                    _notifyOpenTag(tagName, attributes);
+                    states.WITHIN_ELEMENT.eof();
                 },
 
                 end: function() {
@@ -441,28 +419,23 @@ exports.createParser = function(listeners, options) {
                 },
 
                 char: function(ch) {
-                    attributeValue += ch;
+                    attribute.value += ch;
                 }
             },
 
             eof: function() {
-                _attribute();
-                _notifyOpenTag(tagName, attributes);
+                states.WITHIN_ELEMENT.eof();
             },
 
             char: function(ch) {
                 if (ch === '>') {
-                    _attribute();
-                    _notifyOpenTag(tagName, attributes);
-
-                    parser.enterState(states.INITIAL);
+                    _afterOpenTag();
                 } else if (ch === '/') {
                     parser.lookAtCharAhead(1, function(nextCh) {
                         if (nextCh === '>') {
                             // we found a self-closing tag
 
                             // save the current attribute
-                            _attribute();
                             _notifyOpenTag(tagName, attributes);
                             _notifyCloseTag(tagName);
 
@@ -470,12 +443,11 @@ exports.createParser = function(listeners, options) {
                             parser.enterState(states.INITIAL);
                         } else if (nextCh === '*') {
                             parser.skip(1);
-
                             _enterBlockCommentState();
                         } else {
                             // we encountered a "/" but it wasn't followed
                             // by a ">" so continue
-                            attributeValue += ch;
+                            attribute.value += ch;
                         }
                     });
                 } else if (ch === '\'') {
@@ -489,11 +461,9 @@ exports.createParser = function(listeners, options) {
                 } else if (ch === '[') {
                     _enterExpressionState(ch, ']');
                 } else if (/\s/.test(ch)) {
-                    _attribute();
-
                     parser.enterState(states.WITHIN_ELEMENT);
                 } else {
-                    attributeValue += ch;
+                    attribute.value += ch;
                 }
             }
         }),
@@ -539,16 +509,17 @@ exports.createParser = function(listeners, options) {
 
             char: function(ch) {
                 if (ch === '\'') {
+                    // single-quoted string
                     return _enterStringState(ch);
                 } else if (ch === '"') {
+                    // double-quoted string
                     return _enterStringState(ch);
                 }
 
                 if (parentOfExpressionState === states.ATTRIBUTE_VALUE) {
+                    console.log('expression within attribute value');
                     // We are within an attribute value
                     parentOfExpressionState.expression.char(ch);
-
-                    console.log(ch, expressionEndDelimiter);
 
                     if (ch === expressionEndDelimiter) {
                         expressionDepth--;
@@ -561,6 +532,7 @@ exports.createParser = function(listeners, options) {
                         expressionDepth++;
                     }
                 } else {
+                    console.log('expression within script tag');
                     // We must be within a script tag
                     if (ch === '<') {
                         parser.lookAheadFor('/script>', function(match) {
@@ -579,6 +551,9 @@ exports.createParser = function(listeners, options) {
                             if (nextCh === '/') {
                                 _enterLineCommentState();
                                 parser.skip(1);
+                            } else if (nextCh === '*') {
+                                _enterBlockCommentState();
+                                parser.skip(1);
                             } else {
                                 parentOfExpressionState.expression.char(ch);
                             }
@@ -587,6 +562,34 @@ exports.createParser = function(listeners, options) {
                         parentOfExpressionState.expression.char(ch);
                     }
                 }
+            }
+        }),
+
+        // We enter the SCRIPT_TAG state after we encounter opening script tag
+        SCRIPT_TAG: Parser.createState({
+            expression: {
+                eof: function() {
+                    _notifyText(text);
+                },
+
+                end: function() {
+                    _notifyText(text);
+
+                    // If we reach the end of the expression then return
+                    // back to the INITIAL state
+                    parser.enterState(states.INITIAL);
+                },
+
+                char: function(ch) {
+                    text += ch;
+                }
+            },
+
+            enter: function() {
+                // initialize the text buffer and immediately go into
+                // the expression state
+                text = '';
+                _enterExpressionState();
             }
         }),
 
@@ -635,7 +638,7 @@ exports.createParser = function(listeners, options) {
                         }
                     });
                 } else {
-                    parentOfStringState.comment.char(ch);
+                    parentOfCommentState.comment.char(ch);
                 }
             }
         }),
@@ -664,7 +667,7 @@ exports.createParser = function(listeners, options) {
             },
 
             eof: function() {
-                _notifyDTD(tagName);
+                _notifyText('<!' + tagName);
             },
 
             char: function(ch) {
@@ -686,17 +689,15 @@ exports.createParser = function(listeners, options) {
             },
 
             eof: function() {
-                _notifyDeclaration(tagName);
+                _notifyText('<?' + tagName);
             },
 
             char: function(ch) {
                 if (ch === '?') {
                     parser.lookAtCharAhead(1, function(nextCh) {
                         if (nextCh === '>') {
-                            parser.enterState(states.INITIAL);
-                        } else if (nextCh !== undefined) {
                             parser.skip(1);
-                            tagName +=  nextCh;
+                            parser.enterState(states.INITIAL);
                         }
                     });
                 } else if (ch === '>') {

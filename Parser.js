@@ -148,6 +148,8 @@ function _readStrAhead(parser, lookingFor) {
         }
     } while (keepReading);
 
+    console.log('Read ahead and found: ' + JSON.stringify(str));
+
     return (str === lookingFor) ? str : undefined;
 }
 
@@ -159,8 +161,7 @@ function _checkEOF(parser) {
             console.log('EOF');
         }
 
-        // return to initial state just in case someone tries to
-        // reuse parser parser
+        // return to initial state in case someone tries to reuse parser
         _reset(parser);
     }
 
@@ -179,7 +180,7 @@ Parser.prototype = {
 
             // we were waiting for someting but the stream ended
             // before that request was satisfied
-            this.waitFor.cb();
+            waitFor.cb();
 
             // now that we handled the look-ahead, we need to resume
             // processing...
@@ -225,7 +226,7 @@ Parser.prototype = {
                 // that we weren't able to satisfy their look-ahead...
                 callback();
             } else {
-                console.log('we do not have enough chunks but will wait');
+                console.log('we do not have enough chunks but will wait', this.waitFor);
 
                 // Don't have enough characters so need to wait until
                 // we receive more chunks...
@@ -254,7 +255,9 @@ Parser.prototype = {
      * at the given position.
      */
     lookAtCharAhead: function(offset, callback) {
-        var needPos = this.pos + offset;
+        // Since we increment this.pos immediately after a read, the
+        // look-ahead offset needs to be decremented by 1
+        var needPos = this.pos + offset - 1;
         if (needPos > this.maxPos) {
             if (this.ended) {
                 // we've received everything so let the callback know
@@ -273,11 +276,12 @@ Parser.prototype = {
 
             // Calculate the absolute position of the character
             // that we are trying to read...
-            var pos = this.pos + offset;
 
             // Calculate offset relative to current chunk and
             // move to the next chunk if it is not in range
-            while ((offset = pos - chunkStartPos) > chunk.length) {
+
+
+            while ((offset = needPos - chunkStartPos) >= chunk.length) {
                 chunkIndex++;
                 chunkStartPos += chunk.length;
                 chunk = this.chunks[chunkIndex];
@@ -291,7 +295,8 @@ Parser.prototype = {
     // and when there are no pending look-aheads
     resume: function() {
         if (!this.state) {
-            throw new Error('Cannot resume when parser has no state');
+            // Cannot resume when parser has no state
+            return;
         }
 
         var chunk = this.curChunk;
@@ -322,7 +327,7 @@ Parser.prototype = {
 
             var ch = chunk[offset];
 
-            console.log('-- ' + ch + ' --');
+            console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
 
             this.state.char(ch);
 
@@ -390,7 +395,7 @@ Parser.prototype = {
                     }
                 } else {
                     // there is a look ahead for a specific character at given position
-                    var chunkStartPos = this.maxPos + 1;
+                    var chunkStartPos = this.maxPos - chunk.length + 1;
                     var offset = waitFor.pos - chunkStartPos;
                     waitFor.cb(chunk[offset]);
                 }
