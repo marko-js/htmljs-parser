@@ -374,6 +374,113 @@ describe('htmljs parser', function() {
         ]);
     });
 
+    it('should handle parsing attributes with expressions', function() {
+        parse([
+            '<a a=1/2>test</a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: [
+                    {
+                        name: 'a',
+                        value: '1/2'
+                    }
+                ]
+            },
+            {
+                type: 'text',
+                text: 'test'
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+
+        parse([
+            '<a a=1>2>test</a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: [
+                    {
+                        name: 'a',
+                        value: '1'
+                    }
+                ]
+            },
+            {
+                type: 'text',
+                text: '2>test'
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+
+        parse([
+            '<a data=((a-b)/2 + ")")></a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: [
+                    {
+                        name: 'data',
+                        value: '((a-b)/2 + ")")'
+                    }
+                ]
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+
+        parse([
+            '<a data=((a-b)/2 + \')\')></a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: [
+                    {
+                        name: 'data',
+                        value: '((a-b)/2 + \')\')'
+                    }
+                ]
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+
+    });
+
+    it('should handle parsing element with stray /', function() {
+        parse([
+            '<a / >test</a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: 'test'
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+    });
+
     it('should handle EOF while parsing element', function() {
         parse([
             '<a><b'
@@ -431,123 +538,91 @@ describe('htmljs parser', function() {
             }
         ]);
     });
-});
 
-// [
-//
-//     function() {
-//         var parser = jsxml.createParser({
-//             ontext: function(text) {
-//                 console.log('TEXT');
-//                 console.log(text.cyan);
-//             },
-//
-//             onopentag: function(name, attributes) {
-//                 console.log('OPEN TAG');
-//
-//                 var str = '<' + name;
-//                 for (var i = 0; i < attributes.length; i++) {
-//                     var attr = attributes[i];
-//                     str += ' ' + attr.name + '=' + attr.value;
-//                 }
-//
-//                 str += '>';
-//                 console.log(str.yellow);
-//             },
-//
-//             onclosetag: function(name) {
-//                 console.log('CLOSE TAG');
-//                 var str = '</' + name + '>';
-//                 console.log(str.yellow);
-//             },
-//
-//             ondtd: function(name) {
-//                 console.log('DTD');
-//                 var str = '<!' + name + '>';
-//                 console.log(str.blue);
-//             },
-//
-//             ondeclaration: function(name) {
-//                 console.log('DECLARATION');
-//                 var str = '<?' + name + '?>';
-//                 console.log(str.red);
-//             },
-//
-//             oncomment: function(comment) {
-//                 console.log('COMMENT');
-//                 console.log('<!--' + comment + '-->'.gray);
-//             }
-//         });
-//
-//         parser.parse([
-//             '<script>',
-//             '// Comment: <script></script>\n',
-//             'if (x < 1) {\n',
-//             '   document.write("</script>")\n',
-//             '}\n',
-//             '</script>'
-//         ]);
-//
-//
-//         // parser.parse('<div a=123 b={{}} } c=123+135>abc</div>');
-//         //
-//         // parser.parse([
-//         //     '<', '?', 'xml version="1.0" encoding="UTF-8">',
-//         //     '<', '!', 'DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">',
-//         //     'THIS ', 'IS', ' TEXT',
-//         //     '<d', 'iv', '>DIV CONTENT', '<', '/', 'div>',
-//         //     '<!', '-', '-',
-//         //     '<d', 'iv', '>COMMENT', '<', '/', 'div>',
-//         //     '-->',
-//         //     '<custom x', '=', '(2 + 2) y=a z="abc">',
-//         //     'CUSTOM CONTENT',
-//         //     '</custom>',
-//         //
-//         //     // Just a normal CDATA block...
-//         //     '<![CDATA[this is cdata]]>',
-//         //
-//         //     // When parsing expressions delimited by paranthese,
-//         //     // make sure we ignore any paranthese within string
-//         //     // quotes
-//         //     '<a data=((a-b)/2 + ")")',
-//         //
-//         //     // Make sure we properly parse script blocks
-//         //     // which might have JavaScript expressions with
-//         //     // special characters within them
-//         //     '<script>',
-//         //     'if (x < 1) {\n',
-//         //     '   document.write("</script>")',
-//         //     '}\n',
-//         //     '</script>',
-//         //
-//         //     //"<>" and "</>" should be treated as text
-//         //     '<></>',
-//         //
-//         //     // The misplaced "/" should be ignored
-//         //     '<abc / >',
-//         //
-//         //     // test attribute should have value: 1/2
-//         //     // Make sure that we aren't confused by the "/"
-//         //     // within the expression.
-//         //     '<abc test=1/2/>'
-//         // ]);
-//         //
-//         // parser.parse('<');
-//         //
-//         // parser.parse('<abc');
-//         //
-//         // parser.parse('</');
-//         //
-//         // parser.parse('</abc');
-//         //
-//         // parser.parse('<abc a=123');
-//         //
-//         // parser.parse('<script>a + b');
-//         //
-//         // parser.parse('<script>a + b + "abc');
-//         //
-//         // parser.parse('<script src="xyz">a + b + "abc"');
-//     }
-// ].forEach(function(func) {
-//     func();
-// });
+    it('should handle CDATA', function() {
+        parse([
+            'BEFORE<![CDATA[<within><!-- just text -->]]>AFTER'
+        ], [
+            {
+                type: 'text',
+                text: 'BEFORE'
+            },
+            {
+                type: 'text',
+                text: '<within><!-- just text -->'
+            },
+            {
+                type: 'text',
+                text: 'AFTER'
+            }
+        ]);
+    });
+
+    it('should handle stray "<" and ">"', function() {
+        parse([
+            '<a>1 < > <> </> 2<</a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: '1 '
+            },
+            {
+                type: 'text',
+                text: '< '
+            },
+            {
+                type: 'text',
+                text: '> '
+            },
+            {
+                type: 'text',
+                text: '<>'
+            },
+            {
+                type: 'text',
+                text: ' '
+            },
+            {
+                type: 'text',
+                text: '</>'
+            },
+            {
+                type: 'text',
+                text: ' 2'
+            },
+            {
+                type: 'text',
+                text: '<'
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+    });
+
+    it('should handle XML comments', function() {
+        parse([
+            '<a><!--<b></b>--></a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: []
+            },
+            {
+                type: 'comment',
+                comment: '<b></b>'
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+    });
+});

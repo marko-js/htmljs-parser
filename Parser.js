@@ -148,7 +148,7 @@ function _readStrAhead(parser, lookingFor) {
         }
     } while (keepReading);
 
-    console.log('Read ahead and found: ' + JSON.stringify(str));
+    // console.log('Read ahead and found: ' + JSON.stringify(str));
 
     return (str === lookingFor) ? str : undefined;
 }
@@ -156,9 +156,9 @@ function _readStrAhead(parser, lookingFor) {
 function _checkEOF(parser) {
     if (parser.ended && (parser.pos > parser.maxPos)) {
         if (parser.state) {
-            console.log('EOF while in state ' + parser.state.name);
+            // console.log('EOF while in state ' + parser.state.name);
             parser.state.eof();
-            console.log('EOF');
+            // console.log('EOF');
         }
 
         // return to initial state in case someone tries to reuse parser
@@ -198,13 +198,13 @@ Parser.prototype = {
         }
 
         if (this.state) {
-            console.log('Leaving state ' + this.state.name);
+            // console.log('Leaving state ' + this.state.name);
             this.state.leave(state);
         }
 
         this.state = state;
 
-        console.log('Entering state ' + state.name);
+        // console.log('Entering state ' + state.name);
 
         state.enter();
     },
@@ -214,19 +214,19 @@ Parser.prototype = {
      * beyond
      */
     lookAheadFor: function(str, callback) {
-        console.log('looking ahead for "' + str + '"');
+        // console.log('looking ahead for "' + str + '"');
 
         // Have we read enough chunks to read the string that we need?
         var needPos = this.pos + str.length - 1;
         if (needPos > this.maxPos) {
             if (this.ended) {
-                console.log('we do not have enough chunks and stream has ended');
+                // console.log('we do not have enough chunks and stream has ended');
 
                 // we've received everything so let the callback know
                 // that we weren't able to satisfy their look-ahead...
                 callback();
             } else {
-                console.log('we do not have enough chunks but will wait', this.waitFor);
+                // console.log('we do not have enough chunks but will wait', this.waitFor);
 
                 // Don't have enough characters so need to wait until
                 // we receive more chunks...
@@ -237,12 +237,12 @@ Parser.prototype = {
                 });
             }
         } else if (_readStrAhead(this, str)) {
-            console.log('read ahead and found ' + str);
+            // console.log('read ahead and found ' + str);
 
             // found
             callback(str);
         } else {
-            console.log('read ahead and did not find ' + str);
+            // console.log('read ahead and did not find ' + str);
 
             // not found
             callback();
@@ -327,7 +327,7 @@ Parser.prototype = {
 
             var ch = chunk[offset];
 
-            console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
+            // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
 
             this.state.char(ch);
 
@@ -420,7 +420,7 @@ Parser.prototype = {
     },
 
     parse: function(data) {
-        console.log('-----------------');
+        // console.log('-----------------');
 
         _reset(this);
 

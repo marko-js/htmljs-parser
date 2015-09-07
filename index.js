@@ -1,6 +1,10 @@
 var Parser = require('./Parser');
 
+var WHITESPACE_REGEX = /[ \t\r\n]/;
 
+function _isWhiteSpaceChar(ch) {
+    return (WHITESPACE_REGEX.exec(ch) !== null);
+}
 
 exports.createParser = function(listeners, options) {
     var parser = new Parser(options);
@@ -8,6 +12,12 @@ exports.createParser = function(listeners, options) {
     var tagName;
     var text;
     var comment;
+    var attribute;
+    var attributes;
+    var stringDelimiter;
+    var expressionStartDelimiter;
+    var expressionEndDelimiter;
+    var expressionDepth;
 
     function _notifyText(text) {
         if (listeners.ontext) {
@@ -45,13 +55,6 @@ exports.createParser = function(listeners, options) {
         }
     }
 
-    var attribute;
-    var attributes;
-    var stringDelimiter;
-    var expressionStartDelimiter;
-    var expressionEndDelimiter;
-    var expressionDepth;
-
     function _attribute() {
         attribute = {};
         attributes.push(attribute);
@@ -78,6 +81,12 @@ exports.createParser = function(listeners, options) {
         } else {
             parser.enterState(states.INITIAL);
         }
+    }
+
+    function _afterSelfClosingTag() {
+        _notifyOpenTag(tagName, attributes);
+        _notifyCloseTag(tagName);
+        parser.enterState(states.INITIAL);
     }
 
     var parentOfStringState;
@@ -201,11 +210,56 @@ exports.createParser = function(listeners, options) {
                     _notifyText('<>');
 
                     parser.enterState(states.INITIAL);
+                } else if (ch === '<') {
+                    // found something like:
+                    // ><
+                    // We'll treat the stray ">" as text and stay in
+                    // the START_BEGIN_ELEMENT since we saw a new "<"
+                    _notifyText('<');
+                } else if (_isWhiteSpaceChar(ch)) {
+                    _notifyText('<' + ch);
+
+                    parser.enterState(states.INITIAL);
                 } else {
                     tagName += ch;
 
                     // just a normal element...
                     parser.enterState(states.ELEMENT_NAME);
+                }
+            }
+        }),
+
+        // We enter the ELEMENT_NAME state after we encounter a "<"
+        // followed by a non-special character
+        ELEMENT_NAME: Parser.createState({
+            enter: function() {
+                // reset attributes collection when we enter new element
+                attributes = [];
+            },
+
+            eof: function() {
+                // Data ended with an improperly opened tag
+                _notifyText('<' + tagName);
+            },
+
+            char: function(ch) {
+                if (ch === '>') {
+                    _afterOpenTag();
+                } else if (ch === '/') {
+                    parser.lookAtCharAhead(1, function(ch) {
+                        parser.skip(1);
+
+                        if (ch === '>') {
+                            // we found a self-closing tag
+                            _afterSelfClosingTag();
+                        } else {
+                            parser.enterState(states.WITHIN_ELEMENT);
+                        }
+                    });
+                } else if (_isWhiteSpaceChar(ch)) {
+                    parser.enterState(states.WITHIN_ELEMENT);
+                } else {
+                    tagName += ch;
                 }
             }
         }),
@@ -264,43 +318,6 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
-        // We enter the ELEMENT_NAME state after we encounter a "<"
-        // followed by a non-special character
-        ELEMENT_NAME: Parser.createState({
-            enter: function() {
-                // reset attributes collection when we enter new element
-                attributes = [];
-            },
-
-            eof: function() {
-                // Data ended with an improperly opened tag
-                _notifyText('<' + tagName);
-            },
-
-            char: function(ch) {
-                if (ch === '>') {
-                    _afterOpenTag();
-                } else if (ch === '/') {
-                    parser.lookAtCharAhead(1, function(ch) {
-                        parser.skip(1);
-
-                        if (ch === '>') {
-                            // we found a self-closing tag
-                            _notifyOpenTag(tagName, attributes);
-                            _notifyCloseTag(tagName);
-                            parser.enterState(states.INITIAL);
-                        } else {
-                            parser.enterState(states.WITHIN_ELEMENT);
-                        }
-                    });
-                } else if (/\s/.test(ch)) {
-                    parser.enterState(states.WITHIN_ELEMENT);
-                } else {
-                    tagName += ch;
-                }
-            }
-        }),
-
         // We enter the WITHIN_ELEMENT state after we have fully
         // read in the tag name and encountered the first space
         WITHIN_ELEMENT: Parser.createState({
@@ -312,17 +329,14 @@ exports.createParser = function(listeners, options) {
             char: function(ch) {
                 if (ch === '>') {
                     _afterOpenTag();
-                } if (ch === '/') {
+                } else if (ch === '/') {
                     parser.lookAtCharAhead(1, function(ch) {
                         if (ch === '>') {
-                            _notifyOpenTag(tagName, attributes);
-                            _notifyCloseTag(tagName);
-
                             parser.skip(1);
-                            parser.enterState(states.INITIAL);
+                            _afterSelfClosingTag();
                         }
                     });
-                } else if (/\s/.test(ch)) {
+                } else if (_isWhiteSpaceChar(ch)) {
                     // ignore whitespace within element...
                 } else {
                     // attribute name is initially the first non-whitespace
@@ -350,18 +364,15 @@ exports.createParser = function(listeners, options) {
                     parser.lookAtCharAhead(1, function(nextCh) {
                         if (nextCh === '>') {
                             // we found a self-closing tag
-                            _notifyOpenTag(tagName, attributes);
-                            _notifyCloseTag(tagName);
-
                             parser.skip(1);
-                            parser.enterState(states.INITIAL);
+                            _afterSelfClosingTag();
                         } else {
                             // ignore the extra "/" and stop looking
                             // for attribute value
                             parser.enterState(states.WITHIN_ELEMENT);
                         }
                     });
-                } else if (/\s/.test(ch)) {
+                } else if (_isWhiteSpaceChar(ch)) {
                     // when whitespace is encountered then we complete
                     // the current attribute and don't bother looking
                     // for attribute value
@@ -372,7 +383,13 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
+        // We enter the ATTRIBUTE_VALUE state when we see a "=" while in
+        // the ATTRIBUTE_NAME state.
         ATTRIBUTE_VALUE: Parser.createState({
+            // We go into the STRING sub-state when we see a single or double
+            // quote character while parsing an an attribute value.
+            // The STRING state will bubble some events up to the
+            // parent state.
             string: {
                 eof: function() {
                     states.WITHIN_ELEMENT.eof();
@@ -391,6 +408,11 @@ exports.createParser = function(listeners, options) {
                 }
             },
 
+            // We go into the LINE_COMMENT or BLOCK_COMMENT sub-state
+            // when we see a // or /* character sequence while parsing
+            // an attribute value.
+            // The LINE_COMMENT or BLOCK_COMMENT state will bubble some
+            // events up to the parent state.
             comment: {
                 eof: function() {
                     states.WITHIN_ELEMENT.eof();
@@ -407,6 +429,11 @@ exports.createParser = function(listeners, options) {
                 }
             },
 
+            // We enter the EXPRESSION sub-state after we see an expression
+            // delimiter while in the ATTRIBUTE_VALUE
+            // state. The expression delimiters are the following: ({[
+            // The EXPRESSION state will bubble some events up to the
+            // parent state.
             expression: {
                 eof: function() {
                     states.WITHIN_ELEMENT.eof();
@@ -434,13 +461,8 @@ exports.createParser = function(listeners, options) {
                     parser.lookAtCharAhead(1, function(nextCh) {
                         if (nextCh === '>') {
                             // we found a self-closing tag
-
-                            // save the current attribute
-                            _notifyOpenTag(tagName, attributes);
-                            _notifyCloseTag(tagName);
-
+                            _afterSelfClosingTag();
                             parser.skip(1);
-                            parser.enterState(states.INITIAL);
                         } else if (nextCh === '*') {
                             parser.skip(1);
                             _enterBlockCommentState();
@@ -460,7 +482,7 @@ exports.createParser = function(listeners, options) {
                     _enterExpressionState(ch, '}');
                 } else if (ch === '[') {
                     _enterExpressionState(ch, ']');
-                } else if (/\s/.test(ch)) {
+                } else if (_isWhiteSpaceChar(ch)) {
                     parser.enterState(states.WITHIN_ELEMENT);
                 } else {
                     attribute.value += ch;
@@ -468,7 +490,14 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
+        // We enter the EXPRESSION state after we see a <script> open tag
+        // or if we see an expression delimiter while in the ATTRIBUTE_VALUE
+        // state. The expression delimiters are the following: ({[
         EXPRESSION: Parser.createState({
+            // We go into the STRING sub-state when we see a single or double
+            // quote character while parsing an expression.
+            // The STRING state will bubble some events up to the
+            // parent state.
             string: {
                 eof: function() {
                     parentOfExpressionState.expression.eof();
@@ -487,6 +516,11 @@ exports.createParser = function(listeners, options) {
                 }
             },
 
+            // We go into the LINE_COMMENT or BLOCK_COMMENT sub-state
+            // when we see a // or /* character sequence while parsing
+            // an expression.
+            // The LINE_COMMENT or BLOCK_COMMENT state will bubble some
+            // events up to the parent state.
             comment: {
                 eof: function() {
                     parentOfExpressionState.expression.eof();
@@ -517,7 +551,7 @@ exports.createParser = function(listeners, options) {
                 }
 
                 if (parentOfExpressionState === states.ATTRIBUTE_VALUE) {
-                    console.log('expression within attribute value');
+                    // console.log('expression within attribute value');
                     // We are within an attribute value
                     parentOfExpressionState.expression.char(ch);
 
@@ -532,7 +566,7 @@ exports.createParser = function(listeners, options) {
                         expressionDepth++;
                     }
                 } else {
-                    console.log('expression within script tag');
+                    // console.log('expression within script tag');
                     // We must be within a script tag
                     if (ch === '<') {
                         parser.lookAheadFor('/script>', function(match) {
@@ -567,6 +601,10 @@ exports.createParser = function(listeners, options) {
 
         // We enter the SCRIPT_TAG state after we encounter opening script tag
         SCRIPT_TAG: Parser.createState({
+            // We go into the EXPRESSION sub-state right after entering
+            // the SCRIPT_TAG state.
+            // The EXPRESSION state will bubble some events up to the
+            // parent state.
             expression: {
                 eof: function() {
                     _notifyText(text);
@@ -593,6 +631,8 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
+        // We enter the STRING state after we encounter a single or double
+        // quote character while in the ATTRIBUTE_VALUE or EXPRESSION state.
         STRING: Parser.createState({
             eof: function() {
                 parentOfStringState.string.eof();
@@ -611,6 +651,10 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
+        // We enter the STRING_ESCAPE_CHAR state after we encounter a "\"
+        // while in the STRING state. The next character will always be handled
+        // character within a string and then we'll immediately return back to
+        // the STRING state.
         STRING_ESCAPE_CHAR: Parser.createState({
             eof: function() {
                 parentOfStringState.string.eof();
@@ -622,6 +666,9 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
+        // We enter the BLOCK_COMMENT state after we encounter a "/*" sequence
+        // while in the ATTRIBUTE_VALUE or EXPRESSION state.
+        // We leave the BLOCK_COMMENT state when we see a "*/" sequence.
         BLOCK_COMMENT: Parser.createState({
             eof: function() {
                 parentOfCommentState.comment.eof();
@@ -632,9 +679,9 @@ exports.createParser = function(listeners, options) {
                     parentOfCommentState.comment.char(ch);
                     parser.lookAtCharAhead(1, function(nextCh) {
                         if (nextCh === '/') {
+                            parser.skip(1);
                             parentOfCommentState.comment.char(nextCh);
                             parentOfCommentState.comment.end();
-                            parser.skip(1);
                         }
                     });
                 } else {
@@ -643,6 +690,9 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
+        // We enter the LINE_COMMENT state after we encounter a "//" sequence
+        // while in the EXPRESSION state.
+        // We leave the LINE_COMMENT state when we see a newline character.
         LINE_COMMENT: Parser.createState({
             eof: function() {
                 parentOfCommentState.comment.eof();
@@ -657,6 +707,9 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
+        // We enter the DTD state after we encounter a "<!" while in the
+        // INITIAL state.
+        // We leave the DTD state if we see a ">".
         DTD: Parser.createState({
             enter: function() {
                 tagName = '';
@@ -679,6 +732,9 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
+        // We enter the DECLARATION state after we encounter a "<?"
+        // while in the INITIAL state.
+        // We leave the DECLARATION state if we see a "?>" or ">".
         DECLARATION: Parser.createState({
             enter: function() {
                 tagName = '';
@@ -708,6 +764,9 @@ exports.createParser = function(listeners, options) {
             }
         }),
 
+        // We enter the XML_COMMENT state after we encounter a "<--"
+        // while in the INITIAL state.
+        // We leave the XML_COMMENT state if we see a "-->".
         XML_COMMENT: Parser.createState({
             enter: function() {
                 comment = '';
