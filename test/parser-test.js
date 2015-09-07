@@ -606,4 +606,80 @@ describe('htmljs parser', function() {
             }
         ]);
     });
+
+    it('should handle self-closing tags', function() {
+        parse([
+            '<a />'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: [],
+                selfClosed: true
+            },
+            {
+                type: 'closetag',
+                name: 'a',
+                selfClosed: true
+            }
+        ]);
+    });
+
+    it('should handle style tag', function() {
+        var styleInnerText = [
+            '// line comment within <style></style>\n',
+            '/* block comment within <style></style> */',
+            '"string within \\\"<style></style>\\\""',
+            '\'string within \\\'<style></style>\\\'\''
+        ].join('');
+
+        parse([
+            '<style>',
+            styleInnerText,
+            '</style>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'style',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: styleInnerText
+            },
+            {
+                type: 'closetag',
+                name: 'style'
+            }
+        ]);
+    });
+
+    it('should handle EOF while parsing style tag', function() {
+        var styleInnerText = [
+            '// line comment within <style></style>\n',
+            '/* block comment within <style></style> */',
+            '"string within \\\"<style></style>\\\""',
+            '\'string within \\\'<style></style>\\\'\''
+        ].join('');
+
+        parse([
+            '<style a=b>',
+            styleInnerText
+        ], [
+            {
+                type: 'opentag',
+                name: 'style',
+                attributes: [
+                    {
+                        name: 'a',
+                        value: 'b'
+                    }
+                ]
+            },
+            {
+                type: 'text',
+                text: styleInnerText
+            }
+        ]);
+    });
 });

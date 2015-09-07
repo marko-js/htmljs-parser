@@ -1,46 +1,7 @@
-// A stub function that does not do anything
-var NOOP = function() {};
-
-function State() {
-
-}
-
-State.prototype = {
-    // called when entering state
-    enter: NOOP,
-
-    // called when leaving state
-    leave: NOOP,
-
-    // called while processing single character in this state
-    char: NOOP,
-
-    // called if EOF reach while in this state
-    eof: NOOP
-};
-
-function _extend(dest, src) {
-    for (var key in src) {
-        if (src.hasOwnProperty(key)) {
-            dest[key] = src[key];
-        }
-    }
-}
-
-// Some of the property resets are redundant with what is in the constructor
-// but this is just an optimization because the JavaScript engine can optimize
-// the class instance when all of the the instance properties are set
-// in the constructor.
 function _reset(parser) {
-    parser.pos = -1;
-    parser.maxPos = -1;
-    parser.curChunkIndex = -1;
-    parser.curChunkStartPos = -1;
-    parser.curChunk = undefined;
-    parser.chunks = [];
-    parser.waitFor = null;
-    parser.ended = false;
-    parser.state = null;
+    // call the constructor function again because we have a contract that
+    // it will fully reset the parser
+    Parser.call(parser);
 }
 
 function _waitFor(parser, waitFor) {
@@ -94,9 +55,7 @@ function Parser(options) {
 }
 
 Parser.createState = function(mixins) {
-    var state = new State();
-    _extend(state, mixins);
-    return state;
+    return mixins;
 };
 
 // _readStrAhead will be called if we're looking ahead for a particular
@@ -155,9 +114,10 @@ function _readStrAhead(parser, lookingFor) {
 
 function _checkEOF(parser) {
     if (parser.ended && (parser.pos > parser.maxPos)) {
-        if (parser.state) {
+        var state;
+        if ((state = parser.state) && state.eof) {
             // console.log('EOF while in state ' + parser.state.name);
-            parser.state.eof();
+            state.eof();
             // console.log('EOF');
         }
 
@@ -197,16 +157,18 @@ Parser.prototype = {
             throw new Error('Re-entering the current state is illegal');
         }
 
-        if (this.state) {
-            // console.log('Leaving state ' + this.state.name);
-            this.state.leave(state);
+        var oldState;
+        if ((oldState = this.state) && oldState.leave) {
+            // console.log('Leaving state ' + oldState.name);
+            oldState.leave(state);
         }
 
         this.state = state;
 
         // console.log('Entering state ' + state.name);
-
-        state.enter();
+        if (state.enter) {
+            state.enter();
+        }
     },
 
     /**
@@ -328,7 +290,7 @@ Parser.prototype = {
             var ch = chunk[offset];
 
             // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
-
+            // We assume that every state will have "char" function
             this.state.char(ch);
 
             // If the handling of the character caused the parser to be

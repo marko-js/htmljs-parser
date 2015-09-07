@@ -28,22 +28,34 @@ exports.createParser = function(listeners, options) {
         }
     }
 
-    function _notifyOpenTag(name, attributes) {
+    function _notifyOpenTag(name, attributes, selfClosed) {
         if (listeners.onopentag) {
-            listeners.onopentag({
+            var event = {
                 type: 'opentag',
                 name: name,
                 attributes: attributes
-            });
+            };
+
+            if (selfClosed) {
+                event.selfClosed = true;
+            }
+
+            listeners.onopentag(event);
         }
     }
 
-    function _notifyCloseTag(name) {
+    function _notifyCloseTag(name, selfClosed) {
         if (listeners.onclosetag) {
-            listeners.onclosetag({
+            var event = {
                 type: 'closetag',
                 name: name
-            });
+            };
+
+            if (selfClosed) {
+                event.selfClosed = true;
+            }
+
+            listeners.onclosetag(event);
         }
     }
 
@@ -97,20 +109,23 @@ exports.createParser = function(listeners, options) {
 
         if (tagName === 'script') {
             parser.enterState(states.SCRIPT_TAG);
+        } else if (tagName === 'style') {
+            parser.enterState(states.STYLE_TAG);
         } else {
             parser.enterState(states.INITIAL);
         }
     }
 
     function _afterSelfClosingTag() {
-        _notifyOpenTag(tagName, attributes);
-        _notifyCloseTag(tagName);
+        _notifyOpenTag(tagName, attributes, true /* selfClosed */);
+        _notifyCloseTag(tagName, true /* selfClosed */);
         parser.enterState(states.INITIAL);
     }
 
     var parentOfStringState;
     var parentOfCommentState;
     var parentOfExpressionState;
+    var expressionEndTagName;
 
     function _enterStringState(delimiter) {
         stringDelimiter = delimiter;
@@ -140,6 +155,8 @@ exports.createParser = function(listeners, options) {
         if (startDelimiter) {
             expressionDepth = 1;
             parentOfExpressionState.expression.char(startDelimiter);
+        } else {
+            expressionEndTagName = tagName;
         }
 
         parser.enterState(states.EXPRESSION);
@@ -588,17 +605,18 @@ exports.createParser = function(listeners, options) {
                     // console.log('expression within script tag');
                     // We must be within a script tag
                     if (ch === '<') {
-                        parser.lookAheadFor('/script>', function(match) {
+                        parser.lookAheadFor('/' + expressionEndTagName + '>', function(match) {
                             if (match) {
                                 parentOfExpressionState.expression.end();
 
                                 parser.skip(match.length);
 
-                                _notifyCloseTag('script');
+                                _notifyCloseTag(expressionEndTagName);
                             } else {
                                 parentOfExpressionState.expression.char(ch);
                             }
                         });
+
                     } else if (ch === '/') {
                         parser.lookAtCharAhead(1, function(nextCh) {
                             if (nextCh === '/') {
@@ -622,6 +640,38 @@ exports.createParser = function(listeners, options) {
         SCRIPT_TAG: Parser.createState({
             // We go into the EXPRESSION sub-state right after entering
             // the SCRIPT_TAG state.
+            // The EXPRESSION state will bubble some events up to the
+            // parent state.
+            expression: {
+                eof: function() {
+                    _notifyText(text);
+                },
+
+                end: function() {
+                    _notifyText(text);
+
+                    // If we reach the end of the expression then return
+                    // back to the INITIAL state
+                    parser.enterState(states.INITIAL);
+                },
+
+                char: function(ch) {
+                    text += ch;
+                }
+            },
+
+            enter: function() {
+                // initialize the text buffer and immediately go into
+                // the expression state
+                text = '';
+                _enterExpressionState();
+            }
+        }),
+
+        // We enter the STYLE_TAG state after we encounter opening script tag
+        STYLE_TAG: Parser.createState({
+            // We go into the EXPRESSION sub-state right after entering
+            // the STYLE_TAG state.
             // The EXPRESSION state will bubble some events up to the
             // parent state.
             expression: {
@@ -816,10 +866,6 @@ exports.createParser = function(listeners, options) {
             }
         })
     };
-
-    for (var key in states) {
-        states[key].name = key;
-    }
 
     parser.setInitialState(states.INITIAL);
 
