@@ -11,47 +11,28 @@ require('colors');
 function parse(text, expectedEvents) {
     var actualEvents = [];
     var parser = jsxml.createParser({
-        ontext: function(text) {
-            actualEvents.push({
-                type: 'text',
-                text: text
-            });
+        ontext: function(event) {
+            actualEvents.push(event);
         },
 
-        onopentag: function(name, attributes) {
-            actualEvents.push({
-                type: 'opentag',
-                name: name,
-                attributes: attributes
-            });
+        onopentag: function(event) {
+            actualEvents.push(event);
         },
 
-        onclosetag: function(name) {
-            actualEvents.push({
-                type: 'closetag',
-                name: name
-            });
+        onclosetag: function(event) {
+            actualEvents.push(event);
         },
 
-        ondtd: function(name) {
-            actualEvents.push({
-                type: 'dtd',
-                name: name
-            });
+        ondtd: function(event) {
+            actualEvents.push(event);
         },
 
-        ondeclaration: function(name) {
-            actualEvents.push({
-                type: 'declaration',
-                name: name
-            });
+        ondeclaration: function(event) {
+            actualEvents.push(event);
         },
 
-        oncomment: function(comment) {
-            actualEvents.push({
-                type: 'comment',
-                comment: comment
-            });
+        oncomment: function(event) {
+            actualEvents.push(event);
         }
     });
 

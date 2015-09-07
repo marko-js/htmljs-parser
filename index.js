@@ -21,37 +21,56 @@ exports.createParser = function(listeners, options) {
 
     function _notifyText(text) {
         if (listeners.ontext) {
-            listeners.ontext(text);
+            listeners.ontext({
+                type: 'text',
+                text: text
+            });
         }
     }
 
     function _notifyOpenTag(name, attributes) {
         if (listeners.onopentag) {
-            listeners.onopentag(name, attributes);
+            listeners.onopentag({
+                type: 'opentag',
+                name: name,
+                attributes: attributes
+            });
         }
     }
 
     function _notifyCloseTag(name) {
         if (listeners.onclosetag) {
-            listeners.onclosetag(name);
+            listeners.onclosetag({
+                type: 'closetag',
+                name: name
+            });
         }
     }
 
     function _notifyDTD(name) {
         if (listeners.ondtd) {
-            listeners.ondtd(name);
+            listeners.ondtd({
+                type: 'dtd',
+                name: name
+            });
         }
     }
 
     function _notifyDeclaration(name) {
         if (listeners.ondeclaration) {
-            listeners.ondeclaration(name);
+            listeners.ondeclaration({
+                type: 'declaration',
+                name: name
+            });
         }
     }
 
     function _notifyComment(comment) {
         if (listeners.oncomment) {
-            listeners.oncomment(comment);
+            listeners.oncomment({
+                type: 'comment',
+                comment: comment
+            });
         }
     }
 
