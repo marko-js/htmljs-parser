@@ -1,10 +1,39 @@
 var Parser = require('./Parser');
 
 var WHITESPACE_REGEX = /[ \t\r\n]/;
+var WHITESPACE_CHARS = ' \n\t\r';
 
 function _isWhiteSpaceChar(ch) {
-    return (WHITESPACE_REGEX.exec(ch) !== null);
+    //return (WHITESPACE_REGEX.exec(ch) !== null);
+    //return (WHITESPACE_CHARS.indexOf(ch) !== -1);
+    var code = ch.charCodeAt(0);
+    return (code <= 32);// || (code )
+    //return (code === ' ') || (str.charCodeAt(index);
+    //return (code === ' ') || (code === CODE_NEWLINE) || (code === '\t') || (code === '\r');
 }
+
+function _code(ch) {
+    return ch.charCodeAt(0);
+}
+
+var CODE_BACK_SLASH = _code('\\');
+var CODE_FORWARD_SLASH = _code('/');
+var CODE_LEFT_ANGLE_BRACKET = _code('<');
+var CODE_RIGHT_ANGLE_BRACKET = _code('>');
+var CODE_EXCLAMATION = _code('!');
+var CODE_QUESTION = _code('?');
+var CODE_LEFT_SQUARE_BRACKET = _code('[');
+var CODE_RIGHT_SQUARE_BRACKET = _code(']');
+var CODE_EQUAL = _code('=');
+var CODE_SINGLE_QUOTE = _code('\'');
+var CODE_DOUBLE_QUOTE = _code('\"');
+var CODE_LEFT_PARANTHESIS = _code('(');
+var CODE_RIGHT_PARANTHESIS = _code(')');
+var CODE_LEFT_CURLY_BRACE = _code('{');
+var CODE_RIGHT_CURLY_BRACE = _code('}');
+var CODE_ASTERISK = _code('*');
+var CODE_NEWLINE = _code('\n');
+var CODE_DASH = _code('-');
 
 exports.createParser = function(listeners, options) {
     var parser = new Parser(options);
@@ -134,19 +163,19 @@ exports.createParser = function(listeners, options) {
         parser.enterState(states.STRING);
     }
 
-    function _enterBlockCommentState(delimiter) {
+    function _enterBlockCommentState() {
         parentOfCommentState = parser.state;
         parentOfCommentState.comment.char('/*');
         parser.enterState(states.BLOCK_COMMENT);
     }
 
-    function _enterLineCommentState(delimiter) {
+    function _enterLineCommentState() {
         parentOfCommentState = parser.state;
         parentOfCommentState.comment.char('//');
         parser.enterState(states.LINE_COMMENT);
     }
 
-    function _enterExpressionState(startDelimiter, endDelimiter) {
+    function _enterExpressionState(startCh, startDelimiter, endDelimiter) {
         parentOfExpressionState = parser.state;
 
         expressionStartDelimiter = startDelimiter;
@@ -154,7 +183,7 @@ exports.createParser = function(listeners, options) {
 
         if (startDelimiter) {
             expressionDepth = 1;
-            parentOfExpressionState.expression.char(startDelimiter);
+            parentOfExpressionState.expression.char(startCh);
         } else {
             expressionEndTagName = tagName;
         }
@@ -182,15 +211,14 @@ exports.createParser = function(listeners, options) {
                 }
             },
 
-            char: function(ch) {
-                if (ch === '<') {
+            char: function(ch, code) {
+                if (code === CODE_LEFT_ANGLE_BRACKET) {
                     parser.enterState(states.START_BEGIN_ELEMENT);
                 } else {
                     text += ch;
                 }
             }
         }),
-
 
         // State that we enter just after seeing a "<"
         START_BEGIN_ELEMENT: Parser.createState({
@@ -203,50 +231,48 @@ exports.createParser = function(listeners, options) {
                 _notifyText('<');
             },
 
-            char: function(ch) {
-                if (ch === '!') {
+            char: function(ch, code) {
+                if (code === CODE_EXCLAMATION) {
                     // something like:
                     // <!DOCTYPE html>
                     // <![CDATA[
                     // <!-- comment
 
                     // Look ahead to see if it is comment...
-                    parser.lookAheadFor('--', function(match) {
+                    var match = parser.lookAheadFor('--');
+                    if (match) {
+                        // Found XML comment
+                        parser.skip(2);
+                        parser.enterState(states.XML_COMMENT);
+                    } else {
+                        // Not a comment, see if it is a CDATA...
+                        match = parser.lookAheadFor('[CDATA[');
                         if (match) {
-                            // Found XML comment
-                            parser.enterState(states.XML_COMMENT);
-                            parser.skip(2);
-                        } else {
-                            // Not a comment, see if it is a CDATA...
-                            parser.lookAheadFor('[CDATA[', function(match) {
-                                if (match) {
-                                    parser.skip(match.length);
+                            parser.skip(match.length);
 
-                                    // Found CDATA...
-                                    parser.enterState(states.CDATA);
-                                } else {
-                                    // Some other type of declaration...
-                                    parser.enterState(states.DTD);
-                                }
-                            });
+                            // Found CDATA...
+                            parser.enterState(states.CDATA);
+                        } else {
+                            // Some other type of declaration...
+                            parser.enterState(states.DTD);
                         }
-                    });
-                } else if (ch === '?') {
+                    }
+                } else if (code === CODE_QUESTION) {
                     // something like:
                     // <?xml version="1.0"?>
                     parser.enterState(states.DECLARATION);
-                } else if (ch === '/') {
+                } else if (code === CODE_FORWARD_SLASH) {
                     // something like:
                     // </html>
                     parser.enterState(states.END_ELEMENT);
-                } else if (ch === '>') {
+                } else if (code === CODE_RIGHT_ANGLE_BRACKET) {
                     // something like:
                     // <>
                     // We'll treat this as text
                     _notifyText('<>');
 
                     parser.enterState(states.INITIAL);
-                } else if (ch === '<') {
+                } else if (code === CODE_LEFT_ANGLE_BRACKET) {
                     // found something like:
                     // ><
                     // We'll treat the stray ">" as text and stay in
@@ -278,20 +304,19 @@ exports.createParser = function(listeners, options) {
                 _notifyText('<' + tagName);
             },
 
-            char: function(ch) {
-                if (ch === '>') {
+            char: function(ch, code) {
+                if (code === CODE_RIGHT_ANGLE_BRACKET) {
                     _afterOpenTag();
-                } else if (ch === '/') {
-                    parser.lookAtCharAhead(1, function(ch) {
-                        parser.skip(1);
+                } else if (code === CODE_FORWARD_SLASH) {
+                    var nextCh = parser.lookAtCharCodeAhead(1);
+                    parser.skip(1);
 
-                        if (ch === '>') {
-                            // we found a self-closing tag
-                            _afterSelfClosingTag();
-                        } else {
-                            parser.enterState(states.WITHIN_ELEMENT);
-                        }
-                    });
+                    if (nextCh === CODE_RIGHT_ANGLE_BRACKET) {
+                        // we found a self-closing tag
+                        _afterSelfClosingTag();
+                    } else {
+                        parser.enterState(states.WITHIN_ELEMENT);
+                    }
                 } else if (_isWhiteSpaceChar(ch)) {
                     parser.enterState(states.WITHIN_ELEMENT);
                 } else {
@@ -317,14 +342,13 @@ exports.createParser = function(listeners, options) {
                 _notifyText('<![CDATA[' + text);
             },
 
-            char: function(ch) {
-                if (ch === ']') {
-                    parser.lookAheadFor(']>', function(match) {
-                        if (match) {
-                            parser.skip(match.length);
-                            parser.enterState(states.INITIAL);
-                        }
-                    });
+            char: function(ch, code) {
+                if (code === CODE_RIGHT_SQUARE_BRACKET) {
+                    var match = parser.lookAheadFor(']>');
+                    if (match) {
+                        parser.skip(match.length);
+                        parser.enterState(states.INITIAL);
+                    }
                 } else {
                     text += ch;
                 }
@@ -338,8 +362,8 @@ exports.createParser = function(listeners, options) {
                 _notifyText('</' + tagName);
             },
 
-            char: function(ch) {
-                if (ch === '>') {
+            char: function(ch, code) {
+                if (code === CODE_RIGHT_ANGLE_BRACKET) {
                     if (tagName.length > 0) {
                         _notifyCloseTag(tagName);
                     } else {
@@ -355,23 +379,22 @@ exports.createParser = function(listeners, options) {
         }),
 
         // We enter the WITHIN_ELEMENT state after we have fully
-        // read in the tag name and encountered the first space
+        // read in the tag name and encountered a whitespace character
         WITHIN_ELEMENT: Parser.createState({
             eof: function() {
                 var text = '<' + tagName + _attributesToText(attributes);
                 _notifyText(text);
             },
 
-            char: function(ch) {
-                if (ch === '>') {
+            char: function(ch, code) {
+                if (code === CODE_RIGHT_ANGLE_BRACKET) {
                     _afterOpenTag();
-                } else if (ch === '/') {
-                    parser.lookAtCharAhead(1, function(ch) {
-                        if (ch === '>') {
-                            parser.skip(1);
-                            _afterSelfClosingTag();
-                        }
-                    });
+                } else if (code === CODE_FORWARD_SLASH) {
+                    var nextCh = parser.lookAtCharCodeAhead(1);
+                    if (nextCh === CODE_RIGHT_ANGLE_BRACKET) {
+                        parser.skip(1);
+                        _afterSelfClosingTag();
+                    }
                 } else if (_isWhiteSpaceChar(ch)) {
                     // ignore whitespace within element...
                 } else {
@@ -390,24 +413,23 @@ exports.createParser = function(listeners, options) {
                 states.WITHIN_ELEMENT.eof();
             },
 
-            char: function(ch) {
-                if (ch === '=') {
+            char: function(ch, code) {
+                if (code === CODE_EQUAL) {
                     attribute.value = '';
                     parser.enterState(states.ATTRIBUTE_VALUE);
-                } else if (ch === '>') {
+                } else if (code === CODE_RIGHT_ANGLE_BRACKET) {
                     _afterOpenTag();
-                } else if (ch === '/') {
-                    parser.lookAtCharAhead(1, function(nextCh) {
-                        if (nextCh === '>') {
-                            // we found a self-closing tag
-                            parser.skip(1);
-                            _afterSelfClosingTag();
-                        } else {
-                            // ignore the extra "/" and stop looking
-                            // for attribute value
-                            parser.enterState(states.WITHIN_ELEMENT);
-                        }
-                    });
+                } else if (code === CODE_FORWARD_SLASH) {
+                    var nextCh = parser.lookAtCharCodeAhead(1);
+                    if (nextCh === CODE_RIGHT_ANGLE_BRACKET) {
+                        // we found a self-closing tag
+                        parser.skip(1);
+                        _afterSelfClosingTag();
+                    } else {
+                        // ignore the extra "/" and stop looking
+                        // for attribute value
+                        parser.enterState(states.WITHIN_ELEMENT);
+                    }
                 } else if (_isWhiteSpaceChar(ch)) {
                     // when whitespace is encountered then we complete
                     // the current attribute and don't bother looking
@@ -490,34 +512,33 @@ exports.createParser = function(listeners, options) {
                 states.WITHIN_ELEMENT.eof();
             },
 
-            char: function(ch) {
-                if (ch === '>') {
+            char: function(ch, code) {
+                if (code === CODE_RIGHT_ANGLE_BRACKET) {
                     _afterOpenTag();
-                } else if (ch === '/') {
-                    parser.lookAtCharAhead(1, function(nextCh) {
-                        if (nextCh === '>') {
-                            // we found a self-closing tag
-                            _afterSelfClosingTag();
-                            parser.skip(1);
-                        } else if (nextCh === '*') {
-                            parser.skip(1);
-                            _enterBlockCommentState();
-                        } else {
-                            // we encountered a "/" but it wasn't followed
-                            // by a ">" so continue
-                            attribute.value += ch;
-                        }
-                    });
-                } else if (ch === '\'') {
+                } else if (code === CODE_FORWARD_SLASH) {
+                    var nextCh = parser.lookAtCharCodeAhead(1);
+                    if (nextCh === CODE_RIGHT_ANGLE_BRACKET) {
+                        // we found a self-closing tag
+                        _afterSelfClosingTag();
+                        parser.skip(1);
+                    } else if (nextCh === CODE_ASTERISK) {
+                        parser.skip(1);
+                        _enterBlockCommentState();
+                    } else {
+                        // we encountered a "/" but it wasn't followed
+                        // by a ">" so continue
+                        attribute.value += ch;
+                    }
+                } else if (code === CODE_SINGLE_QUOTE) {
                     _enterStringState(ch);
-                } else if (ch === '"') {
+                } else if (code === CODE_DOUBLE_QUOTE) {
                     _enterStringState(ch);
-                } else if (ch === '(') {
-                    _enterExpressionState(ch, ')');
-                } else if (ch === '{') {
-                    _enterExpressionState(ch, '}');
-                } else if (ch === '[') {
-                    _enterExpressionState(ch, ']');
+                } else if (code === CODE_LEFT_PARANTHESIS) {
+                    _enterExpressionState(ch, code, CODE_RIGHT_PARANTHESIS);
+                } else if (code === CODE_LEFT_CURLY_BRACE) {
+                    _enterExpressionState(ch, code, CODE_RIGHT_CURLY_BRACE);
+                } else if (code === CODE_LEFT_SQUARE_BRACKET) {
+                    _enterExpressionState(ch, code, CODE_RIGHT_SQUARE_BRACKET);
                 } else if (_isWhiteSpaceChar(ch)) {
                     parser.enterState(states.WITHIN_ELEMENT);
                 } else {
@@ -577,11 +598,11 @@ exports.createParser = function(listeners, options) {
                 parentOfExpressionState.expression.eof();
             },
 
-            char: function(ch) {
-                if (ch === '\'') {
+            char: function(ch, code) {
+                if (code === CODE_SINGLE_QUOTE) {
                     // single-quoted string
                     return _enterStringState(ch);
-                } else if (ch === '"') {
+                } else if (code === CODE_DOUBLE_QUOTE) {
                     // double-quoted string
                     return _enterStringState(ch);
                 }
@@ -591,44 +612,41 @@ exports.createParser = function(listeners, options) {
                     // We are within an attribute value
                     parentOfExpressionState.expression.char(ch);
 
-                    if (ch === expressionEndDelimiter) {
+                    if (code === expressionEndDelimiter) {
                         expressionDepth--;
 
                         if (expressionDepth === 0) {
                             parentOfExpressionState.expression.end();
                         }
 
-                    } else if (ch === expressionStartDelimiter) {
+                    } else if (code === expressionStartDelimiter) {
                         expressionDepth++;
                     }
                 } else {
                     // console.log('expression within script tag');
                     // We must be within a script tag
-                    if (ch === '<') {
-                        parser.lookAheadFor('/' + expressionEndTagName + '>', function(match) {
-                            if (match) {
-                                parentOfExpressionState.expression.end();
+                    if (code === CODE_LEFT_ANGLE_BRACKET) {
+                        var match = parser.lookAheadFor('/' + expressionEndTagName + '>');
+                        if (match) {
+                            parentOfExpressionState.expression.end();
 
-                                parser.skip(match.length);
+                            parser.skip(match.length);
+                            _notifyCloseTag(expressionEndTagName);
+                        } else {
+                            parentOfExpressionState.expression.char(ch);
+                        }
 
-                                _notifyCloseTag(expressionEndTagName);
-                            } else {
-                                parentOfExpressionState.expression.char(ch);
-                            }
-                        });
-
-                    } else if (ch === '/') {
-                        parser.lookAtCharAhead(1, function(nextCh) {
-                            if (nextCh === '/') {
-                                _enterLineCommentState();
-                                parser.skip(1);
-                            } else if (nextCh === '*') {
-                                _enterBlockCommentState();
-                                parser.skip(1);
-                            } else {
-                                parentOfExpressionState.expression.char(ch);
-                            }
-                        });
+                    } else if (code === CODE_FORWARD_SLASH) {
+                        var nextCh = parser.lookAtCharCodeAhead(1);
+                        if (nextCh === CODE_FORWARD_SLASH) {
+                            _enterLineCommentState();
+                            parser.skip(1);
+                        } else if (nextCh === CODE_ASTERISK) {
+                            _enterBlockCommentState();
+                            parser.skip(1);
+                        } else {
+                            parentOfExpressionState.expression.char(ch);
+                        }
                     } else {
                         parentOfExpressionState.expression.char(ch);
                     }
@@ -707,8 +725,8 @@ exports.createParser = function(listeners, options) {
                 parentOfStringState.string.eof();
             },
 
-            char: function(ch) {
-                if (ch === '\\') {
+            char: function(ch, code) {
+                if (code === CODE_BACK_SLASH) {
                     parentOfStringState.string.char(ch);
                     parser.enterState(states.STRING_ESCAPE_CHAR);
                 } else if (ch === stringDelimiter) {
@@ -743,16 +761,15 @@ exports.createParser = function(listeners, options) {
                 parentOfCommentState.comment.eof();
             },
 
-            char: function(ch) {
-                if (ch === '*') {
+            char: function(ch, code) {
+                if (code === CODE_ASTERISK) {
                     parentOfCommentState.comment.char(ch);
-                    parser.lookAtCharAhead(1, function(nextCh) {
-                        if (nextCh === '/') {
-                            parser.skip(1);
-                            parentOfCommentState.comment.char(nextCh);
-                            parentOfCommentState.comment.end();
-                        }
-                    });
+                    var nextCh = parser.lookAtCharCodeAhead(1);
+                    if (nextCh === CODE_FORWARD_SLASH) {
+                        parser.skip(1);
+                        parentOfCommentState.comment.char('/');
+                        parentOfCommentState.comment.end();
+                    }
                 } else {
                     parentOfCommentState.comment.char(ch);
                 }
@@ -767,10 +784,10 @@ exports.createParser = function(listeners, options) {
                 parentOfCommentState.comment.eof();
             },
 
-            char: function(ch) {
+            char: function(ch, code) {
                 parentOfCommentState.comment.char(ch);
 
-                if (ch === '\n') {
+                if (code === CODE_NEWLINE) {
                     parentOfCommentState.comment.end();
                 }
             }
@@ -792,8 +809,8 @@ exports.createParser = function(listeners, options) {
                 _notifyText('<!' + tagName);
             },
 
-            char: function(ch) {
-                if (ch === '>') {
+            char: function(ch, code) {
+                if (code === CODE_RIGHT_ANGLE_BRACKET) {
                     parser.enterState(states.INITIAL);
                 } else {
                     tagName += ch;
@@ -817,15 +834,14 @@ exports.createParser = function(listeners, options) {
                 _notifyText('<?' + tagName);
             },
 
-            char: function(ch) {
-                if (ch === '?') {
-                    parser.lookAtCharAhead(1, function(nextCh) {
-                        if (nextCh === '>') {
-                            parser.skip(1);
-                            parser.enterState(states.INITIAL);
-                        }
-                    });
-                } else if (ch === '>') {
+            char: function(ch, code) {
+                if (code === CODE_QUESTION) {
+                    var nextCh = parser.lookAtCharCodeAhead(1);
+                    if (nextCh === CODE_RIGHT_ANGLE_BRACKET) {
+                        parser.skip(1);
+                        parser.enterState(states.INITIAL);
+                    }
+                } else if (code === CODE_RIGHT_ANGLE_BRACKET) {
                     parser.enterState(states.INITIAL);
                 } else {
                     tagName += ch;
@@ -849,17 +865,16 @@ exports.createParser = function(listeners, options) {
                 _notifyComment(comment);
             },
 
-            char: function(ch) {
-                if (ch === '-') {
-                    parser.lookAheadFor('->', function(match) {
-                        if (match) {
-                            parser.skip(match.length);
+            char: function(ch, code) {
+                if (code === CODE_DASH) {
+                    var match = parser.lookAheadFor('->');
+                    if (match) {
+                        parser.skip(match.length);
 
-                            parser.enterState(states.INITIAL);
-                        } else {
-                            comment += ch;
-                        }
-                    });
+                        parser.enterState(states.INITIAL);
+                    } else {
+                        comment += ch;
+                    }
                 } else {
                     comment += ch;
                 }

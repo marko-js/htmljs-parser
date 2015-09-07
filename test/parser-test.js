@@ -4,7 +4,7 @@ require('chai').should();
 var expect = require('chai').expect;
 
 var jsxml = require('../');
-var Parser = require('../Parser');
+var StreamingParser = require('../StreamingParser');
 
 require('colors');
 
@@ -36,16 +36,20 @@ function parse(text, expectedEvents) {
         }
     });
 
+    if (Array.isArray(text)) {
+        text = text.join('');
+    }
+
     parser.parse(text);
 
     expect(actualEvents).to.deep.equal(expectedEvents);
 }
 
-describe('Parser', function() {
+describe('StreamingParser', function() {
     var parser;
 
     beforeEach(function() {
-        parser = new Parser();
+        parser = new StreamingParser();
     });
 
     it('should handle looking ahead for strings', function() {
@@ -440,6 +444,26 @@ describe('htmljs parser', function() {
             }
         ]);
 
+        parse([
+            '<a data={\n' +
+            '    "a": "{b}"\n',
+            '}></a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: [
+                    {
+                        name: 'data',
+                        value: '{\n    \"a\": \"{b}\"\n}'
+                    }
+                ]
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
     });
 
     it('should handle parsing element with stray /', function() {
