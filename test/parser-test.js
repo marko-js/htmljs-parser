@@ -33,6 +33,10 @@ function parse(text, expectedEvents) {
 
         oncomment: function(event) {
             actualEvents.push(event);
+        },
+
+        onplaceholder: function(event) {
+            actualEvents.push(event);
         }
     });
 
@@ -425,6 +429,8 @@ describe('htmljs parser', function() {
             }
         ]);
 
+
+
         parse([
             '<a data=((a-b)/2 + \')\')></a>'
         ], [
@@ -456,6 +462,50 @@ describe('htmljs parser', function() {
                     {
                         name: 'data',
                         value: '{\n    \"a\": \"{b}\"\n}'
+                    }
+                ]
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+    });
+
+    it('should handle parsing attributes without delimiters', function() {
+        parse([
+            '<a data=123"abc"></a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: [
+                    {
+                        name: 'data',
+                        value: '123"abc"'
+                    }
+                ]
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+
+        parse([
+            '<a data=123 data=abc></a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: [
+                    {
+                        name: 'data',
+                        value: '123'
+                    },
+                    {
+                        name: 'data',
+                        value: 'abc'
                     }
                 ]
             },
@@ -703,6 +753,44 @@ describe('htmljs parser', function() {
             {
                 type: 'text',
                 text: styleInnerText
+            }
+        ]);
+    });
+
+    it('should handle placeholder expressions in normal text with surrounding curly braces', function() {
+        parse([
+            'Hello ${xyz}!'
+        ], [
+            {
+                type: 'text',
+                text: 'Hello '
+            },
+            {
+                type: 'placeholder',
+                placeholder: 'xyz'
+            },
+            {
+                type: 'text',
+                text: '!'
+            }
+        ]);
+    });
+
+    it('should handle placeholder expressions in normal text without surrounding curly braces', function() {
+        parse([
+            'Hello $xyz!'
+        ], [
+            {
+                type: 'text',
+                text: 'Hello '
+            },
+            {
+                type: 'placeholder',
+                placeholder: 'xyz'
+            },
+            {
+                type: 'text',
+                text: '!'
             }
         ]);
     });

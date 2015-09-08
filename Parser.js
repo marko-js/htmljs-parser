@@ -48,8 +48,6 @@ Parser.prototype = {
      * beyond
      */
     lookAheadFor: function(str, callback) {
-        // console.log('looking ahead for "' + str + '"');
-
         // Have we read enough chunks to read the string that we need?
         var pos = this.pos;
         var len = str.length;
