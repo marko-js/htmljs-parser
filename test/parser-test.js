@@ -15,6 +15,14 @@ function parse(text, expectedEvents) {
             actualEvents.push(event);
         },
 
+        onplaceholder: function(event) {
+            actualEvents.push(event);
+        },
+
+        oncdata: function(event) {
+            actualEvents.push(event);
+        },
+
         onopentag: function(event) {
             actualEvents.push(event);
         },
@@ -32,10 +40,6 @@ function parse(text, expectedEvents) {
         },
 
         oncomment: function(event) {
-            actualEvents.push(event);
-        },
-
-        onplaceholder: function(event) {
             actualEvents.push(event);
         }
     });
@@ -276,6 +280,26 @@ describe('htmljs parser', function() {
         ]);
     });
 
+    it('should handle closing script tag after single-line comment', function() {
+        parse([
+            '<script>// this is a comment\n</script>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'script',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: '// this is a comment\n'
+            },
+            {
+                type: 'closetag',
+                name: 'script'
+            }
+        ]);
+    });
+
     it('should handle EOF while parsing script tag', function() {
         var scriptInnerText = [
             '// line comment within <script></script>\n',
@@ -305,7 +329,36 @@ describe('htmljs parser', function() {
         ]);
     });
 
-    it('should handle parsing element', function() {
+    it('should handle parsing element with attribute that contains multi-line comment', function() {
+        parse([
+            '<a a=123+456/* test */ b=a+\'123\'>test</a>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'a',
+                attributes: [
+                    {
+                        name: 'a',
+                        value: '123+456/* test */'
+                    },
+                    {
+                        name: 'b',
+                        value: 'a+\'123\''
+                    }
+                ]
+            },
+            {
+                type: 'text',
+                text: 'test'
+            },
+            {
+                type: 'closetag',
+                name: 'a'
+            }
+        ]);
+    });
+
+    it('should handle parsing element with complex attributes', function() {
         parse([
             '<a a=123+256 b c= d=(a + (1/2) /* comment */)>test</a>'
         ], [
@@ -339,7 +392,9 @@ describe('htmljs parser', function() {
                 name: 'a'
             }
         ]);
+    });
 
+    it('should handle parsing element with attribute with no value', function() {
         parse([
             '<a b>test</a>'
         ], [
@@ -604,7 +659,8 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'text',
-                text: '<within><!-- just text -->'
+                text: '<within><!-- just text -->',
+                cdata: true
             },
             {
                 type: 'text',
@@ -701,7 +757,6 @@ describe('htmljs parser', function() {
 
     it('should handle style tag', function() {
         var styleInnerText = [
-            '// line comment within <style></style>\n',
             '/* block comment within <style></style> */',
             '"string within \\\"<style></style>\\\""',
             '\'string within \\\'<style></style>\\\'\''
@@ -730,7 +785,6 @@ describe('htmljs parser', function() {
 
     it('should handle EOF while parsing style tag', function() {
         var styleInnerText = [
-            '// line comment within <style></style>\n',
             '/* block comment within <style></style> */',
             '"string within \\\"<style></style>\\\""',
             '\'string within \\\'<style></style>\\\'\''
@@ -767,7 +821,9 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'placeholder',
-                placeholder: 'xyz'
+                contents: 'xyz',
+                prefix: '${',
+                suffix: '}'
             },
             {
                 type: 'text',
@@ -776,21 +832,357 @@ describe('htmljs parser', function() {
         ]);
     });
 
-    it('should handle placeholder expressions in normal text without surrounding curly braces', function() {
+    it('should handle placeholder expressions in scripts with surrounding curly braces', function() {
         parse([
-            'Hello $xyz!'
+            '<script>Hello ${xyz}!</script>'
         ], [
+            {
+                type: 'opentag',
+                name: 'script',
+                attributes: []
+            },
             {
                 type: 'text',
                 text: 'Hello '
             },
             {
                 type: 'placeholder',
-                placeholder: 'xyz'
+                contents: 'xyz',
+                prefix: '${',
+                suffix: '}'
             },
             {
                 type: 'text',
                 text: '!'
+            },
+            {
+                type: 'closetag',
+                name: 'script'
+            }
+        ]);
+    });
+
+    it('should handle placeholder expressions in strings in scripts with surrounding curly braces', function() {
+        parse([
+            '<script>alert("Hello ${xyz}!")</script>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'script',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: 'alert("Hello '
+            },
+            {
+                type: 'placeholder',
+                contents: 'xyz',
+                prefix: '${',
+                suffix: '}'
+            },
+            {
+                type: 'text',
+                text: '!")'
+            },
+            {
+                type: 'closetag',
+                name: 'script'
+            }
+        ]);
+    });
+
+    it('should handle placeholder expressions within non-delimited attributes', function() {
+        parse([
+            '<custom name=${name}>TEST</custom>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'custom',
+                attributes: [
+                    {
+                        name: 'name',
+                        value: '${name}'
+                    }
+                ]
+            },
+            {
+                type: 'text',
+                text: 'TEST'
+            },
+            {
+                type: 'closetag',
+                name: 'custom'
+            }
+        ]);
+    });
+
+    it('should handle placeholder expressions within delimited expression attributes', function() {
+        parse([
+            '<custom name=(${name})>TEST</custom>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'custom',
+                attributes: [
+                    {
+                        name: 'name',
+                        value: '(${name})'
+                    }
+                ]
+            },
+            {
+                type: 'text',
+                text: 'TEST'
+            },
+            {
+                type: 'closetag',
+                name: 'custom'
+            }
+        ]);
+    });
+
+    it('should handle placeholder expressions within string within delimited expression attributes', function() {
+        parse([
+            '<custom name="${\'name\'}">TEST</custom>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'custom',
+                attributes: [
+                    {
+                        name: 'name',
+                        value: '"${\'name\'}"',
+                    }
+                ]
+            },
+            {
+                type: 'text',
+                text: 'TEST'
+            },
+            {
+                type: 'closetag',
+                name: 'custom'
+            }
+        ]);
+    });
+
+    it('should handle multi-line string attributes', function() {
+        parse([
+            '<div data="\nabc\n124">'
+        ], [
+            {
+                type: 'opentag',
+                name: 'div',
+                attributes: [
+                    {
+                        name: 'data',
+                        value: '"\nabc\n124"',
+                    }
+                ]
+            }
+        ]);
+    });
+
+    it('should handle placeholders in XML comments', function() {
+        parse([
+            '<!-- Copyright ${date} -->'
+        ], [
+            {
+                type: 'begincomment'
+            },
+            {
+                type: 'text',
+                text: ' Copyright '
+            },
+            {
+                type: 'placeholder',
+                contents: 'date',
+                prefix: '${',
+                suffix: '}'
+            },
+            {
+                type: 'text',
+                text: ' '
+            },
+            {
+                type: 'endcomment'
+            }
+        ]);
+    });
+
+    it('should handle placeholders in JavaScript single-line comments', function() {
+        parse([
+            '<script>// Copyright ${date}\n</script>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'script',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: '// Copyright '
+            },
+            {
+                type: 'placeholder',
+                contents: 'date',
+                prefix: '${',
+                suffix: '}'
+            },
+            {
+                type: 'text',
+                text: '\n'
+            },
+            {
+                type: 'closetag',
+                name: 'script'
+            }
+        ]);
+    });
+
+    it('should handle placeholders in JavaScript multi-line comments', function() {
+        parse([
+            '<script>/* Copyright ${date} */</script>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'script',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: '/* Copyright '
+            },
+            {
+                type: 'placeholder',
+                contents: 'date',
+                prefix: '${',
+                suffix: '}'
+            },
+            {
+                type: 'text',
+                text: ' */'
+            },
+            {
+                type: 'closetag',
+                name: 'script'
+            }
+        ]);
+    });
+
+    it('should follow instructions on how to parse contents of tag', function() {
+        var actualEvents = [];
+
+        var opentagHandlers = {
+            html: function(event) {
+                this.enterHtmlContentState();
+            },
+
+            javascript: function(event) {
+                this.enterJsContentState();
+            },
+
+            css: function(event) {
+                this.enterCssContentState();
+            },
+
+            text: function(event) {
+                this.enterTextContentState();
+            }
+        };
+
+        var parser = jsxml.createParser({
+            ontext: function(event) {
+                actualEvents.push(event);
+            },
+
+            onopentag: function(event) {
+                actualEvents.push(event);
+
+                opentagHandlers[event.name].call(this, event);
+            },
+
+            onclosetag: function(event) {
+                actualEvents.push(event);
+            },
+
+            ondtd: function(event) {
+                actualEvents.push(event);
+            },
+
+            ondeclaration: function(event) {
+                actualEvents.push(event);
+            },
+
+            oncomment: function(event) {
+                actualEvents.push(event);
+            },
+        });
+
+        parser.parse([
+            '<html>',
+
+            // The <javascript> tag will be parsed in JavaScript mode
+            '<javascript>/* This </javascript> is ignored */ // this is javascript\n</javascript>',
+
+            // The <css> tag will be parsed in CSS mode
+            '<css>/* CSS */\n.a {image: url("</css>")}</css>',
+
+            // The <text> tag will be parsed as raw text
+            '<text>This is raw ${text} so nothing should be parsed</text>',
+
+            '</html>'
+        ]);
+
+        expect(actualEvents).to.deep.equal([
+            {
+                type: 'opentag',
+                name: 'html',
+                attributes: []
+            },
+            {
+                type: 'opentag',
+                name: 'javascript',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: '/* This </javascript> is ignored */ // this is javascript\n'
+            },
+            {
+                type: 'closetag',
+                name: 'javascript'
+            },
+            {
+                type: 'opentag',
+                name: 'css',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: '/* CSS */\n.a {image: url("</css>")}'
+            },
+            {
+                type: 'closetag',
+                name: 'css'
+            },
+            {
+                type: 'opentag',
+                name: 'text',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: 'This is raw ${text} so nothing should be parsed'
+            },
+            {
+                type: 'closetag',
+                name: 'text'
+            },
+            {
+                type: 'closetag',
+                name: 'html'
             }
         ]);
     });

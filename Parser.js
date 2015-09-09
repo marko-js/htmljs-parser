@@ -31,16 +31,17 @@ Parser.prototype = {
 
         var oldState;
         if ((oldState = this.state) && oldState.leave) {
-            // console.log('Leaving state ' + oldState.name);
-            oldState.leave(state);
+            console.log('Leaving state ' + oldState.name);
+            oldState.leave.call(this, state);
+        }
+
+        console.log('Entering state ' + state.name);
+
+        if (state.enter) {
+            state.enter.call(this, oldState);
         }
 
         this.state = state;
-
-        // console.log('Entering state ' + state.name);
-        if (state.enter) {
-            state.enter();
-        }
     },
 
     /**
@@ -90,6 +91,10 @@ Parser.prototype = {
         // it will fully reset the parser
         Parser.call(this);
 
+        if (Array.isArray(data)) {
+            data = data.join('');
+        }
+
         this.data = data;
         this.maxPos = data.length - 1;
 
@@ -113,15 +118,15 @@ Parser.prototype = {
             // move to next position
             this.pos++;
 
-            // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
+            console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
 
             // We assume that every state will have "char" function
-            this.state.char(ch, ch.charCodeAt(0));
+            this.state.char.call(this, ch, ch.charCodeAt(0));
         }
 
         var state;
         if ((state = this.state) && state.eof) {
-            state.eof();
+            state.eof.call(this);
         }
     }
 };
