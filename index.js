@@ -51,7 +51,7 @@ exports.createParser = function(listeners, options) {
     }
 
     function _notifyCDATA(txt) {
-        if (listeners.ontext && (txt.length > 0)) {
+        if (listeners.ontext && txt) {
             listeners.ontext({
                 type: 'text',
                 text: txt,
@@ -112,11 +112,28 @@ exports.createParser = function(listeners, options) {
         }
     }
 
-    function _notifyComment(comment) {
-        if (listeners.oncomment) {
+    function _notifyBeginComment() {
+        if (listeners.onbegincomment) {
+            listeners.onbegincomment.call(parser, {
+                type: 'begincomment'
+            });
+        }
+    }
+
+    function _notifyCommentText(txt) {
+        if (listeners.oncomment && txt) {
             listeners.oncomment.call(parser, {
                 type: 'comment',
-                comment: comment
+                comment: txt
+            });
+        }
+        comment = '';
+    }
+
+    function _notifyEndComment(comment) {
+        if (listeners.onendcomment) {
+            listeners.onendcomment.call(parser, {
+                type: 'endcomment'
             });
         }
     }
@@ -320,9 +337,30 @@ exports.createParser = function(listeners, options) {
 
         eof: CONTENT_eof,
 
+        placeholder: {
+            begin: function() {
+                // emit the current content text that has been collected
+                _notifyText(text);
+            }
+        },
+
         char: function(ch, code) {
             if (code === CODE_LEFT_ANGLE_BRACKET) {
                 if (_checkForCDATA()) {
+                    return;
+                }
+
+                var match = parser.lookAheadFor('!--');
+                if (match) {
+                    parser.skip(match.length);
+
+                    _notifyText(text);
+
+                    cdataParentState = parser.state;
+
+                    _notifyBeginComment();
+
+                    parser.enterState(STATE_XML_COMMENT);
                     return;
                 }
 
@@ -337,12 +375,12 @@ exports.createParser = function(listeners, options) {
         }
     });
 
-    // We enter STATE_TEXT_CONTENT when a listener manually chooses
+    // We enter STATE_STATIC_TEXT_CONTENT when a listener manually chooses
     // to enter this state after seeing an opentag event for a tag
     // whose content should not be parsed at all (except for the purpose
     // of looking for the end tag).
-    var STATE_TEXT_CONTENT = Parser.createState({
-        name: 'STATE_TEXT_CONTENT',
+    var STATE_STATIC_TEXT_CONTENT = Parser.createState({
+        name: 'STATE_STATIC_TEXT_CONTENT',
 
         enter: function() {
             // The end tag that we are looking for is the last tag
@@ -356,7 +394,7 @@ exports.createParser = function(listeners, options) {
             // First, see if we need to see if we reached the closing tag...
             if (code === CODE_LEFT_ANGLE_BRACKET) {
                 if (_checkForClosingTag()) {
-                    return true;
+                    return;
                 }
             }
 
@@ -364,18 +402,27 @@ exports.createParser = function(listeners, options) {
         }
     });
 
-    // We enter STATE_JS_CONTENT when we are parsing the body of a tag
-    // that contains JavaScript code.
-    var STATE_JS_CONTENT = Parser.createState({
-        name: 'STATE_JS_CONTENT',
+    // We enter STATE_PARSED_TEXT_CONTENT when we are parsing
+    // the body of a tag does not contain HTML tags but may contains
+    // placeholders
+    var STATE_PARSED_TEXT_CONTENT = Parser.createState({
+        name: 'STATE_PARSED_TEXT_CONTENT',
+
+        placeholder: {
+            begin: function() {
+                // emit the current content text that has been collected
+                _notifyText(text);
+            }
+        },
+
         comment: {
             eof: function() {
                 _notifyText(text);
             },
 
             end: function() {
-                // go back to the JAVASCRIPT_CONTENT state
-                parser.enterState(STATE_JS_CONTENT);
+                // go back to the STATE_PARSED_TEXT_CONTENT state
+                parser.enterState(STATE_PARSED_TEXT_CONTENT);
             },
 
             char: function(ch) {
@@ -386,87 +433,13 @@ exports.createParser = function(listeners, options) {
         eof: CONTENT_eof,
 
         char: function(ch, code) {
-            var nextCode;
-
-            // First, see if we need to see if we reached the closing tag...
             if (code === CODE_LEFT_ANGLE_BRACKET) {
+                // First, see if we need to see if we reached the closing tag
+                // and then check if we encountered CDATA
                 if (_checkForClosingTag()) {
                     return;
-                } else if (_checkForCDATA) {
+                } else if (_checkForCDATA()) {
                     return;
-                }
-            } else if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
-                // add the character to our buffer
-                text += ch;
-
-                // switch to string state
-                _enterStringState(ch, code, STATE_STRING_IN_CONTENT);
-                return;
-            } else if (code === CODE_FORWARD_SLASH) {
-                // Check next character to see if we are in a comment
-                nextCode = parser.lookAtCharCodeAhead(1);
-                if (nextCode === CODE_FORWARD_SLASH) {
-                    parser.skip(1);
-                    return _enterLineCommentState();
-                } else if (nextCode === CODE_ASTERISK) {
-                    parser.skip(1);
-                    return _enterBlockCommentState();
-                }
-            } else if (_checkForContentPlaceholder(ch, code)) {
-                // STATE_CONTENT_PLACEHOLDER.handle was called which
-                // called _notifyText
-                return;
-            }
-
-            text += ch;
-        }
-    });
-
-    // We enter STATE_CSS_CONTENT when we are parsing the body of a tag
-    // that contains CSS code.
-    var STATE_CSS_CONTENT = Parser.createState({
-        name: 'STATE_CSS_CONTENT',
-        comment: {
-            eof: function() {
-                _notifyText(text);
-            },
-
-            end: function() {
-                // go back to the STATE_CSS_CONTENT state
-                parser.enterState(STATE_CSS_CONTENT);
-            },
-
-            char: function(ch) {
-                text += ch;
-            }
-        },
-
-        eof: CONTENT_eof,
-
-        char: function(ch, code) {
-            var nextCode;
-
-            // First, see if we need to see if we reached the closing tag...
-            if (code === CODE_LEFT_ANGLE_BRACKET) {
-                if (_checkForClosingTag()) {
-                    return;
-                } else if (_checkForCDATA) {
-                    return;
-                }
-            } else if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
-                // add the character to our buffer
-                text += ch;
-
-                // switch to string state
-                _enterStringState(ch, code, STATE_STRING_IN_CONTENT);
-                return;
-            } else if (code === CODE_FORWARD_SLASH) {
-                // Check next character to see if we are in a comment...
-                // CSS content only allows /* */ comments
-                nextCode = parser.lookAtCharCodeAhead(1);
-                if (nextCode === CODE_ASTERISK) {
-                    parser.skip(1);
-                    return _enterBlockCommentState();
                 }
             } else if (_checkForContentPlaceholder(ch, code)) {
                 // STATE_CONTENT_PLACEHOLDER.handle was called which
@@ -494,18 +467,8 @@ exports.createParser = function(listeners, options) {
             if (code === CODE_EXCLAMATION) {
                 // something like:
                 // <!DOCTYPE html>
-                // <!-- comment
-                // NOTE: We already checked for CDATA earlier
-
-                // Look ahead to see if it is comment...
-                var match = parser.lookAheadFor('--');
-                if (match) {
-                    // Found XML comment
-                    parser.skip(2);
-                    parser.enterState(STATE_XML_COMMENT);
-                } else {
-                    parser.enterState(STATE_DTD);
-                }
+                // NOTE: We already checked for CDATA earlier and <!--
+                parser.enterState(STATE_DTD);
             } else if (code === CODE_QUESTION) {
                 // something like:
                 // <?xml version="1.0"?>
@@ -884,8 +847,7 @@ exports.createParser = function(listeners, options) {
         },
 
         handle: function(prefix) {
-            // emit the current content text that has been collected
-            _notifyText(text);
+            parser.state.placeholder.begin();
 
             contentPlaceholderParentState = parser.state;
             placeholderDepth = 1;
@@ -945,34 +907,6 @@ exports.createParser = function(listeners, options) {
             } else if ((code === expressionEndDelimiter) || (code === CODE_NEWLINE)) {
                 text += ch;
                 _leaveStringState();
-            } else {
-                text += ch;
-            }
-        }
-    });
-
-    // We enter the STATE_STRING_IN_CONTENT state after we encounter a single or double
-    // quote character while in JavaScript or CSS content.
-    var STATE_STRING_IN_CONTENT = Parser.createState({
-        name: 'STATE_STRING_IN_CONTENT',
-        eof: function() {
-            _notifyText(text);
-        },
-
-        char: function(ch, code) {
-            var nextCh;
-            if (code === CODE_BACK_SLASH) {
-                // Handle string escape sequence
-                nextCh = parser.lookAtCharAhead(1);
-                parser.skip(1);
-
-                text += ch + nextCh;
-            } else if ((code === expressionEndDelimiter) || (code === CODE_NEWLINE)) {
-                text += ch;
-                _leaveStringState();
-            } else if (_checkForContentPlaceholder(ch, code)) {
-                // STATE_CONTENT_PLACEHOLDER.handle was called which
-                // called _notifyText
             } else {
                 text += ch;
             }
@@ -1095,25 +1029,39 @@ exports.createParser = function(listeners, options) {
     // We leave the XML_COMMENT state if we see a "-->".
     var STATE_XML_COMMENT = Parser.createState({
         name: 'STATE_XML_COMMENT',
+
+        placeholder: {
+            begin: function() {
+                // emit the current content text that has been collected
+                _notifyCommentText(comment);
+            }
+        },
+
         enter: function() {
             comment = '';
         },
 
         eof: function() {
-            _notifyComment(comment);
+            _notifyCommentText(comment);
         },
 
         char: function(ch, code) {
             if (code === CODE_DASH) {
                 var match = parser.lookAheadFor('->');
                 if (match) {
-                    _notifyComment(comment);
-
                     parser.skip(match.length);
+
+                    _notifyCommentText(comment);
+                    _notifyEndComment();
+
                     parser.enterState(STATE_HTML_CONTENT);
                 } else {
                     comment += ch;
                 }
+            } else if (_checkForContentPlaceholder(ch, code)) {
+                // STATE_CONTENT_PLACEHOLDER.handle was called which
+                // called _notifyText
+                return;
             } else {
                 comment += ch;
             }
@@ -1126,17 +1074,22 @@ exports.createParser = function(listeners, options) {
 
     parser.enterJsContentState = function() {
         endTagName = tagName;
-        parser.enterState(STATE_JS_CONTENT);
+        parser.enterState(STATE_PARSED_TEXT_CONTENT);
     };
 
     parser.enterCssContentState = function() {
         endTagName = tagName;
-        parser.enterState(STATE_CSS_CONTENT);
+        parser.enterState(STATE_PARSED_TEXT_CONTENT);
     };
 
-    parser.enterTextContentState = function() {
+    parser.enterParsedTextContentState = function() {
         endTagName = tagName;
-        parser.enterState(STATE_TEXT_CONTENT);
+        parser.enterState(STATE_PARSED_TEXT_CONTENT);
+    };
+
+    parser.enterStaticTextContentState = function() {
+        endTagName = tagName;
+        parser.enterState(STATE_STATIC_TEXT_CONTENT);
     };
 
     parser.setInitialState(STATE_HTML_CONTENT);

@@ -39,6 +39,14 @@ function parse(text, expectedEvents) {
             actualEvents.push(event);
         },
 
+        onbegincomment: function(event) {
+            actualEvents.push(event);
+        },
+
+        onendcomment: function(event) {
+            actualEvents.push(event);
+        },
+
         oncomment: function(event) {
             actualEvents.push(event);
         }
@@ -253,10 +261,10 @@ describe('htmljs parser', function() {
 
     it('should handle script tag', function() {
         var scriptInnerText = [
-            '// line comment within <script></script>\n',
-            '/* block comment within <script></script> */',
-            '"string within \\\"<script></script>\\\""',
-            '\'string within \\\'<script></script>\\\'\''
+            '// line comment within <script>\n',
+            '/* block comment within <script> */',
+            '"string within \\\"<script>\\\""',
+            '\'string within \\\'<script>\\\'\''
         ].join('');
 
         parse([
@@ -282,7 +290,7 @@ describe('htmljs parser', function() {
 
     it('should handle closing script tag after single-line comment', function() {
         parse([
-            '<script>// this is a comment\n</script>'
+            '<script>// this is a comment</script>'
         ], [
             {
                 type: 'opentag',
@@ -291,7 +299,7 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'text',
-                text: '// this is a comment\n'
+                text: '// this is a comment'
             },
             {
                 type: 'closetag',
@@ -302,10 +310,10 @@ describe('htmljs parser', function() {
 
     it('should handle EOF while parsing script tag', function() {
         var scriptInnerText = [
-            '// line comment within <script></script>\n',
-            '/* block comment within <script></script> */',
-            '"string within \\\"<script></script>\\\""',
-            '\'string within \\\'<script></script>\\\'\''
+            '// line comment within <script>\n',
+            '/* block comment within <script> */',
+            '"string within \\\"<script>\\\""',
+            '\'string within \\\'<script>\\\'\''
         ].join('');
 
         parse([
@@ -727,8 +735,14 @@ describe('htmljs parser', function() {
                 attributes: []
             },
             {
+                type: 'begincomment'
+            },
+            {
                 type: 'comment',
                 comment: '<b></b>'
+            },
+            {
+                type: 'endcomment'
             },
             {
                 type: 'closetag',
@@ -757,9 +771,9 @@ describe('htmljs parser', function() {
 
     it('should handle style tag', function() {
         var styleInnerText = [
-            '/* block comment within <style></style> */',
-            '"string within \\\"<style></style>\\\""',
-            '\'string within \\\'<style></style>\\\'\''
+            '/* block comment within <style> */',
+            '"string within \\\"<style>\\\""',
+            '\'string within \\\'<style>\\\'\''
         ].join('');
 
         parse([
@@ -785,9 +799,9 @@ describe('htmljs parser', function() {
 
     it('should handle EOF while parsing style tag', function() {
         var styleInnerText = [
-            '/* block comment within <style></style> */',
-            '"string within \\\"<style></style>\\\""',
-            '\'string within \\\'<style></style>\\\'\''
+            '/* block comment within <style> */',
+            '"string within \\\"<style>\\\""',
+            '\'string within \\\'<style>\\\'\''
         ].join('');
 
         parse([
@@ -992,8 +1006,8 @@ describe('htmljs parser', function() {
                 type: 'begincomment'
             },
             {
-                type: 'text',
-                text: ' Copyright '
+                type: 'comment',
+                comment: ' Copyright '
             },
             {
                 type: 'placeholder',
@@ -1002,8 +1016,8 @@ describe('htmljs parser', function() {
                 suffix: '}'
             },
             {
-                type: 'text',
-                text: ' '
+                type: 'comment',
+                comment: ' '
             },
             {
                 type: 'endcomment'
@@ -1071,6 +1085,67 @@ describe('htmljs parser', function() {
         ]);
     });
 
+    it('should handle placeholders in string attributes', function() {
+        parse([
+            '<custom data="${\'"\'}">'
+        ], [
+            {
+                type: 'opentag',
+                name: 'custom',
+                attributes: [
+                    {
+                        name: 'data',
+                        value: '"${\'"\'}"'
+                    }
+                ]
+            }
+        ]);
+    });
+
+    it('should handle placeholders in complex attribute', function() {
+        parse([
+            '<custom data=("Hello $!{name}!" + " This is a test.")>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'custom',
+                attributes: [
+                    {
+                        name: 'data',
+                        expression: '("Hello $!{name}!" + " This is a test.")'
+                    },
+                    {
+                        name: 'data',
+                        expression: '123',
+                        staticValue: '123'
+                    },
+                    {
+                        name: 'data',
+                        expression: '"abc"',
+                        staticValue: 'abc'
+                    }
+                ]
+            }
+        ]);
+    });
+
+    it('should handle simple placeholders in string attributes', function() {
+        parse([
+            '<custom data="${abc}">'
+        ], [
+            {
+                type: 'opentag',
+                name: 'custom',
+                attributes: [
+                    {
+                        name: 'data',
+                        value: '"${abc}"'
+                    }
+                ]
+            }
+        ]);
+    });
+
     it('should follow instructions on how to parse contents of tag', function() {
         var actualEvents = [];
 
@@ -1088,19 +1163,35 @@ describe('htmljs parser', function() {
             },
 
             text: function(event) {
-                this.enterTextContentState();
+                this.enterStaticTextContentState();
+            },
+
+            parsedtext: function(event) {
+                this.enterParsedTextContentState();
             }
         };
 
         var parser = jsxml.createParser({
+            onopentag: function(event) {
+                actualEvents.push(event);
+                var handler = opentagHandlers[event.name];
+                if (handler) {
+                    handler.call(this, event);
+                } else {
+                    throw new Error('No opentag handler for tag ' + event.name);
+                }
+            },
+
             ontext: function(event) {
                 actualEvents.push(event);
             },
 
-            onopentag: function(event) {
+            onplaceholder: function(event) {
                 actualEvents.push(event);
+            },
 
-                opentagHandlers[event.name].call(this, event);
+            oncdata: function(event) {
+                actualEvents.push(event);
             },
 
             onclosetag: function(event) {
@@ -1115,22 +1206,33 @@ describe('htmljs parser', function() {
                 actualEvents.push(event);
             },
 
-            oncomment: function(event) {
+            onbegincomment: function(event) {
                 actualEvents.push(event);
             },
+
+            onendcomment: function(event) {
+                actualEvents.push(event);
+            },
+
+            oncomment: function(event) {
+                actualEvents.push(event);
+            }
         });
 
         parser.parse([
             '<html>',
 
             // The <javascript> tag will be parsed in JavaScript mode
-            '<javascript>/* This </javascript> is ignored */ // this is javascript\n</javascript>',
+            '<javascript>/* This <javascript> is ignored */ // this is javascript <a></a></javascript>',
 
             // The <css> tag will be parsed in CSS mode
-            '<css>/* CSS */\n.a {image: url("</css>")}</css>',
+            '<css>/* CSS */\n.a {image: url("<a></a>")}</css>',
 
             // The <text> tag will be parsed as raw text
             '<text>This is raw ${text} so nothing should be parsed</text>',
+
+            // The <parsedtext> tag will be parsed as raw text
+            '<parsedtext>This is parsed ${text}!</parsedtext>',
 
             '</html>'
         ]);
@@ -1148,7 +1250,7 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'text',
-                text: '/* This </javascript> is ignored */ // this is javascript\n'
+                text: '/* This <javascript> is ignored */ // this is javascript <a></a>'
             },
             {
                 type: 'closetag',
@@ -1161,7 +1263,7 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'text',
-                text: '/* CSS */\n.a {image: url("</css>")}'
+                text: '/* CSS */\n.a {image: url("<a></a>")}'
             },
             {
                 type: 'closetag',
@@ -1179,6 +1281,29 @@ describe('htmljs parser', function() {
             {
                 type: 'closetag',
                 name: 'text'
+            },
+            {
+                type: 'opentag',
+                name: 'parsedtext',
+                attributes: []
+            },
+            {
+                type: 'text',
+                text: 'This is parsed '
+            },
+            {
+                type: 'placeholder',
+                contents: 'text',
+                prefix: '${',
+                suffix: '}'
+            },
+            {
+                type: 'text',
+                text: '!'
+            },
+            {
+                type: 'closetag',
+                name: 'parsedtext'
             },
             {
                 type: 'closetag',
