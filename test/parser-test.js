@@ -4,7 +4,6 @@ require('chai').should();
 var expect = require('chai').expect;
 
 var jsxml = require('../');
-var StreamingParser = require('../StreamingParser');
 
 require('colors');
 
@@ -15,8 +14,14 @@ function parse(text, expectedEvents) {
             actualEvents.push(event);
         },
 
-        onplaceholder: function(event) {
+        oncontentplaceholder: function(event) {
             actualEvents.push(event);
+        },
+
+        onattributeplaceholder: function(event) {
+            // ignore this event because it is
+            // emitted to give listeners a chance
+            // to transform content
         },
 
         oncdata: function(event) {
@@ -49,6 +54,10 @@ function parse(text, expectedEvents) {
 
         oncomment: function(event) {
             actualEvents.push(event);
+        },
+
+        escape: function(expression) {
+            return 'escapeXml(' + expression + ')';
         }
     });
 
@@ -60,145 +69,6 @@ function parse(text, expectedEvents) {
 
     expect(actualEvents).to.deep.equal(expectedEvents);
 }
-
-describe('StreamingParser', function() {
-    var parser;
-
-    beforeEach(function() {
-        parser = new StreamingParser();
-    });
-
-    it('should handle looking ahead for strings', function() {
-        ['A', 'B', 'C', 'D'].forEach(function(chunk) {
-            parser.addChunk(chunk);
-        });
-
-        // move to first chunk
-        parser.nextChunk();
-
-        // move to first character
-        parser.pos = 0;
-
-        var lookAheads = [
-            'A',
-            'AB',
-            'ABC',
-            'ABCD',
-
-            // this substring is not immediately available
-            // until we push another chunk later
-            'ABCDE'
-        ];
-
-        var testCount = 0;
-
-        lookAheads.forEach(function(lookAhead) {
-            parser.lookAheadFor(lookAhead, function(match) {
-                testCount++;
-
-                // all of the look aheads that we are testing should exist
-                expect(match).to.equal(lookAhead);
-            });
-        });
-
-        // all but the last test should have been completed
-        expect(testCount).to.equal(lookAheads.length - 1);
-
-        parser.addChunk('E');
-
-        // final test should have completed
-        expect(testCount).to.equal(lookAheads.length);
-
-        // now look for a string that doesn't exist
-        parser.lookAheadFor('X', function(match) {
-            testCount++;
-            expect(match).to.equal(undefined);
-        });
-
-        expect(testCount).to.equal(lookAheads.length + 1);
-
-        // now look ahead for a string that won't be available.
-        // When parser.end() is called the parser will be able
-        // to resolve the look ahead and see that the string we
-        // are looking for does not exist
-        parser.lookAheadFor('ABCDE!', function(match) {
-            testCount++;
-            expect(match).to.equal(undefined);
-        });
-
-        expect(parser.waitFor).to.not.equal(null);
-
-        expect(function() {
-            // look ahead for something that is not currently available...
-            // Since we already blocked looking for "ABCDE!" we expect
-            // the parser to throw an error because it can only be waiting
-            // for a single look ahead (this is by design)
-            parser.lookAheadFor('XXXXXXXXXXXXXXX', function(match) {
-                testCount++;
-                expect(match).to.equal(undefined);
-            });
-        }).to.throw(Error);
-
-        parser.end();
-
-        expect(testCount).to.equal(lookAheads.length + 2);
-    });
-
-    it('should handle looking ahead for single character', function() {
-        ['A', 'B'].forEach(function(chunk) {
-            parser.addChunk(chunk);
-        });
-
-        expect(parser.curChunkIndex).to.equal(-1);
-
-        // move to first chunk
-        parser.nextChunk();
-
-        expect(parser.curChunkIndex).to.equal(0);
-
-        // move to first character
-        parser.pos = 0;
-
-        var testCount = 0;
-
-        parser.lookAtCharAhead(1, function(ch) {
-            testCount++;
-            expect(ch).to.equal('A');
-        });
-
-        expect(testCount).to.equal(1);
-
-        parser.lookAtCharAhead(2, function(ch) {
-            testCount++;
-            expect(ch).to.equal('B');
-        });
-
-        expect(testCount).to.equal(2);
-
-        parser.lookAtCharAhead(3, function(ch) {
-            testCount++;
-            expect(ch).to.equal('C');
-        });
-
-        // last lookAtCharAhead won't complete right away so the
-        // test count should not have changed
-        expect(testCount).to.equal(2);
-
-        parser.addChunk('C');
-
-        expect(testCount).to.equal(3);
-
-        parser.lookAtCharAhead(5, function(ch) {
-            testCount++;
-            expect(ch).to.equal('E');
-        });
-
-        parser.addChunk('DEF');
-
-        expect(testCount).to.equal(4);
-    });
-
-});
 
 describe('htmljs parser', function() {
 
@@ -326,7 +196,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'a',
-                        value: 'b'
+                        expression: 'b'
                     }
                 ]
             },
@@ -347,11 +217,11 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'a',
-                        value: '123+456/* test */'
+                        expression: '123+456/* test */'
                     },
                     {
                         name: 'b',
-                        value: 'a+\'123\''
+                        expression: 'a+\'123\''
                     }
                 ]
             },
@@ -376,18 +246,18 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'a',
-                        value: '123+256'
+                        expression: '123+256'
                     },
                     {
                         name: 'b'
                     },
                     {
                         name: 'c',
-                        value: ''
+                        expression: ''
                     },
                     {
                         name: 'd',
-                        value: '(a + (1/2) /* comment */)'
+                        expression: '(a + (1/2) /* comment */)'
                     }
                 ]
             },
@@ -436,7 +306,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'a',
-                        value: '1/2'
+                        expression: '1/2'
                     }
                 ]
             },
@@ -459,7 +329,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'a',
-                        value: '1'
+                        expression: '1'
                     }
                 ]
             },
@@ -482,7 +352,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'data',
-                        value: '((a-b)/2 + ")")'
+                        expression: '((a-b)/2 + ")")'
                     }
                 ]
             },
@@ -503,7 +373,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'data',
-                        value: '((a-b)/2 + \')\')'
+                        expression: '((a-b)/2 + \')\')'
                     }
                 ]
             },
@@ -524,7 +394,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'data',
-                        value: '{\n    \"a\": \"{b}\"\n}'
+                        expression: '{\n    \"a\": \"{b}\"\n}'
                     }
                 ]
             },
@@ -545,7 +415,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'data',
-                        value: '123"abc"'
+                        expression: '123"abc"'
                     }
                 ]
             },
@@ -564,11 +434,11 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'data',
-                        value: '123'
+                        expression: '123'
                     },
                     {
                         name: 'data',
-                        value: 'abc'
+                        expression: 'abc'
                     }
                 ]
             },
@@ -814,7 +684,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'a',
-                        value: 'b'
+                        expression: 'b'
                     }
                 ]
             },
@@ -834,10 +704,9 @@ describe('htmljs parser', function() {
                 text: 'Hello '
             },
             {
-                type: 'placeholder',
+                type: 'contentplaceholder',
                 contents: 'xyz',
-                prefix: '${',
-                suffix: '}'
+                escape: true
             },
             {
                 type: 'text',
@@ -860,10 +729,9 @@ describe('htmljs parser', function() {
                 text: 'Hello '
             },
             {
-                type: 'placeholder',
+                type: 'contentplaceholder',
                 contents: 'xyz',
-                prefix: '${',
-                suffix: '}'
+                escape: true
             },
             {
                 type: 'text',
@@ -890,10 +758,9 @@ describe('htmljs parser', function() {
                 text: 'alert("Hello '
             },
             {
-                type: 'placeholder',
+                type: 'contentplaceholder',
                 contents: 'xyz',
-                prefix: '${',
-                suffix: '}'
+                escape: true
             },
             {
                 type: 'text',
@@ -908,7 +775,7 @@ describe('htmljs parser', function() {
 
     it('should handle placeholder expressions within non-delimited attributes', function() {
         parse([
-            '<custom name=${name}>TEST</custom>'
+            '<custom name="Hello ${name}!">TEST</custom>'
         ], [
             {
                 type: 'opentag',
@@ -916,7 +783,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'name',
-                        value: '${name}'
+                        expression: '"Hello "+(name)+"!"'
                     }
                 ]
             },
@@ -933,7 +800,7 @@ describe('htmljs parser', function() {
 
     it('should handle placeholder expressions within delimited expression attributes', function() {
         parse([
-            '<custom name=(${name})>TEST</custom>'
+            '<custom name=("Hello ${name}!")>TEST</custom>'
         ], [
             {
                 type: 'opentag',
@@ -941,7 +808,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'name',
-                        value: '(${name})'
+                        expression: '("Hello "+(name)+"!")'
                     }
                 ]
             },
@@ -958,7 +825,7 @@ describe('htmljs parser', function() {
 
     it('should handle placeholder expressions within string within delimited expression attributes', function() {
         parse([
-            '<custom name="${\'name\'}">TEST</custom>'
+            '<custom name="${\'some text\'}">TEST</custom>'
         ], [
             {
                 type: 'opentag',
@@ -966,7 +833,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'name',
-                        value: '"${\'name\'}"',
+                        expression: '""+(\'some text\')+""',
                     }
                 ]
             },
@@ -991,7 +858,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'data',
-                        value: '"\nabc\n124"',
+                        expression: '"\nabc\n124"',
                     }
                 ]
             }
@@ -1010,10 +877,9 @@ describe('htmljs parser', function() {
                 comment: ' Copyright '
             },
             {
-                type: 'placeholder',
+                type: 'contentplaceholder',
                 contents: 'date',
-                prefix: '${',
-                suffix: '}'
+                escape: true
             },
             {
                 type: 'comment',
@@ -1039,10 +905,9 @@ describe('htmljs parser', function() {
                 text: '// Copyright '
             },
             {
-                type: 'placeholder',
+                type: 'contentplaceholder',
                 contents: 'date',
-                prefix: '${',
-                suffix: '}'
+                escape: true
             },
             {
                 type: 'text',
@@ -1057,7 +922,7 @@ describe('htmljs parser', function() {
 
     it('should handle placeholders in JavaScript multi-line comments', function() {
         parse([
-            '<script>/* Copyright ${date} */</script>'
+            '<script>/* Copyright $!{date} */</script>'
         ], [
             {
                 type: 'opentag',
@@ -1069,10 +934,9 @@ describe('htmljs parser', function() {
                 text: '/* Copyright '
             },
             {
-                type: 'placeholder',
+                type: 'contentplaceholder',
                 contents: 'date',
-                prefix: '${',
-                suffix: '}'
+                escape: false
             },
             {
                 type: 'text',
@@ -1087,7 +951,7 @@ describe('htmljs parser', function() {
 
     it('should handle placeholders in string attributes', function() {
         parse([
-            '<custom data="${\'"\'}">'
+            '<custom data="${\nabc\n}">'
         ], [
             {
                 type: 'opentag',
@@ -1095,7 +959,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'data',
-                        value: '"${\'"\'}"'
+                        expression: '""+(\nabc\n)+""'
                     }
                 ]
             }
@@ -1112,17 +976,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'data',
-                        expression: '("Hello $!{name}!" + " This is a test.")'
-                    },
-                    {
-                        name: 'data',
-                        expression: '123',
-                        staticValue: '123'
-                    },
-                    {
-                        name: 'data',
-                        expression: '"abc"',
-                        staticValue: 'abc'
+                        expression: '("Hello "+(name)+"!" + " This is a test.")'
                     }
                 ]
             }
@@ -1139,7 +993,7 @@ describe('htmljs parser', function() {
                 attributes: [
                     {
                         name: 'data',
-                        value: '"${abc}"'
+                        expression: '""+(abc)+""'
                     }
                 ]
             }
@@ -1186,8 +1040,12 @@ describe('htmljs parser', function() {
                 actualEvents.push(event);
             },
 
-            onplaceholder: function(event) {
+            oncontentplaceholder: function(event) {
                 actualEvents.push(event);
+            },
+
+            onattributeplaceholder: function(event) {
+                // ignore this one
             },
 
             oncdata: function(event) {
@@ -1292,10 +1150,9 @@ describe('htmljs parser', function() {
                 text: 'This is parsed '
             },
             {
-                type: 'placeholder',
+                type: 'contentplaceholder',
                 contents: 'text',
-                prefix: '${',
-                suffix: '}'
+                escape: true
             },
             {
                 type: 'text',

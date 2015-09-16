@@ -138,19 +138,16 @@ exports.createParser = function(listeners, options) {
         }
     }
 
-    function _notifyPlaceholder(txt, prefix) {
-        if (listeners.onplaceholder) {
-            var contents = txt.substring(prefix.length, txt.length - 1);
-
-            listeners.onplaceholder.call(parser, {
-                type: 'placeholder',
-                contents: contents,
-                prefix: prefix,
-                suffix: '}'
-            });
+    function _notifyPlaceholder(placeholder) {
+        var eventFunc = listeners['on' + placeholder.type];
+        if (eventFunc) {
+            // remove unnecessary properties
+            ['stringDelimiter', 'delimiterDepth', 'parentState', 'handler']
+                .forEach(function(key) {
+                    delete placeholder[key];
+                });
+            eventFunc.call(parser, placeholder);
         }
-
-        text = '';
     }
 
     function _attribute() {
@@ -164,8 +161,8 @@ exports.createParser = function(listeners, options) {
         for (var i = 0; i < attributes.length; i++) {
             var attr = attributes[i];
             text += ' ' + attr.name;
-            if (attr.value !== undefined) {
-                text += '=' + attr.value;
+            if (attr.expression !== undefined) {
+                text += '=' + attr.expression;
             }
         }
         return text;
@@ -176,8 +173,8 @@ exports.createParser = function(listeners, options) {
 
         _notifyOpenTag(tagName, attributes);
 
-        // Was the parser transitioned into a new state as a result
-        // of notifying listeners about opentag?
+        // Did the parser stay in the same state after
+        // notifying listeners about opentag?
         if (parser.state === origState) {
             // The listener didn't transition the parser to a new state
             // so we use some simple rules to find the appropriate state.
@@ -207,15 +204,13 @@ exports.createParser = function(listeners, options) {
     // - Paranthetic - (...)
     // - Object/Block - {...}
     var expressionStack = [];
-    var expressionStartDelimiter;
-    var expressionEndDelimiter;
-    var expressionDepth;
+    var currentExpression;
 
     var commentHandler;
     var endTagName;
 
-    function _enterStringState(ch, delimiter, stringState) {
-        ___enterExpressionState(ch, delimiter, delimiter, stringState);
+    function _enterStringState(ch, delimiter, newStringState) {
+        ___enterExpressionState(ch, delimiter, delimiter, newStringState);
     }
 
     function _leaveStringState() {
@@ -227,43 +222,29 @@ exports.createParser = function(listeners, options) {
     }
 
     function ___enterExpressionState(startCh, startDelimiter, endDelimiter, newState) {
-        var top;
-
-        var len = expressionStack.length;
-        if (len > 0) {
-            top = expressionStack[len - 1];
-            top.depth = expressionDepth;
-        }
-
-        top = {
-            parentState: parser.state
+        currentExpression = {
+            parentState: parser.state,
+            depth: 1,
+            startDelimiter: startDelimiter,
+            endDelimiter: endDelimiter
         };
 
-        expressionDepth = 1;
-
-        expressionStack.push(top);
-
-        top.startDelimiter = expressionStartDelimiter = startDelimiter;
-        top.endDelimiter = expressionEndDelimiter = endDelimiter;
+        expressionStack.push(currentExpression);
 
         parser.enterState(newState);
     }
 
     function _leaveDelimitedExpressionState() {
         var top = expressionStack.pop();
-        parser.enterState(top.parentState);
 
         var len = expressionStack.length;
         if (len > 0) {
-            top = expressionStack[len - 1];
-            expressionStartDelimiter = top.startDelimiter;
-            expressionEndDelimiter = top.endDelimiter;
-            expressionDepth = top.depth;
+            currentExpression = expressionStack[len - 1];
         } else {
-            expressionStartDelimiter = undefined;
-            expressionEndDelimiter = undefined;
-            expressionDepth = undefined;
+            currentExpression = null;
         }
+
+        parser.enterState(top.parentState);
     }
 
     function _enterBlockCommentState() {
@@ -278,22 +259,83 @@ exports.createParser = function(listeners, options) {
         parser.enterState(STATE_LINE_COMMENT);
     }
 
-    function _checkForContentPlaceholder(ch, code) {
+    var placeholderStack = [];
+    var currentPlaceholder;
+
+    function _enterPlaceholderState(placeholder) {
+        var currentState = parser.state;
+
+        // Set the event type...
+        // This property is used so that the placeholder
+        // can be emitted as an event.
+        placeholder.delimiterDepth = 1;
+        placeholder.parentState = currentState;
+        placeholder.contents = '';
+        placeholder.handler = currentState.placeholder;
+
+        var len = placeholderStack.length;
+        if (len) {
+            var top = placeholderStack[len - 1];
+            if (top.ancestorEscaped) {
+                placeholder.ancestorEscaped = true;
+                placeholder.escape = false;
+            }
+
+            placeholder.type = top.type;
+        } else {
+            placeholder.type = placeholder.handler.type;
+        }
+
+        placeholderStack.push(placeholder);
+
+        currentPlaceholder = placeholder;
+
+        parser.enterState(STATE_PLACEHOLDER);
+    }
+
+    function _leavePlaceholderState(placeholder) {
+        var top = placeholderStack.pop();
+        var newState = top.parentState;
+
+        var len = placeholderStack.length;
+        if (len) {
+            currentPlaceholder = placeholderStack[len - 1];
+        } else {
+            currentPlaceholder = null;
+        }
+
+        top.handler.end(top);
+
+        parser.enterState(newState);
+    }
+
+    function _checkForPlaceholder(ch, code, stringDelimiter) {
         if (code === CODE_DOLLAR) {
             var nextCode = parser.lookAtCharCodeAhead(1);
             if (nextCode === CODE_LEFT_CURLY_BRACE) {
                 parser.skip(1);
-                STATE_CONTENT_PLACEHOLDER.handle('${');
+                _enterPlaceholderState({
+                    escape: true,
+                    stringDelimiter: stringDelimiter
+                });
                 return true;
             } else if (nextCode === CODE_EXCLAMATION) {
                 var afterExclamationCode = parser.lookAtCharCodeAhead(2);
                 if (afterExclamationCode === CODE_LEFT_CURLY_BRACE) {
                     parser.skip(2);
-                    STATE_CONTENT_PLACEHOLDER.handle('$!{');
+                    _enterPlaceholderState({
+                        escape: false,
+                        stringDelimiter: stringDelimiter
+                    });
                     return true;
                 }
             }
         }
+    }
+
+    function _buildConcatenatedString(str, placeholder, stringDelimiter) {
+        stringDelimiter = String.fromCharCode(stringDelimiter);
+        return str +  stringDelimiter + '+' + '(' + placeholder.contents + ')+' + stringDelimiter;
     }
 
     function _checkForClosingTag() {
@@ -338,9 +380,15 @@ exports.createParser = function(listeners, options) {
         eof: CONTENT_eof,
 
         placeholder: {
-            begin: function() {
-                // emit the current content text that has been collected
+            type: 'contentplaceholder',
+
+            end: function(placeholder) {
                 _notifyText(text);
+                _notifyPlaceholder(placeholder);
+            },
+
+            eof: function() {
+                // TODO: implement this
             }
         },
 
@@ -366,9 +414,8 @@ exports.createParser = function(listeners, options) {
 
                 _notifyText(text);
                 parser.enterState(STATE_START_BEGIN_ELEMENT);
-            } else if (_checkForContentPlaceholder(ch, code)) {
-                // STATE_CONTENT_PLACEHOLDER.handle was called which
-                // called _notifyText
+            } else if (_checkForPlaceholder(ch, code)) {
+                // We went into placeholder state...
             } else {
                 text += ch;
             }
@@ -409,24 +456,15 @@ exports.createParser = function(listeners, options) {
         name: 'STATE_PARSED_TEXT_CONTENT',
 
         placeholder: {
-            begin: function() {
-                // emit the current content text that has been collected
-                _notifyText(text);
-            }
-        },
+            type: 'contentplaceholder',
 
-        comment: {
+            end: function(placeholder) {
+                _notifyText(text);
+                _notifyPlaceholder(placeholder);
+            },
+
             eof: function() {
-                _notifyText(text);
-            },
-
-            end: function() {
-                // go back to the STATE_PARSED_TEXT_CONTENT state
-                parser.enterState(STATE_PARSED_TEXT_CONTENT);
-            },
-
-            char: function(ch) {
-                text += ch;
+                // TODO: implement this
             }
         },
 
@@ -441,9 +479,8 @@ exports.createParser = function(listeners, options) {
                 } else if (_checkForCDATA()) {
                     return;
                 }
-            } else if (_checkForContentPlaceholder(ch, code)) {
-                // STATE_CONTENT_PLACEHOLDER.handle was called which
-                // called _notifyText
+            } else if (_checkForPlaceholder(ch, code)) {
+                // We went into placeholder state...
                 return;
             }
 
@@ -451,7 +488,9 @@ exports.createParser = function(listeners, options) {
         }
     });
 
-    // State that we enter just after seeing a "<"
+    // State that we enter just after seeing a "<" while in STATE_HTML_CONTENT.
+    // NOTE: We have already ruled out CDATA and XML comment via a look-ahead
+    // so we just need to handle other entities that start with "<"
     var STATE_START_BEGIN_ELEMENT = Parser.createState({
         name: 'STATE_START_BEGIN_ELEMENT',
         enter: function() {
@@ -629,11 +668,17 @@ exports.createParser = function(listeners, options) {
 
         char: function(ch, code) {
             if (code === CODE_EQUAL) {
-                attribute.value = '';
+                // We encountered "=" which means we need to start reading
+                // the attribute value.
+                // Set the attribute value to empty string (since it is
+                // initially undefined when start reading a new attribute)
+                attribute.expression = '';
                 parser.enterState(STATE_ATTRIBUTE_VALUE);
             } else if (code === CODE_RIGHT_ANGLE_BRACKET) {
+                // While reading attribute name, see if we encounter end tag
                 _afterOpenTag();
             } else if (code === CODE_FORWARD_SLASH) {
+                // Check for self-closing tag
                 var nextCode = parser.lookAtCharCodeAhead(1);
                 if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
                     // we found a self-closing tag
@@ -650,28 +695,11 @@ exports.createParser = function(listeners, options) {
                 // for attribute value
                 parser.enterState(STATE_WITHIN_ELEMENT);
             } else {
+                // Just a normal attribute name character
                 attribute.name += ch;
             }
         }
     });
-
-    var ATTRIBUTE_VALUE_HANDLER = {
-        eof: function() {
-            STATE_WITHIN_ELEMENT.eof();
-        },
-
-        end: function() {
-            // If we reach the end of the string then return
-            // back to the ATTRIBUTE_VALUE state
-            parser.enterState(STATE_ATTRIBUTE_VALUE);
-        },
-
-        char: function(ch) {
-            // char will be called for each character in the
-            // string (including the delimiters)
-            attribute.value += ch;
-        }
-    };
 
     // We enter the ATTRIBUTE_VALUE state when we see a "=" while in
     // the ATTRIBUTE_NAME state.
@@ -682,15 +710,21 @@ exports.createParser = function(listeners, options) {
         // an attribute value.
         // The LINE_COMMENT or BLOCK_COMMENT state will bubble some
         // events up to the parent state.
-        comment: ATTRIBUTE_VALUE_HANDLER,
-
-        placeholder: {
-            char: function(){
-
+        comment: {
+            eof: function() {
+                STATE_WITHIN_ELEMENT.eof();
             },
 
             end: function() {
+                // If we reach the end of the string then return
+                // back to the ATTRIBUTE_VALUE state
+                parser.enterState(STATE_ATTRIBUTE_VALUE);
+            },
 
+            char: function(ch) {
+                // char will be called for each character in the
+                // string (including the delimiters)
+                attribute.expression += ch;
             }
         },
 
@@ -713,24 +747,24 @@ exports.createParser = function(listeners, options) {
                 } else {
                     // we encountered a "/" but it wasn't followed
                     // by a ">" so continue
-                    attribute.value += ch;
+                    attribute.expression += ch;
                 }
             } else if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
-                attribute.value += ch;
+                attribute.expression += ch;
                 _enterStringState(ch, code, STATE_STRING_IN_ATTRIBUTE_VALUE);
             } else if (code === CODE_LEFT_PARANTHESIS) {
-                attribute.value += ch;
+                attribute.expression += ch;
                 _enterDelimitedExpressionState(ch, code, CODE_RIGHT_PARANTHESIS);
             } else if (code === CODE_LEFT_CURLY_BRACE) {
-                attribute.value += ch;
+                attribute.expression += ch;
                 _enterDelimitedExpressionState(ch, code, CODE_RIGHT_CURLY_BRACE);
             } else if (code === CODE_LEFT_SQUARE_BRACKET) {
-                attribute.value += ch;
+                attribute.expression += ch;
                 _enterDelimitedExpressionState(ch, code, CODE_RIGHT_SQUARE_BRACKET);
             } else if (_isWhitespaceCode(code)) {
                 parser.enterState(STATE_WITHIN_ELEMENT);
             } else {
-                attribute.value += ch;
+                attribute.expression += ch;
             }
         }
     });
@@ -743,19 +777,46 @@ exports.createParser = function(listeners, options) {
             STATE_WITHIN_ELEMENT.eof();
         },
 
+        placeholder: {
+            type: 'attributeplaceholder',
+
+            end: function(placeholder) {
+                var stringDelimiter = placeholder.stringDelimiter;
+
+                _notifyPlaceholder(placeholder);
+
+                attribute.expression =
+                    _buildConcatenatedString(
+                        attribute.expression,
+                        placeholder,
+                        stringDelimiter);
+            },
+
+            eof: function() {
+                // TODO: implement this
+            }
+        },
+
         char: function(ch, code) {
-            if (code === expressionEndDelimiter) {
-                attribute.value += ch;
+            var stringDelimiter = currentExpression.endDelimiter;
+            if (code === stringDelimiter) {
+                attribute.expression += ch;
                 _leaveStringState();
+            } else if (_checkForPlaceholder(ch, code, stringDelimiter)) {
+
             } else {
-                attribute.value += ch;
+                attribute.expression += ch;
             }
         }
     });
 
-    // We enter the DELIMITED_EXPRESSION state after we see an
-    // expression delimiter while in the ATTRIBUTE_VALUE
-    // state. The expression delimiters are the following: ({[
+    // We enter STATE_ATTRIBUTE_VALUE_DELIMITED_EXPRESSION after we see an
+    // expression delimiter while in STATE_ATTRIBUTE_VALUE.
+    // The expression delimiters are the following: ({[
+    //
+    // While in this state we keep reading characters until we find the
+    // matching delimiter (while ignoring any expression delimiters that
+    // we might see inside strings and comments).
     var STATE_ATTRIBUTE_VALUE_DELIMITED_EXPRESSION = Parser.createState({
         name: 'STATE_ATTRIBUTE_VALUE_DELIMITED_EXPRESSION',
         // We go into the LINE_COMMENT or BLOCK_COMMENT sub-state
@@ -775,7 +836,7 @@ exports.createParser = function(listeners, options) {
             },
 
             char: function(ch) {
-                attribute.value += ch;
+                attribute.expression += ch;
             }
         },
 
@@ -787,7 +848,7 @@ exports.createParser = function(listeners, options) {
 
             if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
                 // string
-                attribute.value += ch;
+                attribute.expression += ch;
                 _enterStringState(ch, code, STATE_STRING_IN_ATTRIBUTE_VALUE);
                 return;
             } else if (code === CODE_FORWARD_SLASH) {
@@ -804,61 +865,48 @@ exports.createParser = function(listeners, options) {
                 }
             }
 
-            attribute.value += ch;
+            attribute.expression += ch;
 
-            if (code === expressionEndDelimiter) {
-                expressionDepth--;
 
-                if (expressionDepth === 0) {
+            if (code === currentExpression.endDelimiter) {
+                if (--currentExpression.depth === 0) {
                     _leaveDelimitedExpressionState();
                 }
-
-            } else if (code === expressionStartDelimiter) {
-                expressionDepth++;
+            } else if (code === currentExpression.startDelimiter) {
+                currentExpression.depth++;
             }
         }
     });
 
-    var contentPlaceholderParentState;
-    var placeholderPrefix;
-    var placeholderDepth;
 
 
-    var STATE_CONTENT_PLACEHOLDER = Parser.createState({
-        name: 'STATE_CONTENT_PLACEHOLDER',
+    var STATE_PLACEHOLDER = Parser.createState({
+        name: 'STATE_PLACEHOLDER',
         comment: {
             eof: function() {
-                _notifyText(text);
+                currentPlaceholder.handler.eof(currentPlaceholder);
             },
 
             end: function() {
                 // If we reach the end of the comment then return
                 // back to the original state
-                parser.enterState(contentPlaceholderParentState);
+                parser.enterState(STATE_PLACEHOLDER);
             },
 
             char: function(ch) {
-                text += ch;
+                currentPlaceholder.contents += ch;
             }
         },
 
         eof: function() {
-            _notifyText(text);
-        },
-
-        handle: function(prefix) {
-            parser.state.placeholder.begin();
-
-            contentPlaceholderParentState = parser.state;
-            placeholderDepth = 1;
-            text = placeholderPrefix = prefix;
-            parser.enterState(this);
+            currentPlaceholder.handler.eof(currentPlaceholder);
         },
 
         char: function(ch, code) {
             if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
-                // single-quoted string
-                _enterStringState(ch, code, STATE_STRING_IN_CONTENT_PLACEHOLDER);
+                // string
+                currentPlaceholder.contents += ch;
+                _enterStringState(ch, code, STATE_STRING_IN_PLACEHOLDER);
                 return true;
             } else if (code === CODE_FORWARD_SLASH) {
                 // Check next character to see if we are in a comment
@@ -872,43 +920,63 @@ exports.createParser = function(listeners, options) {
                     parser.skip(1);
                     return true;
                 }
-            } else if (code === CODE_RIGHT_CURLY_BRACE){
-                text += ch;
-
-                placeholderDepth--;
-                if (placeholderDepth === 0) {
-                    // end of placeholder
-                    _notifyPlaceholder(text, placeholderPrefix);
-                    parser.enterState(contentPlaceholderParentState);
+            } else if (code === CODE_RIGHT_CURLY_BRACE) {
+                if (--currentPlaceholder.delimiterDepth === 0) {
+                    _leavePlaceholderState();
+                } else {
+                    currentPlaceholder.contents += ch;
                 }
-            } else if (code === CODE_LEFT_CURLY_BRACE){
-                placeholderDepth++;
-                text += ch;
+            } else if (code === CODE_LEFT_CURLY_BRACE) {
+                currentPlaceholder.delimiterDepth++;
+                currentPlaceholder.contents += ch;
             } else {
-                text += ch;
+                currentPlaceholder.contents += ch;
             }
         }
     });
 
-    var STATE_STRING_IN_CONTENT_PLACEHOLDER = Parser.createState({
-        name: 'STATE_STRING_IN_CONTENT_PLACEHOLDER',
+    var STATE_STRING_IN_PLACEHOLDER = Parser.createState({
+        name: 'STATE_STRING_IN_PLACEHOLDER',
         eof: function() {
-            _notifyText(text);
+            // TODO: Implement
+        },
+
+        placeholder: {
+            end: function(placeholder) {
+                var stringDelimiter = placeholder.stringDelimiter;
+
+                _notifyPlaceholder(placeholder);
+
+                currentPlaceholder.contents =
+                    _buildConcatenatedString(
+                        currentPlaceholder.contents,
+                        placeholder,
+                        stringDelimiter);
+            },
+
+            eof: function() {
+                // TODO: implement this
+            }
         },
 
         char: function(ch, code) {
             var nextCh;
+            var stringDelimiter = currentExpression.endDelimiter;
+
             if (code === CODE_BACK_SLASH) {
                 // Handle string escape sequence
                 nextCh = parser.lookAtCharAhead(1);
                 parser.skip(1);
 
-                text += ch + nextCh;
-            } else if ((code === expressionEndDelimiter) || (code === CODE_NEWLINE)) {
-                text += ch;
+                currentPlaceholder.contents += ch + nextCh;
+            } else if ((code === stringDelimiter) || (code === CODE_NEWLINE)) {
+                // We encountered the end delimiter or the newline character
+                currentPlaceholder.contents += ch;
                 _leaveStringState();
+            } else if (_checkForPlaceholder(ch, code, stringDelimiter)) {
+                // We encountered nested placeholder...
             } else {
-                text += ch;
+                currentPlaceholder.contents += ch;
             }
         }
     });
@@ -1001,7 +1069,7 @@ exports.createParser = function(listeners, options) {
             tagName = '';
         },
 
-        leave: function(){
+        leave: function() {
             _notifyDeclaration(tagName);
         },
 
@@ -1031,9 +1099,15 @@ exports.createParser = function(listeners, options) {
         name: 'STATE_XML_COMMENT',
 
         placeholder: {
-            begin: function() {
-                // emit the current content text that has been collected
+            type: 'contentplaceholder',
+
+            end: function(placeholder) {
                 _notifyCommentText(comment);
+                _notifyPlaceholder(placeholder);
+            },
+
+            eof: function() {
+                // TODO: implement this
             }
         },
 
@@ -1058,8 +1132,8 @@ exports.createParser = function(listeners, options) {
                 } else {
                     comment += ch;
                 }
-            } else if (_checkForContentPlaceholder(ch, code)) {
-                // STATE_CONTENT_PLACEHOLDER.handle was called which
+            } else if (_checkForPlaceholder(ch, code)) {
+                // STATE_PLACEHOLDER.handle was called which
                 // called _notifyText
                 return;
             } else {
