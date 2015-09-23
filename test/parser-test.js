@@ -859,6 +859,7 @@ describe('htmljs parser', function() {
                     {
                         name: 'data',
                         expression: '"\nabc\n124"',
+                        staticText: '\nabc\n124'
                     }
                 ]
             }
@@ -994,6 +995,41 @@ describe('htmljs parser', function() {
                     {
                         name: 'data',
                         expression: '""+(abc)+""'
+                    }
+                ]
+            }
+        ]);
+    });
+
+    it('should recognize static text attributes', function() {
+        parse([
+            '<div class="simple">'
+        ], [
+            {
+                type: 'opentag',
+                name: 'div',
+                attributes: [
+                    {
+                        name: 'class',
+                        expression: '"simple"',
+                        staticText: 'simple'
+                    }
+                ]
+            }
+        ]);
+    });
+
+    it('should not recognize static numeric attributes', function() {
+        parse([
+            '<div class=123>'
+        ], [
+            {
+                type: 'opentag',
+                name: 'div',
+                attributes: [
+                    {
+                        name: 'class',
+                        expression: '123'
                     }
                 ]
             }

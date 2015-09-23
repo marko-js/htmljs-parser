@@ -65,6 +65,20 @@ exports.createParser = function(listeners, options) {
 
     function _notifyOpenTag(name, attributes, selfClosed) {
         if (listeners.onopentag) {
+
+            // set the staticText property for attributes that are simple
+            // string values...
+            var i = attributes.length;
+            while(--i >= 0) {
+                var attr = attributes[i];
+                if (attr.possibleStaticText) {
+                    var expression = attr.expression;
+                    attr.staticText = expression.substring(1, expression.length - 1);
+                }
+
+                delete attr.possibleStaticText;
+            }
+
             var event = {
                 type: 'opentag',
                 name: name,
@@ -733,39 +747,50 @@ exports.createParser = function(listeners, options) {
         },
 
         char: function(ch, code) {
+            if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
+                
+                attribute.possibleStaticText = (attribute.expression.length === 0);
+
+                attribute.expression += ch;
+                _enterStringState(ch, code, STATE_STRING_IN_ATTRIBUTE_VALUE);
+                return;
+            }
+
             if (code === CODE_RIGHT_ANGLE_BRACKET) {
                 _afterOpenTag();
+                return;
             } else if (code === CODE_FORWARD_SLASH) {
                 var nextCode = parser.lookAtCharCodeAhead(1);
                 if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
                     // we found a self-closing tag
                     _afterSelfClosingTag();
                     parser.skip(1);
+                    return;
                 } else if (nextCode === CODE_ASTERISK) {
                     parser.skip(1);
                     _enterBlockCommentState();
-                } else {
-                    // we encountered a "/" but it wasn't followed
-                    // by a ">" so continue
-                    attribute.expression += ch;
+                    return;
                 }
-            } else if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
-                attribute.expression += ch;
-                _enterStringState(ch, code, STATE_STRING_IN_ATTRIBUTE_VALUE);
+                
+                // we encountered a "/" but it wasn't followed
+                // by a ">" so continue
+                
+                // if we see any character besides " and ' then value is
+                // not static text
             } else if (code === CODE_LEFT_PARANTHESIS) {
-                attribute.expression += ch;
                 _enterDelimitedExpressionState(ch, code, CODE_RIGHT_PARANTHESIS);
             } else if (code === CODE_LEFT_CURLY_BRACE) {
-                attribute.expression += ch;
                 _enterDelimitedExpressionState(ch, code, CODE_RIGHT_CURLY_BRACE);
             } else if (code === CODE_LEFT_SQUARE_BRACKET) {
-                attribute.expression += ch;
                 _enterDelimitedExpressionState(ch, code, CODE_RIGHT_SQUARE_BRACKET);
             } else if (_isWhitespaceCode(code)) {
                 parser.enterState(STATE_WITHIN_ELEMENT);
-            } else {
-                attribute.expression += ch;
+                return;
             }
+            
+            attribute.possibleStaticText = false;
+            
+            attribute.expression += ch;
         }
     });
 
@@ -803,7 +828,7 @@ exports.createParser = function(listeners, options) {
                 attribute.expression += ch;
                 _leaveStringState();
             } else if (_checkForPlaceholder(ch, code, stringDelimiter)) {
-
+                attribute.possibleStaticText = false;
             } else {
                 attribute.expression += ch;
             }
@@ -1133,8 +1158,7 @@ exports.createParser = function(listeners, options) {
                     comment += ch;
                 }
             } else if (_checkForPlaceholder(ch, code)) {
-                // STATE_PLACEHOLDER.handle was called which
-                // called _notifyText
+                // went into STATE_PLACEHOLDER state
                 return;
             } else {
                 comment += ch;
