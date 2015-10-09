@@ -1155,20 +1155,6 @@ exports.createParser = function(listeners, options) {
         },
 
         char: function(ch, code) {
-            // TODO: Not checking for end tag is slightly non-conforming
-            //       Should we check for end tag while in comment?
-            //       Might be necessary to handle something like this:
-            //       <script>// this is a test</script>
-            // if (code === CODE_LEFT_ANGLE_BRACKET) {
-            //     var match = parser.lookAheadFor('/' + endTagName + '>');
-            //     if (match) {
-            //         parser.skip(match.length);
-            //         _notifyText(text);
-            //         _notifyCloseTag(endTagName);
-            //         return parser.enterState(STATE_HTML_CONTENT);
-            //     }
-            // }
-
             commentHandler.char(ch);
 
             if (code === CODE_NEWLINE) {

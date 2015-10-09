@@ -1056,6 +1056,23 @@ describe('htmljs parser', function() {
                 }
             ]);
         });
+
+        it('should handle placeholder inside placeholder', function() {
+            parse([
+                '<custom data="${"Hello ${data.name}"}">'
+            ], [
+                {
+                    type: 'opentag',
+                    name: 'custom',
+                    attributes: [
+                        {
+                            name: 'data',
+                            expression: '""+("Hello "+(data.name)+"")+""'
+                        }
+                    ]
+                }
+            ]);
+        });
     });
 
     describe('Static text attributes', function() {
