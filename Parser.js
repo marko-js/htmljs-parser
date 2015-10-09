@@ -1,3 +1,5 @@
+var CODE_NEWLINE = 10;
+
 function Parser(options) {
     // current absolute character position
     this.pos = -1;
@@ -11,6 +13,9 @@ function Parser(options) {
 
     // The raw string that we are parsing
     this.data = null;
+
+    // The 1-based line number
+    this.lineNumber = 1;
 }
 
 Parser.createState = function(mixins) {
@@ -31,17 +36,17 @@ Parser.prototype = {
 
         var oldState;
         if ((oldState = this.state) && oldState.leave) {
-            console.log('Leaving state ' + oldState.name);
+            // console.log('Leaving state ' + oldState.name);
             oldState.leave.call(this, state);
         }
 
-        console.log('Entering state ' + state.name);
+        // console.log('Entering state ' + state.name);
+
+        this.state = state;
 
         if (state.enter) {
             state.enter.call(this, oldState);
         }
-
-        this.state = state;
     },
 
     /**
@@ -79,7 +84,15 @@ Parser.prototype = {
     },
 
     skip: function(offset) {
+        // console.log('-- ' + JSON.stringify(this.data.substring(this.pos, this.pos + offset)) + ' --  ' + 'SKIPPED'.gray);
+        var i = this.pos;
         this.pos += offset;
+
+        for (; i < this.pos; i++) {
+            if (this.data.charCodeAt(this.pos) === CODE_NEWLINE) {
+                this.lineNumber++;
+            }
+        }
     },
 
     parse: function(data) {
@@ -114,14 +127,19 @@ Parser.prototype = {
         var pos;
         while ((pos = this.pos) <= this.maxPos) {
             var ch = data[pos];
+            var code = ch.charCodeAt(0);
+
+            if (code === CODE_NEWLINE) {
+                this.lineNumber++;
+            }
 
             // move to next position
             this.pos++;
 
-            console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
+            // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
 
             // We assume that every state will have "char" function
-            this.state.char.call(this, ch, ch.charCodeAt(0));
+            this.state.char.call(this, ch, code);
         }
 
         var state;
