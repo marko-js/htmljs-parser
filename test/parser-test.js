@@ -7,9 +7,16 @@ var htmljs = require('../');
 
 require('colors');
 
-function parse(text, expectedEvents) {
+function parse(text, options, expectedEvents) {
+
+    if (arguments.length === 2) {
+        expectedEvents = arguments[1];
+        options = undefined;
+    }
+
     var actualEvents = [];
-    var parser = htmljs.createParser({
+
+    var listeners = {
         ontext: function(event) {
             actualEvents.push(event);
         },
@@ -51,7 +58,17 @@ function parse(text, expectedEvents) {
         onerror: function(event) {
             actualEvents.push(event);
         }
-    });
+    };
+
+    if (options) {
+        for (var key in options) {
+            if (options.hasOwnProperty(key)) {
+                listeners[key] = options[key];
+            }
+        }
+    }
+
+    var parser = htmljs.createParser(listeners);
 
     if (Array.isArray(text)) {
         text = text.join('');
@@ -1019,7 +1036,7 @@ describe('htmljs parser', function() {
             ]);
         });
 
-        it('should handle placeholder inside placeholder', function() {
+        it('should handle placeholder inside attribute placeholder', function() {
             parse([
                 '<custom data="${"Hello ${data.name}"}">'
             ], [
@@ -1030,6 +1047,41 @@ describe('htmljs parser', function() {
                         {
                             name: 'data',
                             expression: '""+("Hello "+(data.name)+"")+""'
+                        }
+                    ]
+                }
+            ]);
+        });
+
+        it('should handle placeholder inside content placeholder', function() {
+            parse([
+                '${"Hello ${data.name}"}'
+            ], [
+                {
+                    type: 'contentplaceholder',
+                    contents: '"Hello "+(data.name)+""',
+                    escape: true
+                }
+            ]);
+        });
+
+        it('should allow attribute placeholder contents to be escaped', function() {
+            parse([
+                '<custom data="${abc}">'
+            ], {
+                onattributeplaceholder: function(event) {
+                    if (event.escape) {
+                        event.contents = 'escapeAttr(' + event.contents + ')';
+                    }
+                }
+            }, [
+                {
+                    type: 'opentag',
+                    name: 'custom',
+                    attributes: [
+                        {
+                            name: 'data',
+                            expression: 'escapeAttr(abc)'
                         }
                     ]
                 }

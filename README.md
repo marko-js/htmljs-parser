@@ -341,7 +341,9 @@ for interpreting this flag to properly escape the contents.
 ### onattributeplaceholder
 
 The `oncontentplaceholder` function will be called each time a placeholder
-is encountered within an attribute string value.
+is encountered within an attribute string value. This event will be emitted
+before `onopentag` so by changing the `contents` property of the event,
+the resultant attribute can be changed.
 
 **EXAMPLE:**
 
@@ -363,7 +365,9 @@ OUTPUT EVENT:
 
 **NOTE:**
 The `escape` flag is merely informational. The application code is responsible
-for interpreting this flag to properly escape the contents. The contents
+for interpreting this flag to properly escape the contents. The `contents`
+property can be altered by the `onattributeplaceholder` function and the
+attribute information emitted via `onopentag` will reflect this change.
 
 ### ondtd
 
