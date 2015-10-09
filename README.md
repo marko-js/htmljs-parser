@@ -47,15 +47,82 @@ This parser extends the HTML grammar to add these important features:
 <if(a in b)>
 ```
 
+# Installation
+
+```bash
+npm install htmljs-parser
+```
+
+# Usage
+
+```javascript
+var htmljs = require('htmljs-parser');
+var parser = htmljs.createParser({
+    ontext: function(event) {
+        // text
+    },
+
+    oncontentplaceholder: function(event) {
+        // placeholder within content
+    },
+
+    onattributeplaceholder: function(event) {
+        // placeholder within attribute
+    },
+
+    oncdata: function(event) {
+        // CDATA
+    },
+
+    onopentag: function(event) {
+        // open tag
+    },
+
+    onclosetag: function(event) {
+        // close tag
+    },
+
+    ondtd: function(event) {
+        // DTD (e.g. <DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">)
+    },
+
+    ondeclaration: function(event) {
+        // Declaration (e.g. <?xml version="1.0" encoding="UTF-8" ?>)
+    },
+
+    onbegincomment: function(event) {
+        // Begin comment: <!--
+    },
+
+    onendcomment: function(event) {
+        // End comment: -->
+    },
+
+    oncomment: function(event) {
+        // Text within XML comment
+    },
+
+    onerror: function(event) {
+        // Error
+    }
+});
+
+parser.parse(str);
+```
+
+
+
 ## Parsing Events
 
-- `opentag`
-- `closetag`
-- `text`
-- `begincdata`
-- `cdata`
-- `endcdata`
-- `begincomment`
-- `comment`
-- `endcomment`
-- `placeholder`
+- `ontext`
+- `oncontentplaceholder`
+- `onattributeplaceholder`
+- `oncdata`
+- `onopentag`
+- `onclosetag`
+- `ondtd`
+- `ondeclaration`
+- `onbegincomment`
+- `onendcomment`
+- `oncomment`
+- `onerror`

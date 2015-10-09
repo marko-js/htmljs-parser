@@ -3,13 +3,13 @@ chai.config.includeStack = true;
 require('chai').should();
 var expect = require('chai').expect;
 
-var jsxml = require('../');
+var htmljs = require('../');
 
 require('colors');
 
 function parse(text, expectedEvents) {
     var actualEvents = [];
-    var parser = jsxml.createParser({
+    var parser = htmljs.createParser({
         ontext: function(event) {
             actualEvents.push(event);
         },
@@ -58,10 +58,6 @@ function parse(text, expectedEvents) {
 
         onerror: function(event) {
             actualEvents.push(event);
-        },
-
-        escape: function(expression) {
-            return 'escapeXml(' + expression + ')';
         }
     });
 
@@ -101,7 +97,7 @@ describe('htmljs parser', function() {
             }
         };
 
-        var parser = jsxml.createParser({
+        var parser = htmljs.createParser({
             onopentag: function(event) {
                 actualEvents.push(event);
                 var handler = opentagHandlers[event.name];
