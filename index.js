@@ -59,9 +59,8 @@ exports.createParser = function(listeners, options) {
     function _notifyCDATA(txt) {
         if (listeners.ontext && txt) {
             listeners.ontext({
-                type: 'text',
-                text: txt,
-                cdata: true
+                type: 'cdata',
+                text: txt
             });
         }
 
@@ -146,28 +145,20 @@ exports.createParser = function(listeners, options) {
         }
     }
 
-    function _notifyDTD(name) {
+    function _notifyDTD(dtd) {
         if (listeners.ondtd) {
             listeners.ondtd({
                 type: 'dtd',
-                name: name
+                dtd: dtd
             });
         }
     }
 
-    function _notifyDeclaration(name) {
+    function _notifyDeclaration(declaration) {
         if (listeners.ondeclaration) {
             listeners.ondeclaration.call(parser, {
                 type: 'declaration',
-                name: name
-            });
-        }
-    }
-
-    function _notifyBeginComment() {
-        if (listeners.onbegincomment) {
-            listeners.onbegincomment.call(parser, {
-                type: 'begincomment'
+                declaration: declaration
             });
         }
     }
@@ -180,14 +171,6 @@ exports.createParser = function(listeners, options) {
             });
         }
         comment = '';
-    }
-
-    function _notifyEndComment(comment) {
-        if (listeners.onendcomment) {
-            listeners.onendcomment.call(parser, {
-                type: 'endcomment'
-            });
-        }
     }
 
     function _notifyPlaceholder(placeholder) {
@@ -502,11 +485,7 @@ exports.createParser = function(listeners, options) {
                 var match = parser.lookAheadFor('!--');
                 if (match) {
                     parser.skip(match.length);
-
                     _notifyText(text);
-
-                    _notifyBeginComment();
-
                     parser.enterState(STATE_XML_COMMENT);
                     return;
                 }
@@ -1227,21 +1206,6 @@ exports.createParser = function(listeners, options) {
     var STATE_XML_COMMENT = Parser.createState({
         // name: 'STATE_XML_COMMENT',
 
-        placeholder: {
-            type: 'contentplaceholder',
-
-            end: function(placeholder) {
-                _notifyCommentText(comment);
-                _notifyPlaceholder(placeholder);
-            },
-
-            eof: function() {
-                _notifyError(placeholderPos,
-                    'MALFORMED_PLACEHOLDER',
-                    'EOF reached while parsing placeholder in comment');
-            }
-        },
-
         enter: function() {
             comment = '';
         },
@@ -1259,15 +1223,11 @@ exports.createParser = function(listeners, options) {
                     parser.skip(match.length);
 
                     _notifyCommentText(comment);
-                    _notifyEndComment();
 
                     parser.enterState(STATE_HTML_CONTENT);
                 } else {
                     comment += ch;
                 }
-            } else if (_checkForPlaceholder(ch, code)) {
-                // went into STATE_PLACEHOLDER
-                return;
             } else {
                 comment += ch;
             }

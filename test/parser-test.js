@@ -44,14 +44,6 @@ function parse(text, expectedEvents) {
             actualEvents.push(event);
         },
 
-        onbegincomment: function(event) {
-            actualEvents.push(event);
-        },
-
-        onendcomment: function(event) {
-            actualEvents.push(event);
-        },
-
         oncomment: function(event) {
             actualEvents.push(event);
         },
@@ -133,14 +125,6 @@ describe('htmljs parser', function() {
             },
 
             ondeclaration: function(event) {
-                actualEvents.push(event);
-            },
-
-            onbegincomment: function(event) {
-                actualEvents.push(event);
-            },
-
-            onendcomment: function(event) {
                 actualEvents.push(event);
             },
 
@@ -241,39 +225,43 @@ describe('htmljs parser', function() {
         ]);
     });
 
-    it('should handle xml declaration <?xml version="1.0" encoding="UTF-8" ?>', function() {
-        // <?xml version="1.0" encoding="UTF-8" ?>
-        parse([
-            '<', '?', 'xml version="1.0" encoding="UTF-8" ?>'
-        ], [
-            {
-                type: 'declaration',
-                name: 'xml version="1.0" encoding="UTF-8" '
-            }
-        ]);
+    describe('XML declarations', function() {
+        it('should handle xml declaration <?xml version="1.0" encoding="UTF-8" ?>', function() {
+            // <?xml version="1.0" encoding="UTF-8" ?>
+            parse([
+                '<', '?', 'xml version="1.0" encoding="UTF-8" ?>'
+            ], [
+                {
+                    type: 'declaration',
+                    declaration: 'xml version="1.0" encoding="UTF-8" '
+                }
+            ]);
+        });
+
+        it('should handle xml declaration <?xml version="1.0" encoding="UTF-8">', function() {
+            parse([
+                '<', '?', 'xml version="1.0" encoding="UTF-8">'
+            ], [
+                {
+                    type: 'declaration',
+                    declaration: 'xml version="1.0" encoding="UTF-8"'
+                }
+            ]);
+        });
     });
 
-    it('should handle xml declaration <?xml version="1.0" encoding="UTF-8">', function() {
-        parse([
-            '<', '?', 'xml version="1.0" encoding="UTF-8">'
-        ], [
-            {
-                type: 'declaration',
-                name: 'xml version="1.0" encoding="UTF-8"'
-            }
-        ]);
-    });
-
-    it('should handle HTML doctype', function() {
-        // <?xml version="1.0" encoding="UTF-8" ?>
-        parse([
-            '<', '!', 'DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">'
-        ], [
-            {
-                type: 'dtd',
-                name: 'DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN"'
-            }
-        ]);
+    describe('DTD', function() {
+        it('should handle HTML doctype', function() {
+            // <?xml version="1.0" encoding="UTF-8" ?>
+            parse([
+                '<', '!', 'DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">'
+            ], [
+                {
+                    type: 'dtd',
+                    dtd: 'DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN"'
+                }
+            ]);
+        });
     });
 
     describe('Parsed text content', function() {
@@ -635,9 +623,8 @@ describe('htmljs parser', function() {
                     text: 'BEFORE'
                 },
                 {
-                    type: 'text',
-                    text: '<within><!-- just text -->',
-                    cdata: true
+                    type: 'cdata',
+                    text: '<within><!-- just text -->'
                 },
                 {
                     type: 'text',
@@ -728,14 +715,8 @@ describe('htmljs parser', function() {
                     attributes: []
                 },
                 {
-                    type: 'begincomment'
-                },
-                {
                     type: 'comment',
                     comment: '<b></b>'
-                },
-                {
-                    type: 'endcomment'
                 },
                 {
                     type: 'closetag',
@@ -918,28 +899,13 @@ describe('htmljs parser', function() {
             ]);
         });
 
-        it('should handle placeholders in XML comments', function() {
+        it('should ignore placeholders in XML comments', function() {
             parse([
                 '<!-- Copyright ${date} -->'
             ], [
                 {
-                    type: 'begincomment'
-                },
-                {
                     type: 'comment',
-                    comment: ' Copyright '
-                },
-                {
-                    type: 'contentplaceholder',
-                    contents: 'date',
-                    escape: true
-                },
-                {
-                    type: 'comment',
-                    comment: ' '
-                },
-                {
-                    type: 'endcomment'
+                    comment: ' Copyright ${date} '
                 }
             ]);
         });
@@ -1191,6 +1157,28 @@ describe('htmljs parser', function() {
                 }
             ]);
         });
+
+        it('should recognize arguments for both element and attributes', function() {
+            parse([
+                '<for(var i = 0; i < 10; i++) if(x > y)>'
+            ], [
+                {
+                    type: 'opentag',
+                    name: 'for',
+                    arguments: [
+                        '(var i = 0; i < 10; i++)'
+                    ],
+                    attributes: [
+                        {
+                            name: 'if',
+                            arguments: [
+                                '(x > y)'
+                            ]
+                        }
+                    ]
+                }
+            ]);
+        });
     });
 
     describe('EOF handling', function() {
@@ -1264,6 +1252,19 @@ describe('htmljs parser', function() {
                     lineNumber: 1,
                     startPos:3,
                     endPos: 33
+                }
+            ]);
+
+            parse([
+                '<a href="'
+            ], [
+                {
+                    type: 'error',
+                    code: 'MALFORMED_OPEN_TAG',
+                    message: 'EOF reached while parsing open tag.',
+                    lineNumber: 1,
+                    startPos: 0,
+                    endPos: 9
                 }
             ]);
         });
