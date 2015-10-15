@@ -1081,7 +1081,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'data',
-                            expression: 'escapeAttr(abc)'
+                            expression: '""+(escapeAttr(abc))+""'
                         }
                     ]
                 }
@@ -1490,6 +1490,25 @@ describe('htmljs parser', function() {
                     lineNumber: 1,
                     startPos:14,
                     endPos: 19
+                }
+            ]);
+        });
+
+        it('should handle EOF while parsing delimited expression inside placeholder', function() {
+            parse([
+                'Hello ${('
+            ], [
+                {
+                    type: 'text',
+                    text: 'Hello '
+                },
+                {
+                    type: 'error',
+                    code: 'MALFORMED_PLACEHOLDER',
+                    message: 'EOF reached while parsing placeholder.',
+                    lineNumber: 1,
+                    startPos: 6,
+                    endPos: 9
                 }
             ]);
         });

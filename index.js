@@ -1,5 +1,6 @@
 
 var Parser = require('./Parser');
+var notifyUtil = require('./notify-util');
 
 function _isWhitespaceCode(code) {
     // For all practical purposes, the space character (32) and all the
@@ -31,9 +32,15 @@ var CODE_DOLLAR = 36;
 
 var EMPTY_ATTRIBUTES = [];
 
+function _buildConcatenatedString(str, placeholder, stringDelimiter) {
+    stringDelimiter = String.fromCharCode(stringDelimiter);
+    return str +  stringDelimiter + '+' + '(' + placeholder.contents + ')+' + stringDelimiter;
+}
+
 exports.createParser = function(listeners, options) {
 
     var parser = new Parser(options);
+    var notifiers = notifyUtil.createNotifiers(parser, listeners);
 
     var tagName;
     var text = '';
@@ -43,147 +50,23 @@ exports.createParser = function(listeners, options) {
     var elementArguments;
     var tagPos;
     var placeholderPos;
+    var withinTag = false;
 
     function _notifyText(txt) {
-        if (listeners.ontext && (txt.length > 0)) {
-            listeners.ontext({
-                type: 'text',
-                text: txt
-            });
-        }
+        notifiers.notifyText(txt);
 
         // always clear text buffer...
         text =  '';
     }
 
-    function _notifyCDATA(txt) {
-        if (listeners.ontext && txt) {
-            listeners.ontext({
-                type: 'cdata',
-                text: txt
-            });
-        }
-
-        // always clear text buffer...
-        text =  '';
-    }
-
-    function _notifyError(pos, errorCode, message) {
-        if (listeners.onerror) {
-
-            var lineNumber = parser.lineNumber;
-
-            var data = parser.data;
-            var i = data.pos;
-            while(--i >= pos) {
-                var code = data.charCodeAt(i);
-                if (code === CODE_NEWLINE) {
-                    lineNumber--;
-                }
-            }
-
-            listeners.onerror({
-                type: 'error',
-                code: errorCode,
-                message: message,
-                startPos: pos,
-                endPos: parser.pos,
-                lineNumber: lineNumber
-            });
-        }
-
-        // always clear text buffer...
-        text =  '';
-    }
-
-    function _notifyOpenTag(name, attributes, selfClosed) {
-        if (listeners.onopentag) {
-
-            // set the staticText property for attributes that are simple
-            // string values...
-            var i = attributes.length;
-            while(--i >= 0) {
-                var attr = attributes[i];
-                if (attr.possibleStaticText) {
-                    var expression = attr.expression;
-                    attr.staticText = expression.substring(1, expression.length - 1);
-                }
-
-                delete attr.possibleStaticText;
-            }
-
-            var event = {
-                type: 'opentag',
-                name: name,
-                attributes: attributes
-            };
-
-            if (elementArguments) {
-                event.arguments = elementArguments;
-            }
-
-            if (selfClosed) {
-                event.selfClosed = true;
-            }
-
-            listeners.onopentag.call(parser, event);
-        }
-    }
-
-    function _notifyCloseTag(name, selfClosed) {
-        if (listeners.onclosetag) {
-            var event = {
-                type: 'closetag',
-                name: name
-            };
-
-            if (selfClosed) {
-                event.selfClosed = true;
-            }
-
-            listeners.onclosetag.call(parser, event);
-        }
-    }
-
-    function _notifyDTD(dtd) {
-        if (listeners.ondtd) {
-            listeners.ondtd({
-                type: 'dtd',
-                dtd: dtd
-            });
-        }
-    }
-
-    function _notifyDeclaration(declaration) {
-        if (listeners.ondeclaration) {
-            listeners.ondeclaration.call(parser, {
-                type: 'declaration',
-                declaration: declaration
-            });
-        }
-    }
-
-    function _notifyCommentText(txt) {
-        if (listeners.oncomment && txt) {
-            listeners.oncomment.call(parser, {
-                type: 'comment',
-                comment: txt
-            });
-        }
-        comment = '';
-    }
-
-    function _notifyPlaceholder(placeholder) {
-        var eventFunc = listeners['on' + placeholder.type];
-        if (eventFunc) {
-            // remove unnecessary properties
-            ['stringDelimiter', 'delimiterDepth', 'parentState', 'handler']
-                .forEach(function(key) {
-                    delete placeholder[key];
-                });
-            eventFunc.call(parser, placeholder);
-        }
-    }
+    var _notifyCDATA = notifiers.notifyCDATA;
+    var _notifyCommentText = notifiers.notifyCommentText;
+    var _notifyError = notifiers.notifyError;
+    var _notifyOpenTag = notifiers.notifyOpenTag;
+    var _notifyCloseTag = notifiers.notifyCloseTag;
+    var _notifyDTD = notifiers.notifyDTD;
+    var _notifyDeclaration = notifiers.notifyDeclaration;
+    var _notifyPlaceholder = notifiers.notifyPlaceholder;
 
     function _attribute() {
         attribute = {};
@@ -198,7 +81,7 @@ exports.createParser = function(listeners, options) {
     function _afterOpenTag() {
         var origState = parser.state;
 
-        _notifyOpenTag(tagName, attributes);
+        _notifyOpenTag(tagName, attributes, elementArguments, false /* not selfClosed */);
 
         // Did the parser stay in the same state after
         // notifying listeners about opentag?
@@ -216,7 +99,7 @@ exports.createParser = function(listeners, options) {
     }
 
     function _afterSelfClosingTag() {
-        _notifyOpenTag(tagName, attributes, true /* selfClosed */);
+        _notifyOpenTag(tagName, attributes, elementArguments, true /* selfClosed */);
         _notifyCloseTag(tagName, true /* selfClosed */);
         parser.enterHtmlContentState();
     }
@@ -323,11 +206,9 @@ exports.createParser = function(listeners, options) {
                 placeholder.ancestorEscaped = true;
                 placeholder.escape = false;
             }
-
-            placeholder.type = top.type;
-        } else {
-            placeholder.type = placeholder.handler.type;
         }
+
+        placeholder.type = withinTag ? 'attributeplaceholder' : 'contentplaceholder';
 
         placeholderStack.push(placeholder);
 
@@ -380,11 +261,6 @@ exports.createParser = function(listeners, options) {
                 }
             }
         }
-    }
-
-    function _buildConcatenatedString(str, placeholder, stringDelimiter) {
-        stringDelimiter = String.fromCharCode(stringDelimiter);
-        return str +  stringDelimiter + '+' + '(' + placeholder.contents + ')+' + stringDelimiter;
     }
 
     function _checkForClosingTag() {
@@ -448,20 +324,12 @@ exports.createParser = function(listeners, options) {
         }
     }
 
-    var CONTENT_eof = function() {
-        _notifyText(text);
-    };
-
     // In STATE_HTML_CONTENT we are looking for tags and placeholders but
     // everything in between is treated as text.
     var STATE_HTML_CONTENT = Parser.createState({
         // name: 'STATE_HTML_CONTENT',
 
-        eof: CONTENT_eof,
-
         placeholder: {
-            type: 'contentplaceholder',
-
             end: function(placeholder) {
                 _notifyPlaceholder(placeholder);
             },
@@ -471,6 +339,14 @@ exports.createParser = function(listeners, options) {
                     'MALFORMED_PLACEHOLDER',
                     'EOF reached while parsing placeholder.');
             }
+        },
+
+        eof: function() {
+            _notifyText(text);
+        },
+
+        enter: function() {
+            withinTag = false;
         },
 
         char: function(ch, code) {
@@ -512,12 +388,13 @@ exports.createParser = function(listeners, options) {
             // The end tag that we are looking for is the last tag
             // name that we saw
             endTagName = tagName;
+            withinTag = false;
         },
 
-        eof: CONTENT_eof,
+        eof: STATE_HTML_CONTENT.eof,
 
         char: function(ch, code) {
-            // First, see if we need to see if we reached the closing tag...
+            // See if we need to see if we reached the closing tag...
             if (code === CODE_LEFT_ANGLE_BRACKET) {
                 if (_checkForClosingTag()) {
                     return;
@@ -534,17 +411,13 @@ exports.createParser = function(listeners, options) {
     var STATE_PARSED_TEXT_CONTENT = Parser.createState({
         // name: 'STATE_PARSED_TEXT_CONTENT',
 
-        placeholder: {
-            type: 'contentplaceholder',
+        placeholder: STATE_HTML_CONTENT.placeholder,
 
-            end: function(placeholder) {
-                _notifyPlaceholder(placeholder);
-            },
+        eof: STATE_HTML_CONTENT.eof,
 
-            eof: STATE_HTML_CONTENT.placeholder.eof
+        enter: function() {
+            withinTag = false;
         },
-
-        eof: CONTENT_eof,
 
         char: function(ch, code) {
             if (code === CODE_LEFT_ANGLE_BRACKET) {
@@ -573,6 +446,7 @@ exports.createParser = function(listeners, options) {
         enter: function() {
             tagName = '';
             elementArguments = undefined;
+            withinTag = true;
         },
 
         eof: function() {
@@ -676,7 +550,7 @@ exports.createParser = function(listeners, options) {
                 var match = parser.lookAheadFor(']>');
                 if (match) {
                     _notifyCDATA(text);
-
+                    text = '';
                     parser.skip(match.length);
 
                     parser.enterState(cdataParentState);
@@ -1125,7 +999,7 @@ exports.createParser = function(listeners, options) {
     });
 
     // We enter STATE_LINE_COMMENT after we encounter a "//" sequence
-    // while in STATE_DELIMITED_EXPRESSION.
+    // when parsing JavaScript code.
     // We leave STATE_LINE_COMMENT when we see a newline character.
     var STATE_LINE_COMMENT = Parser.createState({
         // name: 'STATE_LINE_COMMENT',
@@ -1223,6 +1097,7 @@ exports.createParser = function(listeners, options) {
                     parser.skip(match.length);
 
                     _notifyCommentText(comment);
+                    comment = '';
 
                     parser.enterState(STATE_HTML_CONTENT);
                 } else {
