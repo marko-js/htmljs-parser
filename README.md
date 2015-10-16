@@ -106,7 +106,55 @@ var parser = htmljs.createParser({
 parser.parse(str);
 ```
 
+## Content Parsing Modes
 
+The parser, by default, will look for HTML tags within content. This behavior
+might not be desirable for certain tags, so the parser allows the parsing mode
+to be changed (usually in response to an `onopentag` event).
+
+There are three content parsing modes:
+
+- **HTML Content (DEFAULT):**
+    The parser will look for any HTML tag and content placeholders while in
+    this mode and parse opening and closing tags accordingly.
+
+- **Parsed Text Content**: The parser will look for the closing tag that matches
+    the current open tag as well as content placeholders but all other content
+    will be interpreted as text.
+
+- **Static Text Content**: The parser will look for the closing tag that matches
+    the current open tag but all other content will be interpreted as raw text.
+
+```javascript
+var htmljs = require('htmljs-parser');
+var parser = htmljs.createParser({
+    onopentag: function(event) {
+        // open tag
+        switch(event.name) {
+            case 'textarea':
+                //fall through
+            case 'script':
+                //fall through
+            case 'style':
+                // parse the content within these tags but only
+                // look for placeholders and the closing tag.
+                parser.enterParsedTextContentState();
+                break;
+            case 'dummy'
+                // treat content within <dummy>...</dummy> as raw
+                // text and ignore other tags and placeholders
+                parser.enterStaticTextContentState();
+                break;
+            default:
+                // The parser will switch to HTML content parsing mode
+                // if the parsing mode is not explicitly changed by
+                // "onopentag" function.
+        }
+    }
+});
+
+parser.parse(str);
+```
 
 ## Parsing Events
 
