@@ -123,9 +123,10 @@ exports.createNotifiers = function(parser, listeners) {
 
         notifyPlaceholder: function(placeholder) {
             var eventFunc = listeners['on' + placeholder.type];
+
             if (eventFunc) {
                 // remove unnecessary properties
-                ['stringDelimiter', 'delimiterDepth', 'parentState', 'handler']
+                ['depth', 'stringDelimiter', 'delimiterDepth', 'parentState', 'handler']
                     .forEach(function(key) {
                         delete placeholder[key];
                     });

@@ -25,6 +25,10 @@ function parse(text, options, expectedEvents) {
             actualEvents.push(event);
         },
 
+        onnestedcontentplaceholder: function(event) {
+            actualEvents.push(event);
+        },
+
         onattributeplaceholder: function(event) {
             // ignore this event because it is
             // emitted to give listeners a chance
@@ -81,7 +85,7 @@ function parse(text, options, expectedEvents) {
 
 describe('htmljs parser', function() {
 
-    it('should follow instructions on how to parse contents of tag', function() {
+    it('should follow instructions on how to parse expression of tag', function() {
         var actualEvents = [];
 
         var opentagHandlers = {
@@ -122,6 +126,10 @@ describe('htmljs parser', function() {
             },
 
             oncontentplaceholder: function(event) {
+                actualEvents.push(event);
+            },
+
+            onnestedcontentplaceholder: function(event) {
                 actualEvents.push(event);
             },
 
@@ -224,7 +232,7 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'contentplaceholder',
-                contents: 'text',
+                expression: 'text',
                 escape: true
             },
             {
@@ -773,7 +781,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'contentplaceholder',
-                    contents: 'xyz',
+                    expression: 'xyz',
                     escape: true
                 },
                 {
@@ -798,7 +806,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'contentplaceholder',
-                    contents: 'xyz',
+                    expression: 'xyz',
                     escape: true
                 },
                 {
@@ -827,7 +835,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'contentplaceholder',
-                    contents: 'xyz',
+                    expression: 'xyz',
                     escape: true
                 },
                 {
@@ -942,7 +950,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'contentplaceholder',
-                    contents: 'date',
+                    expression: 'date',
                     escape: true
                 },
                 {
@@ -971,7 +979,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'contentplaceholder',
-                    contents: 'date',
+                    expression: 'date',
                     escape: false
                 },
                 {
@@ -1055,23 +1063,46 @@ describe('htmljs parser', function() {
 
         it('should handle placeholder inside content placeholder', function() {
             parse([
-                '${"Hello ${data.name}"}'
+                '${"Hello ${data.name}!"}'
             ], [
                 {
+                    type: 'nestedcontentplaceholder',
+                    expression: 'data.name',
+                    escape: true
+                },
+                {
                     type: 'contentplaceholder',
-                    contents: '"Hello "+(data.name)+""',
+                    expression: '"Hello "+(data.name)+"!"',
                     escape: true
                 }
             ]);
         });
 
-        it('should allow attribute placeholder contents to be escaped', function() {
+        it('should handle placeholder inside content placeholder and escaping', function() {
+            parse([
+                '$!{"Hello ${data.name}!"}'
+            ], {
+                onnestedcontentplaceholder: function(event) {
+                    if (event.escape) {
+                        event.expression = 'escapeXml(' + event.expression + ')';
+                    }
+                }
+            }, [
+                {
+                    type: 'contentplaceholder',
+                    expression: '"Hello "+(escapeXml(data.name))+"!"',
+                    escape: false
+                }
+            ]);
+        });
+
+        it('should allow attribute placeholder expression to be escaped', function() {
             parse([
                 '<custom data="${abc}">'
             ], {
                 onattributeplaceholder: function(event) {
                     if (event.escape) {
-                        event.contents = 'escapeAttr(' + event.contents + ')';
+                        event.expression = 'escapeAttr(' + event.expression + ')';
                     }
                 }
             }, [

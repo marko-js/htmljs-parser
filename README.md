@@ -66,6 +66,10 @@ var parser = htmljs.createParser({
         // placeholder within content
     },
 
+    onnestedcontentplaceholder: function(event) {
+        // placeholder within string that is within content placeholder
+    },
+
     onattributeplaceholder: function(event) {
         // placeholder within attribute
     },
@@ -304,6 +308,12 @@ OUTPUT EVENT:
 The `oncontentplaceholder` function will be called each time a placeholder
 is encountered within parsed textual content within elements.
 
+If the placeholder starts with the "$!{" sequence then `event.escape`
+will be `false`.
+
+If the placeholder starts with the "${" sequence then `event.escape` will be
+`true`.
+
 Text within `<![CDATA[` `]]>` and `<!--` `-->` will not be parsed so you
 cannot use placeholders for these blocks of code.
 
@@ -321,7 +331,7 @@ OUTPUT EVENTS
 ```javascript
 {
     type: 'contentplaceholder',
-    contents: '"This is an escaped placeholder"',
+    expression: '"This is an escaped placeholder"',
     escape: true
 }
 ```
@@ -329,21 +339,97 @@ OUTPUT EVENTS
 ```javascript
 {
     type: 'contentplaceholder',
-    contents: '"This is a non-escaped placeholder"',
+    expression: '"This is a non-escaped placeholder"',
     escape: false
 }
 ```
 
 **NOTE:**
 The `escape` flag is merely informational. The application code is responsible
-for interpreting this flag to properly escape the contents.
+for interpreting this flag to properly escape the expression.
+
+### onnestedcontentplaceholder
+
+The `onnestedcontentplaceholder` function will be called each time a placeholder
+is encountered within a string that is also within another content placeholder.
+
+If the placeholder starts with the "$!{" sequence then `event.escape`
+will be `false`.
+
+If the placeholder starts with the "${" sequence then `event.escape` will be
+`true` unless the placeholder is nested within another placeholder that is
+already escaped.
+
+
+The `event.expression` property can be changed which will cause corresponding
+change to ancestor content placeholder expression.
+
+Here's an example of modifying the expression based on the `event.escape` flag:
+
+```javascript
+onnestedcontentplaceholder: function(event) {
+    if (event.escape) {
+        event.expression = 'escapeXml(' + event.expression + ')';
+    }
+}
+```
+
+**EXAMPLE:**
+
+INPUT:
+
+```html
+${"Hello ${data.name}"}
+```
+
+The `${data.name}` sequence will trigger the call to
+`onnestedcontentplaceholder`.
+
+OUTPUT EVENTS
+
+```javascript
+{
+    type: 'nestedcontentplaceholder',
+    expression: 'data.name',
+    escape: true
+}
+```
+
+```javascript
+{
+    type: 'contentplaceholder',
+    expression: '"Hello "+(data.name)+"!"',
+    escape: true
+}
+```
+
+**NOTE:**
+The `escape` flag is merely informational. The application code is responsible
+for interpreting this flag to properly escape the expression.
 
 ### onattributeplaceholder
 
 The `oncontentplaceholder` function will be called each time a placeholder
 is encountered within an attribute string value. This event will be emitted
-before `onopentag` so by changing the `contents` property of the event,
+before `onopentag` so by changing the `expression` property of the event,
 the resultant attribute can be changed.
+
+Here's an example of modifying the expression based on the `event.escape` flag:
+
+```javascript
+onattributeplaceholder: function(event) {
+    if (event.escape) {
+        event.expression = 'escapeAttr(' + event.expression + ')';
+    }
+}
+```
+
+If the placeholder starts with the "$!{" sequence then `event.escape`
+will be `false`.
+
+If the placeholder starts with the "${" sequence then `event.escape` will be
+`true` unless the placeholder is nested within another placeholder that is
+already escaped.
 
 **EXAMPLE:**
 
@@ -358,14 +444,14 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'attributeplaceholder',
-    contents: 'data.className',
+    expression: 'data.className',
     escape: true
 }
 ```
 
 **NOTE:**
 The `escape` flag is merely informational. The application code is responsible
-for interpreting this flag to properly escape the contents. The `contents`
+for interpreting this flag to properly escape the expression. The `expression`
 property can be altered by the `onattributeplaceholder` function and the
 attribute information emitted via `onopentag` will reflect this change.
 

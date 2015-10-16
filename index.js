@@ -34,7 +34,7 @@ var EMPTY_ATTRIBUTES = [];
 
 function _buildConcatenatedString(str, placeholder, stringDelimiter) {
     stringDelimiter = String.fromCharCode(stringDelimiter);
-    return str +  stringDelimiter + '+' + '(' + placeholder.contents + ')+' + stringDelimiter;
+    return str +  stringDelimiter + '+' + '(' + placeholder.expression + ')+' + stringDelimiter;
 }
 
 exports.createParser = function(listeners, options) {
@@ -190,16 +190,24 @@ exports.createParser = function(listeners, options) {
 
     function _enterPlaceholderState(placeholder) {
         var currentState = parser.state;
+        var len = placeholderStack.length;
 
         // Set the event type...
         // This property is used so that the placeholder
         // can be emitted as an event.
+
+        placeholder.type = withinTag ? 'attributeplaceholder' : 'contentplaceholder';
+        if (len) {
+            placeholder.type = 'nested' + placeholder.type;
+        }
+
         placeholder.delimiterDepth = 1;
         placeholder.parentState = currentState;
-        placeholder.contents = '';
+        placeholder.expression = '';
         placeholder.handler = currentState.placeholder;
 
-        var len = placeholderStack.length;
+
+
         if (len) {
             var top = placeholderStack[len - 1];
             if (top.ancestorEscaped) {
@@ -208,7 +216,7 @@ exports.createParser = function(listeners, options) {
             }
         }
 
-        placeholder.type = withinTag ? 'attributeplaceholder' : 'contentplaceholder';
+        placeholder.depth = len;
 
         placeholderStack.push(placeholder);
 
@@ -875,7 +883,7 @@ exports.createParser = function(listeners, options) {
             },
 
             char: function(ch) {
-                currentPlaceholder.contents += ch;
+                currentPlaceholder.expression += ch;
             },
 
             eof: STATE_PLACEHOLDER_EOF
@@ -883,7 +891,7 @@ exports.createParser = function(listeners, options) {
 
         expression: {
             string: function(str) {
-                currentPlaceholder.contents += str;
+                currentPlaceholder.expression += str;
             },
 
             eof: STATE_PLACEHOLDER_EOF
@@ -912,13 +920,13 @@ exports.createParser = function(listeners, options) {
                 if (--currentPlaceholder.delimiterDepth === 0) {
                     _leavePlaceholderState();
                 } else {
-                    currentPlaceholder.contents += ch;
+                    currentPlaceholder.expression += ch;
                 }
             } else if (code === CODE_LEFT_CURLY_BRACE) {
                 currentPlaceholder.delimiterDepth++;
-                currentPlaceholder.contents += ch;
+                currentPlaceholder.expression += ch;
             } else {
-                currentPlaceholder.contents += ch;
+                currentPlaceholder.expression += ch;
             }
         }
     });
