@@ -1,10 +1,16 @@
 {
   "name": "htmljs-parser",
-  "description": "An HTML-like parser that recognize attributes of various primitive types.",
+  "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
   "keywords": [
     "HTML",
-    "Parser",
-    "JavaScript"
+    "parser",
+    "JavaScript",
+    "expressions",
+    "browser",
+    "server",
+    "nodejs",
+    "template",
+    "compiler"
   ],
   "main": "index.js",
   "scripts": {
