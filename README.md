@@ -356,10 +356,10 @@ OUTPUT EVENT:
 The `oncontentplaceholder` function will be called each time a placeholder
 is encountered within parsed textual content within elements.
 
-If the placeholder starts with the "$!{" sequence then `event.escape`
+If the placeholder starts with the `$!{` sequence then `event.escape`
 will be `false`.
 
-If the placeholder starts with the "${" sequence then `event.escape` will be
+If the placeholder starts with the `${` sequence then `event.escape` will be
 `true`.
 
 Text within `<![CDATA[` `]]>` and `<!--` `-->` will not be parsed so you
@@ -401,10 +401,10 @@ for interpreting this flag to properly escape the expression.
 The `onnestedcontentplaceholder` function will be called each time a placeholder
 is encountered within a string that is also within another content placeholder.
 
-If the placeholder starts with the "$!{" sequence then `event.escape`
+If the placeholder starts with the `$!{` sequence then `event.escape`
 will be `false`.
 
-If the placeholder starts with the "${" sequence then `event.escape` will be
+If the placeholder starts with the `${` sequence then `event.escape` will be
 `true` unless the placeholder is nested within another placeholder that is
 already escaped.
 
@@ -472,10 +472,10 @@ onattributeplaceholder: function(event) {
 }
 ```
 
-If the placeholder starts with the "$!{" sequence then `event.escape`
+If the placeholder starts with the `$!{` sequence then `event.escape`
 will be `false`.
 
-If the placeholder starts with the "${" sequence then `event.escape` will be
+If the placeholder starts with the `${` sequence then `event.escape` will be
 `true` unless the placeholder is nested within another placeholder that is
 already escaped.
 
