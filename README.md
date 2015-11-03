@@ -248,7 +248,7 @@ OUTPUT EVENT:
     type: 'opentag',
     name: 'for',
     arguments: [
-        '(var i = 0; i < 10; i++)'
+        'var i = 0; i < 10; i++'
     ],
     attributes: []
 }
@@ -272,7 +272,7 @@ OUTPUT EVENT:
         {
             name: 'if',
             arguments: [
-                '(x > y)'
+                'x > y'
             ]
         }
     ]

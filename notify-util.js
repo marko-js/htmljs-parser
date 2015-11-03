@@ -1,5 +1,13 @@
 var CODE_NEWLINE = 10;
 
+function _removeDelimitersFromArguments(args) {
+    var i = args.length;
+    while(--i >= 0) {
+        var arg = args[i];
+        args[i] = arg.substring(1, arg.length - 1);
+    }
+}
+
 exports.createNotifiers = function(parser, listeners) {
     return {
         notifyText: function(txt) {
@@ -47,6 +55,9 @@ exports.createNotifiers = function(parser, listeners) {
 
         notifyOpenTag: function(name, attributes, elementArguments, selfClosed) {
             if (listeners.onopentag) {
+                if (elementArguments) {
+                    _removeDelimitersFromArguments(elementArguments);
+                }
 
                 // set the staticText property for attributes that are simple
                 // string values...
@@ -56,6 +67,10 @@ exports.createNotifiers = function(parser, listeners) {
                     if (attr.possibleStaticText) {
                         var expression = attr.expression;
                         attr.staticText = expression.substring(1, expression.length - 1);
+                    }
+
+                    if (attr.arguments) {
+                        _removeDelimitersFromArguments(attr.arguments);
                     }
 
                     delete attr.possibleStaticText;

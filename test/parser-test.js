@@ -1166,7 +1166,7 @@ describe('htmljs parser', function() {
                     type: 'opentag',
                     name: 'for',
                     arguments: [
-                        '(x in y)'
+                        'x in y'
                     ],
                     attributes: []
                 }
@@ -1181,7 +1181,7 @@ describe('htmljs parser', function() {
                     type: 'opentag',
                     name: 'for',
                     arguments: [
-                        '(x in y)'
+                        'x in y'
                     ],
                     attributes: []
                 }
@@ -1196,7 +1196,7 @@ describe('htmljs parser', function() {
                     type: 'opentag',
                     name: 'for',
                     arguments: [
-                        '(x in ["Hello "+(name)+"!", "(World)"])'
+                        'x in ["Hello "+(name)+"!", "(World)"]'
                     ],
                     attributes: []
                 }
@@ -1214,7 +1214,7 @@ describe('htmljs parser', function() {
                         {
                             name: 'if',
                             arguments: [
-                                '(x > y)'
+                                'x > y'
                             ]
                         }
                     ]
@@ -1233,7 +1233,7 @@ describe('htmljs parser', function() {
                         {
                             name: 'if',
                             arguments: [
-                                '(x > y)'
+                                'x > y'
                             ]
                         }
                     ]
@@ -1249,13 +1249,13 @@ describe('htmljs parser', function() {
                     type: 'opentag',
                     name: 'for',
                     arguments: [
-                        '(var i = 0; i < 10; i++)'
+                        'var i = 0; i < 10; i++'
                     ],
                     attributes: [
                         {
                             name: 'if',
                             arguments: [
-                                '(x > y)'
+                                'x > y'
                             ]
                         }
                     ]
