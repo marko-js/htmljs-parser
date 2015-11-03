@@ -1,37 +1,37 @@
 {
-  "name": "htmljs-parser",
-  "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
-  "keywords": [
-    "HTML",
-    "parser",
-    "JavaScript",
-    "expressions",
-    "browser",
-    "server",
-    "nodejs",
-    "template",
-    "compiler"
-  ],
-  "main": "index.js",
-  "scripts": {
-    "test": "node_modules/.bin/mocha --ui bdd --reporter spec ./test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/philidem/htmljs-parser.git"
-  },
-  "author": "Phillip Gates-Idem <phillip.idem@gmail.com>",
-  "maintainers": "Phillip Gates-Idem <phillip.idem@gmail.com>",
-  "dependencies": {},
-  "devDependencies": {
-    "chai": "^3.2.0",
-    "colors": "^1.1.2",
-    "jshint": "^2.8.0",
-    "mocha": "^2.3.0"
-  },
-  "license": "MIT",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
-  "version": "1.0.0"
+    "name": "htmljs-parser",
+    "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
+    "keywords": [
+        "HTML",
+        "parser",
+        "JavaScript",
+        "expressions",
+        "browser",
+        "server",
+        "nodejs",
+        "template",
+        "compiler"
+    ],
+    "main": "index.js",
+    "scripts": {
+        "test": "node_modules/.bin/mocha --ui bdd --reporter spec ./test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/philidem/htmljs-parser.git"
+    },
+    "author": "Phillip Gates-Idem <phillip.idem@gmail.com>",
+    "maintainers": "Phillip Gates-Idem <phillip.idem@gmail.com>",
+    "dependencies": {},
+    "devDependencies": {
+        "chai": "^3.2.0",
+        "colors": "^1.1.2",
+        "jshint": "^2.8.0",
+        "mocha": "^2.3.0"
+    },
+    "license": "MIT",
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org/"
+    },
+    "version": "1.0.1"
 }
