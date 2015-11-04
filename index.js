@@ -306,12 +306,12 @@ exports.createParser = function(listeners, options) {
                 // arguments are for attribute
                 currentAttributeForAgument = attributes[attributes.length - 1];
 
-                if ((ignoreArgument = (currentAttributeForAgument.arguments != null))) {
+                if ((ignoreArgument = (currentAttributeForAgument.argument != null))) {
                     _notifyError(tagPos,
                         'ILLEGAL_ATTRIBUTE_ARGUMENT',
                         'Attribute can only have one argument.');
                 } else {
-                    currentAttributeForAgument.arguments = ch;
+                    currentAttributeForAgument.argument = ch;
                 }
 
                 parser.enterState(STATE_ATTRIBUTE_ARGUMENTS);
@@ -643,6 +643,7 @@ exports.createParser = function(listeners, options) {
                 // Set the attribute value to empty string (since it is
                 // initially undefined when start reading a new attribute)
                 attribute.expression = '';
+                attribute.isSimpleLiteral = true;
                 parser.enterState(STATE_ATTRIBUTE_VALUE);
             } else if (code === CODE_RIGHT_ANGLE_BRACKET) {
                 // While reading attribute name, see if we encounter end tag
@@ -704,9 +705,9 @@ exports.createParser = function(listeners, options) {
                 attribute.expression += ch;
             },
 
-            string: function(str, staticText) {
-                if (!staticText) {
-                    attribute.possibleStaticText = false;
+            string: function(str, isStringLiteral) {
+                if (!isStringLiteral) {
+                    attribute.isStringLiteral = false;
                 }
 
                 attribute.expression += str;
@@ -719,9 +720,10 @@ exports.createParser = function(listeners, options) {
 
         char: function(ch, code) {
             if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
-                // The attribute value is possibly static text if the
+                // The attribute value is possibly a string literal if the
                 // first character for the value is a single or double quote
-                attribute.possibleStaticText = (attribute.expression.length === 0);
+                attribute.isStringLiteral = (attribute.expression.length === 0);
+                attribute.isSimpleLiteral = false;
                 _enterExpressionState(ch, code, code, STATE_STRING);
                 return;
             }
@@ -741,6 +743,7 @@ exports.createParser = function(listeners, options) {
                     _afterSelfClosingTag();
                     return parser.skip(1);
                 } else if (nextCode === CODE_ASTERISK) {
+                    attribute.isSimpleLiteral = false;
                     parser.skip(1);
                     return _enterBlockCommentState();
                 }
@@ -751,14 +754,20 @@ exports.createParser = function(listeners, options) {
                 // if we see any character besides " and ' then value is
                 // not static text
             } else if (code === CODE_LEFT_PARANTHESIS) {
+                attribute.isSimpleLiteral = false;
                 _enterExpressionState(ch, code, CODE_RIGHT_PARANTHESIS, STATE_DELIMITED_EXPRESSION);
             } else if (code === CODE_LEFT_CURLY_BRACE) {
+                attribute.isSimpleLiteral = false;
                 _enterExpressionState(ch, code, CODE_RIGHT_CURLY_BRACE, STATE_DELIMITED_EXPRESSION);
             } else if (code === CODE_LEFT_SQUARE_BRACKET) {
+                attribute.isSimpleLiteral = false;
                 _enterExpressionState(ch, code, CODE_RIGHT_SQUARE_BRACKET, STATE_DELIMITED_EXPRESSION);
             }
 
-            attribute.possibleStaticText = false;
+            // If we got here then we are parsing characters that were
+            // not within a quoted string so our value can't possibly be
+            // a string literal
+            attribute.isStringLiteral = false;
 
             attribute.expression += ch;
         }
@@ -798,13 +807,13 @@ exports.createParser = function(listeners, options) {
         expression: {
             char: function(ch, code) {
                 if (!ignoreArgument) {
-                    currentAttributeForAgument.arguments += ch;
+                    currentAttributeForAgument.argument += ch;
                 }
             },
 
             string: function(str) {
                 if (!ignoreArgument) {
-                    currentAttributeForAgument.arguments += str;
+                    currentAttributeForAgument.argument += str;
                 }
             },
 
@@ -983,12 +992,12 @@ exports.createParser = function(listeners, options) {
                 // We encountered the end delimiter
                 expressionStr += ch;
 
-                expressionHandler.string(expressionStr, (currentExpression.staticText !== false));
+                expressionHandler.string(expressionStr, (currentExpression.isStringLiteral !== false));
 
                 _leaveExpressionState();
             } else if (_checkForPlaceholder(ch, code, stringDelimiter)) {
                 // We encountered nested placeholder...
-                currentExpression.staticText = false;
+                currentExpression.isStringLiteral = false;
             } else {
                 expressionStr += ch;
             }

@@ -415,7 +415,8 @@ describe('htmljs parser', function() {
                         },
                         {
                             name: 'c',
-                            expression: ''
+                            expression: '',
+                            literalValue: ''
                         },
                         {
                             name: 'd',
@@ -493,7 +494,8 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'a',
-                            expression: '1'
+                            expression: '1',
+                            literalValue: 1
                         }
                     ]
                 },
@@ -604,7 +606,8 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'data',
-                            expression: '123'
+                            expression: '123',
+                            literalValue: 123
                         },
                         {
                             name: 'data',
@@ -630,11 +633,158 @@ describe('htmljs parser', function() {
                         {
                             name: 'data',
                             expression: '"\nabc\n124"',
-                            staticText: '\nabc\n124'
+                            literalValue: '\nabc\n124'
                         }
                     ]
                 }
             ]);
+        });
+
+        describe('Attribute Literal Values', function() {
+            it('should recognize true literal', function() {
+                parse([
+                    '<div data=true>'
+                ], [
+                    {
+                        type: 'opentag',
+                        name: 'div',
+                        attributes: [
+                            {
+                                name: 'data',
+                                expression: 'true',
+                                literalValue: true
+                            }
+                        ]
+                    }
+                ]);
+            });
+
+            it('should recognize false literal', function() {
+                parse([
+                    '<div data=false>'
+                ], [
+                    {
+                        type: 'opentag',
+                        name: 'div',
+                        attributes: [
+                            {
+                                name: 'data',
+                                expression: 'false',
+                                literalValue: false
+                            }
+                        ]
+                    }
+                ]);
+            });
+
+            it('should recognize undefined literal', function() {
+                parse([
+                    '<div data=undefined>'
+                ], [
+                    {
+                        type: 'opentag',
+                        name: 'div',
+                        attributes: [
+                            {
+                                name: 'data',
+                                expression: 'undefined',
+                                literalValue: undefined
+                            }
+                        ]
+                    }
+                ]);
+            });
+
+            it('should recognize null literal', function() {
+                parse([
+                    '<div data=null>'
+                ], [
+                    {
+                        type: 'opentag',
+                        name: 'div',
+                        attributes: [
+                            {
+                                name: 'data',
+                                expression: 'null',
+                                literalValue: null
+                            }
+                        ]
+                    }
+                ]);
+            });
+
+            it('should recognize number literal', function() {
+                parse([
+                    '<div data=1 data=.5 data=1.5 data=1.5e10 data=1.5e+10 data=1.5e-10 data=-1 data=-.5 data=-1.5 data=-1.5e10 data=-1.5e+10 data=-1.5e-10>'
+                ], [
+                    {
+                        type: 'opentag',
+                        name: 'div',
+                        attributes: [
+                            {
+                                name: 'data',
+                                expression: '1',
+                                literalValue: 1
+                            },
+                            {
+                                name: 'data',
+                                expression: '.5',
+                                literalValue: .5
+                            },
+                            {
+                                name: 'data',
+                                expression: '1.5',
+                                literalValue: 1.5
+                            },
+                            {
+                                name: 'data',
+                                expression: '1.5e10',
+                                literalValue: 1.5e10
+                            },
+                            {
+                                name: 'data',
+                                expression: '1.5e+10',
+                                literalValue: 1.5e+10
+                            },
+                            {
+                                name: 'data',
+                                expression: '1.5e-10',
+                                literalValue: 1.5e-10
+                            },
+                            {
+                                name: 'data',
+                                expression: '-1',
+                                literalValue: -1
+                            },
+                            {
+                                name: 'data',
+                                expression: '-.5',
+                                literalValue: -.5
+                            },
+                            {
+                                name: 'data',
+                                expression: '-1.5',
+                                literalValue: -1.5
+                            },
+                            {
+                                name: 'data',
+                                expression: '-1.5e10',
+                                literalValue: -1.5e10
+                            },
+                            {
+                                name: 'data',
+                                expression: '-1.5e+10',
+                                literalValue: -1.5e+10
+                            },
+                            {
+                                name: 'data',
+                                expression: '-1.5e-10',
+                                literalValue: -1.5e-10
+                            }
+                        ]
+                    }
+                ]);
+            });
         });
     });
 
@@ -1132,24 +1282,7 @@ describe('htmljs parser', function() {
                         {
                             name: 'class',
                             expression: '"simple"',
-                            staticText: 'simple'
-                        }
-                    ]
-                }
-            ]);
-        });
-
-        it('should not recognize static numeric attributes', function() {
-            parse([
-                '<div class=123>'
-            ], [
-                {
-                    type: 'opentag',
-                    name: 'div',
-                    attributes: [
-                        {
-                            name: 'class',
-                            expression: '123'
+                            literalValue: 'simple'
                         }
                     ]
                 }
@@ -1165,7 +1298,7 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     name: 'for',
-                    arguments: 'x in y',
+                    argument: 'x in y',
                     attributes: []
                 }
             ]);
@@ -1178,7 +1311,7 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     name: 'for',
-                    arguments: 'x in y',
+                    argument: 'x in y',
                     attributes: []
                 }
             ]);
@@ -1191,7 +1324,7 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     name: 'for',
-                    arguments: 'x in ["Hello "+(name)+"!", "(World)"]',
+                    argument: 'x in ["Hello "+(name)+"!", "(World)"]',
                     attributes: []
                 }
             ]);
@@ -1207,7 +1340,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'if',
-                            arguments: 'x > y'
+                            argument: 'x > y'
                         }
                     ]
                 }
@@ -1224,7 +1357,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'if',
-                            arguments: 'x > y'
+                            argument: 'x > y'
                         }
                     ]
                 }
@@ -1238,11 +1371,11 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     name: 'for',
-                    arguments: 'var i = 0; i < 10; i++',
+                    argument: 'var i = 0; i < 10; i++',
                     attributes: [
                         {
                             name: 'if',
-                            arguments: 'x > y'
+                            argument: 'x > y'
                         }
                     ]
                 }
@@ -1264,7 +1397,7 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     name: 'for',
-                    arguments: 'var i = 0; i < 10; i++',
+                    argument: 'var i = 0; i < 10; i++',
                     attributes: []
                 }
             ]);
@@ -1288,7 +1421,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'for',
-                            arguments: 'var i = 0; i < 10; i++'
+                            argument: 'var i = 0; i < 10; i++'
                         }
                     ]
                 }

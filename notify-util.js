@@ -1,7 +1,25 @@
 var CODE_NEWLINE = 10;
+var NUMBER_REGEX = /^[\-\+]?\d*(?:\.\d+)?(?:e[\-\+]?\d+)?$/;
 
 function _removeDelimitersFromArgument(arg) {
     return arg.substring(1, arg.length - 1);
+}
+
+function _updateAttributeLiteralValue(attr) {
+    var expression = attr.expression;
+    if (expression.length === 0) {
+        attr.literalValue = '';
+    } else if (expression === 'true') {
+        attr.literalValue = true;
+    } else if (expression === 'false') {
+        attr.literalValue = false;
+    } else if (expression === 'null') {
+        attr.literalValue = null;
+    } else if (expression === 'undefined') {
+        attr.literalValue = undefined;
+    } else if (NUMBER_REGEX.test(expression)) {
+        attr.literalValue = Number(expression);
+    }
 }
 
 exports.createNotifiers = function(parser, listeners) {
@@ -55,21 +73,26 @@ exports.createNotifiers = function(parser, listeners) {
                     elementArguments = _removeDelimitersFromArgument(elementArguments);
                 }
 
-                // set the staticText property for attributes that are simple
-                // string values...
+                // set the literalValue property for attributes that are simple
+                // string simple values or simple literal values
                 var i = attributes.length;
                 while(--i >= 0) {
                     var attr = attributes[i];
-                    if (attr.possibleStaticText) {
+
+                    // if possib
+                    if (attr.isStringLiteral) {
                         var expression = attr.expression;
-                        attr.staticText = expression.substring(1, expression.length - 1);
+                        attr.literalValue = expression.substring(1, expression.length - 1);
+                    } else if (attr.isSimpleLiteral) {
+                        _updateAttributeLiteralValue(attr);
                     }
 
-                    if (attr.arguments) {
-                        attr.arguments = _removeDelimitersFromArgument(attr.arguments);
+                    if (attr.argument) {
+                        attr.argument = _removeDelimitersFromArgument(attr.argument);
                     }
 
-                    delete attr.possibleStaticText;
+                    delete attr.isStringLiteral;
+                    delete attr.isSimpleLiteral;
                 }
 
                 var event = {
@@ -79,7 +102,7 @@ exports.createNotifiers = function(parser, listeners) {
                 };
 
                 if (elementArguments) {
-                    event.arguments = elementArguments;
+                    event.argument = elementArguments;
                 }
 
                 if (selfClosed) {

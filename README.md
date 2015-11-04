@@ -186,12 +186,12 @@ OUTPUT EVENT:
 }
 ```
 
-**EXAMPLE: Tag with simple string attribute**
+**EXAMPLE: Tag with literal attribute values**
 
 INPUT:
 
 ```html
-<div class="demo">
+<div class="demo" disabled=false data-number=123>
 ```
 
 OUTPUT EVENT:
@@ -204,7 +204,17 @@ OUTPUT EVENT:
         {
             name: 'class',
             expression: '"demo"',
-            staticText: 'demo'
+            literalValue: 'demo'
+        },
+        {
+            name: 'disabled',
+            expression: 'false',
+            literalValue: false
+        },
+        {
+            name: 'data-number',
+            expression: '123',
+            literalValue: 123
         }
     ]
 }
@@ -233,7 +243,7 @@ OUTPUT EVENT:
 }
 ```
 
-**EXAMPLE: Tag with arguments**
+**EXAMPLE: Tag with an argument**
 
 INPUT:
 
@@ -247,12 +257,12 @@ OUTPUT EVENT:
 {
     type: 'opentag',
     name: 'for',
-    arguments: 'var i = 0; i < 10; i++',
+    argument: 'var i = 0; i < 10; i++',
     attributes: []
 }
 ```
 
-**EXAMPLE: Attribute arguments**
+**EXAMPLE: Attribute an argument**
 
 INPUT:
 
@@ -269,7 +279,7 @@ OUTPUT EVENT:
     attributes: [
         {
             name: 'if',
-            arguments: 'x > y'
+            argument: 'x > y'
         }
     ]
 }
