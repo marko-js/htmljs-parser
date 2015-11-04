@@ -47,7 +47,7 @@ exports.createParser = function(listeners, options) {
     var comment;
     var attribute;
     var attributes;
-    var elementArguments;
+    var elementArgument;
     var tagPos;
     var placeholderPos;
     var withinTag = false;
@@ -81,7 +81,7 @@ exports.createParser = function(listeners, options) {
     function _afterOpenTag() {
         var origState = parser.state;
 
-        _notifyOpenTag(tagName, attributes, elementArguments, false /* not selfClosed */);
+        _notifyOpenTag(tagName, attributes, elementArgument, false /* not selfClosed */);
 
         // Did the parser stay in the same state after
         // notifying listeners about opentag?
@@ -99,7 +99,7 @@ exports.createParser = function(listeners, options) {
     }
 
     function _afterSelfClosingTag() {
-        _notifyOpenTag(tagName, attributes, elementArguments, true /* selfClosed */);
+        _notifyOpenTag(tagName, attributes, elementArgument, true /* selfClosed */);
         _notifyCloseTag(tagName, true /* selfClosed */);
         parser.enterHtmlContentState();
     }
@@ -286,28 +286,33 @@ exports.createParser = function(listeners, options) {
         }
     }
 
-    var attributeArguments;
+    var currentAttributeForAgument;
+    var ignoreArgument;
 
-    function _checkForArguments(ch, code) {
+    function _checkForArgument(ch, code) {
         if (code === CODE_LEFT_PARANTHESIS) {
             if (attributes === EMPTY_ATTRIBUTES) {
                 // no attributes so arguments are for element
-                if (elementArguments == null) {
-                    elementArguments = [];
+                if ((ignoreArgument = (elementArgument != null))) {
+                    _notifyError(tagPos,
+                        'ILLEGAL_ELEMENT_ARGUMENT',
+                        'Element can only have one argument.');
+                } else {
+                    elementArgument = ch;
                 }
-
-                elementArguments.push(ch);
 
                 parser.enterState(STATE_ELEMENT_ARGUMENTS);
             } else {
                 // arguments are for attribute
-                var attr = attributes[attributes.length - 1];
+                currentAttributeForAgument = attributes[attributes.length - 1];
 
-                attributeArguments =
-                    attr.arguments ||
-                    (attr.arguments = []);
-
-                attributeArguments.push(ch);
+                if ((ignoreArgument = (currentAttributeForAgument.arguments != null))) {
+                    _notifyError(tagPos,
+                        'ILLEGAL_ATTRIBUTE_ARGUMENT',
+                        'Attribute can only have one argument.');
+                } else {
+                    currentAttributeForAgument.arguments = ch;
+                }
 
                 parser.enterState(STATE_ATTRIBUTE_ARGUMENTS);
             }
@@ -453,7 +458,7 @@ exports.createParser = function(listeners, options) {
         // name: 'STATE_START_OPEN_TAG',
         enter: function() {
             tagName = '';
-            elementArguments = undefined;
+            elementArgument = undefined;
             withinTag = true;
         },
 
@@ -532,7 +537,7 @@ exports.createParser = function(listeners, options) {
                 } else {
                     parser.enterState(STATE_WITHIN_OPEN_TAG);
                 }
-            } else if (_checkForArguments(ch, code)) {
+            } else if (_checkForArgument(ch, code)) {
                 // encountered something like:
                 // <for(var i = 0; i < len; i++)>
             } else if (_isWhitespaceCode(code)) {
@@ -612,7 +617,7 @@ exports.createParser = function(listeners, options) {
                 }
             } else if (_isWhitespaceCode(code)) {
                 // ignore whitespace within element...
-            } else if (_checkForArguments(ch, code)) {
+            } else if (_checkForArgument(ch, code)) {
                 // encountered something like:
                 // <for (var i = 0; i < len; i++)>
             } else {
@@ -654,7 +659,7 @@ exports.createParser = function(listeners, options) {
                     // for attribute value
                     parser.enterState(STATE_WITHIN_OPEN_TAG);
                 }
-            } else if (_checkForArguments(ch, code)) {
+            } else if (_checkForArgument(ch, code)) {
                 // Found something like:
                 // <div if(a === b)>
             } else if (_isWhitespaceCode(code)) {
@@ -764,11 +769,15 @@ exports.createParser = function(listeners, options) {
 
         expression: {
             char: function(ch, code) {
-                elementArguments[elementArguments.length - 1] += ch;
+                if (!ignoreArgument) {
+                    elementArgument += ch;
+                }
             },
 
             string: function(str) {
-                elementArguments[elementArguments.length - 1] += str;
+                if (!ignoreArgument) {
+                    elementArgument += str;
+                }
             },
 
             eof: STATE_TAG_NAME.eof
@@ -788,11 +797,15 @@ exports.createParser = function(listeners, options) {
 
         expression: {
             char: function(ch, code) {
-                attributeArguments[attributeArguments.length - 1] += ch;
+                if (!ignoreArgument) {
+                    currentAttributeForAgument.arguments += ch;
+                }
             },
 
             string: function(str) {
-                attributeArguments[attributeArguments.length - 1] += str;
+                if (!ignoreArgument) {
+                    currentAttributeForAgument.arguments += str;
+                }
             },
 
             eof: STATE_TAG_NAME.eof

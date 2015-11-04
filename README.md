@@ -247,9 +247,7 @@ OUTPUT EVENT:
 {
     type: 'opentag',
     name: 'for',
-    arguments: [
-        'var i = 0; i < 10; i++'
-    ],
+    arguments: 'var i = 0; i < 10; i++',
     attributes: []
 }
 ```
@@ -271,9 +269,7 @@ OUTPUT EVENT:
     attributes: [
         {
             name: 'if',
-            arguments: [
-                'x > y'
-            ]
+            arguments: 'x > y'
         }
     ]
 }
@@ -575,6 +571,18 @@ The `onerror` function will be called when malformed content is detected.
 The most common cause for an error is due to reaching the end of the
 input while still parsing an open tag, close tag, XML comment, CDATA section,
 DTD, XML declaration, or placeholder.
+
+Possible errors:
+
+- `ILLEGAL_ELEMENT_ARGUMENT`: Element can only have one argument
+- `ILLEGAL_ATTRIBUTE_ARGUMENT`: Attribute can only have one argument
+- `MALFORMED_OPEN_TAG`: EOF reached while parsing open tag
+- `MALFORMED_CLOSE_TAG`: EOF reached while parsing closing element
+- `MALFORMED_CDATA`: EOF reached while parsing CDATA
+- `MALFORMED_PLACEHOLDER`: EOF reached while parsing placeholder
+- `MALFORMED_DTD`: EOF reached while parsing DTD
+- `MALFORMED_DECLARATION`: EOF reached while parsing declaration
+- `MALFORMED_COMMENT`: EOF reached while parsing comment
 
 **EXAMPLE:**
 

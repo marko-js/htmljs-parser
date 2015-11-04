@@ -1165,9 +1165,7 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     name: 'for',
-                    arguments: [
-                        'x in y'
-                    ],
+                    arguments: 'x in y',
                     attributes: []
                 }
             ]);
@@ -1180,9 +1178,7 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     name: 'for',
-                    arguments: [
-                        'x in y'
-                    ],
+                    arguments: 'x in y',
                     attributes: []
                 }
             ]);
@@ -1195,9 +1191,7 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     name: 'for',
-                    arguments: [
-                        'x in ["Hello "+(name)+"!", "(World)"]'
-                    ],
+                    arguments: 'x in ["Hello "+(name)+"!", "(World)"]',
                     attributes: []
                 }
             ]);
@@ -1213,9 +1207,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'if',
-                            arguments: [
-                                'x > y'
-                            ]
+                            arguments: 'x > y'
                         }
                     ]
                 }
@@ -1232,9 +1224,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'if',
-                            arguments: [
-                                'x > y'
-                            ]
+                            arguments: 'x > y'
                         }
                     ]
                 }
@@ -1248,15 +1238,57 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     name: 'for',
-                    arguments: [
-                        'var i = 0; i < 10; i++'
-                    ],
+                    arguments: 'var i = 0; i < 10; i++',
                     attributes: [
                         {
                             name: 'if',
-                            arguments: [
-                                'x > y'
-                            ]
+                            arguments: 'x > y'
+                        }
+                    ]
+                }
+            ]);
+        });
+
+        it('should allow only one argument per tag', function() {
+            parse([
+                '<for(var i = 0; i < 10; i++) (nonsense!)>'
+            ], [
+                 {
+                    code: 'ILLEGAL_ELEMENT_ARGUMENT',
+                    endPos: 30,
+                    lineNumber: 1,
+                    message: 'Element can only have one argument.',
+                    startPos: 0,
+                    type: 'error'
+                },
+                {
+                    type: 'opentag',
+                    name: 'for',
+                    arguments: 'var i = 0; i < 10; i++',
+                    attributes: []
+                }
+            ]);
+        });
+
+        it('should allow only one argument per attribute', function() {
+            parse([
+                '<div for(var i = 0; i < 10; i++) (nonsense!)>'
+            ], [
+                 {
+                    code: 'ILLEGAL_ATTRIBUTE_ARGUMENT',
+                    lineNumber: 1,
+                    message: 'Attribute can only have one argument.',
+                    startPos: 0,
+                    endPos: 34,
+                    type: 'error'
+                },
+                {
+                    type: 'opentag',
+                    name: 'div',
+                    attributes: [
+                        {
+                            name: 'for',
+                            arguments: 'var i = 0; i < 10; i++'
                         }
                     ]
                 }
