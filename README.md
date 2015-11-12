@@ -130,7 +130,7 @@ var htmljs = require('htmljs-parser');
 var parser = htmljs.createParser({
     onopentag: function(event) {
         // open tag
-        switch(event.name) {
+        switch(event.tagName) {
             case 'textarea':
                 //fall through
             case 'script':
@@ -181,7 +181,7 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'opentag',
-    name: 'div',
+    tagName: 'div',
     attributes: []
 }
 ```
@@ -199,7 +199,7 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'opentag',
-    name: 'div',
+    tagName: 'div',
     attributes: [
         {
             name: 'class',
@@ -233,7 +233,7 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'opentag',
-    name: 'div',
+    tagName: 'div',
     attributes: [
         {
             name: 'message',
@@ -256,7 +256,7 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'opentag',
-    name: 'for',
+    tagName: 'for',
     argument: 'var i = 0; i < 10; i++',
     attributes: []
 }
@@ -275,7 +275,7 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'opentag',
-    name: 'div',
+    tagName: 'div',
     attributes: [
         {
             name: 'if',
@@ -303,7 +303,7 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'closetag',
-    name: 'div'
+    tagName: 'div'
 }
 ```
 

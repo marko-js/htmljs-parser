@@ -24,7 +24,7 @@ function _updateAttributeLiteralValue(attr) {
 
 exports.createNotifiers = function(parser, listeners) {
     return {
-        notifyText: function(txt) {
+        notifyText(txt) {
             if (listeners.ontext && (txt.length > 0)) {
                 listeners.ontext({
                     type: 'text',
@@ -33,7 +33,7 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
-        notifyCDATA: function(txt) {
+        notifyCDATA(txt) {
             if (listeners.oncdata && txt) {
                 listeners.oncdata({
                     type: 'cdata',
@@ -42,7 +42,7 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
-        notifyError: function(pos, errorCode, message) {
+        notifyError(pos, errorCode, message) {
             if (listeners.onerror) {
 
                 var lineNumber = parser.lineNumber;
@@ -67,7 +67,7 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
-        notifyOpenTag: function(name, attributes, elementArguments, selfClosed) {
+        notifyOpenTag(tagName, attributes, elementArguments, selfClosed) {
             if (listeners.onopentag) {
                 if (elementArguments) {
                     elementArguments = _removeDelimitersFromArgument(elementArguments);
@@ -97,7 +97,7 @@ exports.createNotifiers = function(parser, listeners) {
 
                 var event = {
                     type: 'opentag',
-                    name: name,
+                    tagName: tagName,
                     attributes: attributes
                 };
 
@@ -113,11 +113,11 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
-        notifyCloseTag: function(name, selfClosed) {
+        notifyCloseTag(tagName, selfClosed) {
             if (listeners.onclosetag) {
                 var event = {
                     type: 'closetag',
-                    name: name
+                    tagName: tagName
                 };
 
                 if (selfClosed) {
@@ -128,7 +128,7 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
-        notifyDTD: function(dtd) {
+        notifyDTD(dtd) {
             if (listeners.ondtd) {
                 listeners.ondtd({
                     type: 'dtd',
@@ -137,7 +137,7 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
-        notifyDeclaration: function(declaration) {
+        notifyDeclaration(declaration) {
             if (listeners.ondeclaration) {
                 listeners.ondeclaration.call(parser, {
                     type: 'declaration',
@@ -146,7 +146,7 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
-        notifyCommentText: function(txt) {
+        notifyCommentText(txt) {
             if (listeners.oncomment && txt) {
                 listeners.oncomment.call(parser, {
                     type: 'comment',
@@ -155,7 +155,7 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
-        notifyPlaceholder: function(placeholder) {
+        notifyPlaceholder(placeholder) {
             var eventFunc = listeners['on' + placeholder.type];
 
             if (eventFunc) {
@@ -165,6 +165,12 @@ exports.createNotifiers = function(parser, listeners) {
                         delete placeholder[key];
                     });
                 eventFunc.call(parser, placeholder);
+            }
+        },
+
+        notifyFinish() {
+            if (listeners.onfinish) {
+                listeners.onfinish.call(parser, {});
             }
         }
     };
