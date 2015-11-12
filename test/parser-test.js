@@ -72,7 +72,7 @@ function parse(text, options, expectedEvents) {
         }
     }
 
-    var parser = htmljs.createParser(listeners);
+    var parser = htmljs.createNonValidatingParser(listeners);
 
     if (Array.isArray(text)) {
         text = text.join('');
@@ -110,14 +110,15 @@ describe('htmljs parser', function() {
             }
         };
 
-        var parser = htmljs.createParser({
+        var parser = htmljs.createNonValidatingParser({
             onopentag: function(event) {
+                var tagName = event.tagName;
                 actualEvents.push(event);
-                var handler = opentagHandlers[event.name];
+                var handler = opentagHandlers[tagName];
                 if (handler) {
                     handler.call(this, event);
                 } else {
-                    throw new Error('No opentag handler for tag ' + event.name);
+                    throw new Error('No opentag handler for tag ' + tagName);
                 }
             },
 
@@ -179,12 +180,12 @@ describe('htmljs parser', function() {
         expect(actualEvents).to.deep.equal([
             {
                 type: 'opentag',
-                name: 'html',
+                tagName: 'html',
                 attributes: []
             },
             {
                 type: 'opentag',
-                name: 'javascript',
+                tagName: 'javascript',
                 attributes: []
             },
             {
@@ -193,11 +194,11 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'closetag',
-                name: 'javascript'
+                tagName: 'javascript'
             },
             {
                 type: 'opentag',
-                name: 'css',
+                tagName: 'css',
                 attributes: []
             },
             {
@@ -206,11 +207,11 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'closetag',
-                name: 'css'
+                tagName: 'css'
             },
             {
                 type: 'opentag',
-                name: 'text',
+                tagName: 'text',
                 attributes: []
             },
             {
@@ -219,11 +220,11 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'closetag',
-                name: 'text'
+                tagName: 'text'
             },
             {
                 type: 'opentag',
-                name: 'parsedtext',
+                tagName: 'parsedtext',
                 attributes: []
             },
             {
@@ -241,11 +242,11 @@ describe('htmljs parser', function() {
             },
             {
                 type: 'closetag',
-                name: 'parsedtext'
+                tagName: 'parsedtext'
             },
             {
                 type: 'closetag',
-                name: 'html'
+                tagName: 'html'
             }
         ]);
     });
@@ -305,7 +306,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'script',
+                    tagName: 'script',
                     attributes: []
                 },
                 {
@@ -314,7 +315,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'script'
+                    tagName: 'script'
                 }
             ]);
         });
@@ -325,7 +326,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'script',
+                    tagName: 'script',
                     attributes: []
                 },
                 {
@@ -334,7 +335,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'script'
+                    tagName: 'script'
                 }
             ]);
         });
@@ -353,7 +354,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'style',
+                    tagName: 'style',
                     attributes: []
                 },
                 {
@@ -362,7 +363,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'style'
+                    tagName: 'style'
                 }
             ]);
         });
@@ -375,7 +376,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'a',
@@ -393,7 +394,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -404,7 +405,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'a',
@@ -430,7 +431,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -441,7 +442,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'b'
@@ -454,7 +455,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -465,7 +466,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'a',
@@ -479,7 +480,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -490,7 +491,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'a',
@@ -505,7 +506,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -516,7 +517,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'data',
@@ -526,7 +527,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
 
@@ -539,7 +540,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'data',
@@ -549,7 +550,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -562,7 +563,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'data',
@@ -572,7 +573,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -583,7 +584,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'data',
@@ -593,7 +594,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
 
@@ -602,7 +603,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: [
                         {
                             name: 'data',
@@ -617,7 +618,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -628,7 +629,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'div',
+                    tagName: 'div',
                     attributes: [
                         {
                             name: 'data',
@@ -647,7 +648,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
-                        name: 'div',
+                        tagName: 'div',
                         attributes: [
                             {
                                 name: 'data',
@@ -665,7 +666,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
-                        name: 'div',
+                        tagName: 'div',
                         attributes: [
                             {
                                 name: 'data',
@@ -683,7 +684,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
-                        name: 'div',
+                        tagName: 'div',
                         attributes: [
                             {
                                 name: 'data',
@@ -701,7 +702,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
-                        name: 'div',
+                        tagName: 'div',
                         attributes: [
                             {
                                 name: 'data',
@@ -719,7 +720,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
-                        name: 'div',
+                        tagName: 'div',
                         attributes: [
                             {
                                 name: 'data',
@@ -816,7 +817,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: []
                 },
                 {
@@ -853,7 +854,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -864,7 +865,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: []
                 },
                 {
@@ -873,7 +874,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -886,7 +887,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: []
                 },
                 {
@@ -895,7 +896,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'a'
+                    tagName: 'a'
                 }
             ]);
         });
@@ -908,13 +909,13 @@ describe('htmljs parser', function() {
         ], [
             {
                 type: 'opentag',
-                name: 'a',
+                tagName: 'a',
                 attributes: [],
                 selfClosed: true
             },
             {
                 type: 'closetag',
-                name: 'a',
+                tagName: 'a',
                 selfClosed: true
             }
         ]);
@@ -947,7 +948,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'script',
+                    tagName: 'script',
                     attributes: []
                 },
                 {
@@ -965,7 +966,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'script'
+                    tagName: 'script'
                 }
             ]);
         });
@@ -976,7 +977,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'script',
+                    tagName: 'script',
                     attributes: []
                 },
                 {
@@ -994,7 +995,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'script'
+                    tagName: 'script'
                 }
             ]);
         });
@@ -1005,7 +1006,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'custom',
+                    tagName: 'custom',
                     attributes: [
                         {
                             name: 'name',
@@ -1019,7 +1020,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'custom'
+                    tagName: 'custom'
                 }
             ]);
         });
@@ -1030,7 +1031,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'custom',
+                    tagName: 'custom',
                     attributes: [
                         {
                             name: 'name',
@@ -1044,7 +1045,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'custom'
+                    tagName: 'custom'
                 }
             ]);
         });
@@ -1055,7 +1056,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'custom',
+                    tagName: 'custom',
                     attributes: [
                         {
                             name: 'name',
@@ -1069,7 +1070,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'custom'
+                    tagName: 'custom'
                 }
             ]);
         });
@@ -1091,7 +1092,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'script',
+                    tagName: 'script',
                     attributes: []
                 },
                 {
@@ -1109,7 +1110,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'script'
+                    tagName: 'script'
                 }
             ]);
         });
@@ -1120,7 +1121,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'script',
+                    tagName: 'script',
                     attributes: []
                 },
                 {
@@ -1138,7 +1139,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'closetag',
-                    name: 'script'
+                    tagName: 'script'
                 }
             ]);
         });
@@ -1149,7 +1150,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'custom',
+                    tagName: 'custom',
                     attributes: [
                         {
                             name: 'data',
@@ -1166,7 +1167,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'custom',
+                    tagName: 'custom',
                     attributes: [
                         {
                             name: 'data',
@@ -1183,7 +1184,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'custom',
+                    tagName: 'custom',
                     attributes: [
                         {
                             name: 'data',
@@ -1200,7 +1201,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'custom',
+                    tagName: 'custom',
                     attributes: [
                         {
                             name: 'data',
@@ -1258,7 +1259,7 @@ describe('htmljs parser', function() {
             }, [
                 {
                     type: 'opentag',
-                    name: 'custom',
+                    tagName: 'custom',
                     attributes: [
                         {
                             name: 'data',
@@ -1277,7 +1278,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'div',
+                    tagName: 'div',
                     attributes: [
                         {
                             name: 'class',
@@ -1297,7 +1298,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'for',
+                    tagName: 'for',
                     argument: 'x in y',
                     attributes: []
                 }
@@ -1310,7 +1311,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'for',
+                    tagName: 'for',
                     argument: 'x in y',
                     attributes: []
                 }
@@ -1323,7 +1324,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'for',
+                    tagName: 'for',
                     argument: 'x in ["Hello "+(name)+"!", "(World)"]',
                     attributes: []
                 }
@@ -1336,7 +1337,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'div',
+                    tagName: 'div',
                     attributes: [
                         {
                             name: 'if',
@@ -1353,7 +1354,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'div',
+                    tagName: 'div',
                     attributes: [
                         {
                             name: 'if',
@@ -1370,7 +1371,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'for',
+                    tagName: 'for',
                     argument: 'var i = 0; i < 10; i++',
                     attributes: [
                         {
@@ -1396,7 +1397,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'opentag',
-                    name: 'for',
+                    tagName: 'for',
                     argument: 'var i = 0; i < 10; i++',
                     attributes: []
                 }
@@ -1417,7 +1418,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'opentag',
-                    name: 'div',
+                    tagName: 'div',
                     attributes: [
                         {
                             name: 'for',
@@ -1436,7 +1437,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: []
                 },
                 {
@@ -1454,7 +1455,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: []
                 },
                 {
@@ -1472,7 +1473,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: []
                 },
                 {
@@ -1490,7 +1491,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'a',
+                    tagName: 'a',
                     attributes: []
                 },
                 {
@@ -1531,7 +1532,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'script',
+                    tagName: 'script',
                     attributes: [
                         {
                             name: 'a',
@@ -1589,7 +1590,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'style',
+                    tagName: 'style',
                     attributes: [
                         {
                             name: 'a',
@@ -1648,7 +1649,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'script',
+                    tagName: 'script',
                     attributes: []
                 },
                 {
@@ -1672,7 +1673,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
-                    name: 'script',
+                    tagName: 'script',
                     attributes: []
                 },
                 {

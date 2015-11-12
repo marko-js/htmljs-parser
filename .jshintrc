@@ -1,11 +1,6 @@
 {
-    "globals": {
-        "require": true
-    },
-
     "node" : true,
-    "esnext" : true,
-    "browser" : true,
+    "esnext": true,
     "boss" : false,
     "curly": false,
     "debug": false,

@@ -1,19 +1,20 @@
 {
-    "globals": {
-        "define": true,
-        "require": true,
-        "describe": true,
-        "it": true,
-        "before": true,
-        "after": true,
-        "beforeEach": true,
-        "afterEach": true
-    },
-
-    "strict": false,
-    "quotmark": true,
+    "predef": [
+        "it",
+        "xit",
+        "console",
+        "describe",
+        "xdescribe",
+        "beforeEach",
+        "before",
+        "after",
+        "waits",
+        "waitsFor",
+        "runs"
+    ],
     "node" : true,
     "es5" : false,
+    "esnext": true,
     "browser" : true,
     "boss" : false,
     "curly": false,
@@ -38,6 +39,5 @@
     "eqeqeq": false,
     "latedef": true,
     "unused": "vars",
-    "eqnull": true,
-    "sub": true
+    "eqnull": true
 }
