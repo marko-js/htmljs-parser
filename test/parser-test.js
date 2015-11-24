@@ -1010,7 +1010,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'name',
-                            expression: '"Hello "+(name)+"!"'
+                            expression: '("Hello "+(name)+"!")'
                         }
                     ]
                 },
@@ -1035,7 +1035,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'name',
-                            expression: '("Hello "+(name)+"!")'
+                            expression: '(("Hello "+(name)+"!"))'
                         }
                     ]
                 },
@@ -1060,7 +1060,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'name',
-                            expression: '""+(\'some text\')+""',
+                            expression: '(\'some text\')',
                         }
                     ]
                 },
@@ -1154,7 +1154,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'data',
-                            expression: '""+(\nabc\n)+""'
+                            expression: '(\nabc\n)'
                         }
                     ]
                 }
@@ -1171,7 +1171,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'data',
-                            expression: '("Hello "+(name)+"!" + " This is a test.")'
+                            expression: '(("Hello "+(name)+"!") + " This is a test.")'
                         }
                     ]
                 }
@@ -1188,7 +1188,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'data',
-                            expression: '""+(abc)+""'
+                            expression: '(abc)'
                         }
                     ]
                 }
@@ -1197,7 +1197,7 @@ describe('htmljs parser', function() {
 
         it('should handle placeholder inside attribute placeholder', function() {
             parse([
-                '<custom data="${"Hello ${data.name}"}">'
+                '<custom data="${"Hello ${data.firstName + data.lastName}"}">'
             ], [
                 {
                     type: 'opentag',
@@ -1205,7 +1205,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'data',
-                            expression: '""+("Hello "+(data.name)+"")+""'
+                            expression: '(("Hello "+(data.firstName + data.lastName)))'
                         }
                     ]
                 }
@@ -1223,7 +1223,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'contentplaceholder',
-                    expression: '"Hello "+(data.name)+"!"',
+                    expression: '("Hello "+(data.name)+"!")',
                     escape: true
                 }
             ]);
@@ -1241,7 +1241,7 @@ describe('htmljs parser', function() {
             }, [
                 {
                     type: 'contentplaceholder',
-                    expression: '"Hello "+(escapeXml(data.name))+"!"',
+                    expression: '("Hello "+(escapeXml(data.name))+"!")',
                     escape: false
                 }
             ]);
@@ -1263,7 +1263,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'data',
-                            expression: '""+(escapeAttr(abc))+""'
+                            expression: '(escapeAttr(abc))'
                         }
                     ]
                 }
@@ -1325,7 +1325,7 @@ describe('htmljs parser', function() {
                 {
                     type: 'opentag',
                     tagName: 'for',
-                    argument: 'x in ["Hello "+(name)+"!", "(World)"]',
+                    argument: 'x in [("Hello "+(name)+"!"), "(World)"]',
                     attributes: []
                 }
             ]);
@@ -1389,7 +1389,7 @@ describe('htmljs parser', function() {
             ], [
                  {
                     code: 'ILLEGAL_ELEMENT_ARGUMENT',
-                    endPos: 30,
+                    endPos: 29,
                     lineNumber: 1,
                     message: 'Element can only have one argument.',
                     startPos: 0,
@@ -1413,7 +1413,7 @@ describe('htmljs parser', function() {
                     lineNumber: 1,
                     message: 'Attribute can only have one argument.',
                     startPos: 0,
-                    endPos: 34,
+                    endPos: 33,
                     type: 'error'
                 },
                 {

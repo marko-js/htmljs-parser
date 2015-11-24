@@ -33,11 +33,6 @@ var CODE_DOLLAR = 36;
 
 var EMPTY_ATTRIBUTES = [];
 
-function _buildConcatenatedString(str, placeholder, stringDelimiter) {
-    stringDelimiter = String.fromCharCode(stringDelimiter);
-    return str +  stringDelimiter + '+' + '(' + placeholder.expression + ')+' + stringDelimiter;
-}
-
 class Parser extends BaseParser {
     constructor(listeners, options) {
         super(options);
@@ -163,11 +158,15 @@ class Parser extends BaseParser {
                 currentExpression.str = expressionStr;
             }
 
+            var startPos = parser.pos;
+
             currentExpression = {
                 parentState: parser.state,
                 depth: 1,
                 startDelimiter: startDelimiter,
-                endDelimiter: endDelimiter
+                endDelimiter: endDelimiter,
+                startPos: startPos,
+                startChar: parser.data.charAt(startPos)
             };
 
             expressionHandler = currentExpression.parentState.expression || expressionHandler;
@@ -235,8 +234,6 @@ class Parser extends BaseParser {
             placeholder.expression = '';
             placeholder.handler = currentState.placeholder;
 
-
-
             if (len) {
                 var top = placeholderStack[len - 1];
                 if (top.ancestorEscaped) {
@@ -275,7 +272,7 @@ class Parser extends BaseParser {
                 var nextCode = parser.lookAtCharCodeAhead(1);
                 if (nextCode === CODE_LEFT_CURLY_BRACE) {
 
-                    placeholderPos = parser.pos - 1;
+                    placeholderPos = parser.pos;
 
                     parser.skip(1);
                     _enterPlaceholderState({
@@ -287,7 +284,7 @@ class Parser extends BaseParser {
                     var afterExclamationCode = parser.lookAtCharCodeAhead(2);
                     if (afterExclamationCode === CODE_LEFT_CURLY_BRACE) {
 
-                        placeholderPos = parser.pos - 1;
+                        placeholderPos = parser.pos;
 
                         parser.skip(2);
                         _enterPlaceholderState({
@@ -389,7 +386,7 @@ class Parser extends BaseParser {
             char: function(ch, code) {
                 if (code === CODE_LEFT_ANGLE_BRACKET) {
 
-                    tagPos = parser.pos - 1;
+                    tagPos = parser.pos;
 
                     if (_checkForCDATA()) {
                         return;
@@ -964,7 +961,7 @@ class Parser extends BaseParser {
                     }
                 } else if (code === CODE_RIGHT_CURLY_BRACE) {
                     if (--currentPlaceholder.delimiterDepth === 0) {
-                        _leavePlaceholderState();
+                        _leavePlaceholderState(currentPlaceholder);
                     } else {
                         currentPlaceholder.expression += ch;
                     }
@@ -982,15 +979,8 @@ class Parser extends BaseParser {
 
             placeholder: {
                 end: function(placeholder) {
-                    var stringDelimiter = placeholder.stringDelimiter;
-
                     _notifyPlaceholder(placeholder);
-
-                    expressionStr =
-                        _buildConcatenatedString(
-                            expressionStr,
-                            placeholder,
-                            stringDelimiter);
+                    currentExpression.stringParts.push(placeholder);
                 },
 
                 eof: function() {
@@ -1002,28 +992,74 @@ class Parser extends BaseParser {
                 expressionHandler.eof();
             },
 
+            enter: function() {
+                if (!currentExpression.stringParts) {
+                    // We can reenter the string state multiple times on the same string
+                    // so we only want to init the string parts related objects
+                    // the first time
+                    currentExpression.currentStringPart = '';
+                    currentExpression.stringParts = [];
+                }
+
+            },
+
             char: function(ch, code) {
+                var stringParts = currentExpression.stringParts;
+
                 var nextCh;
-                var stringDelimiter = currentExpression.endDelimiter;
+                var stringDelimiterCode = currentExpression.endDelimiter;
 
                 if (code === CODE_BACK_SLASH) {
                     // Handle string escape sequence
                     nextCh = parser.lookAtCharAhead(1);
                     parser.skip(1);
 
-                    expressionStr += ch + nextCh;
-                } else if (code === stringDelimiter) {
+                    currentExpression.currentStringPart += ch + nextCh;
+                } else if (code === stringDelimiterCode) {
                     // We encountered the end delimiter
-                    expressionStr += ch;
+                    if (currentExpression.currentStringPart !== '') {
+                        stringParts.push(currentExpression.currentStringPart);
+                    }
 
-                    expressionHandler.string(expressionStr, (currentExpression.isStringLiteral !== false));
+                    let stringExpr = '';
+                    let stringDelimiter =  String.fromCharCode(stringDelimiterCode);
+
+                    if (stringParts.length) {
+                        for (let i=0; i<stringParts.length; i++) {
+                            let part = stringParts[i];
+                            if (i !== 0) {
+                                stringExpr += '+';
+                            }
+
+                            if (typeof part === 'string') {
+                                stringExpr += stringDelimiter + part + stringDelimiter;
+                            } else {
+                                stringExpr += '(' + part.expression + ')';
+                            }
+                        }
+                    } else {
+                        stringExpr = stringDelimiter + stringDelimiter;
+                    }
+
+                    let isStringLiteral = currentExpression.isStringLiteral !== false;
+
+                    if (stringParts.length > 1) {
+                        stringExpr = '(' + stringExpr + ')';
+                    }
+
+                    expressionHandler.string(stringExpr, isStringLiteral);
 
                     _leaveExpressionState();
-                } else if (_checkForPlaceholder(ch, code, stringDelimiter)) {
+                } else if (_checkForPlaceholder(ch, code, stringDelimiterCode)) {
+                    if (currentExpression.currentStringPart !== '') {
+                        stringParts.push(currentExpression.currentStringPart);
+                    }
+
+                    currentExpression.currentStringPart = '';
                     // We encountered nested placeholder...
                     currentExpression.isStringLiteral = false;
                 } else {
-                    expressionStr += ch;
+                    currentExpression.currentStringPart += ch;
                 }
             }
         });
