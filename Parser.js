@@ -1016,7 +1016,33 @@ class Parser extends BaseParser {
                     // We encountered the end delimiter
                     expressionStr += ch;
 
-                    expressionHandler.string(expressionStr, (currentExpression.isStringLiteral !== false));
+                    // HACK Fixes https://github.com/philidem/htmljs-parser/issues/6
+                    //
+                    // The following code is a little dirty, but it solves
+                    // the problem where the dynamic placeholder is at the very
+                    // beginning or very end and this resulted in an empty string
+                    // being concatenated:
+                    //
+                    // "${data.foo} bar" --> ''+(data.foo)+' bar'
+                    // "foo ${data.bar}" --> 'foo '+(data.bar)+''
+                    //
+                    // It could have been solved differently by looking to see if the
+                    // previous character was the start of the string or if the next
+                    // character was the last character of the string and modifying _buildConcatenatedString
+                    // accordingly, but the code below seemed to be more straightforward.
+                    if (expressionStr.endsWith('+""')) {
+                        expressionStr = expressionStr.slice(0, -3);
+                    }
+                    if (expressionStr.startsWith('""+')) {
+                        expressionStr = expressionStr.substring(3);
+                    }
+
+                    let isStringLiteral = currentExpression.isStringLiteral !== false;
+                    if (!isStringLiteral) {
+                        expressionStr = '(' + expressionStr + ')';
+                    }
+
+                    expressionHandler.string(expressionStr, isStringLiteral);
 
                     _leaveExpressionState();
                 } else if (_checkForPlaceholder(ch, code, stringDelimiter)) {
