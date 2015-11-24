@@ -61,14 +61,17 @@ class Parser {
      */
     lookAheadFor(str, callback) {
         // Have we read enough chunks to read the string that we need?
-        var pos = this.pos;
+        var startPos = this.pos + 1; // Move past the current character
         var len = str.length;
-        var end = pos + len;
-        if (end - 1 > this.maxPos) {
+        var endPos = startPos + len;
+
+        if (endPos > this.maxPos + 1) {
             return undefined;
         }
 
-        var found = this.data.substring(pos, end);
+
+
+        var found = this.data.substring(startPos, endPos);
         return (found === str) ? str : undefined;
     }
 
@@ -78,15 +81,11 @@ class Parser {
      * at the given position.
      */
     lookAtCharAhead(offset, callback) {
-        // Since we increment this.pos immediately after a read, the
-        // look-ahead offset needs to be decremented by 1
-        return this.data.charAt(this.pos + offset - 1);
+        return this.data.charAt(this.pos + offset);
     }
 
     lookAtCharCodeAhead(offset, callback) {
-        // Since we increment this.pos immediately after a read, the
-        // look-ahead offset needs to be decremented by 1
-        return this.data.charCodeAt(this.pos + offset - 1);
+        return this.data.charCodeAt(this.pos + offset);
     }
 
     skip(offset) {
@@ -139,13 +138,13 @@ class Parser {
                 this.lineNumber++;
             }
 
-            // move to next position
-            this.pos++;
-
             // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
 
             // We assume that every state will have "char" function
             this.state.char.call(this, ch, code);
+
+            // move to next position
+            this.pos++;
         }
 
         var state;
