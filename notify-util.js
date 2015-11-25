@@ -60,7 +60,7 @@ exports.createNotifiers = function(parser, listeners) {
                     type: 'error',
                     code: errorCode,
                     message: message,
-                    startPos: pos,
+                    pos: pos,
                     endPos: parser.pos,
                     lineNumber: lineNumber
                 });

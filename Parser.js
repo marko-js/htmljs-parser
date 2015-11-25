@@ -49,7 +49,6 @@ class Parser extends BaseParser {
         var attributes;
         var elementArgument;
         var tagPos;
-        var placeholderPos;
         var withinTag = false;
         // This is a simple stack that we use to handle parsing
         // expressions within expressions. When we start parsing
@@ -85,7 +84,6 @@ class Parser extends BaseParser {
             attributes = undefined;
             elementArgument = undefined;
             tagPos = undefined;
-            placeholderPos = undefined;
             withinTag = false;
             expressionStack = [];
             currentExpression = undefined;
@@ -233,6 +231,7 @@ class Parser extends BaseParser {
             placeholder.parentState = currentState;
             placeholder.expression = '';
             placeholder.handler = currentState.placeholder;
+            placeholder.pos = parser.pos; // Move to the index of the `$` character
 
             if (len) {
                 var top = placeholderStack[len - 1];
@@ -271,26 +270,22 @@ class Parser extends BaseParser {
             if (code === CODE_DOLLAR) {
                 var nextCode = parser.lookAtCharCodeAhead(1);
                 if (nextCode === CODE_LEFT_CURLY_BRACE) {
-
-                    placeholderPos = parser.pos;
-
-                    parser.skip(1);
                     _enterPlaceholderState({
                         escape: true,
                         stringDelimiter: stringDelimiter
                     });
+
+                    parser.skip(1);
                     return true;
                 } else if (nextCode === CODE_EXCLAMATION) {
                     var afterExclamationCode = parser.lookAtCharCodeAhead(2);
                     if (afterExclamationCode === CODE_LEFT_CURLY_BRACE) {
-
-                        placeholderPos = parser.pos;
-
-                        parser.skip(2);
                         _enterPlaceholderState({
                             escape: false,
                             stringDelimiter: stringDelimiter
                         });
+
+                        parser.skip(2);
                         return true;
                     }
                 }
@@ -358,6 +353,12 @@ class Parser extends BaseParser {
             }
         }
 
+        function PLACEHOLDER_EOF_HANDLER() {
+            _notifyError(currentPlaceholder.pos,
+                'MALFORMED_PLACEHOLDER',
+                'EOF reached while parsing placeholder.');
+        }
+
         // In STATE_HTML_CONTENT we are looking for tags and placeholders but
         // everything in between is treated as text.
         var STATE_HTML_CONTENT = Parser.createState({
@@ -368,11 +369,7 @@ class Parser extends BaseParser {
                     _notifyPlaceholder(placeholder);
                 },
 
-                eof: function() {
-                    _notifyError(placeholderPos,
-                        'MALFORMED_PLACEHOLDER',
-                        'EOF reached while parsing placeholder.');
-                }
+                eof: PLACEHOLDER_EOF_HANDLER
             },
 
             eof: function() {
@@ -983,9 +980,7 @@ class Parser extends BaseParser {
                     currentExpression.stringParts.push(placeholder);
                 },
 
-                eof: function() {
-                    expressionHandler.eof();
-                }
+                eof: PLACEHOLDER_EOF_HANDLER
             },
 
             eof: function() {
