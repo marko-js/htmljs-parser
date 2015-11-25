@@ -234,7 +234,8 @@ describe('htmljs parser', function() {
             {
                 type: 'contentplaceholder',
                 expression: 'text',
-                escape: true
+                escape: true,
+                pos: 229
             },
             {
                 type: 'text',
@@ -730,7 +731,7 @@ describe('htmljs parser', function() {
                             {
                                 name: 'data',
                                 expression: '.5',
-                                literalValue: .5
+                                literalValue: 0.5
                             },
                             {
                                 name: 'data',
@@ -760,7 +761,7 @@ describe('htmljs parser', function() {
                             {
                                 name: 'data',
                                 expression: '-.5',
-                                literalValue: -.5
+                                literalValue: -0.5
                             },
                             {
                                 name: 'data',
@@ -933,7 +934,8 @@ describe('htmljs parser', function() {
                 {
                     type: 'contentplaceholder',
                     expression: 'xyz',
-                    escape: true
+                    escape: true,
+                    pos: 6
                 },
                 {
                     type: 'text',
@@ -958,7 +960,8 @@ describe('htmljs parser', function() {
                 {
                     type: 'contentplaceholder',
                     expression: 'xyz',
-                    escape: true
+                    escape: true,
+                    pos: 14
                 },
                 {
                     type: 'text',
@@ -987,7 +990,8 @@ describe('htmljs parser', function() {
                 {
                     type: 'contentplaceholder',
                     expression: 'xyz',
-                    escape: true
+                    escape: true,
+                    pos: 21
                 },
                 {
                     type: 'text',
@@ -1102,7 +1106,8 @@ describe('htmljs parser', function() {
                 {
                     type: 'contentplaceholder',
                     expression: 'date',
-                    escape: true
+                    escape: true,
+                    pos: 21
                 },
                 {
                     type: 'text',
@@ -1131,7 +1136,8 @@ describe('htmljs parser', function() {
                 {
                     type: 'contentplaceholder',
                     expression: 'date',
-                    escape: false
+                    escape: false,
+                    pos: 21
                 },
                 {
                     type: 'text',
@@ -1219,12 +1225,14 @@ describe('htmljs parser', function() {
                 {
                     type: 'nestedcontentplaceholder',
                     expression: 'data.name',
-                    escape: true
+                    escape: true,
+                    pos: 9
                 },
                 {
                     type: 'contentplaceholder',
                     expression: '("Hello "+(data.name)+"!")',
-                    escape: true
+                    escape: true,
+                    pos: 0
                 }
             ]);
         });
@@ -1242,7 +1250,8 @@ describe('htmljs parser', function() {
                 {
                     type: 'contentplaceholder',
                     expression: '("Hello "+(escapeXml(data.name))+"!")',
-                    escape: false
+                    escape: false,
+                    pos: 0
                 }
             ]);
         });
@@ -1392,7 +1401,7 @@ describe('htmljs parser', function() {
                     endPos: 29,
                     lineNumber: 1,
                     message: 'Element can only have one argument.',
-                    startPos: 0,
+                    pos: 0,
                     type: 'error'
                 },
                 {
@@ -1412,7 +1421,7 @@ describe('htmljs parser', function() {
                     code: 'ILLEGAL_ATTRIBUTE_ARGUMENT',
                     lineNumber: 1,
                     message: 'Attribute can only have one argument.',
-                    startPos: 0,
+                    pos: 0,
                     endPos: 33,
                     type: 'error'
                 },
@@ -1445,7 +1454,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
                     lineNumber: 1,
-                    startPos:3,
+                    pos:3,
                     endPos: 5
                 }
             ]);
@@ -1463,7 +1472,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
                     lineNumber: 1,
-                    startPos:3,
+                    pos:3,
                     endPos: 14
                 }
             ]);
@@ -1481,7 +1490,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
                     lineNumber: 1,
-                    startPos:3,
+                    pos:3,
                     endPos: 34
                 }
             ]);
@@ -1499,7 +1508,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
                     lineNumber: 1,
-                    startPos:3,
+                    pos:3,
                     endPos: 33
                 }
             ]);
@@ -1512,7 +1521,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
                     lineNumber: 1,
-                    startPos: 0,
+                    pos: 0,
                     endPos: 9
                 }
             ]);
@@ -1556,7 +1565,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_DTD',
                     message: 'EOF reached while parsing DTD.',
                     lineNumber: 1,
-                    startPos: 0,
+                    pos: 0,
                     endPos: 21
                 }
             ]);
@@ -1571,7 +1580,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_DECLARATION',
                     message: 'EOF reached while parsing declaration.',
                     lineNumber: 1,
-                    startPos: 0,
+                    pos: 0,
                     endPos: 19
                 }
             ]);
@@ -1618,7 +1627,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
                     lineNumber: 2,
-                    startPos:6,
+                    pos:6,
                     endPos: 12
                 }
             ]);
@@ -1637,7 +1646,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
                     lineNumber: 1,
-                    startPos:6,
+                    pos:6,
                     endPos: 11
                 }
             ]);
@@ -1661,7 +1670,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
                     lineNumber: 1,
-                    startPos:14,
+                    pos:14,
                     endPos: 20
                 }
             ]);
@@ -1685,7 +1694,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
                     lineNumber: 1,
-                    startPos:14,
+                    pos:14,
                     endPos: 19
                 }
             ]);
@@ -1704,7 +1713,7 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
                     lineNumber: 1,
-                    startPos: 6,
+                    pos: 6,
                     endPos: 9
                 }
             ]);
@@ -1719,8 +1728,23 @@ describe('htmljs parser', function() {
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
                     lineNumber: 1,
-                    startPos:0,
+                    pos:0,
                     endPos: 12
+                }
+            ]);
+        });
+
+        it('should handle an attribute with an invalid placeholder', function() {
+            parse([
+                '<foo invalid="${;"></foo>'
+            ], [
+                {
+                    type: 'error',
+                    code: 'MALFORMED_PLACEHOLDER',
+                    message: 'EOF reached while parsing placeholder.',
+                    lineNumber: 1,
+                    pos: 14,
+                    endPos: 25
                 }
             ]);
         });
