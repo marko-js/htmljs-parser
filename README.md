@@ -262,7 +262,7 @@ OUTPUT EVENT:
 }
 ```
 
-**EXAMPLE: Attribute an argument**
+**EXAMPLE: Attribute with an argument**
 
 INPUT:
 
@@ -463,7 +463,7 @@ for interpreting this flag to properly escape the expression.
 
 ### onattributeplaceholder
 
-The `oncontentplaceholder` function will be called each time a placeholder
+The `onattributeplaceholder` function will be called each time a placeholder
 is encountered within an attribute string value. This event will be emitted
 before `onopentag` so by changing the `expression` property of the event,
 the resultant attribute can be changed.
