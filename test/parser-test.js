@@ -2,14 +2,15 @@ var chai = require('chai');
 chai.config.includeStack = true;
 require('chai').should();
 var expect = require('chai').expect;
-
+var path = require('path');
+var fs = require('fs');
 var htmljs = require('../');
 
 require('colors');
 
 function parse(text, options, expectedEvents) {
 
-    if (arguments.length === 2) {
+    if (Array.isArray(options)) {
         expectedEvents = arguments[1];
         options = undefined;
     }
@@ -80,7 +81,11 @@ function parse(text, options, expectedEvents) {
 
     parser.parse(text);
 
-    expect(actualEvents).to.deep.equal(expectedEvents);
+    if (expectedEvents) {
+        expect(actualEvents).to.deep.equal(expectedEvents);
+    }
+
+    return actualEvents;
 }
 
 describe('htmljs parser', function() {
@@ -634,7 +639,7 @@ describe('htmljs parser', function() {
                     attributes: [
                         {
                             name: 'data',
-                            expression: '"\nabc\n124"',
+                            expression: '"\\nabc\\n124"',
                             literalValue: '\nabc\n124'
                         }
                     ]
@@ -1749,4 +1754,13 @@ describe('htmljs parser', function() {
             ]);
         });
     });
+
+    require('./autotest').scanDir(
+        path.join(__dirname, 'fixtures/autotest'),
+        function (dir) {
+            var inputPath = path.join(dir, 'input.htmljs');
+            var inputHtmlJs = fs.readFileSync(inputPath, {encoding: 'utf8'});
+            var parserEvents = parse(inputHtmlJs);
+            return parserEvents;
+        });
 });

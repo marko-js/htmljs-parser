@@ -28,6 +28,7 @@ var CODE_LEFT_CURLY_BRACE = 123;
 var CODE_RIGHT_CURLY_BRACE = 125;
 var CODE_ASTERISK = 42;
 var CODE_NEWLINE = 10;
+var CODE_CARRIAGE_RETURN = 13;
 var CODE_DASH = 45;
 var CODE_DOLLAR = 36;
 
@@ -1010,6 +1011,14 @@ class Parser extends BaseParser {
                     parser.skip(1);
 
                     currentExpression.currentStringPart += ch + nextCh;
+                } else if (code === CODE_NEWLINE) {
+                    // Add an escape sequence for a new line if an actual new line
+                    // is found before the string is ended
+                    currentExpression.currentStringPart += '\\n';
+                } else if (code === CODE_CARRIAGE_RETURN) {
+                    // Add an escape sequence for a carriage return if an actual carriage return
+                    // is found before the string is ended
+                    currentExpression.currentStringPart += '\\r';
                 } else if (code === stringDelimiterCode) {
                     // We encountered the end delimiter
                     if (currentExpression.currentStringPart !== '') {
@@ -1096,6 +1105,14 @@ class Parser extends BaseParser {
                 commentHandler.char(ch);
 
                 if (code === CODE_NEWLINE) {
+                    commentHandler.end();
+                } else if (code === CODE_CARRIAGE_RETURN) {
+                    // Handle Windows new line sequence: '\r\n'
+                    var nextCode = parser.lookAtCharCodeAhead(1);
+                    if (nextCode === CODE_NEWLINE) {
+                        parser.skip(1);
+                    }
+
                     commentHandler.end();
                 }
             }

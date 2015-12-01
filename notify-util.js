@@ -22,6 +22,39 @@ function _updateAttributeLiteralValue(attr) {
     }
 }
 
+/**
+ * Takes a string expression such as `"foo"` or `'foo "bar"'`
+ * and returns the literal String value.
+ */
+function evaluateStringExpression(expression) {
+    // We could just use eval(expression) to get the literal String value,
+    // but there is a small chance we could be introducing a security threat
+    // by accidently running malicous code. Instead, we will use
+    // JSON.parse(expression). JSON.parse() only allows strings
+    // that use double quotes so we have to do extra processing if
+    // we detect that the String uses single quotes
+
+    if (expression.charAt(0) === "'") {
+        expression = expression.substring(1, expression.length - 1);
+
+        // Make sure there are no unescaped double quotes in the string expression...
+        expression = expression.replace(/\\\\|\\["]|["]/g, function(match) {
+            if (match === '"'){
+                // Return an escaped double quote if we encounter an
+                // unescaped double quote
+                return '\\"';
+            } else {
+                // Return the escape sequence
+                return match;
+            }
+        });
+
+        expression = '"' + expression + '"';
+    }
+
+    return JSON.parse(expression);
+}
+
 exports.createNotifiers = function(parser, listeners) {
     return {
         notifyText(txt) {
@@ -79,10 +112,11 @@ exports.createNotifiers = function(parser, listeners) {
                 while(--i >= 0) {
                     var attr = attributes[i];
 
-                    // if possib
+                    // If the expression evaluates to a literal value then add the
+                    // `literalValue` property to the attribute
                     if (attr.isStringLiteral) {
                         var expression = attr.expression;
-                        attr.literalValue = expression.substring(1, expression.length - 1);
+                        attr.literalValue = evaluateStringExpression(expression);
                     } else if (attr.isSimpleLiteral) {
                         _updateAttributeLiteralValue(attr);
                     }

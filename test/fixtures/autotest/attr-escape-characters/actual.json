@@ -1,0 +1,21 @@
+[
+    {
+        "type": "opentag",
+        "tagName": "div",
+        "attributes": [
+            {
+                "name": "foo",
+                "expression": "'\\\"hello\\\"'",
+                "literalValue": "\"hello\""
+            }
+        ]
+    },
+    {
+        "type": "text",
+        "text": "\n    Hello World!\n"
+    },
+    {
+        "type": "closetag",
+        "tagName": "div"
+    }
+]
