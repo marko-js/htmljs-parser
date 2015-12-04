@@ -186,12 +186,14 @@ describe('htmljs parser', function() {
             {
                 type: 'opentag',
                 tagName: 'html',
-                attributes: []
+                attributes: [],
+                pos: 0
             },
             {
                 type: 'opentag',
                 tagName: 'javascript',
-                attributes: []
+                attributes: [],
+                pos: 6
             },
             {
                 type: 'text',
@@ -204,7 +206,8 @@ describe('htmljs parser', function() {
             {
                 type: 'opentag',
                 tagName: 'css',
-                attributes: []
+                attributes: [],
+                pos: 95
             },
             {
                 type: 'text',
@@ -217,7 +220,8 @@ describe('htmljs parser', function() {
             {
                 type: 'opentag',
                 tagName: 'text',
-                attributes: []
+                attributes: [],
+                pos: 142
             },
             {
                 type: 'text',
@@ -230,7 +234,8 @@ describe('htmljs parser', function() {
             {
                 type: 'opentag',
                 tagName: 'parsedtext',
-                attributes: []
+                attributes: [],
+                pos: 202
             },
             {
                 type: 'text',
@@ -312,6 +317,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'script',
                     attributes: []
                 },
@@ -332,6 +338,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'script',
                     attributes: []
                 },
@@ -360,6 +367,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'style',
                     attributes: []
                 },
@@ -382,6 +390,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -411,6 +420,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -448,6 +458,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -472,6 +483,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -497,6 +509,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -523,6 +536,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -546,6 +560,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -569,6 +584,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -590,6 +606,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -609,6 +626,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: [
                         {
@@ -635,6 +653,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'div',
                     attributes: [
                         {
@@ -654,6 +673,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
+                        pos: 0,
                         tagName: 'div',
                         attributes: [
                             {
@@ -672,6 +692,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
+                        pos: 0,
                         tagName: 'div',
                         attributes: [
                             {
@@ -690,6 +711,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
+                        pos: 0,
                         tagName: 'div',
                         attributes: [
                             {
@@ -708,6 +730,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
+                        pos: 0,
                         tagName: 'div',
                         attributes: [
                             {
@@ -726,6 +749,7 @@ describe('htmljs parser', function() {
                 ], [
                     {
                         type: 'opentag',
+                        pos: 0,
                         tagName: 'div',
                         attributes: [
                             {
@@ -823,6 +847,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: []
                 },
@@ -871,6 +896,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: []
                 },
@@ -893,6 +919,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: []
                 },
@@ -917,7 +944,8 @@ describe('htmljs parser', function() {
                 type: 'opentag',
                 tagName: 'a',
                 attributes: [],
-                selfClosed: true
+                selfClosed: true,
+                pos: 0
             },
             {
                 type: 'closetag',
@@ -955,6 +983,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'script',
                     attributes: []
                 },
@@ -985,6 +1014,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'script',
                     attributes: []
                 },
@@ -1015,6 +1045,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'custom',
                     attributes: [
                         {
@@ -1040,6 +1071,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'custom',
                     attributes: [
                         {
@@ -1065,6 +1097,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'custom',
                     attributes: [
                         {
@@ -1101,6 +1134,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'script',
                     attributes: []
                 },
@@ -1131,6 +1165,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'script',
                     attributes: []
                 },
@@ -1161,6 +1196,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'custom',
                     attributes: [
                         {
@@ -1178,6 +1214,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'custom',
                     attributes: [
                         {
@@ -1195,6 +1232,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'custom',
                     attributes: [
                         {
@@ -1212,6 +1250,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'custom',
                     attributes: [
                         {
@@ -1273,6 +1312,7 @@ describe('htmljs parser', function() {
             }, [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'custom',
                     attributes: [
                         {
@@ -1292,6 +1332,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'div',
                     attributes: [
                         {
@@ -1312,6 +1353,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'for',
                     argument: 'x in y',
                     attributes: []
@@ -1325,6 +1367,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'for',
                     argument: 'x in y',
                     attributes: []
@@ -1338,6 +1381,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'for',
                     argument: 'x in [("Hello "+(name)+"!"), "(World)"]',
                     attributes: []
@@ -1351,6 +1395,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'div',
                     attributes: [
                         {
@@ -1368,6 +1413,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'div',
                     attributes: [
                         {
@@ -1385,6 +1431,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'for',
                     argument: 'var i = 0; i < 10; i++',
                     attributes: [
@@ -1411,6 +1458,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'for',
                     argument: 'var i = 0; i < 10; i++',
                     attributes: []
@@ -1432,6 +1480,7 @@ describe('htmljs parser', function() {
                 },
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'div',
                     attributes: [
                         {
@@ -1451,6 +1500,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: []
                 },
@@ -1469,6 +1519,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: []
                 },
@@ -1487,6 +1538,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: []
                 },
@@ -1505,6 +1557,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'a',
                     attributes: []
                 },
@@ -1546,6 +1599,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'script',
                     attributes: [
                         {
@@ -1604,6 +1658,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'style',
                     attributes: [
                         {
@@ -1663,6 +1718,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'script',
                     attributes: []
                 },
@@ -1687,6 +1743,7 @@ describe('htmljs parser', function() {
             ], [
                 {
                     type: 'opentag',
+                    pos: 0,
                     tagName: 'script',
                     attributes: []
                 },

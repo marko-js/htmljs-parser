@@ -151,7 +151,7 @@ class Parser extends BaseParser {
         }
 
         function _afterSelfClosingTag() {
-            _notifyOpenTag(tagName, attributes, elementArgument, true /* selfClosed */);
+            _notifyOpenTag(tagName, attributes, elementArgument, true /* selfClosed */, tagPos);
             _notifyCloseTag(tagName, true /* selfClosed */);
             parser.enterHtmlContentState();
         }
@@ -388,7 +388,6 @@ class Parser extends BaseParser {
 
             char: function(ch, code) {
                 if (code === CODE_LEFT_ANGLE_BRACKET) {
-
                     tagPos = parser.pos;
 
                     if (_checkForCDATA()) {
