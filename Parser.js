@@ -128,7 +128,12 @@ class Parser extends BaseParser {
         function _afterOpenTag() {
             var origState = parser.state;
 
-            _notifyOpenTag(tagName, attributes, elementArgument, false /* not selfClosed */);
+            _notifyOpenTag(
+                tagName,
+                attributes,
+                elementArgument,
+                false, /* not selfClosed */
+                tagPos);
 
             // Did the parser stay in the same state after
             // notifying listeners about opentag?
