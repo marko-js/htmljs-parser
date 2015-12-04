@@ -128,7 +128,12 @@ class Parser extends BaseParser {
         function _afterOpenTag() {
             var origState = parser.state;
 
-            _notifyOpenTag(tagName, attributes, elementArgument, false /* not selfClosed */);
+            _notifyOpenTag(
+                tagName,
+                attributes,
+                elementArgument,
+                false, /* not selfClosed */
+                tagPos);
 
             // Did the parser stay in the same state after
             // notifying listeners about opentag?
@@ -146,7 +151,7 @@ class Parser extends BaseParser {
         }
 
         function _afterSelfClosingTag() {
-            _notifyOpenTag(tagName, attributes, elementArgument, true /* selfClosed */);
+            _notifyOpenTag(tagName, attributes, elementArgument, true /* selfClosed */, tagPos);
             _notifyCloseTag(tagName, true /* selfClosed */);
             parser.enterHtmlContentState();
         }
@@ -383,7 +388,6 @@ class Parser extends BaseParser {
 
             char: function(ch, code) {
                 if (code === CODE_LEFT_ANGLE_BRACKET) {
-
                     tagPos = parser.pos;
 
                     if (_checkForCDATA()) {

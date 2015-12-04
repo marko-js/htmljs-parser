@@ -100,7 +100,7 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
-        notifyOpenTag(tagName, attributes, elementArguments, selfClosed) {
+        notifyOpenTag(tagName, attributes, elementArguments, selfClosed, pos) {
             if (listeners.onopentag) {
                 if (elementArguments) {
                     elementArguments = _removeDelimitersFromArgument(elementArguments);
@@ -132,7 +132,8 @@ exports.createNotifiers = function(parser, listeners) {
                 var event = {
                     type: 'opentag',
                     tagName: tagName,
-                    attributes: attributes
+                    attributes: attributes,
+                    pos: pos
                 };
 
                 if (elementArguments) {

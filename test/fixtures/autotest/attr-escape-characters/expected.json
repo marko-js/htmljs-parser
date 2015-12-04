@@ -8,7 +8,8 @@
                 "expression": "'\\\"hello\\\"'",
                 "literalValue": "\"hello\""
             }
-        ]
+        ],
+        "pos": 0
     },
     {
         "type": "text",
