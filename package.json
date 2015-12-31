@@ -33,5 +33,5 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "version": "1.0.6"
+  "version": "1.0.7"
 }
