@@ -306,6 +306,26 @@ class ValidatingParser {
         }, options);
     }
 
+    enterHtmlContentState () {
+        this.parser.enterHtmlContentState();
+    }
+
+    enterJsContentState () {
+        this.parser.enterJsContentState();
+    }
+
+    enterCssContentState () {
+        this.parser.enterCssContentState();
+    }
+
+    enterParsedTextContentState () {
+        this.parser.enterParsedTextContentState();
+    }
+
+    enterStaticTextContentState () {
+        this.parser.enterStaticTextContentState();
+    }
+
     parse(data) {
         this.reset();
         this.parser.parse(data);
