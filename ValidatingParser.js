@@ -183,7 +183,11 @@ class ValidatingParser {
             },
 
             onnestedcontentplaceholder(event) {
-                addLeafNode(event);
+                notify(listeners, 'on' + event.type, event);
+            },
+
+            onattributeplaceholder(event) {
+                notify(listeners, 'on' + event.type, event);
             },
 
             oncdata(event) {
