@@ -17,7 +17,9 @@ function attributesToString(attributes) {
 function openTagToString(event) {
     var tagName = event.tagName;
     var attributes = event.attributes;
-    return '<' + tagName + attributesToString(attributes) + '>';
+    var openTagOnly = event.openTagOnly === true;
+    var selfClosed =  event.selfClosed === true;
+    return '<' + tagName + attributesToString(attributes) + (openTagOnly ? ' OPEN_ONLY' : '') + (selfClosed ? ' SELF_CLOSED' : '') + '>';
 }
 
 function closeTagToString(event) {
@@ -80,32 +82,32 @@ describe('validating parser', function() {
             [
                 '<div>',
                 'text:A',
-                '<img src="image1.png">',
+                '<img src="image1.png" OPEN_ONLY>',
                 '</img>',
                 'text:B',
-                '<img src="image2.png">',
+                '<img src="image2.png" OPEN_ONLY>',
                 '</img>',
                 'text:C',
-                '<img src="image3.png">',
+                '<img src="image3.png" OPEN_ONLY>',
                 '</img>',
                 'text:D',
                 '</div>'
             ]);
     });
 
-    it('should allow unrecognized tags to be self-closing', function() {
+    it('should allow unrecognized tags to be open tag only', function() {
         testParser(
             '<div> A <foo-img src="image1.png"> B <foo-img src="image2.png"> C <foo-img src="image3.png"> D </div>',
             [
                 '<div>',
                 'text:A',
-                '<foo-img src="image1.png">',
+                '<foo-img src="image1.png" OPEN_ONLY>',
                 '</foo-img>',
                 'text:B',
-                '<foo-img src="image2.png">',
+                '<foo-img src="image2.png" OPEN_ONLY>',
                 '</foo-img>',
                 'text:C',
-                '<foo-img src="image3.png">',
+                '<foo-img src="image3.png" OPEN_ONLY>',
                 '</foo-img>',
                 'text:D',
                 '</div>'
@@ -119,7 +121,7 @@ describe('validating parser', function() {
                 '<div>',
                 'text:foo',
                 '</div>',
-                '<img src="image1.png">',
+                '<img src="image1.png" OPEN_ONLY>',
                 '</img>'
             ]);
     });
@@ -148,7 +150,7 @@ describe('validating parser', function() {
             '<div><img src="image1.png"/></div>',
             [
                 '<div>',
-                '<img src="image1.png">',
+                '<img src="image1.png" OPEN_ONLY>',
                 '</img>',
                 '</div>'
             ]);
@@ -190,6 +192,15 @@ describe('validating parser', function() {
             function(err) {
                 expect(err.tagName).to.equal('span');
             });
+    });
+
+    it('should correct a tag that is not allowed to be self-closing', function() {
+        testParser(
+            '<div class="foo"/>',
+            [
+                '<div class="foo">',
+                '</div>'
+            ]);
     });
 
     // it('should include line number in error', function() {

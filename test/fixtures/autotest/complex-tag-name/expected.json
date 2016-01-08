@@ -1,22 +1,23 @@
 [
     {
         "type": "opentag",
-        "tagName": "div",
+        "tagName": "assign",
         "attributes": [
             {
-                "name": "foo",
-                "expression": "'\\\"hello\\\"'",
-                "literalValue": "\"hello\""
+                "name": "data.someArray[0].doSomething",
+                "argument": "'test'"
+            },
+            {
+                "name": ".hello",
+                "expression": "1+1"
             }
         ],
-        "pos": 0
-    },
-    {
-        "type": "text",
-        "text": "\n    Hello World!\n"
+        "pos": 0,
+        "selfClosed": true
     },
     {
         "type": "closetag",
-        "tagName": "div"
+        "tagName": "assign",
+        "selfClosed": true
     }
 ]

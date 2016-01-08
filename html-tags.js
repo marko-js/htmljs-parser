@@ -1,4 +1,4 @@
-var startTagOnly = {};
+var openTagOnly = {};
 var requireClosingTag = {};
 
 [
@@ -17,7 +17,7 @@ var requireClosingTag = {};
     'track',
     'wbr'
 ].forEach(function(tagName) {
-    startTagOnly[tagName] = true;
+    openTagOnly[tagName] = true;
 });
 
 [
@@ -120,5 +120,5 @@ var requireClosingTag = {};
     requireClosingTag[tagName] = true;
 });
 
-exports.startTagOnly = startTagOnly;
+exports.openTagOnly = openTagOnly;
 exports.requireClosingTag = requireClosingTag;

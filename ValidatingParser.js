@@ -11,7 +11,7 @@ function notify(listeners, eventType, event) {
 
 var htmlTags = require('./html-tags');
 
-var startTagOnly = htmlTags.startTagOnly;
+var openTagOnly = htmlTags.openTagOnly;
 var requireClosingTag = htmlTags.requireClosingTag;
 
 class Node {
@@ -106,7 +106,8 @@ class ElementNode extends Node {
         if (!closetagEvent) {
             closetagEvent = {
                 type: 'closetag',
-                tagName: this.tagName
+                tagName: this.tagName,
+                selfClosing: true
             };
         }
         notify(listeners, 'onopentag', this.event);
@@ -195,14 +196,25 @@ class ValidatingParser {
             },
 
             onopentag(event) {
+                var tagName = event.tagName;
+                var isOpenTagOnly = openTagOnly[tagName.toLowerCase()];
+
+                if (isOpenTagOnly) {
+                    delete event.selfClosed;
+                    event.openTagOnly = true;
+                }
+
                 var newNode = new ElementNode(event);
                 var parent = stack[stack.length - 1];
                 parent.addChild(newNode);
                 stack.push(newNode);
 
-                var tagName = event.tagName;
-                if (event.selfClosed || startTagOnly[tagName.toLowerCase()]) {
+                if (event.selfClosed || isOpenTagOnly) {
                     stack.length--;
+                }
+
+                if (event.selfClosed && requireClosingTag[tagName.toLowerCase()]) {
+                    delete event.selfClosed;
                 }
             },
 
@@ -215,7 +227,7 @@ class ValidatingParser {
                 var last = stack[i];
                 var tagName = event.tagName;
 
-                if (startTagOnly[tagName.toLowerCase()]) {
+                if (openTagOnly[tagName.toLowerCase()]) {
                     return notifyError(
                         new Error('Invalid closing tag: </' + tagName + '>'),
                         event);
@@ -233,6 +245,8 @@ class ValidatingParser {
 
                     // We need to fix all of the tags
                     var curNode = last;
+
+                    curNode.event.openTagOnly = true;
 
                     do {
                         if (curNode.tagName && requireClosingTag[curNode.getTagName().toLowerCase()]) {
@@ -260,6 +274,8 @@ class ValidatingParser {
                             stack.length = i - 1;
                             curNode.closetagEvent = event;
                             return;
+                        } else {
+                            curNode.event.openTagOnly = true;
                         }
                     } while(true);
                 }
