@@ -1451,7 +1451,6 @@ describe('htmljs parser', function() {
                  {
                     code: 'ILLEGAL_ELEMENT_ARGUMENT',
                     endPos: 29,
-                    lineNumber: 1,
                     message: 'Element can only have one argument.',
                     pos: 0,
                     type: 'error'
@@ -1472,7 +1471,6 @@ describe('htmljs parser', function() {
             ], [
                  {
                     code: 'ILLEGAL_ATTRIBUTE_ARGUMENT',
-                    lineNumber: 1,
                     message: 'Attribute can only have one argument.',
                     pos: 0,
                     endPos: 33,
@@ -1508,7 +1506,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
-                    lineNumber: 1,
                     pos:3,
                     endPos: 5
                 }
@@ -1527,7 +1524,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
-                    lineNumber: 1,
                     pos:3,
                     endPos: 14
                 }
@@ -1546,7 +1542,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
-                    lineNumber: 1,
                     pos:3,
                     endPos: 34
                 }
@@ -1565,7 +1560,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
-                    lineNumber: 1,
                     pos:3,
                     endPos: 33
                 }
@@ -1578,7 +1572,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
-                    lineNumber: 1,
                     pos: 0,
                     endPos: 9
                 }
@@ -1623,7 +1616,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_DTD',
                     message: 'EOF reached while parsing DTD.',
-                    lineNumber: 1,
                     pos: 0,
                     endPos: 21
                 }
@@ -1638,7 +1630,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_DECLARATION',
                     message: 'EOF reached while parsing declaration.',
-                    lineNumber: 1,
                     pos: 0,
                     endPos: 19
                 }
@@ -1686,7 +1677,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
-                    lineNumber: 2,
                     pos:6,
                     endPos: 12
                 }
@@ -1705,7 +1695,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
-                    lineNumber: 1,
                     pos:6,
                     endPos: 11
                 }
@@ -1730,7 +1719,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
-                    lineNumber: 1,
                     pos:14,
                     endPos: 20
                 }
@@ -1755,7 +1743,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
-                    lineNumber: 1,
                     pos:14,
                     endPos: 19
                 }
@@ -1774,7 +1761,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
-                    lineNumber: 1,
                     pos: 6,
                     endPos: 9
                 }
@@ -1789,7 +1775,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_OPEN_TAG',
                     message: 'EOF reached while parsing open tag.',
-                    lineNumber: 1,
                     pos:0,
                     endPos: 12
                 }
@@ -1804,7 +1789,6 @@ describe('htmljs parser', function() {
                     type: 'error',
                     code: 'MALFORMED_PLACEHOLDER',
                     message: 'EOF reached while parsing placeholder.',
-                    lineNumber: 1,
                     pos: 14,
                     endPos: 25
                 }

@@ -77,25 +77,12 @@ exports.createNotifiers = function(parser, listeners) {
 
         notifyError(pos, errorCode, message) {
             if (listeners.onerror) {
-
-                var lineNumber = parser.lineNumber;
-
-                var data = parser.data;
-                var i = data.pos;
-                while(--i >= pos) {
-                    var code = data.charCodeAt(i);
-                    if (code === CODE_NEWLINE) {
-                        lineNumber--;
-                    }
-                }
-
                 listeners.onerror({
                     type: 'error',
                     code: errorCode,
                     message: message,
                     pos: pos,
-                    endPos: parser.pos,
-                    lineNumber: lineNumber
+                    endPos: parser.pos
                 });
             }
         },
