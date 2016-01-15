@@ -28,26 +28,41 @@ function closeTagToString(event) {
 }
 
 function testParser(data, expected, expectedError) {
+    var parserOptions;
+
+    if (arguments.length === 1) {
+        var options = arguments[0];
+        data = options.data;
+        expected = options.expected;
+        expectedError = options.expectedError;
+        parserOptions = options.parserOptions;
+    }
+
     var events = [];
     var error = null;
 
     var parser = htmljs.createParser({
-        onopentag: function(event) {
-            events.push(openTagToString(event));
-        },
+            onopentag: function(event) {
+                events.push(openTagToString(event));
+            },
 
-        onclosetag: function(event) {
-            events.push(closeTagToString(event));
-        },
+            onclosetag: function(event) {
+                events.push(closeTagToString(event));
+            },
 
-        ontext: function(event) {
-            events.push('text:' + event.text.trim());
-        },
+            ontext: function(event) {
+                events.push('text:' + event.text.trim());
+            },
 
-        onerror: function(err) {
-            error = err;
-        }
-    });
+            oncontentplaceholder: function(event) {
+                events.push('contentplaceholder:' + event.expression + '|' + event.escape);
+            },
+
+            onerror: function(err) {
+                error = err;
+            }
+        },
+        parserOptions);
 
     parser.parse(data);
 
@@ -201,6 +216,34 @@ describe('validating parser', function() {
                 '<div class="foo">',
                 '</div>'
             ]);
+    });
+
+    it('should support a parserStateProvider option', function() {
+        testParser({
+            data: '<div class="foo">${foo}</div><span class="bar">${bar}</span><pre class="baz"><baz>${baz}</baz></pre>',
+            expected: [
+                '<div class="foo">',
+                'text:${foo}',
+                '</div>',
+                '<span class="bar">',
+                'contentplaceholder:bar|true',
+                '</span>',
+                '<pre class="baz">',
+                'text:<baz>',
+                'contentplaceholder:baz|true',
+                'text:</baz>',
+                '</pre>',
+            ],
+            parserOptions: {
+                parserStateProvider: function(event) {
+                    if (event.type === 'opentag' && event.tagName === 'div') {
+                        return 'static-text';
+                    } else if (event.type === 'opentag' && event.tagName === 'pre') {
+                        return 'parsed-text';
+                    }
+                }
+            }
+        });
     });
 
     // it('should include line number in error', function() {

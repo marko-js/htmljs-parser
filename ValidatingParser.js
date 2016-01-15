@@ -149,19 +149,12 @@ class ValidatingParser {
             error = undefined;
         };
 
-        function notifyError(err, event) {
+        function notifyError(err) {
             if (error) {
                 return;
             }
 
             error = err;
-
-            for (var k in event) {
-                if (event.hasOwnProperty(k)) {
-                    err[k] = event[k];
-                }
-            }
-
             var listener = listeners.onerror;
             if (!listener) {
                 throw err;
@@ -174,7 +167,10 @@ class ValidatingParser {
              stack[stack.length - 1].addChild(new LeafNode(event));
         }
 
+        var parserStateProvider = options && options.parserStateProvider;
+
         this.parser = new Parser({
+
             ontext(event) {
                 addLeafNode(event);
             },
@@ -204,6 +200,29 @@ class ValidatingParser {
                     event.openTagOnly = true;
                 }
 
+                if (parserStateProvider) {
+                    var newParseState = parserStateProvider(event);
+                    if (newParseState) {
+                        switch(newParseState) {
+                            case 'static-text': {
+                                this.enterStaticTextContentState();
+                                break;
+                            }
+                            case 'parsed-text': {
+                                this.enterParsedTextContentState();
+                                break;
+                            }
+                            case 'html': {
+                                this.enterHtmlContentState();
+                                break;
+                            }
+                            default: {
+                                throw new Error('Invalid parse state: ' + newParseState);
+                            }
+                        }
+                    }
+                }
+
                 var newNode = new ElementNode(event);
                 var parent = stack[stack.length - 1];
                 parent.addChild(newNode);
@@ -228,9 +247,15 @@ class ValidatingParser {
                 var tagName = event.tagName;
 
                 if (openTagOnly[tagName.toLowerCase()]) {
-                    return notifyError(
-                        new Error('Invalid closing tag: </' + tagName + '>'),
-                        event);
+
+                    return notifyError({
+                        type: 'error',
+                        code: 'ERR_INVALID_CLOSING_TAG',
+                        message: 'Invalid closing tag: </' + tagName + '>',
+                        pos: event.pos,
+                        endPos: event.endPos,
+                        tagName: tagName
+                    });
                 }
 
                 var missingClosingTagNode = null;
@@ -265,9 +290,14 @@ class ValidatingParser {
                             // that was closed. However, if we found any intermediate tags that
                             // that was missing a closing tag then trigger an error.
                             if (missingClosingTagNode) {
-                                return notifyError(
-                                    new Error('Missing closing tag: </' + missingClosingTagNode.getTagName() + '>'),
-                                    missingClosingTagNode.event);
+                                return notifyError({
+                                    type: 'error',
+                                    code: 'ERR_MISSING_CLOSING_TAG',
+                                    message: 'Missing closing tag: </' + missingClosingTagNode.getTagName() + '>',
+                                    pos: missingClosingTagNode.event.pos,
+                                    endPos: missingClosingTagNode.event.endPos,
+                                    tagName: missingClosingTagNode.getTagName()
+                                });
                             }
                             // The value of "i" will be the index of the matched tag on the stack.
                             // Remove the matched tag from the stack and everything after it;
@@ -280,9 +310,14 @@ class ValidatingParser {
                     } while(true);
                 }
 
-                return notifyError(
-                    new Error('Unmatched closing tag: </' + tagName + '>'),
-                    event);
+                return notifyError({
+                    type: 'error',
+                    code: 'ERR_UNMATCHED_CLOSING_TAG',
+                    message: 'Unmatched closing tag: </' + tagName + '>',
+                    pos: event.pos,
+                    endPos: event.endPos,
+                    tagName: tagName
+                });
             },
 
             ondtd(event) {
@@ -305,9 +340,14 @@ class ValidatingParser {
 
                     while (i > 0) {
                         if (curNode.tagName && requireClosingTag[curNode.getTagName().toLowerCase()]) {
-                            return notifyError(
-                                new Error('Missing closing tag: </' + curNode.getTagName() + '>'),
-                                curNode.event);
+                            return notifyError({
+                                type: 'error',
+                                code: 'ERR_MISSING_CLOSING_TAG',
+                                message: 'Missing closing tag: </' + curNode.getTagName() + '>',
+                                pos: curNode.event.pos,
+                                endPos: curNode.event.endPos,
+                                tagName: curNode.getTagName()
+                            });
                         }
 
                         var children = curNode.children;
@@ -324,26 +364,6 @@ class ValidatingParser {
                 root.emitEvents(listeners);
             }
         }, options);
-    }
-
-    enterHtmlContentState () {
-        this.parser.enterHtmlContentState();
-    }
-
-    enterJsContentState () {
-        this.parser.enterJsContentState();
-    }
-
-    enterCssContentState () {
-        this.parser.enterCssContentState();
-    }
-
-    enterParsedTextContentState () {
-        this.parser.enterParsedTextContentState();
-    }
-
-    enterStaticTextContentState () {
-        this.parser.enterStaticTextContentState();
     }
 
     parse(data) {
