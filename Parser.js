@@ -588,12 +588,12 @@ class Parser extends BaseParser {
                         _notifyCDATA(text);
                         text = '';
                         parser.skip(match.length);
-
                         parser.enterState(cdataParentState);
+                        return;
                     }
-                } else {
-                    text += ch;
                 }
+
+                text += ch;
             }
         });
 
