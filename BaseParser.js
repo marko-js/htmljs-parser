@@ -1,6 +1,7 @@
 'use strict';
 
 var CODE_NEWLINE = 10;
+var CODE_CARRIAGE_RETURN = 13;
 
 class Parser {
     static createState(mixins) {
@@ -24,9 +25,6 @@ class Parser {
 
         // The raw string that we are parsing
         this.data = null;
-
-        // The 1-based line number
-        this.lineNumber = 1;
     }
 
     setInitialState(initialState) {
@@ -37,7 +35,7 @@ class Parser {
         if (this.state === state) {
             // Re-entering the same state can lead to unexpected behavior
             // so we should throw error to catch these types of mistakes
-            throw new Error('Re-entering the current state is illegal');
+            throw new Error('Re-entering the current state is illegal - ' + state.name);
         }
 
         var oldState;
@@ -59,9 +57,11 @@ class Parser {
      * Look ahead to see if the given str matches the substring sequence
      * beyond
      */
-    lookAheadFor(str, callback) {
+    lookAheadFor(str, startPos) {
         // Have we read enough chunks to read the string that we need?
-        var startPos = this.pos + 1; // Move past the current character
+        if (startPos == null) {
+            startPos = this.pos + 1;
+        }
         var len = str.length;
         var endPos = startPos + len;
 
@@ -80,24 +80,31 @@ class Parser {
      * The callback will be invoked with the character
      * at the given position.
      */
-    lookAtCharAhead(offset, callback) {
-        return this.data.charAt(this.pos + offset);
+    lookAtCharAhead(offset, startPos) {
+        if (startPos == null) {
+            startPos = this.pos;
+        }
+        return this.data.charAt(startPos + offset);
     }
 
-    lookAtCharCodeAhead(offset, callback) {
-        return this.data.charCodeAt(this.pos + offset);
+    lookAtCharCodeAhead(offset, startPos) {
+        if (startPos == null) {
+            startPos = this.pos;
+        }
+        return this.data.charCodeAt(startPos + offset);
+    }
+
+    rewind(offset) {
+        this.pos -= offset;
     }
 
     skip(offset) {
         // console.log('-- ' + JSON.stringify(this.data.substring(this.pos, this.pos + offset)) + ' --  ' + 'SKIPPED'.gray);
-        var i = this.pos;
         this.pos += offset;
+    }
 
-        for (; i < this.pos; i++) {
-            if (this.data.charCodeAt(this.pos) === CODE_NEWLINE) {
-                this.lineNumber++;
-            }
-        }
+    end() {
+        this.pos = this.maxPos + 1;
     }
 
     parse(data) {
@@ -131,24 +138,38 @@ class Parser {
 
         var pos;
         while ((pos = this.pos) <= this.maxPos) {
-            var ch = data[pos];
-            var code = ch.charCodeAt(0);
+            let ch = data[pos];
+            let code = ch.charCodeAt(0);
+            let state = this.state;
 
             if (code === CODE_NEWLINE) {
-                this.lineNumber++;
+                if (state.eol) {
+                    state.eol.call(this, ch);
+                }
+                this.pos++;
+                continue;
+            } else if (code === CODE_CARRIAGE_RETURN) {
+                let nextPos = pos + 1;
+                if (nextPos < data.length && data.charChodeAt(nextPos) === CODE_NEWLINE) {
+                    if (state.eol) {
+                        state.eol.call(this, '\r\n');
+                    }
+                    this.pos+=2;
+                    continue;
+                }
             }
 
             // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
 
             // We assume that every state will have "char" function
-            this.state.char.call(this, ch, code);
+            state.char.call(this, ch, code);
 
             // move to next position
             this.pos++;
         }
 
-        var state;
-        if ((state = this.state) && state.eof) {
+        let state = this.state;
+        if (state && state.eof) {
             state.eof.call(this);
         }
     }

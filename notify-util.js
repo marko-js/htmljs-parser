@@ -1,198 +1,197 @@
-var CODE_NEWLINE = 10;
-var NUMBER_REGEX = /^[\-\+]?\d*(?:\.\d+)?(?:e[\-\+]?\d+)?$/;
-
-function _removeDelimitersFromArgument(arg) {
-    return arg.substring(1, arg.length - 1);
-}
-
-function _updateAttributeLiteralValue(attr) {
-    var expression = attr.expression;
-    if (expression.length === 0) {
-        attr.literalValue = '';
-    } else if (expression === 'true') {
-        attr.literalValue = true;
-    } else if (expression === 'false') {
-        attr.literalValue = false;
-    } else if (expression === 'null') {
-        attr.literalValue = null;
-    } else if (expression === 'undefined') {
-        attr.literalValue = undefined;
-    } else if (NUMBER_REGEX.test(expression)) {
-        attr.literalValue = Number(expression);
-    }
-}
-
-/**
- * Takes a string expression such as `"foo"` or `'foo "bar"'`
- * and returns the literal String value.
- */
-function evaluateStringExpression(expression) {
-    // We could just use eval(expression) to get the literal String value,
-    // but there is a small chance we could be introducing a security threat
-    // by accidently running malicous code. Instead, we will use
-    // JSON.parse(expression). JSON.parse() only allows strings
-    // that use double quotes so we have to do extra processing if
-    // we detect that the String uses single quotes
-
-    if (expression.charAt(0) === "'") {
-        expression = expression.substring(1, expression.length - 1);
-
-        // Make sure there are no unescaped double quotes in the string expression...
-        expression = expression.replace(/\\\\|\\["]|["]/g, function(match) {
-            if (match === '"'){
-                // Return an escaped double quote if we encounter an
-                // unescaped double quote
-                return '\\"';
-            } else {
-                // Return the escape sequence
-                return match;
-            }
-        });
-
-        expression = '"' + expression + '"';
-    }
-
-    return JSON.parse(expression);
-}
-
 exports.createNotifiers = function(parser, listeners) {
+    var hasError = false;
+
     return {
-        notifyText(txt) {
-            if (listeners.ontext && (txt.length > 0)) {
-                listeners.ontext({
+        notifyText(value) {
+            if (hasError) {
+                return;
+            }
+
+            var eventFunc = listeners.onText;
+
+            if (eventFunc && (value.length > 0)) {
+                eventFunc.call(parser, {
                     type: 'text',
-                    text: txt
-                });
+                    value: value
+                }, parser);
             }
         },
 
-        notifyCDATA(txt) {
-            if (listeners.oncdata && txt) {
-                listeners.oncdata({
+        notifyCDATA(value, pos, endPos) {
+            if (hasError) {
+                return;
+            }
+
+            var eventFunc = listeners.onCDATA;
+
+            if (eventFunc && value) {
+                eventFunc.call(parser, {
                     type: 'cdata',
-                    text: txt
-                });
+                    value: value,
+                    pos: pos,
+                    endPos: endPos
+                }, parser);
             }
         },
 
         notifyError(pos, errorCode, message) {
-            if (listeners.onerror) {
-                listeners.onerror({
+            if (hasError) {
+                return;
+            }
+
+            hasError = true;
+
+            var eventFunc = listeners.onError;
+
+            if (eventFunc) {
+                eventFunc.call(parser, {
                     type: 'error',
                     code: errorCode,
                     message: message,
                     pos: pos,
                     endPos: parser.pos
-                });
+                }, parser);
             }
         },
 
-        notifyOpenTag(tagName, attributes, elementArguments, selfClosed, pos) {
-            if (listeners.onopentag) {
-                if (elementArguments) {
-                    elementArguments = _removeDelimitersFromArgument(elementArguments);
-                }
+        notifyOpenTag(tagInfo) {
+            if (hasError) {
+                return;
+            }
 
+            var eventFunc = listeners.onOpenTag;
+
+            if (eventFunc) {
                 // set the literalValue property for attributes that are simple
                 // string simple values or simple literal values
+
+                var attributes = tagInfo.attributes;
+
                 var i = attributes.length;
                 while(--i >= 0) {
                     var attr = attributes[i];
+                    var value = attr.value;
 
-                    // If the expression evaluates to a literal value then add the
-                    // `literalValue` property to the attribute
-                    if (attr.isStringLiteral) {
-                        var expression = attr.expression;
-                        attr.literalValue = evaluateStringExpression(expression);
-                    } else if (attr.isSimpleLiteral) {
-                        _updateAttributeLiteralValue(attr);
-                    }
 
-                    if (attr.argument) {
-                        attr.argument = _removeDelimitersFromArgument(attr.argument);
-                    }
 
                     delete attr.isStringLiteral;
                     delete attr.isSimpleLiteral;
                 }
 
                 var event = {
-                    type: 'opentag',
-                    tagName: tagName,
-                    attributes: attributes,
-                    pos: pos
+                    type: 'openTag',
+                    tagName: tagInfo.tagName,
+                    argument: tagInfo.argument,
+                    attributes,
+                    pos: tagInfo.pos,
+                    endPos: tagInfo.endPos,
+                    openTagOnly: tagInfo.openTagOnly,
+                    selfClosed: tagInfo.selfClosed,
+                    concise: tagInfo.concise
                 };
 
-                if (elementArguments) {
-                    event.argument = elementArguments;
-                }
-
-                if (selfClosed) {
-                    event.selfClosed = true;
-                }
-
-                listeners.onopentag.call(parser, event);
+                eventFunc.call(parser, event, parser);
             }
         },
 
-        notifyCloseTag(tagName, selfClosed) {
-            if (listeners.onclosetag) {
+        notifyCloseTag(tagName, pos, endPos) {
+            if (hasError) {
+                return;
+            }
+
+            var eventFunc = listeners.onCloseTag;
+
+            if (eventFunc) {
                 var event = {
-                    type: 'closetag',
-                    tagName: tagName
+                    type: 'closeTag',
+                    tagName: tagName,
+                    pos: pos,
+                    endPos: endPos
                 };
 
-                if (selfClosed) {
-                    event.selfClosed = true;
-                }
-
-                listeners.onclosetag.call(parser, event);
+                eventFunc.call(parser, event, parser);
             }
         },
 
-        notifyDTD(dtd) {
-            if (listeners.ondtd) {
-                listeners.ondtd({
-                    type: 'dtd',
-                    dtd: dtd
-                });
+        notifyDocumentType(documentType) {
+            if (hasError) {
+                return;
+            }
+
+            var eventFunc = listeners.onDocumentType;
+
+            if (eventFunc) {
+                eventFunc.call(this, {
+                    type: 'documentType',
+                    value: documentType.value,
+                    pos: documentType.pos,
+                    endPos: documentType.endPos
+                }, parser);
             }
         },
 
         notifyDeclaration(declaration) {
-            if (listeners.ondeclaration) {
-                listeners.ondeclaration.call(parser, {
+            if (hasError) {
+                return;
+            }
+
+            var eventFunc = listeners.onDeclaration;
+
+            if (eventFunc) {
+                eventFunc.call(parser, {
                     type: 'declaration',
-                    declaration: declaration
-                });
+                    value: declaration.value,
+                    pos: declaration.pos,
+                    endPos: declaration.endPos
+                }, parser);
             }
         },
 
-        notifyCommentText(txt) {
-            if (listeners.oncomment && txt) {
-                listeners.oncomment.call(parser, {
+        notifyComment(comment) {
+            if (hasError) {
+                return;
+            }
+
+            var eventFunc = listeners.onComment;
+
+            if (eventFunc && comment.value) {
+                eventFunc.call(parser, {
                     type: 'comment',
-                    comment: txt
-                });
+                    value: comment.value,
+                    pos: comment.pos,
+                    endPos: comment.endPos
+                }, parser);
             }
         },
 
         notifyPlaceholder(placeholder) {
-            var eventFunc = listeners['on' + placeholder.type];
-
-            if (eventFunc) {
-                // remove unnecessary properties
-                ['depth', 'stringDelimiter', 'delimiterDepth', 'parentState', 'handler']
-                    .forEach(function(key) {
-                        delete placeholder[key];
-                    });
-                eventFunc.call(parser, placeholder);
+            if (hasError) {
+                return;
             }
+
+            var eventFunc = listeners.onPlaceholder;
+            if (eventFunc) {
+                var placeholderEvent = {
+                    type: 'placeholder',
+                    value: placeholder.value,
+                    pos: placeholder.pos,
+                    endPos: placeholder.endPos,
+                    escape: placeholder.escape !== false,
+                    withinBody: placeholder.withinBody === true,
+                    withinAttribute: placeholder.withinAttribute === true,
+                    withinString: placeholder.withinString === true
+                };
+
+                eventFunc.call(parser, placeholderEvent, parser);
+                return placeholderEvent.value;
+            }
+
+            return placeholder.value;
         },
 
         notifyFinish() {
             if (listeners.onfinish) {
-                listeners.onfinish.call(parser, {});
+                listeners.onfinish.call(parser, {}, parser);
             }
         }
     };

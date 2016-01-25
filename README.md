@@ -22,6 +22,7 @@ Ideally, the template compiler should be able to handle any of the following:
 ```
 
 This parser extends the HTML grammar to add these important features:
+
 - JavaScript expressions as attribute values
 ```html
 <say-hello message=("Hello " + personName) count=2+2 large=true />
@@ -58,48 +59,69 @@ npm install htmljs-parser
 ```javascript
 var htmljs = require('htmljs-parser');
 var parser = htmljs.createParser({
-    ontext: function(event) {
-        // text
+    onText: function(event) {
+        // Text within an HTML element
+        var value = event.value;
     },
 
-    oncontentplaceholder: function(event) {
-        // placeholder within content
+    onPlaceholder: function(event) {
+        //  ${<value>]} // escape = true
+        // $!{<value>]} // escape = false
+        var value = event.value; // String
+        var escaped = event.escaped; // boolean
+        var withinBody = event.withinBody; // boolean
+        var withinAttribute = event.withinAttribute; // boolean
+        var withinString = event.withinString; // boolean
+        var pos = event.pos; // Integer
     },
 
-    onnestedcontentplaceholder: function(event) {
-        // placeholder within string that is within content placeholder
+    onCDATA: function(event) {
+        // <![CDATA[<value>]]>
+        var value = event.value; // String
+        var pos = event.pos; // Integer
     },
 
-    onattributeplaceholder: function(event) {
-        // placeholder within attribute
+    onOpenTag: function(event) {
+        var tagName = event.tagName; // String
+        var value = event.value; // String
+        var attributes = event.attributes; // Array
+        var argument = event.argument; // String
+        var pos = event.pos; // Integer
     },
 
-    oncdata: function(event) {
-        // CDATA
-    },
-
-    onopentag: function(event) {
-        // open tag
-    },
-
-    onclosetag: function(event) {
+    onCloseTag: function(event) {
         // close tag
+        var tagName = event.tagName; // String
+        var pos = event.pos; // Integer
     },
 
-    ondtd: function(event) {
-        // DTD (e.g. <DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">)
+    onDocumentType: function(event) {
+        // Document Type/DTD
+        // <!<value>>
+        // Example: <!DOCTYPE html>
+        var value = event.value; // String
+        var pos = event.pos; // Integer
     },
 
-    ondeclaration: function(event) {
-        // Declaration (e.g. <?xml version="1.0" encoding="UTF-8" ?>)
+    onDeclaration: function(event) {
+        // Declaration
+        // <?<value>?>
+        // Example: <?xml version="1.0" encoding="UTF-8" ?>
+        var value = event.value; // String
+        var pos = event.pos; // Integer
     },
 
-    oncomment: function(event) {
+    onComment: function(event) {
         // Text within XML comment
+        var value = event.value; // String
+        var pos = event.pos; // Integer
     },
 
-    onerror: function(event) {
+    onError: function(event) {
         // Error
+        var message = event.message; // String
+        var code = event.code; // String
+        var pos = event.pos; // Integer
     }
 });
 
@@ -110,7 +132,7 @@ parser.parse(str);
 
 The parser, by default, will look for HTML tags within content. This behavior
 might not be desirable for certain tags, so the parser allows the parsing mode
-to be changed (usually in response to an `onopentag` event).
+to be changed (usually in response to an `onOpenTag` event).
 
 There are three content parsing modes:
 
@@ -128,7 +150,7 @@ There are three content parsing modes:
 ```javascript
 var htmljs = require('htmljs-parser');
 var parser = htmljs.createParser({
-    onopentag: function(event) {
+    onOpenTag: function(event) {
         // open tag
         switch(event.tagName) {
             case 'textarea':
@@ -148,7 +170,7 @@ var parser = htmljs.createParser({
             default:
                 // The parser will switch to HTML content parsing mode
                 // if the parsing mode is not explicitly changed by
-                // "onopentag" function.
+                // "onOpenTag" function.
         }
     }
 });
@@ -163,9 +185,9 @@ events as it is parsing the document. Events are emitted via calls
 to `on<eventname>` function which are supplied as properties in the options
 via call to `require('htmljs-parser').createParser(options)`.
 
-### onopentag
+### onOpenTag
 
-The `onopentag` function will be called each time an opening tag is
+The `onOpenTag` function will be called each time an opening tag is
 encountered.
 
 **EXAMPLE: Simple tag**
@@ -180,7 +202,7 @@ OUTPUT EVENT:
 
 ```javascript
 {
-    type: 'opentag',
+    type: 'openTag',
     tagName: 'div',
     attributes: []
 }
@@ -198,22 +220,22 @@ OUTPUT EVENT:
 
 ```javascript
 {
-    type: 'opentag',
+    type: 'openTag',
     tagName: 'div',
     attributes: [
         {
             name: 'class',
-            expression: '"demo"',
+            value: '"demo"',
             literalValue: 'demo'
         },
         {
             name: 'disabled',
-            expression: 'false',
+            value: 'false',
             literalValue: false
         },
         {
             name: 'data-number',
-            expression: '123',
+            value: '123',
             literalValue: 123
         }
     ]
@@ -232,12 +254,12 @@ OUTPUT EVENT:
 
 ```javascript
 {
-    type: 'opentag',
+    type: 'openTag',
     tagName: 'div',
     attributes: [
         {
             name: 'message',
-            expression: '"Hello "+data.name'
+            value: '"Hello "+data.name'
         }
     ]
 }
@@ -255,7 +277,7 @@ OUTPUT EVENT:
 
 ```javascript
 {
-    type: 'opentag',
+    type: 'openTag',
     tagName: 'for',
     argument: 'var i = 0; i < 10; i++',
     attributes: []
@@ -274,7 +296,7 @@ OUTPUT EVENT:
 
 ```javascript
 {
-    type: 'opentag',
+    type: 'openTag',
     tagName: 'div',
     attributes: [
         {
@@ -285,9 +307,9 @@ OUTPUT EVENT:
 }
 ```
 
-### onclosetag
+### onCloseTag
 
-The `onclosetag` function will be called each time a closing tag is
+The `onCloseTag` function will be called each time a closing tag is
 encountered.
 
 **EXAMPLE: Simple close tag**
@@ -302,18 +324,18 @@ OUTPUT EVENT:
 
 ```javascript
 {
-    type: 'closetag',
+    type: 'closeTag',
     tagName: 'div'
 }
 ```
 
-### ontext
+### onText
 
-The `ontext` function will be called each time within an element
+The `onText` function will be called each time within an element
 when textual data is encountered.
 
 **NOTE:** Text within `<![CDATA[` `]]>` will be emitted via call
-to `oncdata`.
+to `onCDATA`.
 
 **EXAMPLE**
 
@@ -331,13 +353,13 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'text',
-    text: 'Simple text'
+    value: 'Simple text'
 }
 ```
 
-### oncdata
+### onCDATA
 
-The `oncdata` function will be called when text within `<![CDATA[` `]]>`
+The `onCDATA` function will be called when text within `<![CDATA[` `]]>`
 is encountered.
 
 **EXAMPLE:**
@@ -353,14 +375,14 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'cdata',
-    text: 'This is text'
+    value: 'This is text'
 }
 ```
 
-### oncontentplaceholder
+### onPlaceholder
 
-The `oncontentplaceholder` function will be called each time a placeholder
-is encountered within parsed textual content within elements.
+The `onPlaceholder` function will be called each time a placeholder
+is encountered.
 
 If the placeholder starts with the `$!{` sequence then `event.escape`
 will be `false`.
@@ -382,77 +404,28 @@ $!{"This is a non-escaped placeholder"}
 
 OUTPUT EVENTS
 
+```html
+${name}
+```
+
 ```javascript
 {
-    type: 'contentplaceholder',
-    expression: '"This is an escaped placeholder"',
+    type: 'placeholder',
+    value: 'name',
     escape: true
 }
 ```
 
-```javascript
-{
-    type: 'contentplaceholder',
-    expression: '"This is a non-escaped placeholder"',
-    escape: false
-}
-```
-
-**NOTE:**
-The `escape` flag is merely informational. The application code is responsible
-for interpreting this flag to properly escape the expression.
-
-### onnestedcontentplaceholder
-
-The `onnestedcontentplaceholder` function will be called each time a placeholder
-is encountered within a string that is also within another content placeholder.
-
-If the placeholder starts with the `$!{` sequence then `event.escape`
-will be `false`.
-
-If the placeholder starts with the `${` sequence then `event.escape` will be
-`true` unless the placeholder is nested within another placeholder that is
-already escaped.
-
-
-The `event.expression` property can be changed which will cause corresponding
-change to ancestor content placeholder expression.
-
-Here's an example of modifying the expression based on the `event.escape` flag:
-
-```javascript
-onnestedcontentplaceholder: function(event) {
-    if (event.escape) {
-        event.expression = 'escapeXml(' + event.expression + ')';
-    }
-}
-```
-
-**EXAMPLE:**
-
-INPUT:
+--------
 
 ```html
-${"Hello ${data.name}"}
-```
-
-The `${data.name}` sequence will trigger the call to
-`onnestedcontentplaceholder`.
-
-OUTPUT EVENTS
-
-```javascript
-{
-    type: 'nestedcontentplaceholder',
-    expression: 'data.name',
-    escape: true
-}
+$!{name}
 ```
 
 ```javascript
 {
-    type: 'contentplaceholder',
-    expression: '"Hello "+(data.name)+"!"',
+    type: 'placeholder',
+    value: 'name',
     escape: true
 }
 ```
@@ -461,57 +434,19 @@ OUTPUT EVENTS
 The `escape` flag is merely informational. The application code is responsible
 for interpreting this flag to properly escape the expression.
 
-### onattributeplaceholder
-
-The `onattributeplaceholder` function will be called each time a placeholder
-is encountered within an attribute string value. This event will be emitted
-before `onopentag` so by changing the `expression` property of the event,
-the resultant attribute can be changed.
-
 Here's an example of modifying the expression based on the `event.escape` flag:
 
 ```javascript
-onattributeplaceholder: function(event) {
+onPlaceholder: function(event) {
     if (event.escape) {
-        event.expression = 'escapeAttr(' + event.expression + ')';
+        event.value = 'escapeXml(' + event.value + ')';
     }
 }
 ```
 
-If the placeholder starts with the `$!{` sequence then `event.escape`
-will be `false`.
+### onDocumentType
 
-If the placeholder starts with the `${` sequence then `event.escape` will be
-`true` unless the placeholder is nested within another placeholder that is
-already escaped.
-
-**EXAMPLE:**
-
-INPUT:
-
-```html
-<div class="${data.className}"><div>
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'attributeplaceholder',
-    expression: 'data.className',
-    escape: true
-}
-```
-
-**NOTE:**
-The `escape` flag is merely informational. The application code is responsible
-for interpreting this flag to properly escape the expression. The `expression`
-property can be altered by the `onattributeplaceholder` function and the
-attribute information emitted via `onopentag` will reflect this change.
-
-### ondtd
-
-The `ondtd` function will be called when the document type declaration
+The `onDocumentType` function will be called when the document type declaration
 is encountered _anywhere_ in the content.
 
 **EXAMPLE:**
@@ -526,14 +461,14 @@ OUTPUT EVENT:
 
 ```javascript
 {
-    type: 'dtd',
-    dtd: 'DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN"'
+    type: 'documentType',
+    value: 'DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN"'
 }
 ```
 
-### ondeclaration
+### onDeclaration
 
-The `ondeclaration` function will be called when an XML declaration
+The `onDeclaration` function will be called when an XML declaration
 is encountered _anywhere_ in the content.
 
 **EXAMPLE:**
@@ -549,13 +484,13 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'declaration',
-    declaration: 'xml version="1.0" encoding="UTF-8"'
+    value: 'xml version="1.0" encoding="UTF-8"'
 }
 ```
 
-### oncomment
+### onComment
 
-The `oncomment` function will be called when text within `<!--` `-->`
+The `onComment` function will be called when text within `<!--` `-->`
 is encountered.
 
 **EXAMPLE:**
@@ -571,28 +506,31 @@ OUTPUT EVENT:
 ```javascript
 {
     type: 'comment',
-    text: 'This is a comment'
+    value: 'This is a comment'
 }
 ```
 
-### onerror
+### onError
 
-The `onerror` function will be called when malformed content is detected.
+The `onError` function will be called when malformed content is detected.
 The most common cause for an error is due to reaching the end of the
 input while still parsing an open tag, close tag, XML comment, CDATA section,
 DTD, XML declaration, or placeholder.
 
-Possible errors:
+Possible error codes:
 
-- `ILLEGAL_ELEMENT_ARGUMENT`: Element can only have one argument
-- `ILLEGAL_ATTRIBUTE_ARGUMENT`: Attribute can only have one argument
-- `MALFORMED_OPEN_TAG`: EOF reached while parsing open tag
-- `MALFORMED_CLOSE_TAG`: EOF reached while parsing closing element
-- `MALFORMED_CDATA`: EOF reached while parsing CDATA
-- `MALFORMED_PLACEHOLDER`: EOF reached while parsing placeholder
-- `MALFORMED_DTD`: EOF reached while parsing DTD
-- `MALFORMED_DECLARATION`: EOF reached while parsing declaration
-- `MALFORMED_COMMENT`: EOF reached while parsing comment
+- `MISSING_END_TAG`
+- `MISSING_END_DELIMITER`
+- `MALFORMED_OPEN_TAG`
+- `MALFORMED_CLOSE_TAG`
+- `MALFORMED_CDATA`
+- `MALFORMED_PLACEHOLDER`
+- `MALFORMED_DOCUMENT_TYPE`
+- `MALFORMED_DECLARATION`
+- `MALFORMED_COMMENT`
+- `EXTRA_CLOSING_TAG`
+- `MISMATCHED_CLOSING_TAG`
+- ...
 
 **EXAMPLE:**
 
@@ -609,8 +547,7 @@ OUTPUT EVENT:
     type: 'error',
     code: 'MALFORMED_OPEN_TAG',
     message: 'EOF reached while parsing open tag.',
-    lineNumber: 1,
-    startPos: 0,
+    pos: 0,
     endPos: 9
 }
 ```

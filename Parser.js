@@ -3,7 +3,7 @@ var BaseParser = require('./BaseParser');
 
 var notifyUtil = require('./notify-util');
 
-function _isWhitespaceCode(code) {
+function isWhitespaceCode(code) {
     // For all practical purposes, the space character (32) and all the
     // control characters below it are whitespace. We simplify this
     // condition for performance reasons.
@@ -11,28 +11,82 @@ function _isWhitespaceCode(code) {
     return (code <= 32);
 }
 
-var CODE_BACK_SLASH = 92;
-var CODE_FORWARD_SLASH = 47;
-var CODE_LEFT_ANGLE_BRACKET = 60;
-var CODE_RIGHT_ANGLE_BRACKET = 62;
-var CODE_EXCLAMATION = 33;
-var CODE_QUESTION = 63;
-var CODE_LEFT_SQUARE_BRACKET = 91;
-var CODE_RIGHT_SQUARE_BRACKET = 93;
-var CODE_EQUAL = 61;
-var CODE_SINGLE_QUOTE = 39;
-var CODE_DOUBLE_QUOTE = 34;
-var CODE_LEFT_PARANTHESIS = 40;
-var CODE_RIGHT_PARANTHESIS = 41;
-var CODE_LEFT_CURLY_BRACE = 123;
-var CODE_RIGHT_CURLY_BRACE = 125;
-var CODE_ASTERISK = 42;
-var CODE_NEWLINE = 10;
-var CODE_CARRIAGE_RETURN = 13;
-var CODE_DASH = 45;
-var CODE_DOLLAR = 36;
+var NUMBER_REGEX = /^[\-\+]?\d*(?:\.\d+)?(?:e[\-\+]?\d+)?$/;
 
-var EMPTY_ATTRIBUTES = [];
+/**
+ * Takes a string expression such as `"foo"` or `'foo "bar"'`
+ * and returns the literal String value.
+ */
+function evaluateStringExpression(expression) {
+    // We could just use eval(expression) to get the literal String value,
+    // but there is a small chance we could be introducing a security threat
+    // by accidently running malicous code. Instead, we will use
+    // JSON.parse(expression). JSON.parse() only allows strings
+    // that use double quotes so we have to do extra processing if
+    // we detect that the String uses single quotes
+
+    if (expression.charAt(0) === "'") {
+        expression = expression.substring(1, expression.length - 1);
+
+        // Make sure there are no unescaped double quotes in the string expression...
+        expression = expression.replace(/\\\\|\\["]|["]/g, function(match) {
+            if (match === '"'){
+                // Return an escaped double quote if we encounter an
+                // unescaped double quote
+                return '\\"';
+            } else {
+                // Return the escape sequence
+                return match;
+            }
+        });
+
+        expression = '"' + expression + '"';
+    }
+
+    return JSON.parse(expression);
+}
+
+
+function peek(array) {
+    var len = array.length;
+    if (!len) {
+        return undefined;
+    }
+    return array[len - 1];
+}
+
+const MODE_HTML = 1;
+const MODE_CONCISE = 2;
+
+const CODE_NEWLINE = 10;
+const CODE_CARRIAGE_RETURN = 13;
+const CODE_BACK_SLASH = 92;
+const CODE_FORWARD_SLASH = 47;
+const CODE_LEFT_ANGLE_BRACKET = 60;
+const CODE_RIGHT_ANGLE_BRACKET = 62;
+const CODE_EXCLAMATION = 33;
+const CODE_QUESTION = 63;
+const CODE_LEFT_SQUARE_BRACKET = 91;
+const CODE_RIGHT_SQUARE_BRACKET = 93;
+const CODE_EQUAL = 61;
+const CODE_SINGLE_QUOTE = 39;
+const CODE_DOUBLE_QUOTE = 34;
+const CODE_BACKTICK = 96;
+const CODE_LEFT_PARANTHESIS = 40;
+const CODE_RIGHT_PARANTHESIS = 41;
+const CODE_LEFT_CURLY_BRACE = 123;
+const CODE_RIGHT_CURLY_BRACE = 125;
+const CODE_ASTERISK = 42;
+const CODE_HYPHEN = 45;
+const CODE_HTML_BLOCK_DELIMITER = CODE_HYPHEN;
+const CODE_DOLLAR = 36;
+const CODE_SPACE = 32;
+
+const BODY_PARSED_TEXT = 1; // Body of a tag is treated as text, but placeholders will be parsed
+const BODY_STATIC_TEXT = 2;// Body of a tag is treated as text and placeholders will *not* be parsed
+
+const EMPTY_ATTRIBUTES = [];
+const htmlTags = require('./html-tags');
 
 class Parser extends BaseParser {
     constructor(listeners, options) {
@@ -43,100 +97,312 @@ class Parser extends BaseParser {
         var notifiers = notifyUtil.createNotifiers(parser, listeners);
         this.notifiers = notifiers;
 
-        var tagName;
-        var text = '';
-        var comment;
-        var attribute;
-        var attributes;
-        var elementArgument;
-        var tagPos;
-        var withinTag = false;
-        // This is a simple stack that we use to handle parsing
-        // expressions within expressions. When we start parsing
-        // a delimited expression then we keep track of the start
-        // and end delimiter. We use this for the following types
-        // of expressions:
-        // - Strings: "..." and '...'
-        // - Arrays: [...]
-        // - Paranthetic: (...)
-        // - Object/Block: {...}
-        var expressionStack = [];
+        var defaultMode = options && options.concise !== false ? MODE_CONCISE : MODE_HTML;
+        var userIsOpenTagOnly = options && options.isOpenTagOnly;
 
-        // the current expression info at the top of the stack
-        var currentExpression;
-
-        // the top-most expression handler
-        var expressionHandler;
-
-        var commentHandler;
-        var endTagName;
-        var expressionStr;
-        var placeholderStack = [];
-        var currentPlaceholder;
-        var currentAttributeForAgument;
-        var ignoreArgument;
-        var cdataParentState;
+        var currentOpenTag; // Used to reference the current open tag that is being parsed
+        var currentAttribute; // Used to reference the current attribute that is being parsed
+        var closeTagName; // Used to keep track of the current close tag name as it is being parsed
+        var closeTagPos; // Used to keep track of the position of the current closing tag
+        var expectedCloseTagName; // Used to figure out when a text block has been ended (HTML tags are ignored)
+        var text; // Used to buffer text that is found within the body of a tag
+        var withinOpenTag;// Set to true if the parser is within the open tag
+        var blockStack; // Used to keep track of HTML tags and HTML blocks
+        var partStack; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
+        var currentPart; // The current part at the top of the part stack
+        var indent; // Used to build the indent for the current concise line
+        var isConcise; // Set to true if parser is currently in concise mode
+        var isWithinSingleLineHtmlBlock; // Set to true if the current block is for a single line HTML block
+        var htmlBlockDelimiter; // Current delimiter for multiline HTML blocks nested within a concise tag. e.g. "--"
+        var htmlBlockIndent; // Used to hold the indentation for a delimited, multiline HTML block
+        var beginMixedMode; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
+        var endingMixedModeAtEOL; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
+        var placeholderDepth; // Used as an easy way to know if an exptression is within a placeholder
 
         this.reset = function() {
             BaseParser.prototype.reset.call(this);
             text = '';
-            comment = undefined;
-            attribute = undefined;
-            attributes = undefined;
-            elementArgument = undefined;
-            tagPos = undefined;
-            withinTag = false;
-            expressionStack = [];
-            currentExpression = undefined;
-            expressionHandler = undefined;
-            commentHandler = undefined;
-            endTagName = undefined;
-            expressionStr = undefined;
-            placeholderStack = [];
-            currentPlaceholder = undefined;
-            currentAttributeForAgument = undefined;
-            ignoreArgument = undefined;
-            cdataParentState = undefined;
+            currentOpenTag = undefined;
+            currentAttribute = undefined;
+            closeTagName = undefined;
+            closeTagPos = undefined;
+            expectedCloseTagName = undefined;
+            withinOpenTag = false;
+            blockStack = [];
+            partStack = [];
+            currentPart = undefined;
+            indent = '';
+            isConcise = defaultMode === MODE_CONCISE;
+            isWithinSingleLineHtmlBlock = false;
+            htmlBlockDelimiter = null;
+            htmlBlockIndent = null;
+            beginMixedMode = false;
+            endingMixedModeAtEOL = false;
+            placeholderDepth = 0;
         };
 
-        function _notifyText(txt) {
+        this.reset();
+
+        /**
+         * This function is called to determine if a tag is an "open only tag". Open only tags such as <img>
+         * are immediately closed.
+         * @param  {String}  tagName The name of the tag (e.g. "img")
+         */
+        function isOpenTagOnly(tagName) {
+            tagName = tagName.toLowerCase();
+
+            var openTagOnly = userIsOpenTagOnly && userIsOpenTagOnly(tagName);
+            if (openTagOnly == null) {
+                openTagOnly = htmlTags.isOpenTagOnly(tagName);
+            }
+
+            return openTagOnly;
+        }
+
+        /**
+         * Clear out any buffered body text and notify any listeners
+         */
+        function endText(txt) {
+            if (arguments.length === 0) {
+                txt = text;
+            }
+
             notifiers.notifyText(txt);
 
             // always clear text buffer...
             text =  '';
         }
 
-        var _notifyCDATA = notifiers.notifyCDATA;
-        var _notifyCommentText = notifiers.notifyCommentText;
-        var _notifyError = notifiers.notifyError;
-        var _notifyOpenTag = notifiers.notifyOpenTag;
-        var _notifyCloseTag = notifiers.notifyCloseTag;
-        var _notifyDTD = notifiers.notifyDTD;
-        var _notifyDeclaration = notifiers.notifyDeclaration;
-        var _notifyPlaceholder = notifiers.notifyPlaceholder;
 
-        function _attribute() {
-            attribute = {};
-            if (attributes === EMPTY_ATTRIBUTES) {
-                attributes = [attribute];
-            } else {
-                attributes.push(attribute);
+        function openTagEOL() {
+            if (isConcise) {
+                // In concise mode we always end the open tag
+                finishOpenTag();
             }
-            return attribute;
         }
 
-        function _afterOpenTag() {
-            var origState = parser.state;
+        /**
+         * This function is used to enter into "HTML" parsing mode instead
+         * of concise HTML. We push a block on to the stack so that we know when
+         * return back to the previous parsing mode and to ensure that all
+         * tags within a block are properly closed.
+         */
+        function beginHtmlBlock(delimiter) {
+            htmlBlockIndent = indent;
+            htmlBlockDelimiter = delimiter;
 
-            _notifyOpenTag(
-                tagName,
-                attributes,
-                elementArgument,
-                false, /* not selfClosed */
-                tagPos);
+            var parent = peek(blockStack);
+            blockStack.push({
+                type: 'html',
+                delimiter: delimiter,
+                indent: indent
+            });
+
+            if (parent && parent.body) {
+                if (parent.body === BODY_PARSED_TEXT) {
+                    parser.enterState(STATE_PARSED_TEXT_CONTENT);
+                } else if (parent.body === BODY_STATIC_TEXT) {
+                    parser.enterState(STATE_STATIC_TEXT_CONTENT);
+                } else {
+                    throw new Error('Illegal value for parent.body: ' + parent.body);
+                }
+            } else {
+                return parser.enterState(STATE_HTML_CONTENT);
+            }
+        }
+
+        /**
+         * This method gets called when we are in non-concise mode
+         * and we are exiting out of non-concise mode.
+         */
+        function endHtmlBlock() {
+            // End any text
+            endText();
+
+            // Make sure all tags in this HTML block are closed
+            for (let i=blockStack.length-1; i>=0; i--) {
+                var curBlock = blockStack[i];
+                if (curBlock.type === 'html') {
+                    // Remove the HTML block from the stack since it has ended
+                    blockStack.pop();
+                    // We have reached the point where the HTML block started
+                    // so we can stop
+                    break;
+                } else {
+                    // The current block is for an HTML tag and it still open. When a tag is tag is closed
+                    // it is removed from the stack
+                    notifyError(curBlock.pos,
+                        'MISSING_END_TAG',
+                        'Missing ending "' + curBlock.tagName + '" tag');
+                    return;
+                }
+            }
+
+            // Resert variables associated with parsing an HTML block
+            htmlBlockIndent = null;
+            htmlBlockDelimiter = null;
+            isWithinSingleLineHtmlBlock = false;
+
+            parser.enterState(STATE_CONCISE_HTML_CONTENT);
+        }
+
+        /**
+         * This function gets called when we reach EOF outside of a tag.
+         */
+        function htmlEOF() {
+            endText();
+
+            while(blockStack.length) {
+                var curBlock = peek(blockStack);
+                if (curBlock.type === 'tag') {
+                    if (curBlock.concise) {
+                        closeTag(curBlock.tagName);
+                    } else {
+                        // We found an unclosed tag on the stack that is not for a concise tag. That means
+                        // there is a problem with the template because all open tags should have a closing
+                        // tag
+                        //
+                        // NOTE: We have already closed tags that are open tag only or self-closed
+                        notifyError(curBlock.pos,
+                            'MISSING_END_TAG',
+                            'Missing ending "' + curBlock.tagName + '" tag');
+                        return;
+                    }
+                } else if (curBlock.type === 'html') {
+                    if (curBlock.delimiter) {
+                        // We reached the end of the file and there is still a delimited HTML block on the stack.
+                        // That means we never found the ending delimiter and should emit a parse error
+                        notifyError(curBlock.pos,
+                            'MISSING_END_DELIMITER',
+                            'End of file reached before finding the ending "' + curBlock.delimiter + '" delimiter');
+                        return;
+                    } else {
+                        // We reached the end of file while still within a single line HTML block. That's okay
+                        // though since we know the line is completely. We'll continue ending all open concise tags.
+                        blockStack.pop();
+                    }
+                } else {
+                    // There is a bug in our parser...
+                    throw new Error('Illegal state. There should not be any non-concise tags on the stack when in concise mode');
+                }
+            }
+        }
+
+        function openTagEOF() {
+            if (isConcise) {
+                // If we reach EOF inside an open tag when in concise-mode
+                // then we just end the tag and all other open tags on the stack
+                finishOpenTag();
+                htmlEOF();
+            } else {
+                // Otherwise, in non-concise mode we consider this malformed input
+                // since the end '>' was not found.
+                notifyError(currentOpenTag.pos,
+                    'MALFORMED_OPEN_TAG',
+                    'EOF reached while parsing open tag');
+            }
+        }
+
+        var notifyCDATA = notifiers.notifyCDATA;
+        var notifyComment = notifiers.notifyComment;
+        var notifyOpenTag = notifiers.notifyOpenTag;
+        var notifyCloseTag = notifiers.notifyCloseTag;
+        var notifyDocumentType = notifiers.notifyDocumentType;
+        var notifyDeclaration = notifiers.notifyDeclaration;
+        var notifyPlaceholder = notifiers.notifyPlaceholder;
+
+        function notifyError(pos, errorCode, message) {
+            parser.end();
+            notifiers.notifyError(pos, errorCode, message);
+        }
+
+        function beginAttribute() {
+            currentAttribute = {};
+            if (currentOpenTag.attributes === EMPTY_ATTRIBUTES) {
+                currentOpenTag.attributes = [currentAttribute];
+            } else {
+                currentOpenTag.attributes.push(currentAttribute);
+            }
+            parser.enterState(STATE_ATTRIBUTE_NAME);
+            return currentAttribute;
+        }
+
+        function endAttribute() {
+            currentAttribute = null;
+            if (parser.state !== STATE_WITHIN_OPEN_TAG) {
+                parser.enterState(STATE_WITHIN_OPEN_TAG);
+            }
+        }
+
+        function beginOpenTag() {
+            endText();
+
+            var tagInfo = {
+                type: 'tag',
+                tagName: '',
+                attributes: [],
+                argument: undefined,
+                pos: parser.pos,
+                indent: indent,
+                nestedIndent: null, // This will get set when we know what hte nested indent is
+                concise: isConcise
+            };
+
+            withinOpenTag = true;
+
+            if (beginMixedMode) {
+                tagInfo.beginMixedMode = true;
+                beginMixedMode = false;
+            }
+
+            blockStack.push(tagInfo);
+
+            currentOpenTag = tagInfo;
+
+            parser.enterState(STATE_TAG_NAME);
+
+            return currentOpenTag;
+        }
+
+        function finishOpenTag(selfClosed) {
+            var tagName = currentOpenTag.tagName;
+            var openTagOnly = currentOpenTag.openTagOnly = isOpenTagOnly(tagName);
+            var endPos = parser.pos;
+
+            if (!isConcise) {
+                if (selfClosed) {
+                    endPos += 2; // Skip past '/>'
+                } else {
+                    endPos += 1;
+                }
+            }
+
+            currentOpenTag.endPos = endPos;
+            currentOpenTag.selfClosed = selfClosed === true;
+
+            var origState = parser.state;
+            notifyOpenTag(currentOpenTag);
+
+            var shouldClose = false;
+
+            if (selfClosed) {
+                shouldClose = true;
+            } else if (openTagOnly) {
+                if (!isConcise) {
+                    // Only close the tag if we are not in concise mode. In concise mode
+                    // we want to keep the tag on the stack to make sure nothing is nested below it
+                    shouldClose = true;
+                }
+            }
+
+            if (shouldClose) {
+                closeTag(tagName);
+            }
+
+            withinOpenTag = false;
 
             // Did the parser stay in the same state after
-            // notifying listeners about opentag?
+            // notifying listeners about openTag?
             if (parser.state === origState) {
                 // The listener didn't transition the parser to a new state
                 // so we use some simple rules to find the appropriate state.
@@ -145,294 +411,672 @@ class Parser extends BaseParser {
                 } else if (tagName === 'style') {
                     parser.enterCssContentState();
                 } else {
-                    parser.enterHtmlContentState();
+                    if (isConcise) {
+                        parser.enterConciseHtmlContentState();
+                    } else {
+                        parser.enterHtmlContentState();
+                    }
+
                 }
             }
+
+            // We need to record the "expected close tag name" if we transition into
+            // either STATE_STATIC_TEXT_CONTENT or STATE_PARSED_TEXT_CONTENT
+            expectedCloseTagName = tagName;
+
+            currentOpenTag = undefined;
         }
 
-        function _afterSelfClosingTag() {
-            _notifyOpenTag(tagName, attributes, elementArgument, true /* selfClosed */, tagPos);
-            _notifyCloseTag(tagName, true /* selfClosed */);
-            parser.enterHtmlContentState();
-        }
+        function closeTag(tagName, pos, endPos) {
+            if (!tagName) {
+                throw new Error('Illegal state. Invalid tag name');
+            }
+            var lastTag = blockStack.length ? blockStack.pop() : undefined;
 
-        function _enterExpressionState(ch, startDelimiter, endDelimiter, newState) {
-            if (currentExpression) {
-                // remember the expression string that we are currently building
-                currentExpression.str = expressionStr;
+            if (pos == null && closeTagPos != null) {
+                pos = closeTagPos;
+                endPos = parser.pos + 1;
             }
 
-            var startPos = parser.pos;
+            if (!lastTag || lastTag.type !== 'tag') {
+                return notifyError(pos,
+                    'EXTRA_CLOSING_TAG',
+                    'The closing "' + tagName + '" tag was not expected');
+            }
 
-            currentExpression = {
-                parentState: parser.state,
-                depth: 1,
-                startDelimiter: startDelimiter,
-                endDelimiter: endDelimiter,
-                startPos: startPos,
-                startChar: parser.data.charAt(startPos)
+            if (!lastTag || lastTag.tagName !== tagName) {
+                return notifyError(pos,
+                    'MISMATCHED_CLOSING_TAG',
+                    'The closing "' + tagName + '" tag does not match the corresponding opening "' + lastTag.tagName + '" tag');
+            }
+
+            notifyCloseTag(tagName, pos, endPos);
+
+            if (lastTag.beginMixedMode) {
+                endingMixedModeAtEOL = true;
+            }
+
+            closeTagName = null;
+            closeTagPos = null;
+        }
+
+        function beginPart() {
+            currentPart = {
+                pos: parser.pos,
+                parentState: parser.state
             };
 
-            expressionHandler = currentExpression.parentState.expression || expressionHandler;
+            partStack.push(currentPart);
 
-            currentExpression.str = expressionStr = ch;
-
-            expressionStack.push(currentExpression);
-
-            parser.enterState(newState);
+            return currentPart;
         }
 
-        function _leaveExpressionState() {
-            var top = expressionStack.pop();
-
-            if (expressionHandler === top.parentState.expression) {
-                // find a new top-most expression handler
-                var i = expressionStack.length;
-                while(--i >= 0) {
-                    var cur = expressionStack[i];
-                    if ((expressionHandler = cur.parentState.expression)) {
-                        break;
-                    }
-                }
-            }
-
-            var len = expressionStack.length;
-            if (len > 0) {
-                currentExpression = expressionStack[len - 1];
-                expressionStr = currentExpression.str;
-            } else {
-                currentExpression = null;
-                expressionStr = null;
-            }
-
-            parser.enterState(top.parentState);
+        function endPart() {
+            var last = partStack.pop();
+            parser.endPos = parser.pos;
+            parser.enterState(last.parentState);
+            currentPart = partStack.length ? peek(partStack) : undefined;
+            return last;
         }
 
-        function _enterBlockCommentState() {
-            commentHandler = parser.state.comment;
-            commentHandler.char('/*');
-            parser.enterState(STATE_BLOCK_COMMENT);
+        // Expression
+
+        function beginExpression(endAfterGroup) {
+            var expression = beginPart();
+            expression.value = '';
+            expression.groupStack = [];
+            expression.endAfterGroup = endAfterGroup === true;
+            expression.isStringLiteral = null;
+            parser.enterState(STATE_EXPRESSION);
+            return expression;
         }
 
-        function _enterLineCommentState() {
-            commentHandler = parser.state.comment;
-            commentHandler.char('//');
-            parser.enterState(STATE_LINE_COMMENT);
+        function endExpression() {
+            var expression = endPart();
+            expression.parentState.expression(expression);
         }
 
-        function _enterPlaceholderState(placeholder) {
-            var currentState = parser.state;
-            var len = placeholderStack.length;
+        // --------------------------
 
-            // Set the event type...
-            // This property is used so that the placeholder
-            // can be emitted as an event.
+        // String
 
-            placeholder.type = withinTag ? 'attributeplaceholder' : 'contentplaceholder';
-            if (len) {
-                placeholder.type = 'nested' + placeholder.type;
-            }
+        function beginString(quoteChar, quoteCharCode) {
+            var string = beginPart();
+            string.stringParts = [];
+            string.currentText = '';
+            string.quoteChar = quoteChar;
+            string.quoteCharCode = quoteCharCode;
+            string.isStringLiteral = true;
+            parser.enterState(STATE_STRING);
+            return string;
+        }
 
-            placeholder.delimiterDepth = 1;
-            placeholder.parentState = currentState;
-            placeholder.expression = '';
-            placeholder.handler = currentState.placeholder;
-            placeholder.pos = parser.pos; // Move to the index of the `$` character
+        function endString() {
+            var string = endPart();
+            string.parentState.string(string);
+        }
 
-            if (len) {
-                var top = placeholderStack[len - 1];
-                if (top.ancestorEscaped) {
-                    placeholder.ancestorEscaped = true;
-                    placeholder.escape = false;
-                }
-            }
+        // --------------------------
 
-            placeholder.depth = len;
+        // Template String
 
-            placeholderStack.push(placeholder);
+        function beginTemplateString() {
+            var templateString = beginPart();
+            templateString.value = '`';
+            parser.enterState(STATE_TEMPLATE_STRING);
+            return templateString;
+        }
 
-            currentPlaceholder = placeholder;
+        function endTemplateString() {
+            var templateString = endPart();
+            templateString.parentState.templateString(templateString);
+        }
 
+        // --------------------------
+
+        // DTD
+
+        function beginDocumentType() {
+            endText();
+
+            var documentType = beginPart();
+            documentType.value = '';
+
+            parser.enterState(STATE_DTD);
+            return documentType;
+        }
+
+        function endDocumentType() {
+            var documentType = endPart();
+            notifyDocumentType(documentType);
+        }
+
+        // --------------------------
+
+        // Declaration
+        function beginDeclaration() {
+            endText();
+
+            var declaration = beginPart();
+            declaration.value = '';
+            parser.enterState(STATE_DECLARATION);
+            return declaration;
+        }
+
+        function endDeclaration() {
+            var declaration = endPart();
+            notifyDeclaration(declaration);
+        }
+
+        // --------------------------
+
+        // CDATA
+
+        function beginCDATA() {
+            endText();
+
+            var cdata = beginPart();
+            cdata.value = '';
+            parser.enterState(STATE_CDATA);
+            return cdata;
+        }
+
+        function endCDATA() {
+            var cdata = endPart();
+            notifyCDATA(cdata.value, cdata.pos, parser.pos + 3);
+        }
+
+        // --------------------------
+
+        // JavaScript Comments
+        function beginLineComment() {
+            var comment = beginPart();
+            comment.value = '//';
+            parser.enterState(STATE_JS_COMMENT_LINE);
+            return comment;
+        }
+
+        function beginBlockComment() {
+            var comment = beginPart();
+            comment.value = '/*';
+            parser.enterState(STATE_JS_COMMENT_BLOCK);
+            return comment;
+        }
+
+        function endJavaScriptComment() {
+            var comment = endPart();
+            comment.parentState.comment(comment);
+        }
+        // --------------------------
+
+        // HTML Comment
+
+        function beginHtmlComment() {
+            endText();
+            var comment = beginPart();
+            comment.value = '';
+            parser.enterState(STATE_HTML_COMMENT);
+            return comment;
+        }
+
+        function endHtmlComment() {
+            var comment = endPart();
+            comment.endPos = parser.pos + 3;
+            notifyComment(comment);
+        }
+
+        // --------------------------
+
+        // Placeholder
+
+        function beginPlaceholder(escape) {
+            var placeholder = beginPart();
+            placeholder.value = '';
+            placeholder.escape = escape !== false;
+            placeholder.type = 'placeholder';
+            placeholder.withinBody = withinOpenTag !== true;
+            placeholder.withinAttribute = withinOpenTag === true;
+            placeholder.withinString = placeholder.parentState === STATE_STRING;
+            placeholderDepth++;
             parser.enterState(STATE_PLACEHOLDER);
+            return placeholder;
         }
 
-        function _leavePlaceholderState(placeholder) {
-            var top = placeholderStack.pop();
-            var newState = top.parentState;
+        function endPlaceholder() {
+            var placeholder = endPart();
+            placeholderDepth--;
 
-            var len = placeholderStack.length;
-            if (len) {
-                currentPlaceholder = placeholderStack[len - 1];
-            } else {
-                currentPlaceholder = null;
+            var newExpression = notifyPlaceholder(placeholder);
+            placeholder.value = newExpression;
+            placeholder.parentState.placeholder(placeholder);
+        }
+
+        // --------------------------
+
+        function getAndRemoveArgument(expression) {
+            let start = expression.lastLeftParenPos;
+            if (start != null) {
+                // The tag has an argument that we need to slice off
+                let end = expression.lastRightParenPos;
+                if (end === expression.value.length - 1) {
+                    var argument = {
+                        value: expression.value.substring(start+1, end),
+                        pos: expression.pos + start,
+                        endPos: expression.pos + end + 1
+                    };
+
+                    // Chop off the argument from the expression
+                    expression.value = expression.value.substring(0, start);
+                    // Fix the end position for the expression
+                    expression.endPos = expression.pos + expression.value.length;
+
+                    return argument;
+                }
             }
 
-            top.handler.end(top);
-
-            parser.enterState(newState);
+            return undefined;
         }
 
-        function _checkForPlaceholder(ch, code, stringDelimiter) {
+        // --------------------------
+
+        function checkForPlaceholder(ch, code) {
             if (code === CODE_DOLLAR) {
                 var nextCode = parser.lookAtCharCodeAhead(1);
                 if (nextCode === CODE_LEFT_CURLY_BRACE) {
-                    _enterPlaceholderState({
-                        escape: true,
-                        stringDelimiter: stringDelimiter
-                    });
-
-                    parser.skip(1);
+                    // We expect to start a placeholder at the first curly brace (the next character)
+                    beginPlaceholder(true);
                     return true;
                 } else if (nextCode === CODE_EXCLAMATION) {
                     var afterExclamationCode = parser.lookAtCharCodeAhead(2);
                     if (afterExclamationCode === CODE_LEFT_CURLY_BRACE) {
-                        _enterPlaceholderState({
-                            escape: false,
-                            stringDelimiter: stringDelimiter
-                        });
-
-                        parser.skip(2);
+                        // We expect to start a placeholder at the first curly brace so skip
+                        // past the exclamation point
+                        beginPlaceholder(false);
+                        parser.skip(1);
                         return true;
                     }
                 }
             }
+
+            return false;
         }
 
-        function _checkForClosingTag() {
+        function checkForEscapedPlaceholder(ch, code) {
+            // Look for \${ and \$!{
+            if (code === CODE_BACK_SLASH) {
+                if (parser.lookAtCharCodeAhead(1) === CODE_DOLLAR) {
+                    if (parser.lookAtCharCodeAhead(2) === CODE_LEFT_CURLY_BRACE) {
+                        return true;
+                    } else if (parser.lookAtCharCodeAhead(2) === CODE_EXCLAMATION) {
+                        if (parser.lookAtCharCodeAhead(3) === CODE_LEFT_CURLY_BRACE) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        function checkForEscapedEscapedPlaceholder(ch, code) {
+            // Look for \\${ and \\$!{
+            if (code === CODE_BACK_SLASH) {
+                if (parser.lookAtCharCodeAhead(1) === CODE_BACK_SLASH) {
+                    if (parser.lookAtCharCodeAhead(2) === CODE_DOLLAR) {
+                        if (parser.lookAtCharCodeAhead(3) === CODE_LEFT_CURLY_BRACE) {
+                            return true;
+                        } else if (parser.lookAtCharCodeAhead(3) === CODE_EXCLAMATION) {
+                            if (parser.lookAtCharCodeAhead(4) === CODE_LEFT_CURLY_BRACE) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        function checkForClosingTag() {
             // Look ahead to see if we found the closing tag that will
             // take us out of the EXPRESSION state...
-            var match = parser.lookAheadFor('/' + endTagName + '>');
+            var lookAhead = '/' + expectedCloseTagName + '>';
+            var match = parser.lookAheadFor(lookAhead);
             if (match) {
+                endText();
+                closeTag(expectedCloseTagName, parser.pos, parser.pos + 1 + lookAhead.length);
+                expectedCloseTagName = undefined;
                 parser.skip(match.length);
-
-                _notifyText(text);
-                _notifyCloseTag(endTagName);
-
-                parser.enterHtmlContentState();
-                return true;
-            }
-        }
-
-        function _checkForArgument(ch, code) {
-            if (code === CODE_LEFT_PARANTHESIS) {
-                if (attributes === EMPTY_ATTRIBUTES) {
-                    // no attributes so arguments are for element
-                    if ((ignoreArgument = (elementArgument != null))) {
-                        _notifyError(tagPos,
-                            'ILLEGAL_ELEMENT_ARGUMENT',
-                            'Element can only have one argument.');
-                    } else {
-                        elementArgument = ch;
-                    }
-
-                    parser.enterState(STATE_ELEMENT_ARGUMENTS);
-                } else {
-                    // arguments are for attribute
-                    currentAttributeForAgument = attributes[attributes.length - 1];
-
-                    if ((ignoreArgument = (currentAttributeForAgument.argument != null))) {
-                        _notifyError(tagPos,
-                            'ILLEGAL_ATTRIBUTE_ARGUMENT',
-                            'Attribute can only have one argument.');
-                    } else {
-                        currentAttributeForAgument.argument = ch;
-                    }
-
-                    parser.enterState(STATE_ATTRIBUTE_ARGUMENTS);
-                }
+                parser.enterState(STATE_HTML_CONTENT);
                 return true;
             }
 
             return false;
         }
 
-        function _checkForCDATA(ch) {
-            var match = parser.lookAheadFor('![CDATA[');
-            if (match) {
-                parser.skip(match.length);
-
-                _notifyText(text);
-
-                cdataParentState = parser.state;
-                parser.enterState(STATE_CDATA);
+        function checkForCDATA(ch) {
+            if (parser.lookAheadFor('![CDATA[')) {
+                beginCDATA();
+                parser.skip(8);
                 return true;
             }
+
+            return false;
         }
 
-        function PLACEHOLDER_EOF_HANDLER() {
-            _notifyError(currentPlaceholder.pos,
-                'MALFORMED_PLACEHOLDER',
-                'EOF reached while parsing placeholder.');
+        function handleDelimitedBlockEOL(newLine) {
+            // If we are within a delimited HTML block then we want to check if the next line is the end
+            // delimiter. Since we are currently positioned at the start of the new line character our lookahead
+            // will need to include the new line character, followed by the expected indentation, followed by
+            // the delimiter.
+            let endHtmlBlockLookahead = htmlBlockIndent + htmlBlockDelimiter;
+
+            if (parser.lookAheadFor(endHtmlBlockLookahead, parser.pos + newLine.length)) {
+                parser.skip(htmlBlockIndent.length);
+                parser.skip(htmlBlockDelimiter.length);
+                // We use a new state to make sure the end delimiter has no other junk on the same line
+                parser.enterState(STATE_END_MULTILINE_HTML_BLOCK);
+                return;
+            } else if (parser.lookAheadFor(htmlBlockIndent, parser.pos + newLine.length)) {
+                // We know the next line does not end the multiline HTML block, but we need to check if there
+                // is any indentation that we need to skip over as we continue parsing the HTML in this
+                // multiline HTML block
+
+                parser.skip(htmlBlockIndent.length);
+                // We stay in the same state since we are still parsing a multiline, delimited HTML block
+            }
         }
 
         // In STATE_HTML_CONTENT we are looking for tags and placeholders but
         // everything in between is treated as text.
         var STATE_HTML_CONTENT = Parser.createState({
-            // name: 'STATE_HTML_CONTENT',
+            name: 'STATE_HTML_CONTENT',
 
-            placeholder: {
-                end: function(placeholder) {
-                    _notifyPlaceholder(placeholder);
-                },
-
-                eof: PLACEHOLDER_EOF_HANDLER
+            placeholder(placeholder) {
+                // We found a placeholder while parsing the HTML content. This function is called
+                // from endPlaceholder(). We have already notified the listener of the placeholder so there is
+                // nothing to do here
             },
 
-            eof: function() {
-                _notifyText(text);
+            eol(newLine) {
+                text += newLine;
+
+                if (beginMixedMode) {
+                    beginMixedMode = false;
+                    endHtmlBlock();
+                } else if (endingMixedModeAtEOL) {
+                    endingMixedModeAtEOL = false;
+                    endHtmlBlock();
+                } else if (isWithinSingleLineHtmlBlock) {
+                    // We are parsing "HTML" and we reached the end of the line. If we are within a single
+                    // line HTML block then we should return back to the state to parse concise HTML.
+                    // A single line HTML block can be at the end of the tag or on its own line:
+                    //
+                    // span class="hello" - This is an HTML block at the end of a tag
+                    //     - This is an HTML block on its own line
+                    //
+                    endHtmlBlock();
+                } else if (htmlBlockDelimiter) {
+                    handleDelimitedBlockEOL(newLine);
+                }
             },
 
-            enter: function() {
-                withinTag = false;
+            eof: htmlEOF,
+
+            enter() {
+                isConcise = false; // Back into non-concise HTML parsing
             },
 
-            char: function(ch, code) {
+            char(ch, code) {
                 if (code === CODE_LEFT_ANGLE_BRACKET) {
-                    tagPos = parser.pos;
-
-                    if (_checkForCDATA()) {
+                    if (checkForCDATA()) {
                         return;
                     }
 
-                    var match = parser.lookAheadFor('!--');
-                    if (match) {
-                        parser.skip(match.length);
-                        _notifyText(text);
-                        parser.enterState(STATE_XML_COMMENT);
-                        return;
-                    }
+                    var nextCode = parser.lookAtCharCodeAhead(1);
 
-                    _notifyText(text);
-                    parser.enterState(STATE_START_OPEN_TAG);
-                } else if (_checkForPlaceholder(ch, code)) {
+                    if (parser.lookAheadFor('!--')) {
+                        beginHtmlComment();
+                        parser.skip(3);
+                        return;
+                    } else if (nextCode === CODE_EXCLAMATION) {
+                        // something like:
+                        // <!DOCTYPE html>
+                        // NOTE: We already checked for CDATA earlier and <!--
+                        beginDocumentType();
+                        parser.skip(1);
+                    } else if (nextCode === CODE_QUESTION) {
+                        // something like:
+                        // <?xml version="1.0"?>
+                        beginDeclaration();
+                        parser.skip(1);
+                    } else if (nextCode === CODE_FORWARD_SLASH) {
+                        closeTagPos = parser.pos;
+                        closeTagName = null;
+
+                        parser.skip(1);
+                        // something like:
+                        // </html>
+                        endText();
+
+                        parser.enterState(STATE_CLOSE_TAG);
+                    } else if (nextCode === CODE_RIGHT_ANGLE_BRACKET ||
+                               nextCode === CODE_LEFT_ANGLE_BRACKET ||
+                               isWhitespaceCode(nextCode)) {
+                        // something like:
+                        // "<>"
+                        // "<<"
+                        // "< "
+                        // We'll treat this left angle brakect as text
+                        text += '<';
+                    } else {
+                        beginOpenTag();
+                    }
+                } else if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                    text += '\\';
+                    parser.skip(1);
+                }  else if (checkForEscapedPlaceholder(ch, code)) {
+                    text += '$';
+                    parser.skip(1);
+                } else if (checkForPlaceholder(ch, code)) {
                     // We went into placeholder state...
-                    _notifyText(text);
+                    endText();
                 } else {
                     text += ch;
                 }
             }
         });
 
+        // In STATE_CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
+        var STATE_CONCISE_HTML_CONTENT = Parser.createState({
+            name: 'STATE_CONCISE_HTML_CONTENT',
+
+            eof: htmlEOF,
+
+            enter() {
+                isConcise = true;
+                indent = '';
+            },
+
+            char(ch, code) {
+                if (isWhitespaceCode(code)) {
+                    indent += ch;
+                } else  {
+                    while(true) {
+                        let len = blockStack.length;
+                        if (len) {
+                            let curBlock = blockStack[len - 1];
+                            if (curBlock.indent.length >= indent.length) {
+                                closeTag(curBlock.tagName);
+                            } else {
+                                // Indentation is greater than the last tag so we are starting a
+                                // nested tag and there are no more tags to end
+                                break;
+                            }
+                        } else {
+                            if (indent) {
+                                notifyError(parser.pos,
+                                    'BAD_INDENTATION',
+                                    'Line has extra indentation at the beginning');
+                                return;
+                            }
+                            break;
+                        }
+                    }
+
+                    var parent = blockStack.length && blockStack[blockStack.length - 1];
+                    var body;
+
+                    if (parent) {
+                        body = parent.body;
+                        if (parent.openTagOnly) {
+                            notifyError(parser.pos,
+                                'INVALID_BODY',
+                                'The "' + parent.tagName + '" tag does not allow nested body content');
+                            return;
+                        }
+
+                        if (parent.nestedIndent) {
+                            if (parent.nestedIndent.length !== indent.length) {
+                                notifyError(parser.pos,
+                                    'BAD_INDENTATION',
+                                    'Line indentation does match indentation of previous line');
+                                return;
+                            }
+                        } else {
+                            parent.nestedIndent = indent;
+                        }
+                    }
+
+                    if (body && code !== CODE_HTML_BLOCK_DELIMITER) {
+                        notifyError(parser.pos,
+                            'ILLEGAL_LINE_START',
+                            'A line within a tag that only allows text content must begin with a "-" character');
+                        return;
+                    }
+
+                    if (code === CODE_LEFT_ANGLE_BRACKET || code === CODE_DOLLAR) {
+                        beginMixedMode = true;
+                        parser.rewind(1);
+                        beginHtmlBlock();
+                        return;
+                    }
+
+                    if (code === CODE_HTML_BLOCK_DELIMITER) {
+                        if (parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
+                            // Two or more HTML block delimiters means we are starting a multiline, delimited HTML block
+                            htmlBlockDelimiter = ch;
+                            // We enter the following state to read in the full delimiter
+                            return parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
+                        } else {
+
+                            if (parser.lookAtCharCodeAhead(1) === CODE_SPACE) {
+                                // We skip over the first space
+                                parser.skip(1);
+                            }
+                            isWithinSingleLineHtmlBlock = true;
+                            beginHtmlBlock();
+                        }
+                    } else {
+                        beginOpenTag();
+                        parser.rewind(1); // START_TAG_NAME expects to start at the first character
+                    }
+                }
+            }
+        });
+
+        // In STATE_BEGIN_DELIMITED_HTML_BLOCK we have already found two consecutive hyphens. We expect
+        // to reach the end of the line with only whitespace characters
+        var STATE_BEGIN_DELIMITED_HTML_BLOCK = Parser.createState({
+            name: 'STATE_BEGIN_DELIMITED_HTML_BLOCK',
+
+            eol: function(newLine) {
+                // We have reached the end of the first delimiter... we need to skip over any indentation on the next
+                // line and we might also find that the multi-line, delimited block is immediately ended
+                beginHtmlBlock(htmlBlockDelimiter);
+                handleDelimitedBlockEOL(newLine);
+            },
+
+            eof: htmlEOF,
+
+            char(ch, code) {
+                if (code === CODE_HTML_BLOCK_DELIMITER) {
+                    htmlBlockDelimiter += ch;
+                } else if (isWhitespaceCode(code)) {
+                    // Just whitespace... we are still good
+                } else {
+                    // This is a non-whitespace! We don't allow non-whitespace
+                    // after matching two or more hyphens. This is user error...
+                    notifyError(parser.pos,
+                        'MALFORMED_MULTILINE_HTML_BLOCK',
+                        'A non-whitespace of "' + ch + '" was found on the same line as a multiline HTML block delimiter ("' + htmlBlockDelimiter + '")');
+                }
+            }
+        });
+
+        // In STATE_END_MULTILINE_HTML_BLOCK we have already skipped past the matched delimiter. Now, we are just making
+        // sure there are no non-whitespace characters on the same line
+        var STATE_END_MULTILINE_HTML_BLOCK = Parser.createState({
+            name: 'STATE_END_MULTILINE_HTML_BLOCK',
+
+            eol: function() {
+                // We successfully made it to the end of the line so we are officially done with the multiline,
+                // delimited HTML block. We return back to the STATE_CONCISE_HTML_CONTENT state positioned at the first
+                // column on the next line.
+                endHtmlBlock();
+            },
+
+            eof: function() {
+                // We already found the end delimiter... while checking every character on the line to make sure it was
+                // all whitespace we reached the end of file.
+                endHtmlBlock();
+
+                htmlEOF();
+            },
+
+            char(ch, code) {
+                if (isWhitespaceCode(code)) {
+                    // Just whitespace... we are still good
+                } else {
+                    // This is a non-whitespace! We don't allow non-whitespace
+                    // after matching two or more hyphens. This is user error...
+                    notifyError(parser.pos,
+                        'MALFORMED_MULTILINE_HTML_BLOCK',
+                        'A non-whitespace of "' + ch + '" was found on the same line as the ending delimiter ("' + htmlBlockDelimiter + '") for a multiline HTML block');
+                }
+            }
+        });
+
         // We enter STATE_STATIC_TEXT_CONTENT when a listener manually chooses
-        // to enter this state after seeing an opentag event for a tag
+        // to enter this state after seeing an openTag event for a tag
         // whose content should not be parsed at all (except for the purpose
         // of looking for the end tag).
         var STATE_STATIC_TEXT_CONTENT = Parser.createState({
-            // name: 'STATE_STATIC_TEXT_CONTENT',
+            name: 'STATE_STATIC_TEXT_CONTENT',
 
-            enter: function() {
-                // The end tag that we are looking for is the last tag
-                // name that we saw
-                endTagName = tagName;
-                withinTag = false;
+            eol(newLine) {
+                text += newLine;
+
+                if (isWithinSingleLineHtmlBlock) {
+                    // We are parsing "HTML" and we reached the end of the line. If we are within a single
+                    // line HTML block then we should return back to the state to parse concise HTML.
+                    // A single line HTML block can be at the end of the tag or on its own line:
+                    //
+                    // span class="hello" - This is an HTML block at the end of a tag
+                    //     - This is an HTML block on its own line
+                    //
+                    endHtmlBlock();
+                } else if (htmlBlockDelimiter) {
+                    handleDelimitedBlockEOL(newLine);
+                }
             },
 
-            eof: STATE_HTML_CONTENT.eof,
+            eof: htmlEOF,
 
-            char: function(ch, code) {
+            char(ch, code) {
                 // See if we need to see if we reached the closing tag...
-                if (code === CODE_LEFT_ANGLE_BRACKET) {
-                    if (_checkForClosingTag()) {
+                if (!isConcise && code === CODE_LEFT_ANGLE_BRACKET) {
+                    if (checkForClosingTag()) {
                         return;
                     }
                 }
@@ -445,28 +1089,47 @@ class Parser extends BaseParser {
         // the body of a tag does not contain HTML tags but may contains
         // placeholders
         var STATE_PARSED_TEXT_CONTENT = Parser.createState({
-            // name: 'STATE_PARSED_TEXT_CONTENT',
+            name: 'STATE_PARSED_TEXT_CONTENT',
 
             placeholder: STATE_HTML_CONTENT.placeholder,
 
-            eof: STATE_HTML_CONTENT.eof,
+            eol(newLine) {
+                text += newLine;
 
-            enter: function() {
-                withinTag = false;
+                if (isWithinSingleLineHtmlBlock) {
+                    // We are parsing "HTML" and we reached the end of the line. If we are within a single
+                    // line HTML block then we should return back to the state to parse concise HTML.
+                    // A single line HTML block can be at the end of the tag or on its own line:
+                    //
+                    // span class="hello" - This is an HTML block at the end of a tag
+                    //     - This is an HTML block on its own line
+                    //
+                    endHtmlBlock();
+                } else if (htmlBlockDelimiter) {
+                    handleDelimitedBlockEOL(newLine);
+                }
             },
 
-            char: function(ch, code) {
-                if (code === CODE_LEFT_ANGLE_BRACKET) {
+            eof: htmlEOF,
+
+            char(ch, code) {
+                if (!isConcise && code === CODE_LEFT_ANGLE_BRACKET) {
                     // First, see if we need to see if we reached the closing tag
                     // and then check if we encountered CDATA
-                    if (_checkForClosingTag()) {
+                    if (checkForClosingTag()) {
                         return;
-                    } else if (_checkForCDATA()) {
+                    } else if (checkForCDATA()) {
                         return;
                     }
-                } else if (_checkForPlaceholder(ch, code)) {
+                } else if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                    text += '\\';
+                    parser.skip(1);
+                }  else if (checkForEscapedPlaceholder(ch, code)) {
+                    text += '$';
+                    parser.skip(1);
+                } else if (checkForPlaceholder(ch, code)) {
                     // We went into placeholder state...
-                    _notifyText(text);
+                    endText();
                     return;
                 }
 
@@ -474,150 +1137,93 @@ class Parser extends BaseParser {
             }
         });
 
-        // State that we enter just after seeing a "<" while in STATE_HTML_CONTENT.
-        // NOTE: We have already ruled out CDATA and XML comment via a look-ahead
-        // so we just need to handle other entities that start with "<"
-        var STATE_START_OPEN_TAG = Parser.createState({
-            // name: 'STATE_START_OPEN_TAG',
-            enter: function() {
-                tagName = '';
-                elementArgument = undefined;
-                withinTag = true;
-            },
-
-            eof: function() {
-                // Encountered a "<" at the end of the data
-                _notifyText('<');
-            },
-
-            char: function(ch, code) {
-                if (code === CODE_EXCLAMATION) {
-                    // something like:
-                    // <!DOCTYPE html>
-                    // NOTE: We already checked for CDATA earlier and <!--
-                    parser.enterState(STATE_DTD);
-                } else if (code === CODE_QUESTION) {
-                    // something like:
-                    // <?xml version="1.0"?>
-                    parser.enterState(STATE_DECLARATION);
-                } else if (code === CODE_FORWARD_SLASH) {
-                    // something like:
-                    // </html>
-                    parser.enterState(STATE_CLOSE_TAG);
-                } else if (code === CODE_RIGHT_ANGLE_BRACKET) {
-                    // something like:
-                    // <>
-                    // We'll treat this as text
-                    _notifyText('<>');
-
-                    parser.enterHtmlContentState();
-                } else if (code === CODE_LEFT_ANGLE_BRACKET) {
-                    // found something like:
-                    // ><
-                    // We'll treat the stray ">" as text and stay in
-                    // the START_BEGIN_ELEMENT since we saw a new "<"
-                    _notifyText('<');
-                } else if (_isWhitespaceCode(code)) {
-                    // Found something like "< "
-                    _notifyText('<' + ch);
-
-                    parser.enterHtmlContentState();
-                } else {
-                    tagName += ch;
-
-                    // just a normal element...
-                    parser.enterState(STATE_TAG_NAME);
-                }
-            }
-        });
-
         // We enter STATE_TAG_NAME after we encounter a "<"
         // followed by a non-special character
         var STATE_TAG_NAME = Parser.createState({
-            // name: 'STATE_TAG_NAME',
+            name: 'STATE_TAG_NAME',
 
-            enter: function() {
-                // reset attributes collection when we enter new element
-                attributes = EMPTY_ATTRIBUTES;
-            },
+            eol: openTagEOL,
 
-            eof: function() {
-                _notifyError(tagPos,
-                    'MALFORMED_OPEN_TAG',
-                    'EOF reached while parsing open tag.');
-            },
+            eof: openTagEOF,
 
-            char: function(ch, code) {
-                if (code === CODE_RIGHT_ANGLE_BRACKET) {
-                    _afterOpenTag();
-                } else if (code === CODE_FORWARD_SLASH) {
-                    var nextCode = parser.lookAtCharCodeAhead(1);
-                    parser.skip(1);
+            expression(expression) {
+                var argument = getAndRemoveArgument(expression);
 
-                    if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
-                        // we found a self-closing tag
-                        _afterSelfClosingTag();
-                    } else {
-                        parser.enterState(STATE_WITHIN_OPEN_TAG);
+                if (argument) {
+                    // The tag has an argument that we need to slice off
+
+                    if (currentOpenTag.argument != null) {
+                        notifyError(expression.endPos,
+                            'ILLEGAL_TAG_ARGUMENT',
+                            'A tag can only have one argument');
                     }
-                } else if (_checkForArgument(ch, code)) {
-                    // encountered something like:
-                    // <for(var i = 0; i < len; i++)>
-                } else if (_isWhitespaceCode(code)) {
-                    parser.enterState(STATE_WITHIN_OPEN_TAG);
-                } else {
-                    tagName += ch;
+
+                    currentOpenTag.argument = argument;
                 }
+
+                currentOpenTag.tagName = expression.value;
+            },
+
+            enter(oldState) {
+                if (oldState !== STATE_EXPRESSION) {
+                    beginExpression();
+                }
+            },
+
+            char(ch, code) {
+                throw new Error('Illegal state');
             }
         });
 
         // We enter STATE_CDATA after we see "<![CDATA["
         var STATE_CDATA = Parser.createState({
-            // name: 'STATE_CDATA',
+            name: 'STATE_CDATA',
 
-            eof: function() {
-                _notifyError(tagPos,
+            eof() {
+                notifyError(currentPart.pos,
                     'MALFORMED_CDATA',
                     'EOF reached while parsing CDATA');
             },
 
-            char: function(ch, code) {
+            char(ch, code) {
                 if (code === CODE_RIGHT_SQUARE_BRACKET) {
                     var match = parser.lookAheadFor(']>');
                     if (match) {
-                        _notifyCDATA(text);
-                        text = '';
+                        endCDATA();
                         parser.skip(match.length);
-                        parser.enterState(cdataParentState);
                         return;
                     }
                 }
 
-                text += ch;
+                currentPart.value += ch;
             }
         });
 
         // We enter STATE_CLOSE_TAG after we see "</"
         var STATE_CLOSE_TAG = Parser.createState({
-            // name: 'STATE_CLOSE_TAG',
-            eof: function() {
-                _notifyError(tagPos,
+            name: 'STATE_CLOSE_TAG',
+            eof() {
+                notifyError(closeTag.pos,
                     'MALFORMED_CLOSE_TAG',
-                    'EOF reached while parsing closing element.');
+                    'EOF reached while parsing closing tag');
             },
 
-            char: function(ch, code) {
+            enter() {
+                closeTagName = '';
+            },
+
+            char(ch, code) {
                 if (code === CODE_RIGHT_ANGLE_BRACKET) {
-                    if (tagName.length > 0) {
-                        _notifyCloseTag(tagName);
+                    if (closeTagName.length > 0) {
+                        closeTag(closeTagName, closeTagPos, parser.pos + 1);
                     } else {
                         // Treat </> as text block...
-                        _notifyText('</>');
+                        endText('</>');
                     }
 
                     parser.enterState(STATE_HTML_CONTENT);
                 } else {
-                    tagName += ch;
+                    closeTagName += ch;
                 }
             }
         });
@@ -625,29 +1231,89 @@ class Parser extends BaseParser {
         // We enter STATE_WITHIN_OPEN_TAG after we have fully
         // read in the tag name and encountered a whitespace character
         var STATE_WITHIN_OPEN_TAG = Parser.createState({
-            // name: 'STATE_WITHIN_OPEN_TAG',
+            name: 'STATE_WITHIN_OPEN_TAG',
 
-            eof: STATE_TAG_NAME.eof,
+            eol: openTagEOL,
 
-            char: function(ch, code) {
-                if (code === CODE_RIGHT_ANGLE_BRACKET) {
-                    _afterOpenTag();
-                } else if (code === CODE_FORWARD_SLASH) {
-                    var nextCode = parser.lookAtCharCodeAhead(1);
-                    if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
-                        parser.skip(1);
-                        _afterSelfClosingTag();
+            eof: openTagEOF,
+
+            expression(expression) {
+                var argument = getAndRemoveArgument(expression);
+
+                if (argument) {
+                    // We found an argument... the argument could be for an attribute or the tag
+                    if (currentOpenTag.attributes.length === 0) {
+                        if (currentOpenTag.argument != null) {
+                            notifyError(expression.endPos,
+                                'ILLEGAL_TAG_ARGUMENT',
+                                'A tag can only have one argument');
+                            return;
+                        }
+                        currentOpenTag.argument = argument;
+                    } else {
+                        let targetAttribute = currentAttribute || peek(currentOpenTag.attributes);
+
+                        if (targetAttribute.argument != null) {
+                            notifyError(expression.endPos,
+                                'ILLEGAL_ATTRIBUTE_ARGUMENT',
+                                'An attribute can only have one argument');
+                            return;
+                        }
+                        targetAttribute.argument = argument;
                     }
-                } else if (_isWhitespaceCode(code)) {
+                }
+            },
+
+            char(ch, code) {
+
+                if (isConcise) {
+                    if (code === CODE_HTML_BLOCK_DELIMITER) {
+                        // The open tag is complete
+                        finishOpenTag();
+
+                        let nextCode = parser.lookAtCharCodeAhead(1);
+                        if (nextCode !== CODE_NEWLINE && nextCode !== CODE_CARRIAGE_RETURN &&
+                            isWhitespaceCode(nextCode)) {
+                            // We want to remove the first whitespace character after the `-` symbol
+                            parser.skip(1);
+                        }
+
+                        isWithinSingleLineHtmlBlock = true;
+                        beginHtmlBlock();
+                        return;
+                    }
+                } else {
+                    if (code === CODE_RIGHT_ANGLE_BRACKET) {
+                        finishOpenTag();
+                        return;
+                    } else if (code === CODE_FORWARD_SLASH) {
+                        let nextCode = parser.lookAtCharCodeAhead(1);
+                        if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
+                            finishOpenTag(true /* self closed */);
+                            parser.skip(1);
+                            return;
+                        }
+                    }
+                }
+
+                if (code === CODE_LEFT_ANGLE_BRACKET) {
+                    return notifyError(parser.pos,
+                        'ILLEGAL_ATTRIBUTE_NAME',
+                        'Invalid attribute name. Attribute name cannot begin with the "<" character.');
+                }
+
+                if (isWhitespaceCode(code)) {
                     // ignore whitespace within element...
-                } else if (_checkForArgument(ch, code)) {
+                } else if (code === CODE_LEFT_PARANTHESIS) {
+                    parser.rewind(1);
+                    beginExpression();
                     // encountered something like:
                     // <for (var i = 0; i < len; i++)>
                 } else {
+                    parser.rewind(1);
                     // attribute name is initially the first non-whitespace
                     // character that we found
-                    _attribute().name = ch;
-                    parser.enterState(STATE_ATTRIBUTE_NAME);
+                    beginAttribute();
                 }
             }
         });
@@ -655,382 +1321,379 @@ class Parser extends BaseParser {
         // We enter STATE_ATTRIBUTE_NAME when we see a non-whitespace
         // character after reading the tag name
         var STATE_ATTRIBUTE_NAME = Parser.createState({
-            // name: 'STATE_ATTRIBUTE_NAME',
+            name: 'STATE_ATTRIBUTE_NAME',
 
-            eof: STATE_TAG_NAME.eof,
+            eol: openTagEOL,
 
-            char: function(ch, code) {
-                if (code === CODE_EQUAL) {
-                    // We encountered "=" which means we need to start reading
-                    // the attribute value.
-                    // Set the attribute value to empty string (since it is
-                    // initially undefined when start reading a new attribute)
-                    attribute.expression = '';
-                    attribute.isSimpleLiteral = true;
-                    parser.enterState(STATE_ATTRIBUTE_VALUE);
-                } else if (code === CODE_RIGHT_ANGLE_BRACKET) {
-                    // While reading attribute name, see if we encounter end tag
-                    _afterOpenTag();
-                } else if (code === CODE_FORWARD_SLASH) {
-                    // Check for self-closing tag
-                    var nextCode = parser.lookAtCharCodeAhead(1);
-                    if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
-                        // we found a self-closing tag
-                        parser.skip(1);
-                        _afterSelfClosingTag();
-                    } else {
-                        // ignore the extra "/" and stop looking
-                        // for attribute value
-                        parser.enterState(STATE_WITHIN_OPEN_TAG);
-                    }
-                } else if (_checkForArgument(ch, code)) {
-                    // Found something like:
-                    // <div if(a === b)>
-                } else if (_isWhitespaceCode(code)) {
-                    // when whitespace is encountered then we complete
-                    // the current attribute and don't bother looking
-                    // for attribute value
-                    parser.enterState(STATE_WITHIN_OPEN_TAG);
-                } else {
-                    // Just a normal attribute name character
-                    attribute.name += ch;
+            eof: openTagEOF,
+
+            expression(expression) {
+                var argument = getAndRemoveArgument(expression);
+                if (argument) {
+                    // The tag has an argument that we need to slice off
+                    currentAttribute.argument = argument;
                 }
+
+                currentAttribute.name = expression.value;
+                currentAttribute.pos = expression.pos;
+                currentAttribute.endPos = expression.endPos;
+            },
+
+            enter(oldState) {
+                if (oldState !== STATE_EXPRESSION) {
+                    beginExpression();
+                }
+            },
+
+            char(ch, code) {
+                throw new Error('Illegal state');
             }
         });
 
         // We enter STATE_ATTRIBUTE_VALUE when we see a "=" while in
         // the ATTRIBUTE_NAME state.
         var STATE_ATTRIBUTE_VALUE = Parser.createState({
-            // name: 'STATE_ATTRIBUTE_VALUE',
-            // We go into the LINE_COMMENT or BLOCK_COMMENT sub-state
-            // when we see a // or /* character sequence while parsing
-            // an attribute value.
-            // The LINE_COMMENT or BLOCK_COMMENT state will bubble some
-            // events up to the parent state.
-            comment: {
-                end: function() {
-                    // If we reach the end of the string then return
-                    // back to the ATTRIBUTE_VALUE state
-                    parser.enterState(STATE_ATTRIBUTE_VALUE);
-                },
+            name: 'STATE_ATTRIBUTE_VALUE',
 
-                char: function(ch) {
-                    // char will be called for each character in the
-                    // string (including the delimiters)
-                    attribute.expression += ch;
-                },
+            expression(expression) {
+                var value = expression.value;
 
-                eof: STATE_TAG_NAME.eof
+                if (value === '') {
+
+                    return notifyError(expression.pos,
+                        'ILLEGAL_ATTRIBUTE_VALUE',
+                        'No attribute value found after "="');
+                }
+                currentAttribute.value = value;
+                currentAttribute.pos = expression.pos;
+                currentAttribute.endPos = expression.endPos;
+
+                // If the expression evaluates to a literal value then add the
+                // `literalValue` property to the attribute
+                if (expression.isStringLiteral) {
+                    currentAttribute.literalValue = evaluateStringExpression(value);
+                } else if (value === 'true') {
+                    currentAttribute.literalValue = true;
+                } else if (value === 'false') {
+                    currentAttribute.literalValue = false;
+                } else if (value === 'null') {
+                    currentAttribute.literalValue = null;
+                } else if (value === 'undefined') {
+                    currentAttribute.literalValue = undefined;
+                } else if (NUMBER_REGEX.test(value)) {
+                    currentAttribute.literalValue = Number(value);
+                }
+
+                // We encountered a whitespace character while parsing the attribute name. That
+                // means the attribute name has ended and we should continue parsing within the
+                // open tag
+                endAttribute();
             },
 
-            expression: {
-                char: function(ch, code) {
-                    attribute.expression += ch;
-                },
+            eol: openTagEOL,
 
-                string: function(str, isStringLiteral) {
-                    if (!isStringLiteral) {
-                        attribute.isStringLiteral = false;
-                    }
+            eof: openTagEOF,
 
-                    attribute.expression += str;
-                },
-
-                eof: STATE_TAG_NAME.eof,
+            enter(oldState) {
+                if (oldState !== STATE_EXPRESSION) {
+                    beginExpression();
+                }
             },
 
-            eof: STATE_TAG_NAME.eof,
-
-            char: function(ch, code) {
-                if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
-                    // The attribute value is possibly a string literal if the
-                    // first character for the value is a single or double quote
-                    attribute.isStringLiteral = (attribute.expression.length === 0);
-                    attribute.isSimpleLiteral = false;
-                    _enterExpressionState(ch, code, code, STATE_STRING);
-                    return;
-                }
-
-                if (code === CODE_RIGHT_ANGLE_BRACKET) {
-                    return _afterOpenTag();
-                }
-
-                if (_isWhitespaceCode(code)) {
-                    return parser.enterState(STATE_WITHIN_OPEN_TAG);
-                }
-
-                if (code === CODE_FORWARD_SLASH) {
-                    var nextCode = parser.lookAtCharCodeAhead(1);
-                    if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
-                        // we found a self-closing tag
-                        _afterSelfClosingTag();
-                        return parser.skip(1);
-                    } else if (nextCode === CODE_ASTERISK) {
-                        attribute.isSimpleLiteral = false;
-                        parser.skip(1);
-                        return _enterBlockCommentState();
-                    }
-
-                    // we encountered a "/" but it wasn't followed
-                    // by a ">" so continue
-
-                    // if we see any character besides " and ' then value is
-                    // not static text
-                } else if (code === CODE_LEFT_PARANTHESIS) {
-                    attribute.isSimpleLiteral = false;
-                    _enterExpressionState(ch, code, CODE_RIGHT_PARANTHESIS, STATE_DELIMITED_EXPRESSION);
-                } else if (code === CODE_LEFT_CURLY_BRACE) {
-                    attribute.isSimpleLiteral = false;
-                    _enterExpressionState(ch, code, CODE_RIGHT_CURLY_BRACE, STATE_DELIMITED_EXPRESSION);
-                } else if (code === CODE_LEFT_SQUARE_BRACKET) {
-                    attribute.isSimpleLiteral = false;
-                    _enterExpressionState(ch, code, CODE_RIGHT_SQUARE_BRACKET, STATE_DELIMITED_EXPRESSION);
-                }
-
-                // If we got here then we are parsing characters that were
-                // not within a quoted string so our value can't possibly be
-                // a string literal
-                attribute.isStringLiteral = false;
-
-                attribute.expression += ch;
+            char(ch, code) {
+                throw new Error('Illegal state');
             }
         });
 
-        var STATE_ELEMENT_ARGUMENTS = Parser.createState({
-            // name: 'STATE_ELEMENT_ARGUMENTS',
+        var STATE_EXPRESSION = Parser.createState({
+            name: 'STATE_EXPRESSION',
 
-            expression: {
-                char: function(ch, code) {
-                    if (!ignoreArgument) {
-                        elementArgument += ch;
+            eol(str) {
+                let depth = currentPart.groupStack.length;
+
+                if (depth === 0) {
+                    if (currentPart.parentState === STATE_ATTRIBUTE_NAME || currentPart.parentState === STATE_ATTRIBUTE_VALUE) {
+                        currentPart.endPos = parser.pos;
+                        endExpression();
+                        // We encountered a whitespace character while parsing the attribute name. That
+                        // means the attribute name has ended and we should continue parsing within the
+                        // open tag
+                        endAttribute();
+
+                        if (isConcise) {
+                            openTagEOL();
+                        }
+                        return;
+                    } else if (currentPart.parentState === STATE_TAG_NAME) {
+                        currentPart.endPos = parser.pos;
+                        endExpression();
+
+                        // We encountered a whitespace character while parsing the attribute name. That
+                        // means the attribute name has ended and we should continue parsing within the
+                        // open tag
+                        if (parser.state !== STATE_WITHIN_OPEN_TAG) {
+                            // Make sure we transition into parsing within the open tag
+                            parser.enterState(STATE_WITHIN_OPEN_TAG);
+                        }
+
+                        if (isConcise) {
+                            openTagEOL();
+                        }
+
+                        return;
                     }
-                },
+                }
 
-                string: function(str) {
-                    if (!ignoreArgument) {
-                        elementArgument += str;
-                    }
-                },
-
-                eof: STATE_TAG_NAME.eof
+                currentPart.value += str;
             },
 
-            enter: function(oldState) {
-                if (oldState === STATE_DELIMITED_EXPRESSION) {
-                    parser.enterState(STATE_WITHIN_OPEN_TAG);
+            eof() {
+                if (isConcise && currentPart.groupStack.length === 0) {
+                    currentPart.endPos = parser.pos;
+                    endExpression();
+                    openTagEOL();
                 } else {
-                    _enterExpressionState('(', CODE_LEFT_PARANTHESIS, CODE_RIGHT_PARANTHESIS, STATE_DELIMITED_EXPRESSION);
-                }
-            }
-        });
+                    let parentState = currentPart.parentState;
 
-        var STATE_ATTRIBUTE_ARGUMENTS = Parser.createState({
-            // name: 'STATE_ELEMENT_ARGUMENTS',
-
-            expression: {
-                char: function(ch, code) {
-                    if (!ignoreArgument) {
-                        currentAttributeForAgument.argument += ch;
+                    if (parentState === STATE_ATTRIBUTE_NAME) {
+                        return notifyError(currentPart.pos,
+                            'MALFORMED_OPEN_TAG',
+                            'EOF reached while parsing attribute name for the "' + currentOpenTag.tagName + '" tag');
+                    } else if (parentState === STATE_ATTRIBUTE_VALUE) {
+                        return notifyError(currentPart.pos,
+                            'MALFORMED_OPEN_TAG',
+                            'EOF reached while parsing attribute value for the "' + currentAttribute.name + '" attribute');
+                    } else if (parentState === STATE_TAG_NAME) {
+                        return notifyError(currentPart.pos,
+                            'MALFORMED_OPEN_TAG',
+                            'EOF reached while parsing tag name');
+                    } else if (parentState === STATE_PLACEHOLDER) {
+                        return notifyError(currentPart.pos,
+                            'MALFORMED_PLACEHOLDER',
+                            'EOF reached while parsing placeholder');
                     }
-                },
 
-                string: function(str) {
-                    if (!ignoreArgument) {
-                        currentAttributeForAgument.argument += str;
-                    }
-                },
-
-                eof: STATE_TAG_NAME.eof
-            },
-
-            enter: STATE_ELEMENT_ARGUMENTS.enter
-        });
-
-        // We enter STATE_DELIMITED_EXPRESSION after we see an
-        // expression delimiter while in STATE_ATTRIBUTE_VALUE
-        // or STATE_PLACEHOLDER.
-        // The expression delimiters are the following: ({[
-        //
-        // While in this state we keep reading characters until we find the
-        // matching delimiter (while ignoring any expression delimiters that
-        // we might see inside strings and comments).
-        var STATE_DELIMITED_EXPRESSION = Parser.createState({
-            // name: 'STATE_DELIMITED_EXPRESSION',
-            // We go into STATE_LINE_COMMENT or STATE_BLOCK_COMMENT
-            // when we see a // or /* character sequence while parsing
-            // an expression.
-            //
-            // The STATE_LINE_COMMENT or STATE_BLOCK_COMMENT state will
-            // bubble some events up to the parent state.
-            comment: {
-                eof: function() {
-                    currentExpression.parentState.expression.eof();
-                },
-
-                end: function() {
-                    // If we reach the end of the comment then return
-                    // back to the original expression state
-                    parser.enterState(STATE_DELIMITED_EXPRESSION);
-                },
-
-                char: function(ch, code) {
-                    var handler = currentExpression.parentState.expression;
-                    handler.char(ch, code);
+                    return notifyError(currentPart.pos,
+                        'INVALID_EXPRESSION',
+                        'EOF reached will parsing expression');
                 }
             },
 
-            eof: function() {
-                currentExpression.parentState.expression.eof();
+            string(string) {
+                if (currentPart.value === '') {
+                    currentPart.isStringLiteral = string.isStringLiteral === true;
+                } else {
+                    // More than one strings means it is for sure not a string literal...
+                    currentPart.isStringLiteral = false;
+                }
+
+                currentPart.value += string.value;
             },
 
-            char: function(ch, code) {
+            comment(comment) {
+                currentPart.isStringLiteral = false;
+                currentPart.value += comment.value;
+            },
 
-                var handler = currentExpression.parentState.expression;
+            templateString(templateString) {
+                currentPart.isStringLiteral = false;
+                currentPart.value += templateString.value;
+            },
 
-                if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
-                    _enterExpressionState(ch, code, code, STATE_STRING);
-                    return;
+            char(ch, code) {
+                let depth = currentPart.groupStack.length;
+                let parentState = currentPart.parentState;
+
+                if (code === CODE_SINGLE_QUOTE) {
+                    return beginString("'", CODE_SINGLE_QUOTE);
+                } else if (code === CODE_DOUBLE_QUOTE) {
+                    return beginString('"', CODE_DOUBLE_QUOTE);
+                } else if (code === CODE_BACKTICK) {
+                    return beginTemplateString();
                 } else if (code === CODE_FORWARD_SLASH) {
                     // Check next character to see if we are in a comment
                     var nextCode = parser.lookAtCharCodeAhead(1);
                     if (nextCode === CODE_FORWARD_SLASH) {
-                        _enterLineCommentState();
-                        return parser.skip(1);
+                        beginLineComment();
+                        parser.skip(1);
+                        return;
                     } else if (nextCode === CODE_ASTERISK) {
-                        _enterBlockCommentState();
-                        return parser.skip(1);
+
+                        beginBlockComment();
+                        parser.skip(1);
+                        return;
+                    } else if (depth === 0 && !isConcise && nextCode === CODE_RIGHT_ANGLE_BRACKET) {
+                        // Let the STATE_WITHIN_OPEN_TAG state deal with the ending tag sequence
+                        currentPart.endPos = parser.pos;
+                        endExpression();
+                        parser.rewind(1);
+                        return;
+                    }
+                } else if (code === CODE_LEFT_PARANTHESIS ||
+                           code === CODE_LEFT_SQUARE_BRACKET ||
+                           code === CODE_LEFT_CURLY_BRACE) {
+
+                    if (code === CODE_LEFT_PARANTHESIS && depth === 0) {
+                        currentPart.lastLeftParenPos = currentPart.value.length;
+                    }
+
+                    currentPart.groupStack.push(code);
+                    currentPart.isStringLiteral = false;
+                    currentPart.value += ch;
+                    return;
+                } else if (code === CODE_RIGHT_PARANTHESIS ||
+                           code === CODE_RIGHT_SQUARE_BRACKET ||
+                           code === CODE_RIGHT_CURLY_BRACE) {
+
+
+
+                    let matchingGroupCharCode = currentPart.groupStack.pop();
+
+                    if ((code === CODE_RIGHT_PARANTHESIS && matchingGroupCharCode !== CODE_LEFT_PARANTHESIS) ||
+                        (code === CODE_RIGHT_SQUARE_BRACKET && matchingGroupCharCode !== CODE_LEFT_SQUARE_BRACKET) ||
+                        (code === CODE_RIGHT_CURLY_BRACE && matchingGroupCharCode !== CODE_LEFT_CURLY_BRACE)) {
+                            return notifyError(currentPart.pos,
+                                'INVALID_EXPRESSION',
+                                'Mismatched group. A "' + ch + '" character was found when "' + String.fromCharCode(matchingGroupCharCode) + '" was expected.');
+                    }
+
+                    currentPart.value += ch;
+
+                    if (currentPart.groupStack.length === 0) {
+                        if (code === CODE_RIGHT_PARANTHESIS) {
+                            currentPart.lastRightParenPos = currentPart.value.length - 1;
+                        } else if (code === CODE_RIGHT_CURLY_BRACE && parentState === STATE_PLACEHOLDER) {
+                            currentPart.endPos = parser.pos + 1;
+                            endExpression();
+                            return;
+                        }
+                    }
+
+                    return;
+                } else if (depth === 0) {
+                    if (!isConcise) {
+                        if (code === CODE_RIGHT_ANGLE_BRACKET) {
+                            currentPart.endPos = parser.pos + 1;
+                            endExpression();
+                            // Let the STATE_WITHIN_OPEN_TAG state deal with the ending tag sequence
+                            parser.rewind(1);
+                            if (parser.state !== STATE_WITHIN_OPEN_TAG) {
+                                // Make sure we transition into parsing within the open tag
+                                parser.enterState(STATE_WITHIN_OPEN_TAG);
+                            }
+                            return;
+                        }
+                    }
+
+                    if (isWhitespaceCode(code)) {
+                        currentPart.endPos = parser.pos;
+                        endExpression();
+                        endAttribute();
+                        if (parser.state !== STATE_WITHIN_OPEN_TAG) {
+                            // Make sure we transition into parsing within the open tag
+                            parser.enterState(STATE_WITHIN_OPEN_TAG);
+                        }
+                        return;
+                    } else if (code === CODE_EQUAL && parentState === STATE_ATTRIBUTE_NAME) {
+                        currentPart.endPos = parser.pos;
+                        endExpression();
+                        // We encountered "=" which means we need to start reading
+                        // the attribute value.
+                        parser.enterState(STATE_ATTRIBUTE_VALUE);
+                        return;
                     }
                 }
 
-                handler.char(ch, code);
-
-                if (code === currentExpression.endDelimiter) {
-                    if (--currentExpression.depth === 0) {
-                        _leaveExpressionState();
-                    }
-                } else if (code === currentExpression.startDelimiter) {
-                    currentExpression.depth++;
-                }
+                currentPart.value += ch;
             }
         });
-
-        var STATE_PLACEHOLDER_EOF = function() {
-            currentPlaceholder.handler.eof(currentPlaceholder);
-        };
 
         var STATE_PLACEHOLDER = Parser.createState({
-            // name: 'STATE_PLACEHOLDER',
-            comment: {
-                end: function() {
-                    // If we reach the end of the comment then return
-                    // back to the original state
-                    parser.enterState(STATE_PLACEHOLDER);
-                },
+            name: 'STATE_PLACEHOLDER',
 
-                char: function(ch) {
-                    currentPlaceholder.expression += ch;
-                },
-
-                eof: STATE_PLACEHOLDER_EOF
+            expression(expression) {
+                currentPart.value = expression.value.slice(1, -1); // Chop off the curly braces
+                currentPart.endPos = expression.endPos;
+                endPlaceholder();
             },
 
-            expression: {
-                string: function(str) {
-                    currentPlaceholder.expression += str;
-                },
-
-                eof: STATE_PLACEHOLDER_EOF
+            eol(str) {
+                throw new Error('Illegal state. EOL not expected');
             },
 
-            eof: STATE_PLACEHOLDER_EOF,
+            eof() {
+                throw new Error('Illegal state. EOF not expected');
+            },
 
-            char: function(ch, code) {
-                if ((code === CODE_SINGLE_QUOTE) || (code === CODE_DOUBLE_QUOTE)) {
-                    // string
-                    _enterExpressionState(ch, code, code, STATE_STRING);
-                    return true;
-                } else if (code === CODE_FORWARD_SLASH) {
-                    // Check next character to see if we are in a comment
-                    var nextCode = parser.lookAtCharCodeAhead(1);
-                    if (nextCode === CODE_FORWARD_SLASH) {
-                        _enterLineCommentState();
-                        parser.skip(1);
-                        return true;
-                    } else if (nextCode === CODE_ASTERISK) {
-                        _enterBlockCommentState();
-                        parser.skip(1);
-                        return true;
-                    }
-                } else if (code === CODE_RIGHT_CURLY_BRACE) {
-                    if (--currentPlaceholder.delimiterDepth === 0) {
-                        _leavePlaceholderState(currentPlaceholder);
-                    } else {
-                        currentPlaceholder.expression += ch;
-                    }
-                } else if (code === CODE_LEFT_CURLY_BRACE) {
-                    currentPlaceholder.delimiterDepth++;
-                    currentPlaceholder.expression += ch;
-                } else {
-                    currentPlaceholder.expression += ch;
+            enter(oldState) {
+                if (oldState !== STATE_EXPRESSION) {
+                    beginExpression();
                 }
             }
         });
 
         var STATE_STRING = Parser.createState({
-            // name: 'STATE_STRING',
+            name: 'STATE_STRING',
 
-            placeholder: {
-                end: function(placeholder) {
-                    _notifyPlaceholder(placeholder);
-                    currentExpression.stringParts.push(placeholder);
-                },
-
-                eof: PLACEHOLDER_EOF_HANDLER
+            placeholder: function(placeholder) {
+                if (currentPart.currentText) {
+                    currentPart.stringParts.push(currentPart.currentText);
+                    currentPart.currentText = '';
+                }
+                currentPart.isStringLiteral = false;
+                currentPart.stringParts.push(placeholder);
             },
 
-            eof: function() {
-                expressionHandler.eof();
-            },
-
-            enter: function() {
-                if (!currentExpression.stringParts) {
-                    // We can reenter the string state multiple times on the same string
-                    // so we only want to init the string parts related objects
-                    // the first time
-                    currentExpression.currentStringPart = '';
-                    currentExpression.stringParts = [];
+            eol(str) {
+                // New line characters are not allowed in JavaScript string expressions. We need to use
+                // a different character sequence, but we don't want to through off positions so we need
+                // to use a replacement sequence with the same number of characters.
+                if (str.length === 2) {
+                    currentPart.currentText += '\\r\\n';
+                } else {
+                    currentPart.currentText += '\\n';
                 }
 
             },
 
-            char: function(ch, code) {
-                var stringParts = currentExpression.stringParts;
+            eof() {
+                if (placeholderDepth > 0) {
+                    notifyError(parser.pos,
+                        'INVALID_STRING',
+                        'EOF reached while parsing string expression found inside placeholder');
+                    return;
+                }
+                notifyError(parser.pos,
+                    'INVALID_STRING',
+                    'EOF reached while parsing string expression');
+            },
+
+            char(ch, code) {
+                var stringParts = currentPart.stringParts;
 
                 var nextCh;
-                var stringDelimiterCode = currentExpression.endDelimiter;
+                var quoteCharCode = currentPart.quoteCharCode;
 
                 if (code === CODE_BACK_SLASH) {
-                    // Handle string escape sequence
-                    nextCh = parser.lookAtCharAhead(1);
-                    parser.skip(1);
+                    if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                        currentPart.currentText += '\\';
+                    }  else if (checkForEscapedPlaceholder(ch, code)) {
+                        currentPart.currentText += '$';
+                    } else {
+                        // Handle string escape sequence
+                        nextCh = parser.lookAtCharAhead(1);
+                        currentPart.currentText += ch + nextCh;
+                    }
 
-                    currentExpression.currentStringPart += ch + nextCh;
-                } else if (code === CODE_NEWLINE) {
-                    // Add an escape sequence for a new line if an actual new line
-                    // is found before the string is ended
-                    currentExpression.currentStringPart += '\\n';
-                } else if (code === CODE_CARRIAGE_RETURN) {
-                    // Add an escape sequence for a carriage return if an actual carriage return
-                    // is found before the string is ended
-                    currentExpression.currentStringPart += '\\r';
-                } else if (code === stringDelimiterCode) {
+                    parser.skip(1);
+                } else if (code === quoteCharCode) {
                     // We encountered the end delimiter
-                    if (currentExpression.currentStringPart !== '') {
-                        stringParts.push(currentExpression.currentStringPart);
+                    if (currentPart.currentText) {
+                        stringParts.push(currentPart.currentText);
                     }
 
                     let stringExpr = '';
-                    let stringDelimiter =  String.fromCharCode(stringDelimiterCode);
+                    let quoteChar =  currentPart.quoteChar;
 
                     if (stringParts.length) {
                         for (let i=0; i<stringParts.length; i++) {
@@ -1040,108 +1703,150 @@ class Parser extends BaseParser {
                             }
 
                             if (typeof part === 'string') {
-                                stringExpr += stringDelimiter + part + stringDelimiter;
+                                stringExpr += quoteChar + part + quoteChar;
                             } else {
-                                stringExpr += '(' + part.expression + ')';
+                                stringExpr += '(' + part.value + ')';
                             }
                         }
                     } else {
-                        stringExpr = stringDelimiter + stringDelimiter;
+                        // Just an empty string...
+                        stringExpr = quoteChar + quoteChar;
                     }
-
-                    let isStringLiteral = currentExpression.isStringLiteral !== false;
 
                     if (stringParts.length > 1) {
                         stringExpr = '(' + stringExpr + ')';
                     }
 
-                    expressionHandler.string(stringExpr, isStringLiteral);
-
-                    _leaveExpressionState();
-                } else if (_checkForPlaceholder(ch, code, stringDelimiterCode)) {
-                    if (currentExpression.currentStringPart !== '') {
-                        stringParts.push(currentExpression.currentStringPart);
+                    currentPart.value = stringExpr;
+                    endString();
+                } else if (checkForPlaceholder(ch, code)) {
+                    if (currentPart.currentText) {
+                        stringParts.push(currentPart.currentText);
                     }
 
-                    currentExpression.currentStringPart = '';
+                    currentPart.currentText = '';
                     // We encountered nested placeholder...
-                    currentExpression.isStringLiteral = false;
+                    currentPart.isStringLiteral = false;
                 } else {
-                    currentExpression.currentStringPart += ch;
+                    currentPart.currentText += ch;
                 }
             }
         });
 
-        // We enter STATE_BLOCK_COMMENT after we encounter a "/*" sequence
-        // while in STATE_ATTRIBUTE_VALUE or STATE_DELIMITED_EXPRESSION.
-        // We leave STATE_BLOCK_COMMENT when we see a "*/" sequence.
-        var STATE_BLOCK_COMMENT = Parser.createState({
-            // name: 'STATE_BLOCK_COMMENT',
-            eof: function() {
-                commentHandler.eof();
+        var STATE_TEMPLATE_STRING = Parser.createState({
+            name: 'STATE_TEMPLATE_STRING',
+
+            placeholder: function(placeholder) {
+                if (currentPart.currentText) {
+                    currentPart.stringParts.push(currentPart.currentText);
+                    currentPart.currentText = '';
+                }
+                currentPart.isStringLiteral = false;
+                currentPart.stringParts.push(placeholder);
             },
 
-            char: function(ch, code) {
+            eol(str) {
+                // Convert the EOL sequence ot the equivalent string escape sequences... Not necessary
+                // for template strings but it is equivalent.
+                if (str.length === 2) {
+                    currentPart.value += '\\r\\n';
+                } else {
+                    currentPart.value += '\\n';
+                }
+            },
+
+            eof() {
+                notifyError(parser.pos,
+                    'INVALID_TEMPLATE_STRING',
+                    'EOF reached while parsing template string expression');
+            },
+
+            char(ch, code) {
+                var nextCh;
+                currentPart.value += ch;
+                if (code === CODE_BACK_SLASH) {
+                    // Handle string escape sequence
+                    nextCh = parser.lookAtCharAhead(1);
+                    parser.skip(1);
+
+                    currentPart.value += nextCh;
+                } else if (code === CODE_BACKTICK) {
+                    endTemplateString();
+                }
+            }
+        });
+
+        // We enter STATE_JS_COMMENT_BLOCK after we encounter a "/*" sequence
+        // while in STATE_ATTRIBUTE_VALUE or STATE_DELIMITED_EXPRESSION.
+        // We leave STATE_JS_COMMENT_BLOCK when we see a "*/" sequence.
+        var STATE_JS_COMMENT_BLOCK = Parser.createState({
+            name: 'STATE_JS_COMMENT_BLOCK',
+
+            eol(str) {
+                currentPart.value += str;
+            },
+
+            eof() {
+                notifyError(currentPart.pos,
+                    'MALFORMED_COMMENT',
+                    'EOF reached while parsing multi-line JavaScript comment');
+            },
+
+            char(ch, code) {
+                currentPart.value += ch;
+
                 if (code === CODE_ASTERISK) {
-                    commentHandler.char(ch);
                     var nextCode = parser.lookAtCharCodeAhead(1);
                     if (nextCode === CODE_FORWARD_SLASH) {
+                        currentPart.value += '/';
+                        endJavaScriptComment();
                         parser.skip(1);
-                        commentHandler.char('/');
-                        commentHandler.end();
                     }
-                } else {
-                    commentHandler.char(ch);
                 }
             }
         });
 
-        // We enter STATE_LINE_COMMENT after we encounter a "//" sequence
+        // We enter STATE_JS_COMMENT_LINE after we encounter a "//" sequence
         // when parsing JavaScript code.
-        // We leave STATE_LINE_COMMENT when we see a newline character.
-        var STATE_LINE_COMMENT = Parser.createState({
-            // name: 'STATE_LINE_COMMENT',
-            eof: function() {
-                commentHandler.eof();
+        // We leave STATE_JS_COMMENT_LINE when we see a newline character.
+        var STATE_JS_COMMENT_LINE = Parser.createState({
+            name: 'STATE_JS_COMMENT_LINE',
+
+            eol(str) {
+                currentPart.value += str;
+                endJavaScriptComment();
             },
 
-            char: function(ch, code) {
-                commentHandler.char(ch);
+            eof() {
+                endJavaScriptComment();
+            },
 
-                if (code === CODE_NEWLINE) {
-                    commentHandler.end();
-                } else if (code === CODE_CARRIAGE_RETURN) {
-                    // Handle Windows new line sequence: '\r\n'
-                    var nextCode = parser.lookAtCharCodeAhead(1);
-                    if (nextCode === CODE_NEWLINE) {
-                        parser.skip(1);
-                    }
-
-                    commentHandler.end();
-                }
+            char(ch, code) {
+                currentPart.value += ch;
             }
         });
 
         // We enter STATE_DTD after we encounter a "<!" while in the STATE_HTML_CONTENT.
         // We leave STATE_DTD if we see a ">".
         var STATE_DTD = Parser.createState({
-            // name: 'STATE_DTD',
-            enter: function() {
-                tagName = '';
+            name: 'STATE_DTD',
+
+            eol(str) {
+                currentPart.value += str;
             },
 
-            eof: function() {
-                _notifyError(tagPos,
-                    'MALFORMED_DTD',
-                    'EOF reached while parsing DTD.');
+            eof() {
+                notifyError(currentPart.pos,
+                    'MALFORMED_DOCUMENT_TYPE',
+                    'EOF reached while parsing document type');
             },
 
-            char: function(ch, code) {
+            char(ch, code) {
                 if (code === CODE_RIGHT_ANGLE_BRACKET) {
-                    _notifyDTD(tagName);
-                    parser.enterState(STATE_HTML_CONTENT);
+                    currentPart.endPos = parser.pos + 1;
+                    endDocumentType();
                 } else {
-                    tagName += ch;
+                    currentPart.value += ch;
                 }
             }
         });
@@ -1150,67 +1855,63 @@ class Parser extends BaseParser {
         // while in the STATE_HTML_CONTENT.
         // We leave STATE_DECLARATION if we see a "?>" or ">".
         var STATE_DECLARATION = Parser.createState({
-            // name: 'STATE_DECLARATION',
-            enter: function() {
-                tagName = '';
+            name: 'STATE_DECLARATION',
+
+            eol(str) {
+                currentPart.value += str;
             },
 
-            leave: function() {
-                _notifyDeclaration(tagName);
-            },
-
-            eof: function() {
-                _notifyError(tagPos,
+            eof() {
+                notifyError(currentPart.pos,
                     'MALFORMED_DECLARATION',
-                    'EOF reached while parsing declaration.');
+                    'EOF reached while parsing declaration');
             },
 
-            char: function(ch, code) {
+            char(ch, code) {
                 if (code === CODE_QUESTION) {
                     var nextCode = parser.lookAtCharCodeAhead(1);
                     if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
+                        currentPart.endPos = parser.pos + 2;
+                        endDeclaration();
                         parser.skip(1);
-                        parser.enterState(STATE_HTML_CONTENT);
                     }
                 } else if (code === CODE_RIGHT_ANGLE_BRACKET) {
-                    parser.enterState(STATE_HTML_CONTENT);
+                    currentPart.endPos = parser.pos + 1;
+                    endDeclaration();
                 } else {
-                    tagName += ch;
+                    currentPart.value += ch;
                 }
             }
         });
 
-        // We enter STATE_XML_COMMENT after we encounter a "<--"
+        // We enter STATE_HTML_COMMENT after we encounter a "<--"
         // while in the STATE_HTML_CONTENT.
-        // We leave STATE_XML_COMMENT when we see a "-->".
-        var STATE_XML_COMMENT = Parser.createState({
-            // name: 'STATE_XML_COMMENT',
+        // We leave STATE_HTML_COMMENT when we see a "-->".
+        var STATE_HTML_COMMENT = Parser.createState({
+            name: 'STATE_HTML_COMMENT',
 
-            enter: function() {
-                comment = '';
+            eol(newLineChars) {
+                currentPart.value += newLineChars;
             },
 
-            eof: function() {
-                _notifyError(tagPos,
+            eof() {
+                notifyError(currentPart.pos,
                     'MALFORMED_COMMENT',
                     'EOF reached while parsing comment');
             },
 
-            char: function(ch, code) {
-                if (code === CODE_DASH) {
+            char(ch, code) {
+                if (code === CODE_HYPHEN) {
                     var match = parser.lookAheadFor('->');
                     if (match) {
+                        currentPart.endPos = parser.pos + 3;
+                        endHtmlComment();
                         parser.skip(match.length);
-
-                        _notifyCommentText(comment);
-                        comment = '';
-
-                        parser.enterState(STATE_HTML_CONTENT);
                     } else {
-                        comment += ch;
+                        currentPart.value += ch;
                     }
                 } else {
-                    comment += ch;
+                    currentPart.value += ch;
                 }
             }
         });
@@ -1219,27 +1920,59 @@ class Parser extends BaseParser {
             parser.enterState(STATE_HTML_CONTENT);
         };
 
-        parser.enterJsContentState = function() {
-            endTagName = tagName;
-            parser.enterState(STATE_PARSED_TEXT_CONTENT);
-        };
-
-        parser.enterCssContentState = function() {
-            endTagName = tagName;
-            parser.enterState(STATE_PARSED_TEXT_CONTENT);
+        parser.enterConciseHtmlContentState = function() {
+            parser.enterState(STATE_CONCISE_HTML_CONTENT);
         };
 
         parser.enterParsedTextContentState = function() {
-            endTagName = tagName;
-            parser.enterState(STATE_PARSED_TEXT_CONTENT);
+            var last = blockStack.length && blockStack[blockStack.length - 1];
+
+            if (!last || !last.tagName) {
+                throw new Error('The "parsed text content" parser state is only allowed within a tag');
+            }
+
+            if (isConcise) {
+                // We will transition into the STATE_PARSED_TEXT_CONTENT state
+                // for each of the nested HTML blocks
+                last.body = BODY_PARSED_TEXT;
+                parser.enterState(STATE_CONCISE_HTML_CONTENT);
+            } else {
+                parser.enterState(STATE_PARSED_TEXT_CONTENT);
+            }
         };
+
+        parser.enterJsContentState = parser.enterParsedTextContentState;
+        parser.enterCssContentState = parser.enterParsedTextContentState;
 
         parser.enterStaticTextContentState = function() {
-            endTagName = tagName;
-            parser.enterState(STATE_STATIC_TEXT_CONTENT);
+            var last = blockStack.length && blockStack[blockStack.length - 1];
+
+            if (!last || !last.tagName) {
+                throw new Error('The "static text content" parser state is only allowed within a tag');
+            }
+
+            if (isConcise) {
+                // We will transition into the STATE_STATIC_TEXT_CONTENT state
+                // for each of the nested HTML blocks
+                last.body = BODY_STATIC_TEXT;
+                parser.enterState(STATE_CONCISE_HTML_CONTENT);
+            } else {
+                parser.enterState(STATE_STATIC_TEXT_CONTENT);
+            }
         };
 
-        parser.setInitialState(STATE_HTML_CONTENT);
+
+        if (defaultMode === MODE_CONCISE) {
+            parser.setInitialState(STATE_CONCISE_HTML_CONTENT);
+            parser.enterDefaultState = function() {
+                parser.enterState(STATE_CONCISE_HTML_CONTENT);
+            };
+        } else {
+            parser.setInitialState(STATE_HTML_CONTENT);
+            parser.enterDefaultState = function() {
+                parser.enterState(STATE_HTML_CONTENT);
+            };
+        }
     }
 
     parse(data) {

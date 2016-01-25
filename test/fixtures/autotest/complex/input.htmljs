@@ -1,0 +1,22 @@
+--
+This is top-level text
+--
+p
+    --
+    This is text that spans multiple lines.
+
+    <strong>You can throw in some HTML markup if you want!</strong>
+    --
+p
+    -----
+    If you really want to you can change the block delimiter for the following
+    reasons:
+    - Avoid accidentally ending a block
+    - To improve readability
+    -----
+i - This text will be in italics
+b
+    - This text will be bold
+    - This is okay too
+app-hello
+    ${data.name} some html - <b>bold</b>

@@ -3,31 +3,47 @@ var enabledTest = process.env.TEST;
 var path = require('path');
 var assert = require('assert');
 
-function autoTest(name, dir, run) {
-    var actualPath = path.join(dir, 'actual.json');
-    var expectedPath = path.join(dir, 'expected.json');
+function autoTest(name, dir, run, options) {
+    var ext = options.ext || '.json';
+    var actualPath = path.join(dir, 'actual' + ext);
+    var expectedPath = path.join(dir, 'expected' + ext);
 
     var actual = run(dir);
-    var actualJSON = JSON.stringify(actual, null, 4);
 
-    fs.writeFileSync(actualPath, actualJSON, {encoding: 'utf8'});
 
-    var expectedJSON;
+    fs.writeFileSync(actualPath, ext === '.json' ? JSON.stringify(actual, null, 4) : actual, {encoding: 'utf8'});
+
+    var expected;
 
     try {
-        expectedJSON = fs.readFileSync(expectedPath, { encoding: 'utf8' });
+        expected = fs.readFileSync(expectedPath, { encoding: 'utf8' });
     } catch(e) {
-        expectedJSON = '"TBD"';
-        fs.writeFileSync(expectedPath, expectedJSON, {encoding: 'utf8'});
+        expected = ext === '.json' ? '"TBD"' : 'TBD';
+        fs.writeFileSync(expectedPath, expected, {encoding: 'utf8'});
     }
 
-    var expected = JSON.parse(expectedJSON);
+    if (ext === '.json') {
+        var expectedObject = JSON.parse(expected);
 
-    assert.deepEqual(
-        actual,
-        expected,
-        'Unexpected output for "' + name + '":\nEXPECTED (' + expectedPath + '):\n---------\n' + expectedJSON +
-        '\n---------\nACTUAL (' + actualPath + '):\n---------\n' + actualJSON + '\n---------');
+        try {
+            assert.deepEqual(
+                actual,
+                expectedObject);
+        } catch(e) {
+            // console.error('Unexpected output for "' + name + '":\nEXPECTED (' + expectedPath + '):\n---------\n' + expectedJSON +
+            //     '\n---------\nACTUAL (' + actualPath + '):\n---------\n' + actualJSON + '\n---------');
+            throw new Error('Unexpected output for "' + name + '"');
+        }
+    } else {
+        if (actual !== expected) {
+            throw new Error('Unexpected output for "' + name + '"');
+        }
+    }
+    // assert.deepEqual(
+    //     actual,
+    //     expected,
+    //     'Unexpected output for "' + name + '":\nEXPECTED (' + expectedPath + '):\n---------\n' + expectedJSON +
+    //     '\n---------\nACTUAL (' + actualPath + '):\n---------\n' + actualJSON + '\n---------');
 }
 
 exports.scanDir = function(autoTestDir, run, options) {
