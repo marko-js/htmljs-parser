@@ -1264,6 +1264,13 @@ class Parser extends BaseParser {
                 }
             },
 
+            placeholder(placeholder) {
+                var attr = beginAttribute();
+                attr.value = placeholder.value;
+                attr.withinOpenTag = true;
+                endAttribute();
+            },
+
             char(ch, code) {
 
                 if (isConcise) {
@@ -1294,6 +1301,20 @@ class Parser extends BaseParser {
                             return;
                         }
                     }
+                }
+
+                if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                    let attr = beginAttribute();
+                    attr.name = '\\';
+                    parser.skip(1);
+                    return;
+                }  else if (checkForEscapedPlaceholder(ch, code)) {
+                    let attr = beginAttribute();
+                    attr.name = '$';
+                    parser.skip(1);
+                    return;
+                } else if (checkForPlaceholder(ch, code)) {
+                    return;
                 }
 
                 if (code === CODE_LEFT_ANGLE_BRACKET) {
@@ -1334,7 +1355,7 @@ class Parser extends BaseParser {
                     currentAttribute.argument = argument;
                 }
 
-                currentAttribute.name = expression.value;
+                currentAttribute.name = currentAttribute.name ? currentAttribute.name + expression.value : expression.value;
                 currentAttribute.pos = expression.pos;
                 currentAttribute.endPos = expression.endPos;
             },
@@ -1635,7 +1656,7 @@ class Parser extends BaseParser {
         var STATE_STRING = Parser.createState({
             name: 'STATE_STRING',
 
-            placeholder: function(placeholder) {
+            placeholder(placeholder) {
                 if (currentPart.currentText) {
                     currentPart.stringParts.push(currentPart.currentText);
                     currentPart.currentText = '';

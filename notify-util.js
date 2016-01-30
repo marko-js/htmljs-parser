@@ -179,7 +179,8 @@ exports.createNotifiers = function(parser, listeners) {
                     escape: placeholder.escape !== false,
                     withinBody: placeholder.withinBody === true,
                     withinAttribute: placeholder.withinAttribute === true,
-                    withinString: placeholder.withinString === true
+                    withinString: placeholder.withinString === true,
+                    withinOpenTag: placeholder.withinOpenTag === true,
                 };
 
                 eventFunc.call(parser, placeholderEvent, parser);
