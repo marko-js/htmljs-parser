@@ -74,6 +74,11 @@ class Node {
                 break;
             }
 
+            case 'scriptlet': {
+                out.writeLine('scriptlet:' + JSON.stringify(event.value));
+                break;
+            }
+
             case 'error': {
                 out.writeLine('error:' + JSON.stringify(event.message) + ' (code: ' + JSON.stringify(event.code) + ')');
                 break;
@@ -254,6 +259,12 @@ class TreeBuilder {
             onComment: (event) => {
                 expect(src.substring(event.pos, event.pos+4)).to.equal('<!--');
                 expect(src.substring(event.endPos-3, event.endPos)).to.equal('-->');
+                this.last.children.push(new Node(event));
+            },
+
+            onScriptlet: (event) => {
+                expect(src.substring(event.pos, event.pos+2)).to.equal('<%');
+                expect(src.substring(event.endPos-2, event.endPos)).to.equal('%>');
                 this.last.children.push(new Node(event));
             },
 

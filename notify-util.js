@@ -65,30 +65,32 @@ exports.createNotifiers = function(parser, listeners) {
                 // set the literalValue property for attributes that are simple
                 // string simple values or simple literal values
 
-                var attributes = tagInfo.attributes;
-
-                var i = attributes.length;
-                while(--i >= 0) {
-                    var attr = attributes[i];
-                    var value = attr.value;
-
-
-
-                    delete attr.isStringLiteral;
-                    delete attr.isSimpleLiteral;
-                }
-
                 var event = {
                     type: 'openTag',
                     tagName: tagInfo.tagName,
                     argument: tagInfo.argument,
-                    attributes,
                     pos: tagInfo.pos,
                     endPos: tagInfo.endPos,
                     openTagOnly: tagInfo.openTagOnly,
                     selfClosed: tagInfo.selfClosed,
                     concise: tagInfo.concise
                 };
+
+                event.attributes = tagInfo.attributes.map((attr) => {
+                    var newAttr = {
+                        name: attr.name,
+                        value: attr.value,
+                        pos: attr.pos,
+                        endPos: attr.endPos,
+                        argument: attr.argument
+                    };
+
+                    if (attr.hasOwnProperty('literalValue')) {
+                        newAttr.literalValue = attr.literalValue;
+                    }
+
+                    return newAttr;
+                });
 
                 eventFunc.call(parser, event, parser);
             }
@@ -160,6 +162,23 @@ exports.createNotifiers = function(parser, listeners) {
                     value: comment.value,
                     pos: comment.pos,
                     endPos: comment.endPos
+                }, parser);
+            }
+        },
+
+        notifyScriptlet(scriptlet) {
+            if (hasError) {
+                return;
+            }
+
+            var eventFunc = listeners.onScriptlet;
+
+            if (eventFunc && scriptlet.value) {
+                eventFunc.call(parser, {
+                    type: 'scriptlet',
+                    value: scriptlet.value,
+                    pos: scriptlet.pos,
+                    endPos: scriptlet.endPos
                 }, parser);
             }
         },

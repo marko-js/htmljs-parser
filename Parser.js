@@ -62,25 +62,26 @@ const CODE_NEWLINE = 10;
 const CODE_CARRIAGE_RETURN = 13;
 const CODE_BACK_SLASH = 92;
 const CODE_FORWARD_SLASH = 47;
-const CODE_LEFT_ANGLE_BRACKET = 60;
-const CODE_RIGHT_ANGLE_BRACKET = 62;
+const CODE_OPEN_ANGLE_BRACKET = 60;
+const CODE_CLOSE_ANGLE_BRACKET = 62;
 const CODE_EXCLAMATION = 33;
 const CODE_QUESTION = 63;
-const CODE_LEFT_SQUARE_BRACKET = 91;
-const CODE_RIGHT_SQUARE_BRACKET = 93;
+const CODE_OPEN_SQUARE_BRACKET = 91;
+const CODE_CLOSE_SQUARE_BRACKET = 93;
 const CODE_EQUAL = 61;
 const CODE_SINGLE_QUOTE = 39;
 const CODE_DOUBLE_QUOTE = 34;
 const CODE_BACKTICK = 96;
-const CODE_LEFT_PARANTHESIS = 40;
-const CODE_RIGHT_PARANTHESIS = 41;
-const CODE_LEFT_CURLY_BRACE = 123;
-const CODE_RIGHT_CURLY_BRACE = 125;
+const CODE_OPEN_PAREN = 40;
+const CODE_CLOSE_PAREN = 41;
+const CODE_OPEN_CURLY_BRACE = 123;
+const CODE_CLOSE_CURLY_BRACE = 125;
 const CODE_ASTERISK = 42;
 const CODE_HYPHEN = 45;
 const CODE_HTML_BLOCK_DELIMITER = CODE_HYPHEN;
 const CODE_DOLLAR = 36;
 const CODE_SPACE = 32;
+const CODE_PERCENT = 37;
 
 const BODY_PARSED_TEXT = 1; // Body of a tag is treated as text, but placeholders will be parsed
 const BODY_STATIC_TEXT = 2;// Body of a tag is treated as text and placeholders will *not* be parsed
@@ -310,6 +311,7 @@ class Parser extends BaseParser {
         var notifyDocumentType = notifiers.notifyDocumentType;
         var notifyDeclaration = notifiers.notifyDeclaration;
         var notifyPlaceholder = notifiers.notifyPlaceholder;
+        var notifyScriptlet = notifiers.notifyScriptlet;
 
         function notifyError(pos, errorCode, message) {
             parser.end();
@@ -534,6 +536,26 @@ class Parser extends BaseParser {
 
         // --------------------------
 
+
+        // Scriptlet
+
+        function beginScriptlet() {
+            var scriptlet = beginPart();
+            scriptlet.value = '';
+            scriptlet.quoteCharCode = null;
+            parser.enterState(STATE_SCRIPTLET);
+            return scriptlet;
+        }
+
+        function endScriptlet(endPos) {
+            var scriptlet = endPart();
+            scriptlet.endPos = endPos;
+            notifyScriptlet(scriptlet);
+        }
+
+        // --------------------------
+
+
         // DTD
 
         function beginDocumentType() {
@@ -682,13 +704,13 @@ class Parser extends BaseParser {
         function checkForPlaceholder(ch, code) {
             if (code === CODE_DOLLAR) {
                 var nextCode = parser.lookAtCharCodeAhead(1);
-                if (nextCode === CODE_LEFT_CURLY_BRACE) {
+                if (nextCode === CODE_OPEN_CURLY_BRACE) {
                     // We expect to start a placeholder at the first curly brace (the next character)
                     beginPlaceholder(true);
                     return true;
                 } else if (nextCode === CODE_EXCLAMATION) {
                     var afterExclamationCode = parser.lookAtCharCodeAhead(2);
-                    if (afterExclamationCode === CODE_LEFT_CURLY_BRACE) {
+                    if (afterExclamationCode === CODE_OPEN_CURLY_BRACE) {
                         // We expect to start a placeholder at the first curly brace so skip
                         // past the exclamation point
                         beginPlaceholder(false);
@@ -705,10 +727,10 @@ class Parser extends BaseParser {
             // Look for \${ and \$!{
             if (code === CODE_BACK_SLASH) {
                 if (parser.lookAtCharCodeAhead(1) === CODE_DOLLAR) {
-                    if (parser.lookAtCharCodeAhead(2) === CODE_LEFT_CURLY_BRACE) {
+                    if (parser.lookAtCharCodeAhead(2) === CODE_OPEN_CURLY_BRACE) {
                         return true;
                     } else if (parser.lookAtCharCodeAhead(2) === CODE_EXCLAMATION) {
-                        if (parser.lookAtCharCodeAhead(3) === CODE_LEFT_CURLY_BRACE) {
+                        if (parser.lookAtCharCodeAhead(3) === CODE_OPEN_CURLY_BRACE) {
                             return true;
                         }
                     }
@@ -723,10 +745,10 @@ class Parser extends BaseParser {
             if (code === CODE_BACK_SLASH) {
                 if (parser.lookAtCharCodeAhead(1) === CODE_BACK_SLASH) {
                     if (parser.lookAtCharCodeAhead(2) === CODE_DOLLAR) {
-                        if (parser.lookAtCharCodeAhead(3) === CODE_LEFT_CURLY_BRACE) {
+                        if (parser.lookAtCharCodeAhead(3) === CODE_OPEN_CURLY_BRACE) {
                             return true;
                         } else if (parser.lookAtCharCodeAhead(3) === CODE_EXCLAMATION) {
-                            if (parser.lookAtCharCodeAhead(4) === CODE_LEFT_CURLY_BRACE) {
+                            if (parser.lookAtCharCodeAhead(4) === CODE_OPEN_CURLY_BRACE) {
                                 return true;
                             }
                         }
@@ -754,7 +776,7 @@ class Parser extends BaseParser {
             return false;
         }
 
-        function checkForCDATA(ch) {
+        function checkForCDATA() {
             if (parser.lookAheadFor('![CDATA[')) {
                 beginCDATA();
                 parser.skip(8);
@@ -828,17 +850,19 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
-                if (code === CODE_LEFT_ANGLE_BRACKET) {
+                if (code === CODE_OPEN_ANGLE_BRACKET) {
                     if (checkForCDATA()) {
                         return;
                     }
 
                     var nextCode = parser.lookAtCharCodeAhead(1);
 
-                    if (parser.lookAheadFor('!--')) {
+                    if (nextCode === CODE_PERCENT) {
+                        beginScriptlet();
+                        parser.skip(1);
+                    } else if (parser.lookAheadFor('!--')) {
                         beginHtmlComment();
                         parser.skip(3);
-                        return;
                     } else if (nextCode === CODE_EXCLAMATION) {
                         // something like:
                         // <!DOCTYPE html>
@@ -860,8 +884,8 @@ class Parser extends BaseParser {
                         endText();
 
                         parser.enterState(STATE_CLOSE_TAG);
-                    } else if (nextCode === CODE_RIGHT_ANGLE_BRACKET ||
-                               nextCode === CODE_LEFT_ANGLE_BRACKET ||
+                    } else if (nextCode === CODE_CLOSE_ANGLE_BRACKET ||
+                               nextCode === CODE_OPEN_ANGLE_BRACKET ||
                                isWhitespaceCode(nextCode)) {
                         // something like:
                         // "<>"
@@ -955,7 +979,7 @@ class Parser extends BaseParser {
                         return;
                     }
 
-                    if (code === CODE_LEFT_ANGLE_BRACKET || code === CODE_DOLLAR) {
+                    if (code === CODE_OPEN_ANGLE_BRACKET || code === CODE_DOLLAR) {
                         beginMixedMode = true;
                         parser.rewind(1);
                         beginHtmlBlock();
@@ -1075,7 +1099,7 @@ class Parser extends BaseParser {
 
             char(ch, code) {
                 // See if we need to see if we reached the closing tag...
-                if (!isConcise && code === CODE_LEFT_ANGLE_BRACKET) {
+                if (!isConcise && code === CODE_OPEN_ANGLE_BRACKET) {
                     if (checkForClosingTag()) {
                         return;
                     }
@@ -1113,12 +1137,16 @@ class Parser extends BaseParser {
             eof: htmlEOF,
 
             char(ch, code) {
-                if (!isConcise && code === CODE_LEFT_ANGLE_BRACKET) {
+                if (!isConcise && code === CODE_OPEN_ANGLE_BRACKET) {
                     // First, see if we need to see if we reached the closing tag
                     // and then check if we encountered CDATA
                     if (checkForClosingTag()) {
                         return;
                     } else if (checkForCDATA()) {
+                        return;
+                    } else if (parser.lookAtCharCodeAhead(1) === CODE_PERCENT) {
+                        beginScriptlet();
+                        parser.skip(1);
                         return;
                     }
                 } else if (checkForEscapedEscapedPlaceholder(ch, code)) {
@@ -1186,7 +1214,7 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
-                if (code === CODE_RIGHT_SQUARE_BRACKET) {
+                if (code === CODE_CLOSE_SQUARE_BRACKET) {
                     var match = parser.lookAheadFor(']>');
                     if (match) {
                         endCDATA();
@@ -1213,7 +1241,7 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
-                if (code === CODE_RIGHT_ANGLE_BRACKET) {
+                if (code === CODE_CLOSE_ANGLE_BRACKET) {
                     if (closeTagName.length > 0) {
                         closeTag(closeTagName, closeTagPos, parser.pos + 1);
                     } else {
@@ -1290,12 +1318,12 @@ class Parser extends BaseParser {
                         return;
                     }
                 } else {
-                    if (code === CODE_RIGHT_ANGLE_BRACKET) {
+                    if (code === CODE_CLOSE_ANGLE_BRACKET) {
                         finishOpenTag();
                         return;
                     } else if (code === CODE_FORWARD_SLASH) {
                         let nextCode = parser.lookAtCharCodeAhead(1);
-                        if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
+                        if (nextCode === CODE_CLOSE_ANGLE_BRACKET) {
                             finishOpenTag(true /* self closed */);
                             parser.skip(1);
                             return;
@@ -1317,7 +1345,7 @@ class Parser extends BaseParser {
                     return;
                 }
 
-                if (code === CODE_LEFT_ANGLE_BRACKET) {
+                if (code === CODE_OPEN_ANGLE_BRACKET) {
                     return notifyError(parser.pos,
                         'ILLEGAL_ATTRIBUTE_NAME',
                         'Invalid attribute name. Attribute name cannot begin with the "<" character.');
@@ -1325,7 +1353,7 @@ class Parser extends BaseParser {
 
                 if (isWhitespaceCode(code)) {
                     // ignore whitespace within element...
-                } else if (code === CODE_LEFT_PARANTHESIS) {
+                } else if (code === CODE_OPEN_PAREN) {
                     parser.rewind(1);
                     beginExpression();
                     // encountered something like:
@@ -1543,18 +1571,18 @@ class Parser extends BaseParser {
                         beginBlockComment();
                         parser.skip(1);
                         return;
-                    } else if (depth === 0 && !isConcise && nextCode === CODE_RIGHT_ANGLE_BRACKET) {
+                    } else if (depth === 0 && !isConcise && nextCode === CODE_CLOSE_ANGLE_BRACKET) {
                         // Let the STATE_WITHIN_OPEN_TAG state deal with the ending tag sequence
                         currentPart.endPos = parser.pos;
                         endExpression();
                         parser.rewind(1);
                         return;
                     }
-                } else if (code === CODE_LEFT_PARANTHESIS ||
-                           code === CODE_LEFT_SQUARE_BRACKET ||
-                           code === CODE_LEFT_CURLY_BRACE) {
+                } else if (code === CODE_OPEN_PAREN ||
+                           code === CODE_OPEN_SQUARE_BRACKET ||
+                           code === CODE_OPEN_CURLY_BRACE) {
 
-                    if (code === CODE_LEFT_PARANTHESIS && depth === 0) {
+                    if (code === CODE_OPEN_PAREN && depth === 0) {
                         currentPart.lastLeftParenPos = currentPart.value.length;
                     }
 
@@ -1562,17 +1590,17 @@ class Parser extends BaseParser {
                     currentPart.isStringLiteral = false;
                     currentPart.value += ch;
                     return;
-                } else if (code === CODE_RIGHT_PARANTHESIS ||
-                           code === CODE_RIGHT_SQUARE_BRACKET ||
-                           code === CODE_RIGHT_CURLY_BRACE) {
+                } else if (code === CODE_CLOSE_PAREN ||
+                           code === CODE_CLOSE_SQUARE_BRACKET ||
+                           code === CODE_CLOSE_CURLY_BRACE) {
 
 
 
                     let matchingGroupCharCode = currentPart.groupStack.pop();
 
-                    if ((code === CODE_RIGHT_PARANTHESIS && matchingGroupCharCode !== CODE_LEFT_PARANTHESIS) ||
-                        (code === CODE_RIGHT_SQUARE_BRACKET && matchingGroupCharCode !== CODE_LEFT_SQUARE_BRACKET) ||
-                        (code === CODE_RIGHT_CURLY_BRACE && matchingGroupCharCode !== CODE_LEFT_CURLY_BRACE)) {
+                    if ((code === CODE_CLOSE_PAREN && matchingGroupCharCode !== CODE_OPEN_PAREN) ||
+                        (code === CODE_CLOSE_SQUARE_BRACKET && matchingGroupCharCode !== CODE_OPEN_SQUARE_BRACKET) ||
+                        (code === CODE_CLOSE_CURLY_BRACE && matchingGroupCharCode !== CODE_OPEN_CURLY_BRACE)) {
                             return notifyError(currentPart.pos,
                                 'INVALID_EXPRESSION',
                                 'Mismatched group. A "' + ch + '" character was found when "' + String.fromCharCode(matchingGroupCharCode) + '" was expected.');
@@ -1581,9 +1609,9 @@ class Parser extends BaseParser {
                     currentPart.value += ch;
 
                     if (currentPart.groupStack.length === 0) {
-                        if (code === CODE_RIGHT_PARANTHESIS) {
+                        if (code === CODE_CLOSE_PAREN) {
                             currentPart.lastRightParenPos = currentPart.value.length - 1;
-                        } else if (code === CODE_RIGHT_CURLY_BRACE && parentState === STATE_PLACEHOLDER) {
+                        } else if (code === CODE_CLOSE_CURLY_BRACE && parentState === STATE_PLACEHOLDER) {
                             currentPart.endPos = parser.pos + 1;
                             endExpression();
                             return;
@@ -1593,7 +1621,7 @@ class Parser extends BaseParser {
                     return;
                 } else if (depth === 0) {
                     if (!isConcise) {
-                        if (code === CODE_RIGHT_ANGLE_BRACKET) {
+                        if (code === CODE_CLOSE_ANGLE_BRACKET) {
                             currentPart.endPos = parser.pos + 1;
                             endExpression();
                             // Let the STATE_WITHIN_OPEN_TAG state deal with the ending tag sequence
@@ -1863,7 +1891,7 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
-                if (code === CODE_RIGHT_ANGLE_BRACKET) {
+                if (code === CODE_CLOSE_ANGLE_BRACKET) {
                     currentPart.endPos = parser.pos + 1;
                     endDocumentType();
                 } else {
@@ -1891,12 +1919,12 @@ class Parser extends BaseParser {
             char(ch, code) {
                 if (code === CODE_QUESTION) {
                     var nextCode = parser.lookAtCharCodeAhead(1);
-                    if (nextCode === CODE_RIGHT_ANGLE_BRACKET) {
+                    if (nextCode === CODE_CLOSE_ANGLE_BRACKET) {
                         currentPart.endPos = parser.pos + 2;
                         endDeclaration();
                         parser.skip(1);
                     }
-                } else if (code === CODE_RIGHT_ANGLE_BRACKET) {
+                } else if (code === CODE_CLOSE_ANGLE_BRACKET) {
                     currentPart.endPos = parser.pos + 1;
                     endDeclaration();
                 } else {
@@ -1934,6 +1962,58 @@ class Parser extends BaseParser {
                 } else {
                     currentPart.value += ch;
                 }
+            }
+        });
+
+        // We enter STATE_SCRIPTLET after we encounter a "<%" while in STATE_HTML_CONTENT.
+        // We leave STATE_SCRIPTLET if we see a "%>".
+        var STATE_SCRIPTLET = Parser.createState({
+            name: 'STATE_SCRIPTLET',
+
+            eol(str) {
+                currentPart.value += str;
+            },
+
+            eof() {
+                notifyError(currentPart.pos,
+                    'MALFORMED_SCRIPTLET',
+                    'EOF reached while parsing scriptlet');
+            },
+
+            comment(comment) {
+                currentPart.value += comment.value;
+            },
+
+            char(ch, code) {
+                if (currentPart.quoteCharCode) {
+                    currentPart.value += ch;
+
+                    // We are within a string... only look for ending string code
+                    if (code === CODE_BACK_SLASH) {
+                        // Handle string escape sequence
+                        currentPart.value += parser.lookAtCharAhead(1);
+                        parser.skip(1);
+                    } else if (code === currentPart.quoteCharCode) {
+                        currentPart.quoteCharCode = null;
+                    }
+                    return;
+                } else if (code === CODE_FORWARD_SLASH) {
+                    if (parser.lookAtCharCodeAhead(1) === CODE_ASTERISK) {
+                        // Skip over code inside a JavaScript block comment
+                        beginBlockComment();
+                        parser.skip(1);
+                        return;
+                    }
+                } else if (code === CODE_SINGLE_QUOTE || code === CODE_DOUBLE_QUOTE) {
+                    currentPart.quoteCharCode = code;
+                } else if (code === CODE_PERCENT) {
+                    if (parser.lookAtCharCodeAhead(1) === CODE_CLOSE_ANGLE_BRACKET) {
+                        endScriptlet(parser.pos + 2 /* end pos */);
+                        return;
+                    }
+                }
+
+                currentPart.value += ch;
             }
         });
 

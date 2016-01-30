@@ -57,8 +57,7 @@ npm install htmljs-parser
 # Usage
 
 ```javascript
-var htmljs = require('htmljs-parser');
-var parser = htmljs.createParser({
+var parser = require('htmljs-parser').createParser({
     onText: function(event) {
         // Text within an HTML element
         var value = event.value;
@@ -72,6 +71,7 @@ var parser = htmljs.createParser({
         var withinBody = event.withinBody; // boolean
         var withinAttribute = event.withinAttribute; // boolean
         var withinString = event.withinString; // boolean
+        var withinOpenTag = event.withinOpenTag; // boolean
         var pos = event.pos; // Integer
     },
 
@@ -83,7 +83,6 @@ var parser = htmljs.createParser({
 
     onOpenTag: function(event) {
         var tagName = event.tagName; // String
-        var value = event.value; // String
         var attributes = event.attributes; // Array
         var argument = event.argument; // String
         var pos = event.pos; // Integer
@@ -113,6 +112,12 @@ var parser = htmljs.createParser({
 
     onComment: function(event) {
         // Text within XML comment
+        var value = event.value; // String
+        var pos = event.pos; // Integer
+    },
+
+    onScriptlet: function(event) {
+        // Text within <% %>
         var value = event.value; // String
         var pos = event.pos; // Integer
     },
@@ -507,6 +512,28 @@ OUTPUT EVENT:
 {
     type: 'comment',
     value: 'This is a comment'
+}
+```
+
+### onScriptlet
+
+The `onScriptlet` function will be called when text within `<%` `%>`
+is encountered.
+
+**EXAMPLE:**
+
+INPUT:
+
+```html
+<% console.log("Hello World!"); %>
+```
+
+OUTPUT EVENT:
+
+```javascript
+{
+    type: 'scriptlet',
+    value: ' console.log("Hello World!"); '
 }
 ```
 
