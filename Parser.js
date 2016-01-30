@@ -1299,6 +1299,10 @@ class Parser extends BaseParser {
                 endAttribute();
             },
 
+            comment(comment) {
+                /* Ignore comments within an open tag */
+            },
+
             char(ch, code) {
 
                 if (isConcise) {
@@ -1349,6 +1353,13 @@ class Parser extends BaseParser {
                     return notifyError(parser.pos,
                         'ILLEGAL_ATTRIBUTE_NAME',
                         'Invalid attribute name. Attribute name cannot begin with the "<" character.');
+                }
+
+                if (code === CODE_FORWARD_SLASH && parser.lookAtCharCodeAhead(1) === CODE_ASTERISK) {
+                    // Skip over code inside a JavaScript block comment
+                    beginBlockComment();
+                    parser.skip(1);
+                    return;
                 }
 
                 if (isWhitespaceCode(code)) {
