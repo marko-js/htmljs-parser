@@ -613,20 +613,25 @@ class Parser extends BaseParser {
         // JavaScript Comments
         function beginLineComment() {
             var comment = beginPart();
-            comment.value = '//';
+            comment.value = '';
+            comment.type = 'line';
             parser.enterState(STATE_JS_COMMENT_LINE);
             return comment;
         }
 
         function beginBlockComment() {
             var comment = beginPart();
-            comment.value = '/*';
+            comment.value = '';
+            comment.type = 'block';
             parser.enterState(STATE_JS_COMMENT_BLOCK);
             return comment;
         }
 
         function endJavaScriptComment() {
             var comment = endPart();
+            comment.rawValue = comment.type === 'line' ?
+                '//' + comment.value :
+                '/*' + comment.value + '*/';
             comment.parentState.comment(comment);
         }
         // --------------------------
@@ -645,6 +650,24 @@ class Parser extends BaseParser {
             var comment = endPart();
             comment.endPos = parser.pos + 3;
             notifyComment(comment);
+        }
+
+        // --------------------------
+
+        // Trailing whitespace
+
+        function beginCheckTrailingWhitespace() {
+            var part = beginPart();
+
+            if (!part.parentState.endTrailingWhitespace) {
+                throw new Error('The "' + part.parentState.name + '" does not implement the "endTrailingWhitespace" method');
+            }
+            parser.enterState(STATE_CHECK_TRAILING_WHITESPACE);
+        }
+
+        function endCheckTrailingWhitespace(error, eof) {
+            var part = endPart();
+            part.parentState.endTrailingWhitespace(error, eof);
         }
 
         // --------------------------
@@ -796,8 +819,12 @@ class Parser extends BaseParser {
             if (parser.lookAheadFor(endHtmlBlockLookahead, parser.pos + newLine.length)) {
                 parser.skip(htmlBlockIndent.length);
                 parser.skip(htmlBlockDelimiter.length);
+
+                endHtmlBlock();
+
+                // NOTE: endHtmlBlock() returns state back to STATE_CONCISE_HTML_CONTENT
                 // We use a new state to make sure the end delimiter has no other junk on the same line
-                parser.enterState(STATE_END_MULTILINE_HTML_BLOCK);
+                beginCheckTrailingWhitespace();
                 return;
             } else if (parser.lookAheadFor(htmlBlockIndent, parser.pos + newLine.length)) {
                 // We know the next line does not end the multiline HTML block, but we need to check if there
@@ -818,6 +845,23 @@ class Parser extends BaseParser {
                 // We found a placeholder while parsing the HTML content. This function is called
                 // from endPlaceholder(). We have already notified the listener of the placeholder so there is
                 // nothing to do here
+            },
+
+            endTrailingWhitespace(ch, eof) {
+                if (ch) {
+                    // This is a non-whitespace! We don't allow non-whitespace
+                    // after matching two or more hyphens. This is user error...
+                    notifyError(parser.pos,
+                        'MALFORMED_MULTILINE_HTML_BLOCK',
+                        'A non-whitespace of "' + ch + '" was found on the same line as the ending delimiter ("' + htmlBlockDelimiter + '") for a multiline HTML block');
+                    return;
+                }
+
+                endHtmlBlock();
+
+                if (eof) {
+                    htmlEOF();
+                }
             },
 
             eol(newLine) {
@@ -922,6 +966,39 @@ class Parser extends BaseParser {
                 indent = '';
             },
 
+            comment(comment) {
+                var value = comment.value;
+
+                value = value.trim();
+
+                notifyComment({
+                    value: value,
+                    pos: comment.pos,
+                    endPos: comment.endPos
+                });
+
+                if (comment.type === 'block') {
+                    // Make sure there is only whitespace on the line
+                    // after the ending "*/" sequence
+                    beginCheckTrailingWhitespace();
+                }
+            },
+
+            endTrailingWhitespace(ch, eof) {
+                if (ch) {
+                    // This is a non-whitespace! We don't allow non-whitespace
+                    // after matching two or more hyphens. This is user error...
+                    notifyError(parser.pos,
+                        'INVALID_CHARACTER',
+                        'A non-whitespace of "' + ch + '" was found after a JavaScript block comment.');
+                    return;
+                }
+
+                if (eof) {
+                    htmlEOF();
+                }
+            },
+
             char(ch, code) {
                 if (isWhitespaceCode(code)) {
                     indent += ch;
@@ -1001,6 +1078,23 @@ class Parser extends BaseParser {
                             isWithinSingleLineHtmlBlock = true;
                             beginHtmlBlock();
                         }
+                    } else if (code === CODE_FORWARD_SLASH) {
+                        // Check next character to see if we are in a comment
+                        var nextCode = parser.lookAtCharCodeAhead(1);
+                        if (nextCode === CODE_FORWARD_SLASH) {
+                            beginLineComment();
+                            parser.skip(1);
+                            return;
+                        } else if (nextCode === CODE_ASTERISK) {
+                            beginBlockComment();
+                            parser.skip(1);
+                            return;
+                        } else {
+                            notifyError(parser.pos,
+                                'ILLEGAL_LINE_START',
+                                'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment');
+                            return;
+                        }
                     } else {
                         beginOpenTag();
                         parser.rewind(1); // START_TAG_NAME expects to start at the first character
@@ -1038,35 +1132,22 @@ class Parser extends BaseParser {
             }
         });
 
-        // In STATE_END_MULTILINE_HTML_BLOCK we have already skipped past the matched delimiter. Now, we are just making
-        // sure there are no non-whitespace characters on the same line
-        var STATE_END_MULTILINE_HTML_BLOCK = Parser.createState({
-            name: 'STATE_END_MULTILINE_HTML_BLOCK',
+        var STATE_CHECK_TRAILING_WHITESPACE = Parser.createState({
+            name: 'STATE_CHECK_TRAILING_WHITESPACE',
 
             eol: function() {
-                // We successfully made it to the end of the line so we are officially done with the multiline,
-                // delimited HTML block. We return back to the STATE_CONCISE_HTML_CONTENT state positioned at the first
-                // column on the next line.
-                endHtmlBlock();
+                endCheckTrailingWhitespace(null /* no error */, false /* not EOF */);
             },
 
             eof: function() {
-                // We already found the end delimiter... while checking every character on the line to make sure it was
-                // all whitespace we reached the end of file.
-                endHtmlBlock();
-
-                htmlEOF();
+                endCheckTrailingWhitespace(null /* no error */, true /* not EOF */);
             },
 
             char(ch, code) {
                 if (isWhitespaceCode(code)) {
                     // Just whitespace... we are still good
                 } else {
-                    // This is a non-whitespace! We don't allow non-whitespace
-                    // after matching two or more hyphens. This is user error...
-                    notifyError(parser.pos,
-                        'MALFORMED_MULTILINE_HTML_BLOCK',
-                        'A non-whitespace of "' + ch + '" was found on the same line as the ending delimiter ("' + htmlBlockDelimiter + '") for a multiline HTML block');
+                    endCheckTrailingWhitespace(ch, true /* not EOF */);
                 }
             }
         });
@@ -1552,7 +1633,7 @@ class Parser extends BaseParser {
 
             comment(comment) {
                 currentPart.isStringLiteral = false;
-                currentPart.value += comment.value;
+                currentPart.value += comment.rawValue;
             },
 
             templateString(templateString) {
@@ -1853,16 +1934,19 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
-                currentPart.value += ch;
+
 
                 if (code === CODE_ASTERISK) {
                     var nextCode = parser.lookAtCharCodeAhead(1);
                     if (nextCode === CODE_FORWARD_SLASH) {
-                        currentPart.value += '/';
+                        currentPart.endPos = parser.pos + 2;
                         endJavaScriptComment();
                         parser.skip(1);
+                        return;
                     }
                 }
+
+                currentPart.value += ch;
             }
         });
 
@@ -1874,10 +1958,12 @@ class Parser extends BaseParser {
 
             eol(str) {
                 currentPart.value += str;
+                currentPart.endPos = parser.pos;
                 endJavaScriptComment();
             },
 
             eof() {
+                currentPart.endPos = parser.pos;
                 endJavaScriptComment();
             },
 
@@ -1992,7 +2078,7 @@ class Parser extends BaseParser {
             },
 
             comment(comment) {
-                currentPart.value += comment.value;
+                currentPart.value += comment.rawValue;
             },
 
             char(ch, code) {

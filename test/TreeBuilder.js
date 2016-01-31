@@ -257,8 +257,15 @@ class TreeBuilder {
             },
 
             onComment: (event) => {
-                expect(src.substring(event.pos, event.pos+4)).to.equal('<!--');
-                expect(src.substring(event.endPos-3, event.endPos)).to.equal('-->');
+                var prefix = src.substring(event.pos, event.pos + 2);
+                if (prefix === '//') {
+                } else if (prefix === '/*') {
+                    expect(src.substring(event.endPos-2, event.endPos)).to.equal('*/');
+                } else {
+                    expect(src.substring(event.pos, event.pos+4)).to.equal('<!--');
+                    expect(src.substring(event.endPos-3, event.endPos)).to.equal('-->');
+                }
+
                 this.last.children.push(new Node(event));
             },
 
