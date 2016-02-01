@@ -244,7 +244,9 @@ class Parser extends BaseParser {
             htmlBlockDelimiter = null;
             isWithinSingleLineHtmlBlock = false;
 
-            parser.enterState(STATE_CONCISE_HTML_CONTENT);
+            if (parser.state !== STATE_CONCISE_HTML_CONTENT) {
+                parser.enterState(STATE_CONCISE_HTML_CONTENT);
+            }
         }
 
         /**
@@ -656,18 +658,49 @@ class Parser extends BaseParser {
 
         // Trailing whitespace
 
-        function beginCheckTrailingWhitespace() {
+        function beginCheckTrailingWhitespace(handler) {
             var part = beginPart();
-
-            if (!part.parentState.endTrailingWhitespace) {
-                throw new Error('The "' + part.parentState.name + '" does not implement the "endTrailingWhitespace" method');
+            part.handler = handler;
+            if (typeof handler !== 'function') {
+                throw new Error('Invalid handler');
             }
             parser.enterState(STATE_CHECK_TRAILING_WHITESPACE);
         }
 
-        function endCheckTrailingWhitespace(error, eof) {
+        function endCheckTrailingWhitespace(err, eof) {
             var part = endPart();
-            part.parentState.endTrailingWhitespace(error, eof);
+            part.handler(err, eof);
+        }
+
+        function handleTrailingWhitespaceJavaScriptComment(err) {
+            if (err) {
+                // This is a non-whitespace! We don't allow non-whitespace
+                // after matching two or more hyphens. This is user error...
+                notifyError(parser.pos,
+                    'INVALID_CHARACTER',
+                    'A non-whitespace of "' + err.ch + '" was found after a JavaScript block comment.');
+            }
+
+            return;
+        }
+
+        function handleTrailingWhitespaceMultilineHtmlBlcok(err, eof) {
+            if (err) {
+                // This is a non-whitespace! We don't allow non-whitespace
+                // after matching two or more hyphens. This is user error...
+                notifyError(parser.pos,
+                    'INVALID_CHARACTER',
+                    'A non-whitespace of "' + err.ch + '" was found on the same line as the ending delimiter ("' + htmlBlockDelimiter + '") for a multiline HTML block');
+                return;
+            }
+
+            endHtmlBlock();
+
+            if (eof) {
+                htmlEOF();
+            }
+
+            return;
         }
 
         // --------------------------
@@ -820,11 +853,9 @@ class Parser extends BaseParser {
                 parser.skip(htmlBlockIndent.length);
                 parser.skip(htmlBlockDelimiter.length);
 
-                endHtmlBlock();
+                parser.enterState(STATE_CONCISE_HTML_CONTENT);
 
-                // NOTE: endHtmlBlock() returns state back to STATE_CONCISE_HTML_CONTENT
-                // We use a new state to make sure the end delimiter has no other junk on the same line
-                beginCheckTrailingWhitespace();
+                beginCheckTrailingWhitespace(handleTrailingWhitespaceMultilineHtmlBlcok);
                 return;
             } else if (parser.lookAheadFor(htmlBlockIndent, parser.pos + newLine.length)) {
                 // We know the next line does not end the multiline HTML block, but we need to check if there
@@ -845,23 +876,6 @@ class Parser extends BaseParser {
                 // We found a placeholder while parsing the HTML content. This function is called
                 // from endPlaceholder(). We have already notified the listener of the placeholder so there is
                 // nothing to do here
-            },
-
-            endTrailingWhitespace(ch, eof) {
-                if (ch) {
-                    // This is a non-whitespace! We don't allow non-whitespace
-                    // after matching two or more hyphens. This is user error...
-                    notifyError(parser.pos,
-                        'MALFORMED_MULTILINE_HTML_BLOCK',
-                        'A non-whitespace of "' + ch + '" was found on the same line as the ending delimiter ("' + htmlBlockDelimiter + '") for a multiline HTML block');
-                    return;
-                }
-
-                endHtmlBlock();
-
-                if (eof) {
-                    htmlEOF();
-                }
             },
 
             eol(newLine) {
@@ -980,19 +994,12 @@ class Parser extends BaseParser {
                 if (comment.type === 'block') {
                     // Make sure there is only whitespace on the line
                     // after the ending "*/" sequence
-                    beginCheckTrailingWhitespace();
+                    beginCheckTrailingWhitespace(handleTrailingWhitespaceJavaScriptComment);
                 }
             },
 
-            endTrailingWhitespace(ch, eof) {
-                if (ch) {
-                    // This is a non-whitespace! We don't allow non-whitespace
-                    // after matching two or more hyphens. This is user error...
-                    notifyError(parser.pos,
-                        'INVALID_CHARACTER',
-                        'A non-whitespace of "' + ch + '" was found after a JavaScript block comment.');
-                    return;
-                }
+            endTrailingWhitespace(eof) {
+                endHtmlBlock();
 
                 if (eof) {
                     htmlEOF();
@@ -1140,14 +1147,16 @@ class Parser extends BaseParser {
             },
 
             eof: function() {
-                endCheckTrailingWhitespace(null /* no error */, true /* not EOF */);
+                endCheckTrailingWhitespace(null /* no error */, true /* EOF */);
             },
 
             char(ch, code) {
                 if (isWhitespaceCode(code)) {
                     // Just whitespace... we are still good
                 } else {
-                    endCheckTrailingWhitespace(ch, true /* not EOF */);
+                    endCheckTrailingWhitespace({
+                        ch: ch
+                    });
                 }
             }
         });
