@@ -1677,6 +1677,11 @@ class Parser extends BaseParser {
                         currentPart.endPos = parser.pos;
                         endExpression();
                         parser.rewind(1);
+
+                        if (parser.state !== STATE_WITHIN_OPEN_TAG) {
+                            // Make sure we transition into parsing within the open tag
+                            parser.enterState(STATE_WITHIN_OPEN_TAG);
+                        }
                         return;
                     }
                 } else if (code === CODE_OPEN_PAREN ||
