@@ -69,8 +69,6 @@ class Parser {
             return undefined;
         }
 
-
-
         var found = this.data.substring(startPos, endPos);
         return (found === str) ? str : undefined;
     }
