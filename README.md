@@ -84,7 +84,7 @@ var parser = require('htmljs-parser').createParser({
     onOpenTag: function(event) {
         var tagName = event.tagName; // String
         var attributes = event.attributes; // Array
-        var argument = event.argument; // String
+        var argument = event.argument; // Object
         var pos = event.pos; // Integer
     },
 
@@ -284,7 +284,10 @@ OUTPUT EVENT:
 {
     type: 'openTag',
     tagName: 'for',
-    argument: 'var i = 0; i < 10; i++',
+    argument: {
+        value: 'var i = 0; i < 10; i++',
+        pos: ... // Integer
+    },
     attributes: []
 }
 ```
@@ -306,7 +309,10 @@ OUTPUT EVENT:
     attributes: [
         {
             name: 'if',
-            argument: 'x > y'
+            argument: {
+                value: 'x > y',
+                pos: ... // Integer
+            }
         }
     ]
 }
