@@ -98,7 +98,7 @@ class Parser extends BaseParser {
         var notifiers = notifyUtil.createNotifiers(parser, listeners);
         this.notifiers = notifiers;
 
-        var defaultMode = options && options.concise !== false ? MODE_CONCISE : MODE_HTML;
+        var defaultMode = options && options.concise === false ? MODE_HTML : MODE_CONCISE;
         var userIsOpenTagOnly = options && options.isOpenTagOnly;
 
         var currentOpenTag; // Used to reference the current open tag that is being parsed
@@ -713,8 +713,9 @@ class Parser extends BaseParser {
             placeholder.escape = escape !== false;
             placeholder.type = 'placeholder';
             placeholder.withinBody = withinOpenTag !== true;
-            placeholder.withinAttribute = withinOpenTag === true;
+            placeholder.withinAttribute = currentAttribute != null;
             placeholder.withinString = placeholder.parentState === STATE_STRING;
+            placeholder.withinOpenTag = withinOpenTag === true && currentAttribute == null;
             placeholderDepth++;
             parser.enterState(STATE_PLACEHOLDER);
             return placeholder;
@@ -1385,7 +1386,6 @@ class Parser extends BaseParser {
             placeholder(placeholder) {
                 var attr = beginAttribute();
                 attr.value = placeholder.value;
-                attr.withinOpenTag = true;
                 endAttribute();
             },
 
