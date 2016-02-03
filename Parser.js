@@ -176,7 +176,7 @@ class Parser extends BaseParser {
 
 
         function openTagEOL() {
-            if (isConcise) {
+            if (isConcise && !currentOpenTag.withinAttrGroup) {
                 // In concise mode we always end the open tag
                 finishOpenTag();
             }
@@ -293,6 +293,13 @@ class Parser extends BaseParser {
 
         function openTagEOF() {
             if (isConcise) {
+                if (currentOpenTag.withinAttrGroup) {
+                    notifyError(currentOpenTag.pos,
+                        'MALFORMED_OPEN_TAG',
+                        'EOF reached while within an attribute group (e.g. "[ ... ]").');
+                    return;
+                }
+
                 // If we reach EOF inside an open tag when in concise-mode
                 // then we just end the tag and all other open tags on the stack
                 finishOpenTag();
@@ -1397,6 +1404,13 @@ class Parser extends BaseParser {
 
                 if (isConcise) {
                     if (code === CODE_HTML_BLOCK_DELIMITER) {
+                        if (currentOpenTag.withinAttrGroup) {
+                            notifyError(currentOpenTag.pos,
+                                'MALFORMED_OPEN_TAG',
+                                'Attribute group was not properly ended');
+                            return;
+                        }
+
                         // The open tag is complete
                         finishOpenTag();
 
@@ -1409,6 +1423,26 @@ class Parser extends BaseParser {
 
                         isWithinSingleLineHtmlBlock = true;
                         beginHtmlBlock();
+                        return;
+                    } else if (code === CODE_OPEN_SQUARE_BRACKET) {
+                        if (currentOpenTag.withinAttrGroup) {
+                            notifyError(parser.pos,
+                                'MALFORMED_OPEN_TAG',
+                                'Unexpected "[" character within open tag.');
+                            return;
+                        }
+
+                        currentOpenTag.withinAttrGroup = true;
+                        return;
+                    } else if (code === CODE_CLOSE_SQUARE_BRACKET) {
+                        if (!currentOpenTag.withinAttrGroup) {
+                            notifyError(parser.pos,
+                                'MALFORMED_OPEN_TAG',
+                                'Unexpected "]" character within open tag.');
+                            return;
+                        }
+
+                        currentOpenTag.withinAttrGroup = false;
                         return;
                     }
                 } else {
@@ -1601,7 +1635,7 @@ class Parser extends BaseParser {
                 if (isConcise && currentPart.groupStack.length === 0) {
                     currentPart.endPos = parser.pos;
                     endExpression();
-                    openTagEOL();
+                    openTagEOF();
                 } else {
                     let parentState = currentPart.parentState;
 
@@ -1688,7 +1722,7 @@ class Parser extends BaseParser {
                            code === CODE_OPEN_SQUARE_BRACKET ||
                            code === CODE_OPEN_CURLY_BRACE) {
 
-                    if (code === CODE_OPEN_PAREN && depth === 0) {
+                    if (code === CODE_OPEN_PAREN) {
                         currentPart.lastLeftParenPos = currentPart.value.length;
                     }
 
@@ -1700,6 +1734,27 @@ class Parser extends BaseParser {
                            code === CODE_CLOSE_SQUARE_BRACKET ||
                            code === CODE_CLOSE_CURLY_BRACE) {
 
+                    if (depth === 0) {
+                        if (code === CODE_CLOSE_SQUARE_BRACKET) {
+                            // We are ending the attribute group so end this expression and let the
+                            // STATE_WITHIN_OPEN_TAG state deal with the ending attribute group
+                            if (currentOpenTag.withinAttrGroup) {
+                                currentPart.endPos = parser.pos + 1;
+                                endExpression();
+                                // Let the STATE_WITHIN_OPEN_TAG state deal with the ending tag sequence
+                                parser.rewind(1);
+                                if (parser.state !== STATE_WITHIN_OPEN_TAG) {
+                                    // Make sure we transition into parsing within the open tag
+                                    parser.enterState(STATE_WITHIN_OPEN_TAG);
+                                }
+                                return;
+                            }
+                        } else {
+                            return notifyError(currentPart.pos,
+                                'INVALID_EXPRESSION',
+                                'Mismatched group. A closing "' + ch + '" character was found but it is not matched with a corresponding opening character.');
+                        }
+                    }
 
 
                     let matchingGroupCharCode = currentPart.groupStack.pop();
