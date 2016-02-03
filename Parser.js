@@ -549,6 +549,8 @@ class Parser extends BaseParser {
         // Scriptlet
 
         function beginScriptlet() {
+            endText();
+            
             var scriptlet = beginPart();
             scriptlet.value = '';
             scriptlet.quoteCharCode = null;
