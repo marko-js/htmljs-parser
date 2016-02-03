@@ -14,7 +14,8 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha --ui bdd --reporter spec ./test"
+    "test": "node_modules/.bin/mocha --ui bdd --reporter spec ./test",
+    "jshint": "node_modules/.bin/jshint *.js"
   },
   "repository": {
     "type": "git",
