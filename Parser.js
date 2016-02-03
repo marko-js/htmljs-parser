@@ -550,7 +550,7 @@ class Parser extends BaseParser {
 
         function beginScriptlet() {
             endText();
-            
+
             var scriptlet = beginPart();
             scriptlet.value = '';
             scriptlet.quoteCharCode = null;
@@ -1724,7 +1724,7 @@ class Parser extends BaseParser {
                            code === CODE_OPEN_SQUARE_BRACKET ||
                            code === CODE_OPEN_CURLY_BRACE) {
 
-                    if (code === CODE_OPEN_PAREN) {
+                    if (depth === 0 && code === CODE_OPEN_PAREN) {
                         currentPart.lastLeftParenPos = currentPart.value.length;
                     }
 
