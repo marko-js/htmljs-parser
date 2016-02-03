@@ -2120,6 +2120,7 @@ class Parser extends BaseParser {
                 } else if (code === CODE_PERCENT) {
                     if (parser.lookAtCharCodeAhead(1) === CODE_CLOSE_ANGLE_BRACKET) {
                         endScriptlet(parser.pos + 2 /* end pos */);
+                        parser.skip(1); // Skip over the closing right angle bracket
                         return;
                     }
                 }
