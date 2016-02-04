@@ -148,7 +148,7 @@ class Parser {
                 continue;
             } else if (code === CODE_CARRIAGE_RETURN) {
                 let nextPos = pos + 1;
-                if (nextPos < data.length && data.charChodeAt(nextPos) === CODE_NEWLINE) {
+                if (nextPos < data.length && data.charCodeAt(nextPos) === CODE_NEWLINE) {
                     if (state.eol) {
                         state.eol.call(this, '\r\n');
                     }
