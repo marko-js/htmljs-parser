@@ -6,6 +6,7 @@ var path = require('path');
 var fs = require('fs');
 var htmljs = require('../');
 var TreeBuilder = require('./TreeBuilder');
+var expect = require('chai').expect;
 
 require('colors');
 
@@ -51,12 +52,19 @@ describe('parser', function() {
         path.join(__dirname, 'fixtures/autotest'),
         function (dir) {
             var inputPath = path.join(dir, 'input.htmljs');
-            var inputHtmlJs = fs.readFileSync(inputPath, {encoding: 'utf8'});
             var testOptionsPath = path.join(dir, 'test.js');
+
             var options;
+            var inputHtmlJs;
 
             if (fs.existsSync(testOptionsPath)) {
                 options = require(testOptionsPath);
+            }
+
+            if (options && options.getSource) {
+                inputHtmlJs = options.getSource();
+            } else {
+                inputHtmlJs = fs.readFileSync(inputPath, {encoding: 'utf8'});
             }
 
             if (options && options.checkThrownError) {
