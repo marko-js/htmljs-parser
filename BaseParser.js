@@ -105,6 +105,10 @@ class Parser {
         this.pos = this.maxPos + 1;
     }
 
+    substring(pos, endPos) {
+        return this.data.substring(pos, endPos);
+    }
+
     parse(data) {
         if (data == null) {
             return;

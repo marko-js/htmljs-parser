@@ -100,12 +100,17 @@ class ElementNode {
     write(out) {
         var event = this.event;
         var tagName = event.tagName;
+        var tagNameExpression = event.tagNameExpression;
         var argument = event.argument;
         var attributes = event.attributes;
         var openTagOnly = event.openTagOnly === true;
         var selfClosed =  event.selfClosed === true;
 
         var str = '<' + tagName;
+
+        if (tagNameExpression) {
+            str += '[' + tagNameExpression + ']';
+        }
 
         if (argument) {
             str += '(' + argument.value + ')';
@@ -163,6 +168,10 @@ class TreeBuilder {
                 }
 
                 expect(src.substring(event.endPos-1, event.endPos)).to.equal('}');
+
+                if (event.withinTagName) {
+                    return;
+                }
 
                 var escapeFunc = escape ? '$escapeXml' : '$noEscapeXml';
                 event.value = escapeFunc + '(' + event.value + ')';

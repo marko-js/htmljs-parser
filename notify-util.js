@@ -68,6 +68,7 @@ exports.createNotifiers = function(parser, listeners) {
                 var event = {
                     type: 'openTag',
                     tagName: tagInfo.tagName,
+                    tagNameExpression: tagInfo.tagNameExpression,
                     argument: tagInfo.argument,
                     pos: tagInfo.pos,
                     endPos: tagInfo.endPos,
@@ -200,6 +201,7 @@ exports.createNotifiers = function(parser, listeners) {
                     withinAttribute: placeholder.withinAttribute === true,
                     withinString: placeholder.withinString === true,
                     withinOpenTag: placeholder.withinOpenTag === true,
+                    withinTagName: placeholder.withinTagName === true
                 };
 
                 eventFunc.call(parser, placeholderEvent, parser);

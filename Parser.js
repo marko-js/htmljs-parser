@@ -351,6 +351,7 @@ class Parser extends BaseParser {
             var tagInfo = {
                 type: 'tag',
                 tagName: '',
+                tagNameParts: null,
                 attributes: [],
                 argument: undefined,
                 pos: parser.pos,
@@ -386,6 +387,10 @@ class Parser extends BaseParser {
                 } else {
                     endPos += 1;
                 }
+            }
+
+            if (currentOpenTag.tagNameParts) {
+                currentOpenTag.tagNameExpression = currentOpenTag.tagNameParts.join('+');
             }
 
             currentOpenTag.endPos = endPos;
@@ -719,7 +724,7 @@ class Parser extends BaseParser {
 
         // Placeholder
 
-        function beginPlaceholder(escape) {
+        function beginPlaceholder(escape, withinTagName) {
             var placeholder = beginPart();
             placeholder.value = '';
             placeholder.escape = escape !== false;
@@ -728,6 +733,7 @@ class Parser extends BaseParser {
             placeholder.withinAttribute = currentAttribute != null;
             placeholder.withinString = placeholder.parentState === STATE_STRING;
             placeholder.withinOpenTag = withinOpenTag === true && currentAttribute == null;
+            placeholder.withinTagName = withinTagName;
             placeholderDepth++;
             parser.enterState(STATE_PLACEHOLDER);
             return placeholder;
@@ -1291,7 +1297,27 @@ class Parser extends BaseParser {
                     currentOpenTag.argument = argument;
                 }
 
-                currentOpenTag.tagName = expression.value;
+
+                if (expression.value) {
+                    currentOpenTag.tagName += expression.value;
+
+                    if (currentOpenTag.tagNameParts) {
+                        currentOpenTag.tagNameParts.push(JSON.stringify(expression.value));
+                    }
+                }
+            },
+
+            placeholder(placeholder) {
+                if (!currentOpenTag.tagNameParts) {
+                    currentOpenTag.tagNameParts = [];
+
+                    if (currentOpenTag.tagName) {
+                        currentOpenTag.tagNameParts.push(JSON.stringify(currentOpenTag.tagName));
+                    }
+                }
+
+                currentOpenTag.tagName += parser.substring(placeholder.pos, placeholder.endPos);
+                currentOpenTag.tagNameParts.push('(' + placeholder.value + ')');
             },
 
             enter(oldState) {
@@ -1304,6 +1330,8 @@ class Parser extends BaseParser {
                 throw new Error('Illegal state');
             }
         });
+
+
 
         // We enter STATE_CDATA after we see "<![CDATA["
         var STATE_CDATA = Parser.createState({
@@ -1814,6 +1842,24 @@ class Parser extends BaseParser {
                         // the attribute value.
                         parser.enterState(STATE_ATTRIBUTE_VALUE);
                         return;
+                    }
+
+                    if (currentPart.parentState === STATE_TAG_NAME) {
+                        if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                            currentPart.value += '\\';
+                            parser.skip(1);
+                            return;
+                        }  else if (checkForEscapedPlaceholder(ch, code)) {
+                            currentPart.value += '$';
+                            parser.skip(1);
+                            return;
+                        } else if (code === CODE_DOLLAR && parser.lookAtCharCodeAhead(1) === CODE_OPEN_CURLY_BRACE) {
+                            currentPart.endPos = parser.pos;
+                            endExpression();
+                            // We expect to start a placeholder at the first curly brace (the next character)
+                            beginPlaceholder(true, true /* tag name */);
+                            return;
+                        }
                     }
                 }
 
