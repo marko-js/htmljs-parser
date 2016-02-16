@@ -237,7 +237,10 @@ class TreeBuilder {
                     expect(startPos == null).to.equal(true);
                     expect(endPos == null).to.equal(true);
                 } else {
-                    expect(src.substring(startPos, startPos + 2 + tagName.length + 1)).to.equal('</' + tagName + '>');
+                    var actualEndTag = src.substring(startPos, endPos);
+                    if (actualEndTag !== '</' + tagName + '>' && actualEndTag !== '</>') {
+                        throw new Error('Incorrect start/stop pos for close tag: ' + actualEndTag);
+                    }
                 }
 
 

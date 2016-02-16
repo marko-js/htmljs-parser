@@ -469,6 +469,9 @@ class Parser extends BaseParser {
 
             closeTagName = null;
             closeTagPos = null;
+
+            lastTag = peek(blockStack);
+            expectedCloseTagName = lastTag && lastTag.tagName;
         }
 
         function beginPart() {
@@ -833,7 +836,6 @@ class Parser extends BaseParser {
             if (match) {
                 endText();
                 closeTag(expectedCloseTagName, parser.pos, parser.pos + 1 + lookAhead.length);
-                expectedCloseTagName = undefined;
                 parser.skip(match.length);
                 parser.enterState(STATE_HTML_CONTENT);
                 return true;
@@ -1345,8 +1347,7 @@ class Parser extends BaseParser {
                     if (closeTagName.length > 0) {
                         closeTag(closeTagName, closeTagPos, parser.pos + 1);
                     } else {
-                        // Treat </> as text block...
-                        endText('</>');
+                        closeTag(expectedCloseTagName, closeTagPos, parser.pos + 1);
                     }
 
                     parser.enterState(STATE_HTML_CONTENT);
