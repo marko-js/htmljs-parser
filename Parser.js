@@ -779,7 +779,7 @@ class Parser extends BaseParser {
                     },
                     addPlaceholder(placeholder) {
                         this._endText();
-                        this.stringParts.push(placeholder.value);
+                        this.stringParts.push('(' + placeholder.value + ')');
                     },
                     end() {
                         this._endText();
