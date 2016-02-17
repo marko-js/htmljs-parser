@@ -468,7 +468,7 @@ class Parser extends BaseParser {
                     'The closing "' + tagName + '" tag was not expected');
             }
 
-            if (!lastTag || lastTag.expectedCloseTagName !== tagName) {
+            if (!lastTag || (lastTag.expectedCloseTagName !== tagName && lastTag.tagName !== tagName)) {
                 return notifyError(pos,
                     'MISMATCHED_CLOSING_TAG',
                     'The closing "' + tagName + '" tag does not match the corresponding opening "' + lastTag.expectedCloseTagName + '" tag');
