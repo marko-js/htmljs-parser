@@ -120,6 +120,16 @@ class ElementNode {
             str += ':' + event.pos;
         }
 
+        if (event.shorthandId) {
+            str += ' shorthandId=' + event.shorthandId.value;
+        }
+
+        if (event.shorthandClassNames) {
+            str += ' shorthandClassNames=[' + event.shorthandClassNames.map((classNamePart) => {
+                return classNamePart.value;
+            }).join(', ') + ']';
+        }
+
         str += attributesToString(attributes, out.includeLiteralValues) + (openTagOnly ? ' OPEN_ONLY' : '') + (selfClosed ? ' SELF_CLOSED' : '') + '>';
         out.writeLine(str);
 
@@ -199,19 +209,23 @@ class TreeBuilder {
 
                 var tagName = event.tagName;
 
-                // Make sure the position information is correct
-                if (event.concise) {
-                    expect(src.substring(startPos, startPos + tagName.length)).to.equal(tagName);
-                } else {
-                    expect(src.substring(startPos, startPos + 1 + tagName.length)).to.equal('<' + tagName);
-
-                    if (event.selfClosed) {
-                        expect(src.substring(endPos - 2, endPos)).to.equal('/>');
+                if (!event.shorthandId && !event.shorthandClassNames) {
+                    // Make sure the position information is correct, but only if the
+                    // shorthand syntax was not used on the tag name
+                    if (event.concise) {
+                        expect(src.substring(startPos, startPos + tagName.length)).to.equal(tagName);
                     } else {
-                        expect(src.charAt(endPos-1)).to.equal('>');
-                    }
+                        expect(src.substring(startPos, startPos + 1 + tagName.length)).to.equal('<' + tagName);
 
+                        if (event.selfClosed) {
+                            expect(src.substring(endPos - 2, endPos)).to.equal('/>');
+                        } else {
+                            expect(src.charAt(endPos-1)).to.equal('>');
+                        }
+
+                    }
                 }
+
 
                 var el = new ElementNode(event);
                 this.last.children.push(el);
@@ -246,9 +260,11 @@ class TreeBuilder {
                     expect(startPos == null).to.equal(true);
                     expect(endPos == null).to.equal(true);
                 } else {
-                    var actualEndTag = src.substring(startPos, endPos);
-                    if (actualEndTag !== '</' + tagName + '>' && actualEndTag !== '</>') {
-                        throw new Error('Incorrect start/stop pos for close tag: ' + actualEndTag);
+                    if (!lastEvent.shorthandId && !lastEvent.shorthandClassNames) {
+                        var actualEndTag = src.substring(startPos, endPos);
+                        if (actualEndTag !== '</' + tagName + '>' && actualEndTag !== '</>') {
+                            throw new Error('Incorrect start/stop pos for close tag: ' + actualEndTag);
+                        }
                     }
                 }
 

@@ -82,6 +82,8 @@ const CODE_HTML_BLOCK_DELIMITER = CODE_HYPHEN;
 const CODE_DOLLAR = 36;
 const CODE_SPACE = 32;
 const CODE_PERCENT = 37;
+const CODE_PERIOD = 46;
+const CODE_NUMBER_SIGN = 35;
 
 const BODY_PARSED_TEXT = 1; // Body of a tag is treated as text, but placeholders will be parsed
 const BODY_STATIC_TEXT = 2;// Body of a tag is treated as text and placeholders will *not* be parsed
@@ -259,7 +261,7 @@ class Parser extends BaseParser {
                 var curBlock = peek(blockStack);
                 if (curBlock.type === 'tag') {
                     if (curBlock.concise) {
-                        closeTag(curBlock.tagName);
+                        closeTag(curBlock.expectedCloseTagName);
                     } else {
                         // We found an unclosed tag on the stack that is not for a concise tag. That means
                         // there is a problem with the template because all open tags should have a closing
@@ -378,6 +380,10 @@ class Parser extends BaseParser {
 
         function finishOpenTag(selfClosed) {
             var tagName = currentOpenTag.tagName;
+
+            currentOpenTag.expectedCloseTagName = expectedCloseTagName =
+                parser.substring(currentOpenTag.tagNameStart, currentOpenTag.tagNameEnd);
+
             var openTagOnly = currentOpenTag.openTagOnly = isOpenTagOnly(tagName);
             var endPos = parser.pos;
 
@@ -396,6 +402,10 @@ class Parser extends BaseParser {
             currentOpenTag.endPos = endPos;
             currentOpenTag.selfClosed = selfClosed === true;
 
+            if (!currentOpenTag.tagName) {
+                tagName = currentOpenTag.tagName = 'div';
+            }
+
             var origState = parser.state;
             notifyOpenTag(currentOpenTag);
 
@@ -412,7 +422,7 @@ class Parser extends BaseParser {
             }
 
             if (shouldClose) {
-                closeTag(tagName);
+                closeTag(expectedCloseTagName);
             }
 
             withinOpenTag = false;
@@ -438,8 +448,6 @@ class Parser extends BaseParser {
 
             // We need to record the "expected close tag name" if we transition into
             // either STATE_STATIC_TEXT_CONTENT or STATE_PARSED_TEXT_CONTENT
-            expectedCloseTagName = tagName;
-
             currentOpenTag = undefined;
         }
 
@@ -460,11 +468,13 @@ class Parser extends BaseParser {
                     'The closing "' + tagName + '" tag was not expected');
             }
 
-            if (!lastTag || lastTag.tagName !== tagName) {
+            if (!lastTag || lastTag.expectedCloseTagName !== tagName) {
                 return notifyError(pos,
                     'MISMATCHED_CLOSING_TAG',
-                    'The closing "' + tagName + '" tag does not match the corresponding opening "' + lastTag.tagName + '" tag');
+                    'The closing "' + tagName + '" tag does not match the corresponding opening "' + lastTag.expectedCloseTagName + '" tag');
             }
+
+            tagName = lastTag.tagName;
 
             notifyCloseTag(tagName, pos, endPos);
 
@@ -750,6 +760,64 @@ class Parser extends BaseParser {
 
         // --------------------------
 
+        // Placeholder
+
+        function beginTagNameShorthand(escape, withinTagName) {
+            var shorthand = beginPart();
+            shorthand.currentPart = null;
+            shorthand.hasId = false;
+            shorthand.beginPart = function(type) {
+                shorthand.currentPart = {
+                    type: type,
+                    stringParts: [],
+                    text: '',
+                    _endText() {
+                        if (this.text) {
+                            this.stringParts.push(JSON.stringify(this.text));
+                        }
+                        this.text = '';
+                    },
+                    addPlaceholder(placeholder) {
+                        this._endText();
+                        this.stringParts.push(placeholder.value);
+                    },
+                    end() {
+                        this._endText();
+
+                        var expression = this.stringParts.join('+');
+
+                        if (type === 'id') {
+                            currentOpenTag.shorthandId = {
+                                value: expression
+                            };
+                        } else if (type === 'class') {
+                            if (!currentOpenTag.shorthandClassNames) {
+                                currentOpenTag.shorthandClassNames = [];
+                            }
+
+                            currentOpenTag.shorthandClassNames.push({
+                                value: expression
+                            });
+
+
+                        }
+                    }
+                };
+            };
+            parser.enterState(STATE_TAG_NAME_SHORTHAND);
+            return shorthand;
+        }
+
+        function endTagNameShorthand() {
+            var shorthand = endPart();
+            if (shorthand.currentPart) {
+                shorthand.currentPart.end();
+            }
+            parser.enterState(STATE_WITHIN_OPEN_TAG);
+        }
+
+        // --------------------------
+
         function getAndRemoveArgument(expression) {
             let start = expression.lastLeftParenPos;
             if (start != null) {
@@ -971,6 +1039,7 @@ class Parser extends BaseParser {
                         text += '<';
                     } else {
                         beginOpenTag();
+                        currentOpenTag.tagNameStart = parser.pos+1;
                     }
                 } else if (checkForEscapedEscapedPlaceholder(ch, code)) {
                     text += '\\';
@@ -1033,7 +1102,7 @@ class Parser extends BaseParser {
                         if (len) {
                             let curBlock = blockStack[len - 1];
                             if (curBlock.indent.length >= indent.length) {
-                                closeTag(curBlock.tagName);
+                                closeTag(curBlock.expectedCloseTagName);
                             } else {
                                 // Indentation is greater than the last tag so we are starting a
                                 // nested tag and there are no more tags to end
@@ -1122,6 +1191,7 @@ class Parser extends BaseParser {
                         }
                     } else {
                         beginOpenTag();
+                        currentOpenTag.tagNameStart = parser.pos;
                         parser.rewind(1); // START_TAG_NAME expects to start at the first character
                     }
                 }
@@ -1295,6 +1365,9 @@ class Parser extends BaseParser {
                     }
 
                     currentOpenTag.argument = argument;
+                    currentOpenTag.tagNameEnd = expression.pos + expression.lastLeftParenPos + 1;
+                } else {
+                    currentOpenTag.tagNameEnd = expression.endPos;
                 }
 
 
@@ -1318,6 +1391,7 @@ class Parser extends BaseParser {
 
                 currentOpenTag.tagName += parser.substring(placeholder.pos, placeholder.endPos);
                 currentOpenTag.tagNameParts.push('(' + placeholder.value + ')');
+                currentOpenTag.tagNameEnd = placeholder.endPos;
             },
 
             enter(oldState) {
@@ -1814,7 +1888,7 @@ class Parser extends BaseParser {
                 } else if (depth === 0) {
                     if (!isConcise) {
                         if (code === CODE_CLOSE_ANGLE_BRACKET) {
-                            currentPart.endPos = parser.pos + 1;
+                            currentPart.endPos = parser.pos;
                             endExpression();
                             // Let the STATE_WITHIN_OPEN_TAG state deal with the ending tag sequence
                             parser.rewind(1);
@@ -1859,11 +1933,106 @@ class Parser extends BaseParser {
                             // We expect to start a placeholder at the first curly brace (the next character)
                             beginPlaceholder(true, true /* tag name */);
                             return;
+                        } else if (code === CODE_PERIOD || code === CODE_NUMBER_SIGN) {
+                            endExpression();
+                            parser.rewind(1);
+                            beginTagNameShorthand();
+                            return;
                         }
                     }
                 }
 
                 currentPart.value += ch;
+            }
+        });
+
+        var STATE_TAG_NAME_SHORTHAND = Parser.createState({
+            name: 'STATE_TAG_NAME_SHORTHAND',
+
+            placeholder(placeholder) {
+                var shorthand = currentPart;
+                shorthand.currentPart.addPlaceholder(placeholder);
+            },
+
+            eol(str) {
+                currentOpenTag.tagNameEnd = parser.pos;
+                endTagNameShorthand();
+
+                if (parser.state !== STATE_WITHIN_OPEN_TAG) {
+                    // Make sure we transition into parsing within the open tag
+                    parser.enterState(STATE_WITHIN_OPEN_TAG);
+                }
+
+                if (isConcise) {
+                    openTagEOL();
+                }
+            },
+
+            eof() {
+                endTagNameShorthand();
+
+                if (isConcise) {
+                    openTagEOF();
+                } else {
+                    return notifyError(currentPart.pos,
+                        'INVALID_TAG_SHORTHAND',
+                        'EOF reached will parsing id/class shorthand in tag name');
+                }
+            },
+
+            char(ch, code) {
+                var shorthand = currentPart;
+                if (!isConcise) {
+                    if (code === CODE_CLOSE_ANGLE_BRACKET) {
+                        currentOpenTag.tagNameEnd = parser.pos;
+                        endTagNameShorthand();
+                        parser.rewind(1);
+                        return;
+                    }
+                }
+
+                if (isWhitespaceCode(code)) {
+                    endTagNameShorthand();
+                    currentOpenTag.tagNameEnd = parser.pos;
+                    if (parser.state !== STATE_WITHIN_OPEN_TAG) {
+                        parser.enterState(STATE_WITHIN_OPEN_TAG);
+                    }
+                    return;
+                }
+
+                if (code === CODE_PERIOD) {
+                    if (shorthand.currentPart) {
+                        shorthand.currentPart.end();
+                    }
+
+                    shorthand.beginPart('class');
+                } else if (code === CODE_NUMBER_SIGN) {
+                    if (shorthand.hasId) {
+                        return notifyError(currentPart.pos,
+                            'INVALID_TAG_SHORTHAND',
+                            'Multiple shorthand ID parts are not allowed on the same tag');
+                    }
+
+                    shorthand.hasId = true;
+
+                    if (shorthand.currentPart) {
+                        shorthand.currentPart.end();
+                    }
+
+                    shorthand.beginPart('id');
+                }
+
+                else if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                    shorthand.currentPart.text += '\\';
+                    parser.skip(1);
+                }  else if (checkForEscapedPlaceholder(ch, code)) {
+                    shorthand.currentPart.text += '$';
+                    parser.skip(1);
+                } else if (checkForPlaceholder(ch, code)) {
+                    // We went into placeholder state...
+                } else {
+                    shorthand.currentPart.text += ch;
+                }
             }
         });
 

@@ -1,0 +1,5 @@
+<#foo>Hello</#foo>
+<#foo.bar name="Frank"></#foo.bar>
+<.bar.baz></.bar.baz>
+<div.foo></>
+<span.foo></span.foo>

@@ -77,6 +77,14 @@ exports.createNotifiers = function(parser, listeners) {
                     concise: tagInfo.concise
                 };
 
+                if (tagInfo.shorthandId) {
+                    event.shorthandId = tagInfo.shorthandId;
+                }
+
+                if (tagInfo.shorthandClassNames) {
+                    event.shorthandClassNames = tagInfo.shorthandClassNames;
+                }
+
                 event.attributes = tagInfo.attributes.map((attr) => {
                     var newAttr = {
                         name: attr.name,
