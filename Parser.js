@@ -486,7 +486,7 @@ class Parser extends BaseParser {
             closeTagPos = null;
 
             lastTag = peek(blockStack);
-            expectedCloseTagName = lastTag && lastTag.tagName;
+            expectedCloseTagName = lastTag && lastTag.expectedCloseTagName;
         }
 
         function beginPart() {
@@ -1887,9 +1887,14 @@ class Parser extends BaseParser {
                     return;
                 } else if (depth === 0) {
                     if (!isConcise) {
-                        if (code === CODE_CLOSE_ANGLE_BRACKET) {
+                        if (code === CODE_CLOSE_ANGLE_BRACKET &&
+                            (parentState === STATE_TAG_NAME ||
+                             parentState === STATE_ATTRIBUTE_NAME ||
+                             parentState === STATE_ATTRIBUTE_VALUE ||
+                             parentState === STATE_WITHIN_OPEN_TAG)) {
                             currentPart.endPos = parser.pos;
                             endExpression();
+                            endAttribute();
                             // Let the STATE_WITHIN_OPEN_TAG state deal with the ending tag sequence
                             parser.rewind(1);
                             if (parser.state !== STATE_WITHIN_OPEN_TAG) {
