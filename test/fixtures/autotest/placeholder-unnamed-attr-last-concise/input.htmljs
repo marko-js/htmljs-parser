@@ -1,0 +1,2 @@
+div class="foo" ${myCustomAttrs}
+    span.bar

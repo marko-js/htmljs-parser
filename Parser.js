@@ -1499,6 +1499,8 @@ class Parser extends BaseParser {
                 var attr = beginAttribute();
                 attr.value = placeholder.value;
                 endAttribute();
+
+                parser.enterState(STATE_AFTER_PLACEHOLDER_WITHIN_TAG);
             },
 
             comment(comment) {
@@ -2037,6 +2039,42 @@ class Parser extends BaseParser {
                     // We went into placeholder state...
                 } else {
                     shorthand.currentPart.text += ch;
+                }
+            }
+        });
+
+        // We enter STATE_WITHIN_OPEN_TAG after we have fully
+        // read in the tag name and encountered a whitespace character
+        var STATE_AFTER_PLACEHOLDER_WITHIN_TAG = Parser.createState({
+            name: 'STATE_AFTER_PLACEHOLDER_WITHIN_TAG',
+
+            eol: openTagEOL,
+
+            eof: openTagEOF,
+
+            char(ch, code) {
+
+                if (!isConcise) {
+                    if (code === CODE_CLOSE_ANGLE_BRACKET) {
+                        finishOpenTag();
+                        return;
+                    } else if (code === CODE_FORWARD_SLASH) {
+                        let nextCode = parser.lookAtCharCodeAhead(1);
+                        if (nextCode === CODE_CLOSE_ANGLE_BRACKET) {
+                            finishOpenTag(true /* self closed */);
+                            parser.skip(1);
+                            return;
+                        }
+                    }
+                }
+
+                if (isWhitespaceCode(code)) {
+                    parser.enterState(STATE_WITHIN_OPEN_TAG);
+                } else {
+                    notifyError(parser.pos,
+                        'UNEXPECTED_TEXT_AFTER_PLACEHOLDER_IN_TAG',
+                        `An unexpected "${ch}" character was found after a placeoholder within the open tag.`);
+                    return;
                 }
             }
         });
