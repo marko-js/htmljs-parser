@@ -102,6 +102,7 @@ class Parser extends BaseParser {
 
         var defaultMode = options && options.concise === false ? MODE_HTML : MODE_CONCISE;
         var userIsOpenTagOnly = options && options.isOpenTagOnly;
+        var ignorePlaceholders = options && options.ignorePlaceholders;
 
         var currentOpenTag; // Used to reference the current open tag that is being parsed
         var currentAttribute; // Used to reference the current attribute that is being parsed
@@ -1041,13 +1042,13 @@ class Parser extends BaseParser {
                         beginOpenTag();
                         currentOpenTag.tagNameStart = parser.pos+1;
                     }
-                } else if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                } else if (!ignorePlaceholders && checkForEscapedEscapedPlaceholder(ch, code)) {
                     text += '\\';
                     parser.skip(1);
-                }  else if (checkForEscapedPlaceholder(ch, code)) {
+                }  else if (!ignorePlaceholders && checkForEscapedPlaceholder(ch, code)) {
                     text += '$';
                     parser.skip(1);
-                } else if (checkForPlaceholder(ch, code)) {
+                } else if (!ignorePlaceholders && checkForPlaceholder(ch, code)) {
                     // We went into placeholder state...
                     endText();
                 } else {
@@ -1327,13 +1328,13 @@ class Parser extends BaseParser {
                         parser.skip(1);
                         return;
                     }
-                } else if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                } else if (!ignorePlaceholders && checkForEscapedEscapedPlaceholder(ch, code)) {
                     text += '\\';
                     parser.skip(1);
-                }  else if (checkForEscapedPlaceholder(ch, code)) {
+                }  else if (!ignorePlaceholders && checkForEscapedPlaceholder(ch, code)) {
                     text += '$';
                     parser.skip(1);
-                } else if (checkForPlaceholder(ch, code)) {
+                } else if (!ignorePlaceholders && checkForPlaceholder(ch, code)) {
                     // We went into placeholder state...
                     endText();
                     return;
@@ -2029,13 +2030,13 @@ class Parser extends BaseParser {
                     shorthand.beginPart('id');
                 }
 
-                else if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                else if (!ignorePlaceholders && checkForEscapedEscapedPlaceholder(ch, code)) {
                     shorthand.currentPart.text += '\\';
                     parser.skip(1);
-                }  else if (checkForEscapedPlaceholder(ch, code)) {
+                }  else if (!ignorePlaceholders && checkForEscapedPlaceholder(ch, code)) {
                     shorthand.currentPart.text += '$';
                     parser.skip(1);
-                } else if (checkForPlaceholder(ch, code)) {
+                } else if (!ignorePlaceholders && checkForPlaceholder(ch, code)) {
                     // We went into placeholder state...
                 } else {
                     shorthand.currentPart.text += ch;
@@ -2146,9 +2147,9 @@ class Parser extends BaseParser {
                 var quoteCharCode = currentPart.quoteCharCode;
 
                 if (code === CODE_BACK_SLASH) {
-                    if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                    if (!ignorePlaceholders && checkForEscapedEscapedPlaceholder(ch, code)) {
                         currentPart.currentText += '\\';
-                    }  else if (checkForEscapedPlaceholder(ch, code)) {
+                    }  else if (!ignorePlaceholders && checkForEscapedPlaceholder(ch, code)) {
                         currentPart.currentText += '$';
                     } else {
                         // Handle string escape sequence
@@ -2190,7 +2191,7 @@ class Parser extends BaseParser {
 
                     currentPart.value = stringExpr;
                     endString();
-                } else if (checkForPlaceholder(ch, code)) {
+                } else if (!ignorePlaceholders && checkForPlaceholder(ch, code)) {
                     if (currentPart.currentText) {
                         stringParts.push(currentPart.currentText);
                     }
