@@ -2153,10 +2153,20 @@ class Parser extends BaseParser {
                 var quoteCharCode = currentPart.quoteCharCode;
 
                 if (code === CODE_BACK_SLASH) {
-                    if (!ignorePlaceholders && checkForEscapedEscapedPlaceholder(ch, code)) {
-                        currentPart.currentText += '\\';
-                    }  else if (!ignorePlaceholders && checkForEscapedPlaceholder(ch, code)) {
-                        currentPart.currentText += '$';
+                    if (checkForEscapedEscapedPlaceholder(ch, code)) {
+                        if (ignorePlaceholders) {
+                            // We are actually adding two escaped backslashes here...
+                            currentPart.currentText += '\\\\\\\\';
+                        } else {
+                            currentPart.currentText += '\\';
+                        }
+                    }  else if (checkForEscapedPlaceholder(ch, code)) {
+                        if (ignorePlaceholders) {
+                            // We are actually adding one escaped backslashes here...
+                            currentPart.currentText += '\\\\$';
+                        } else {
+                            currentPart.currentText += '$';
+                        }
                     } else {
                         // Handle string escape sequence
                         nextCh = parser.lookAtCharAhead(1);
