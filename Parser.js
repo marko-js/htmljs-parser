@@ -17,7 +17,7 @@ var NUMBER_REGEX = /^[\-\+]?\d*(?:\.\d+)?(?:e[\-\+]?\d+)?$/;
  * Takes a string expression such as `"foo"` or `'foo "bar"'`
  * and returns the literal String value.
  */
-function evaluateStringExpression(expression) {
+function evaluateStringExpression(expression, pos, notifyError) {
     // We could just use eval(expression) to get the literal String value,
     // but there is a small chance we could be introducing a security threat
     // by accidently running malicous code. Instead, we will use
@@ -43,7 +43,13 @@ function evaluateStringExpression(expression) {
         expression = '"' + expression + '"';
     }
 
-    return JSON.parse(expression);
+    try {
+        return JSON.parse(expression);
+    } catch(e) {
+        notifyError(pos,
+            'INVALID_STRING',
+            'Invalid string (' + expression + '): ' + e);
+    }
 }
 
 
@@ -1663,7 +1669,7 @@ class Parser extends BaseParser {
                 // If the expression evaluates to a literal value then add the
                 // `literalValue` property to the attribute
                 if (expression.isStringLiteral) {
-                    currentAttribute.literalValue = evaluateStringExpression(value);
+                    currentAttribute.literalValue = evaluateStringExpression(value, expression.pos, notifyError);
                 } else if (value === 'true') {
                     currentAttribute.literalValue = true;
                 } else if (value === 'false') {
