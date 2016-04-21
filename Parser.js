@@ -1997,7 +1997,7 @@ class Parser extends BaseParser {
             char(ch, code) {
                 var shorthand = currentPart;
                 if (!isConcise) {
-                    if (code === CODE_CLOSE_ANGLE_BRACKET) {
+                    if (code === CODE_CLOSE_ANGLE_BRACKET || code === CODE_FORWARD_SLASH) {
                         currentOpenTag.tagNameEnd = parser.pos;
                         endTagNameShorthand();
                         parser.rewind(1);
