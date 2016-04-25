@@ -1067,12 +1067,6 @@ class Parser extends BaseParser {
         var STATE_CONCISE_HTML_CONTENT = Parser.createState({
             name: 'STATE_CONCISE_HTML_CONTENT',
 
-            eol(newLine) {
-                text = indent + newLine;
-                endText();
-                indent = '';
-            },
-
             eof: htmlEOF,
 
             enter() {
