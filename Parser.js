@@ -434,22 +434,30 @@ class Parser extends BaseParser {
 
             withinOpenTag = false;
 
-            // Did the parser stay in the same state after
-            // notifying listeners about openTag?
-            if (parser.state === origState) {
-                // The listener didn't transition the parser to a new state
-                // so we use some simple rules to find the appropriate state.
-                if (tagName === 'script') {
-                    parser.enterJsContentState();
-                } else if (tagName === 'style') {
-                    parser.enterCssContentState();
+            if (shouldClose) {
+                if (isConcise) {
+                    parser.enterConciseHtmlContentState();
                 } else {
-                    if (isConcise) {
-                        parser.enterConciseHtmlContentState();
+                    parser.enterHtmlContentState();
+                }
+            } else {
+                // Did the parser stay in the same state after
+                // notifying listeners about openTag?
+                if (parser.state === origState) {
+                    // The listener didn't transition the parser to a new state
+                    // so we use some simple rules to find the appropriate state.
+                    if (tagName === 'script') {
+                        parser.enterJsContentState();
+                    } else if (tagName === 'style') {
+                        parser.enterCssContentState();
                     } else {
-                        parser.enterHtmlContentState();
-                    }
+                        if (isConcise) {
+                            parser.enterConciseHtmlContentState();
+                        } else {
+                            parser.enterHtmlContentState();
+                        }
 
+                    }
                 }
             }
 
@@ -2467,11 +2475,15 @@ class Parser extends BaseParser {
         });
 
         parser.enterHtmlContentState = function() {
-            parser.enterState(STATE_HTML_CONTENT);
+            if (parser.state !== STATE_HTML_CONTENT) {
+                parser.enterState(STATE_HTML_CONTENT);
+            }
         };
 
         parser.enterConciseHtmlContentState = function() {
-            parser.enterState(STATE_CONCISE_HTML_CONTENT);
+            if (parser.state !== STATE_CONCISE_HTML_CONTENT) {
+                parser.enterState(STATE_CONCISE_HTML_CONTENT);
+            }
         };
 
         parser.enterParsedTextContentState = function() {
