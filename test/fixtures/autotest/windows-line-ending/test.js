@@ -7,3 +7,5 @@ exports.getSource = function() {
         '---'
     ].join('\r\n');
 };
+
+exports.preserveLineEndings = true;

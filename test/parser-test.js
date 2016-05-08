@@ -67,6 +67,10 @@ describe('parser', function() {
                 inputHtmlJs = fs.readFileSync(inputPath, {encoding: 'utf8'});
             }
 
+            if (!options || (options.preserveLineEndings !== true)) {
+                inputHtmlJs = inputHtmlJs.replace(/\r\n|\n/g, "\n");
+            }
+
             if (options && options.checkThrownError) {
                 var error;
 
