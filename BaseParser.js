@@ -122,6 +122,14 @@ class Parser {
             data = data.join('');
         }
 
+        // Strip off the byte order mark (BOM) sequence
+        // at the beginning of the file:
+        // - https://en.wikipedia.org/wiki/Byte_order_mark
+        // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
+        if (data.charCodeAt(0) === 0xFEFF) {
+    		data = data.slice(1);
+    	}
+
         this.data = data;
         this.maxPos = data.length - 1;
 
