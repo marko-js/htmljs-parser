@@ -45,7 +45,11 @@ class Node {
         var event = this.event;
         switch(event.type) {
             case 'text': {
-                out.writeLine('text:' + JSON.stringify(event.value));
+                var line = 'text:' + JSON.stringify(event.value);
+                if (out.includeTextParserState) {
+                    line += ' [parseMode=' + event.parseMode + ']';
+                }
+                out.writeLine(line);
                 break;
             }
 
@@ -159,6 +163,8 @@ class TreeBuilder {
         this.src = src;
         this.includePositions = options && options.includePositions === true;
         this.includeLiteralValues = options && options.includeLiteralValues === true;
+        this.includeTextParserState = options.includeTextParserState === true;
+
         this.root = new RootNode();
         this.stack = [this.root];
 
@@ -325,6 +331,7 @@ class TreeBuilder {
         var out = {
             includePositions: this.includePositions === true,
             includeLiteralValues: this.includeLiteralValues === true,
+            includeTextParserState: this.includeTextParserState === true,
             incIndent() {
                 indent += '    ';
             },

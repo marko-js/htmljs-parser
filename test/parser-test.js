@@ -6,7 +6,6 @@ var path = require('path');
 var fs = require('fs');
 var htmljs = require('../');
 var TreeBuilder = require('./TreeBuilder');
-var expect = require('chai').expect;
 
 require('colors');
 

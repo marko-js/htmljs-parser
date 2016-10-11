@@ -2,7 +2,7 @@ exports.createNotifiers = function(parser, listeners) {
     var hasError = false;
 
     return {
-        notifyText(value) {
+        notifyText(value, textParseMode) {
             if (hasError) {
                 return;
             }
@@ -12,7 +12,8 @@ exports.createNotifiers = function(parser, listeners) {
             if (eventFunc && (value.length > 0)) {
                 eventFunc.call(parser, {
                     type: 'text',
-                    value: value
+                    value: value,
+                    parseMode: textParseMode
                 }, parser);
             }
         },

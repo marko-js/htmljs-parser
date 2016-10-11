@@ -128,6 +128,7 @@ class Parser extends BaseParser {
         var beginMixedMode; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
         var endingMixedModeAtEOL; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
         var placeholderDepth; // Used as an easy way to know if an exptression is within a placeholder
+        var textParseMode = 'html';
 
         this.reset = function() {
             BaseParser.prototype.reset.call(this);
@@ -177,7 +178,7 @@ class Parser extends BaseParser {
                 txt = text;
             }
 
-            notifiers.notifyText(txt);
+            notifiers.notifyText(txt, textParseMode);
 
             // always clear text buffer...
             text =  '';
@@ -1005,6 +1006,7 @@ class Parser extends BaseParser {
             eof: htmlEOF,
 
             enter() {
+                textParseMode = 'html';
                 isConcise = false; // Back into non-concise HTML parsing
             },
 
@@ -1275,6 +1277,10 @@ class Parser extends BaseParser {
         var STATE_STATIC_TEXT_CONTENT = Parser.createState({
             name: 'STATE_STATIC_TEXT_CONTENT',
 
+            enter() {
+                textParseMode = 'static-text';
+            },
+
             eol(newLine) {
                 text += newLine;
 
@@ -1311,6 +1317,10 @@ class Parser extends BaseParser {
         // placeholders
         var STATE_PARSED_TEXT_CONTENT = Parser.createState({
             name: 'STATE_PARSED_TEXT_CONTENT',
+
+            enter() {
+                textParseMode = 'parsed-text';
+            },
 
             placeholder: STATE_HTML_CONTENT.placeholder,
 
@@ -1429,6 +1439,10 @@ class Parser extends BaseParser {
         // We enter STATE_CDATA after we see "<![CDATA["
         var STATE_CDATA = Parser.createState({
             name: 'STATE_CDATA',
+
+            enter() {
+                textParseMode = 'cdata';
+            },
 
             eof() {
                 notifyError(currentPart.pos,
