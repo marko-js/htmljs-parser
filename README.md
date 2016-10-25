@@ -252,7 +252,7 @@ OUTPUT EVENT:
 INPUT:
 
 ```html
-<say-something message="Hello "+data.name>
+<say-something message=("Hello "+data.name)/>
 ```
 
 OUTPUT EVENT:
