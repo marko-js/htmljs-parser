@@ -96,6 +96,7 @@ const BODY_STATIC_TEXT = 2;// Body of a tag is treated as text and placeholders 
 
 const EMPTY_ATTRIBUTES = [];
 const htmlTags = require('./html-tags');
+const operators = require('./operators');
 
 class Parser extends BaseParser {
     constructor(listeners, options) {
@@ -538,6 +539,10 @@ class Parser extends BaseParser {
 
         function endExpression() {
             var expression = endPart();
+            // Probably shouldn't do this, but it makes it easier to test!
+            if(expression.parentState === STATE_ATTRIBUTE_VALUE && expression.hasUnenclosedWhitespace) {
+                expression.value = '('+expression.value+')';
+            }
             expression.parentState.expression(expression);
         }
 
@@ -939,6 +944,18 @@ class Parser extends BaseParser {
                 beginCDATA();
                 parser.skip(8);
                 return true;
+            }
+
+            return false;
+        }
+
+        function checkForOperator() {
+            var remaining = parser.data.substring(parser.pos);
+            var match = operators.pattern.exec(remaining);
+
+            if(match) {
+                parser.skip(match[0].length-1);
+                return match[0];
             }
 
             return false;
@@ -1941,6 +1958,15 @@ class Parser extends BaseParser {
                     }
 
                     if (isWhitespaceCode(code)) {
+                        if(parentState === STATE_ATTRIBUTE_VALUE && !isConcise) {
+                            var operator = checkForOperator();
+                            if(operator) {
+                                currentPart.hasUnenclosedWhitespace = true;
+                                currentPart.value += operator;
+                                return;
+                            }
+                        }
+
                         currentPart.endPos = parser.pos;
                         endExpression();
                         endAttribute();
@@ -1948,6 +1974,7 @@ class Parser extends BaseParser {
                             // Make sure we transition into parsing within the open tag
                             parser.enterState(STATE_WITHIN_OPEN_TAG);
                         }
+
                         return;
                     } else if (code === CODE_EQUAL && parentState === STATE_ATTRIBUTE_NAME) {
                         currentPart.endPos = parser.pos;

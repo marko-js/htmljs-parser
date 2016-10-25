@@ -1,0 +1,1 @@
+<tag isString=data instanceof String x=123 + 256 name=lastName.toUppercase() + ', ' + firstName.toLowerCase() age-in-years=daysOld / 365 test=x ? 'a' : 'b'>test</tag>
