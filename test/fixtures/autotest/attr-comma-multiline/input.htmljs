@@ -1,0 +1,6 @@
+a href="http://www.ebay.com",
+  target="_blank",
+  style="background-color: yellow",
+  class="foo",
+  bar
+  - This is the body of the a tag
