@@ -918,6 +918,18 @@ class Parser extends BaseParser {
             return false;
         }
 
+        function checkForEqualAfterWhitespace() {
+            var ahead = 1;
+            while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) ahead++;
+            return parser.lookAtCharCodeAhead(ahead) === CODE_EQUAL;
+        }
+
+        function consumeWhitespace() {
+            var ahead = 1;
+            while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) ahead++;
+            parser.skip(ahead-1);
+        }
+
         function checkForClosingTag() {
             // Look ahead to see if we found the closing tag that will
             // take us out of the EXPRESSION state...
@@ -1941,6 +1953,10 @@ class Parser extends BaseParser {
                     }
 
                     if (isWhitespaceCode(code)) {
+                        if (checkForEqualAfterWhitespace()) {
+                            consumeWhitespace();
+                            return;
+                        }
                         currentPart.endPos = parser.pos;
                         endExpression();
                         endAttribute();
@@ -1955,6 +1971,7 @@ class Parser extends BaseParser {
                         // We encountered "=" which means we need to start reading
                         // the attribute value.
                         parser.enterState(STATE_ATTRIBUTE_VALUE);
+                        consumeWhitespace();
                         return;
                     }
 
