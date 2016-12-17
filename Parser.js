@@ -90,6 +90,7 @@ const CODE_SPACE = 32;
 const CODE_PERCENT = 37;
 const CODE_PERIOD = 46;
 const CODE_COMMA = 44;
+const CODE_SEMICOLON = 59;
 const CODE_NUMBER_SIGN = 35;
 
 const BODY_PARSED_TEXT = 1; // Body of a tag is treated as text, but placeholders will be parsed
@@ -1697,7 +1698,7 @@ class Parser extends BaseParser {
             name: 'STATE_ATTRIBUTE_VALUE',
 
             expression(expression) {
-                var value = expression.value.replace(/(;)$/, '');
+                var value = expression.value;
 
                 if (value === '') {
 
@@ -1955,6 +1956,22 @@ class Parser extends BaseParser {
                             }
                             return;
                         }
+                    }
+
+                    if(code === CODE_SEMICOLON) {
+                        endExpression();
+                        endAttribute();
+                        if(isConcise) {
+                            finishOpenTag();
+                            beginCheckTrailingWhitespace(function(hasChar) {
+                                if(hasChar) {
+                                    parser.skip(-1); //get back the char that was just consumed
+                                    isWithinSingleLineHtmlBlock = true;
+                                    beginHtmlBlock();
+                                }
+                            });
+                        }
+                        return;
                     }
 
                     if (code === CODE_COMMA || isWhitespaceCode(code)) {
