@@ -1,6 +1,6 @@
 'use strict';
 var BaseParser = require('./BaseParser');
-
+var operators = require('./operators');
 var notifyUtil = require('./notify-util');
 
 function isWhitespaceCode(code) {
@@ -544,6 +544,10 @@ class Parser extends BaseParser {
 
         function endExpression() {
             var expression = endPart();
+            // Probably shouldn't do this, but it makes it easier to test!
+            if(expression.parentState === STATE_ATTRIBUTE_VALUE && expression.hasUnenclosedWhitespace) {
+                expression.value = '('+expression.value+')';
+            }
             expression.parentState.expression(expression);
         }
 
@@ -957,6 +961,24 @@ class Parser extends BaseParser {
                 beginCDATA();
                 parser.skip(8);
                 return true;
+            }
+
+            return false;
+        }
+
+        function checkForOperator() {
+            var remaining = parser.data.substring(parser.pos);
+            var match = operators.pattern.exec(remaining);
+
+            if(match) {
+                var op = match[0];
+                var isIgnoredOperator = isConcise ?
+                                        op.includes('-') || op.includes('[')
+                                      : op.includes('>');
+                if(!isIgnoredOperator) {
+                    parser.skip(op.length-1);
+                    return op;
+                }
             }
 
             return false;
@@ -1709,6 +1731,7 @@ class Parser extends BaseParser {
                 currentAttribute.value = value;
                 currentAttribute.pos = expression.pos;
                 currentAttribute.endPos = expression.endPos;
+                currentAttribute.hasUnenclosedWhitespace = expression.hasUnenclosedWhitespace;
 
                 // If the expression evaluates to a literal value then add the
                 // `literalValue` property to the attribute
@@ -1980,6 +2003,13 @@ class Parser extends BaseParser {
                         } else if (checkForEqualAfterWhitespace()) {
                             consumeWhitespace();
                             return;
+                        } else if (parentState === STATE_ATTRIBUTE_VALUE) {
+                            var operator = checkForOperator();
+                            if (operator) {
+                                currentPart.hasUnenclosedWhitespace = true;
+                                currentPart.value += operator;
+                                return;
+                            }
                         }
                         currentPart.endPos = parser.pos;
                         endExpression();
