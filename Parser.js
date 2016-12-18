@@ -188,11 +188,7 @@ class Parser extends BaseParser {
 
 
         function openTagEOL() {
-            if (currentOpenTag.afterComma) {
-                currentOpenTag.afterComma = false;
-                consumeWhitespace();
-                return;
-            } else if (isConcise && !currentOpenTag.withinAttrGroup) {
+            if (isConcise && !currentOpenTag.withinAttrGroup) {
                 // In concise mode we always end the open tag
                 finishOpenTag();
             }
@@ -394,6 +390,29 @@ class Parser extends BaseParser {
 
         function finishOpenTag(selfClosed) {
             var tagName = currentOpenTag.tagName;
+            var attributes;
+
+            if(currentOpenTag.requiresCommas) {
+                attributes = currentOpenTag.attributes;
+                for(let i = 0; i < attributes.length-1; i++) {
+                    if(!attributes[i].endedWithComma) {
+                        notifyError(attributes[i].pos,
+                            'COMMAS_REQUIRED',
+                            'if commas are used, they must be used to separate all attributes for a tag');
+                    }
+                }
+            }
+
+            if(currentOpenTag.hasUnenclosedWhitespace) {
+                attributes = currentOpenTag.attributes;
+                for(let i = 0; i < attributes.length-1; i++) {
+                    if(!attributes[i].endedWithComma) {
+                        notifyError(attributes[i].pos,
+                            'COMMAS_REQUIRED',
+                            'commas are required to separate all attributes when using complex attribute values with un-enclosed whitespace');
+                    }
+                }
+            }
 
             currentOpenTag.expectedCloseTagName = expectedCloseTagName =
                 parser.substring(currentOpenTag.tagNameStart, currentOpenTag.tagNameEnd);
@@ -928,10 +947,10 @@ class Parser extends BaseParser {
             return false;
         }
 
-        function checkForEqualAfterWhitespace() {
-            var ahead = 1;
+        function lookPastWhitespaceFor(str, start) {
+            var ahead = start == null ? 1 : start;
             while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) ahead++;
-            return parser.lookAtCharCodeAhead(ahead) === CODE_EQUAL;
+            return !!parser.lookAheadFor(str, parser.pos+ahead);
         }
 
         function consumeWhitespace() {
@@ -1698,12 +1717,29 @@ class Parser extends BaseParser {
                     currentAttribute.argument = argument;
                 }
 
+                if(expression.endedWithComma) {
+                    // consume all following whitespace,
+                    // including new lines (which allows attributes to
+                    // span multiple lines in concise mode)
+                    consumeWhitespace();
+                    currentOpenTag.requiresCommas = true;
+                    currentAttribute.endedWithComma = true;
+                } else if(!lookPastWhitespaceFor('=', 0)){
+                    currentOpenTag.lastAttrNoComma = true;
+                }
+
                 currentAttribute.name = currentAttribute.name ? currentAttribute.name + expression.value : expression.value;
                 currentAttribute.pos = expression.pos;
                 currentAttribute.endPos = expression.endPos;
             },
 
             enter(oldState) {
+                if (currentOpenTag.requiresCommas && currentOpenTag.lastAttrNoComma) {
+                    return notifyError(parser.pos,
+                        'COMMAS_REQUIRED',
+                        'if commas are used, they must be used to separate all attributes for a tag');
+                }
+
                 if (oldState !== STATE_EXPRESSION) {
                     beginExpression();
                 }
@@ -1728,10 +1764,25 @@ class Parser extends BaseParser {
                         'ILLEGAL_ATTRIBUTE_VALUE',
                         'No attribute value found after "="');
                 }
+
+                if(expression.endedWithComma) {
+                    // consume all following whitespace,
+                    // including new lines (which allows attributes to
+                    // span multiple lines in concise mode)
+                    consumeWhitespace();
+                    currentOpenTag.requiresCommas = true;
+                    currentAttribute.endedWithComma = true;
+                } else {
+                    currentOpenTag.lastAttrNoComma = true;
+                }
+
+                if(expression.hasUnenclosedWhitespace) {
+                    currentOpenTag.hasUnenclosedWhitespace = true;
+                }
+
                 currentAttribute.value = value;
                 currentAttribute.pos = expression.pos;
                 currentAttribute.endPos = expression.endPos;
-                currentAttribute.hasUnenclosedWhitespace = expression.hasUnenclosedWhitespace;
 
                 // If the expression evaluates to a literal value then add the
                 // `literalValue` property to the attribute
@@ -1988,7 +2039,7 @@ class Parser extends BaseParser {
                             finishOpenTag();
                             beginCheckTrailingWhitespace(function(hasChar) {
                                 if(hasChar) {
-                                    parser.skip(-1); //get back the char that was just consumed
+                                    parser.rewind(1);
                                     isWithinSingleLineHtmlBlock = true;
                                     beginHtmlBlock();
                                 }
@@ -1998,9 +2049,14 @@ class Parser extends BaseParser {
                     }
 
                     if (code === CODE_COMMA || isWhitespaceCode(code)) {
-                        if (code === CODE_COMMA) {
-                            currentOpenTag.afterComma = true;
-                        } else if (checkForEqualAfterWhitespace()) {
+                        if (code === CODE_COMMA || lookPastWhitespaceFor(',')) {
+                            if(code !== CODE_COMMA) {
+                                consumeWhitespace();
+                                parser.skip(1);
+                            }
+
+                            currentPart.endedWithComma = true;
+                        } else if (lookPastWhitespaceFor('=')) {
                             consumeWhitespace();
                             return;
                         } else if (parentState === STATE_ATTRIBUTE_VALUE) {
@@ -2011,6 +2067,7 @@ class Parser extends BaseParser {
                                 return;
                             }
                         }
+
                         currentPart.endPos = parser.pos;
                         endExpression();
                         endAttribute();
