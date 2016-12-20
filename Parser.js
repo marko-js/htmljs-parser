@@ -2039,9 +2039,28 @@ class Parser extends BaseParser {
                             finishOpenTag();
                             beginCheckTrailingWhitespace(function(hasChar) {
                                 if(hasChar) {
-                                    parser.rewind(1);
-                                    isWithinSingleLineHtmlBlock = true;
-                                    beginHtmlBlock();
+                                    var code = hasChar.ch.charCodeAt(0);
+
+                                    if(code === CODE_FORWARD_SLASH) {
+                                        if(parser.lookAheadFor('/')) {
+                                            beginLineComment();
+                                            parser.skip(1);
+                                            return;
+                                        } else if(parser.lookAheadFor('*')) {
+                                            beginBlockComment();
+                                            parser.skip(1);
+                                            return;
+                                        }
+                                    } else if (code === CODE_OPEN_ANGLE_BRACKET && parser.lookAheadFor('!--')) {
+                                        // html comment
+                                        beginHtmlComment();
+                                        parser.skip(3);
+                                        return;
+                                    }
+
+                                    notifyError(parser.pos,
+                                        'INVALID_CODE_AFTER_SEMICOLON',
+                                        'A semicolon indicates the end of a line.  Only comments may follow it.');
                                 }
                             });
                         }
