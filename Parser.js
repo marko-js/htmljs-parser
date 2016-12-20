@@ -284,18 +284,9 @@ class Parser extends BaseParser {
                         return;
                     }
                 } else if (curBlock.type === 'html') {
-                    if (curBlock.delimiter) {
-                        // We reached the end of the file and there is still a delimited HTML block on the stack.
-                        // That means we never found the ending delimiter and should emit a parse error
-                        notifyError(curBlock.pos,
-                            'MISSING_END_DELIMITER',
-                            'End of file reached before finding the ending "' + curBlock.delimiter + '" delimiter');
-                        return;
-                    } else {
-                        // We reached the end of file while still within a single line HTML block. That's okay
-                        // though since we know the line is completely. We'll continue ending all open concise tags.
-                        blockStack.pop();
-                    }
+                    // We reached the end of file while still within a single line HTML block. That's okay
+                    // though since we know the line is completely. We'll continue ending all open concise tags.
+                    blockStack.pop();
                 } else {
                     // There is a bug in our parser...
                     throw new Error('Illegal state. There should not be any non-concise tags on the stack when in concise mode');
@@ -953,6 +944,14 @@ class Parser extends BaseParser {
             return !!parser.lookAheadFor(str, parser.pos+ahead);
         }
 
+        function getNextIndent() {
+            var match = /[^\n]*\n(\s+)/.exec(parser.substring(parser.pos));
+            if(match) {
+                var whitespace = match[1].split(/\n/g);
+                return whitespace[whitespace.length-1];
+            }
+        }
+
         function consumeWhitespace() {
             var ahead = 1;
             while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) ahead++;
@@ -1025,6 +1024,11 @@ class Parser extends BaseParser {
 
                 parser.skip(htmlBlockIndent.length);
                 // We stay in the same state since we are still parsing a multiline, delimited HTML block
+            } else if(htmlBlockIndent && !/^\s*\n/.test(parser.substring(parser.pos+1))) {
+                // the next line does not have enough indentation
+                // so unless it is black (whitespace only),
+                // we will end the block
+                endHtmlBlock();
             }
         }
 
@@ -1238,20 +1242,8 @@ class Parser extends BaseParser {
                     }
 
                     if (code === CODE_HTML_BLOCK_DELIMITER) {
-                        if (parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
-                            // Two or more HTML block delimiters means we are starting a multiline, delimited HTML block
-                            htmlBlockDelimiter = ch;
-                            // We enter the following state to read in the full delimiter
-                            return parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
-                        } else {
-
-                            if (parser.lookAtCharCodeAhead(1) === CODE_SPACE) {
-                                // We skip over the first space
-                                parser.skip(1);
-                            }
-                            isWithinSingleLineHtmlBlock = true;
-                            beginHtmlBlock();
-                        }
+                        htmlBlockDelimiter = ch;
+                        return parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
                     } else if (code === CODE_FORWARD_SLASH) {
                         // Check next character to see if we are in a comment
                         var nextCode = parser.lookAtCharCodeAhead(1);
@@ -1298,11 +1290,9 @@ class Parser extends BaseParser {
                 } else if (isWhitespaceCode(code)) {
                     // Just whitespace... we are still good
                 } else {
-                    // This is a non-whitespace! We don't allow non-whitespace
-                    // after matching two or more hyphens. This is user error...
-                    notifyError(parser.pos,
-                        'MALFORMED_MULTILINE_HTML_BLOCK',
-                        'A non-whitespace of "' + ch + '" was found on the same line as a multiline HTML block delimiter ("' + htmlBlockDelimiter + '")');
+                    parser.rewind(1);
+                    isWithinSingleLineHtmlBlock = true;
+                    beginHtmlBlock();
                 }
             }
         });
@@ -1613,15 +1603,12 @@ class Parser extends BaseParser {
                         // The open tag is complete
                         finishOpenTag();
 
-                        let nextCode = parser.lookAtCharCodeAhead(1);
-                        if (nextCode !== CODE_NEWLINE && nextCode !== CODE_CARRIAGE_RETURN &&
-                            isWhitespaceCode(nextCode)) {
-                            // We want to remove the first whitespace character after the `-` symbol
-                            parser.skip(1);
+                        htmlBlockDelimiter = ch;
+                        var nextIndent = getNextIndent();
+                        if(nextIndent > indent) {
+                            indent = nextIndent;
                         }
-
-                        isWithinSingleLineHtmlBlock = true;
-                        beginHtmlBlock();
+                        parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
                         return;
                     } else if (code === CODE_OPEN_SQUARE_BRACKET) {
                         if (currentOpenTag.withinAttrGroup) {
