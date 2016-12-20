@@ -64,8 +64,6 @@ function peek(array) {
 const MODE_HTML = 1;
 const MODE_CONCISE = 2;
 
-const CODE_NEWLINE = 10;
-const CODE_CARRIAGE_RETURN = 13;
 const CODE_BACK_SLASH = 92;
 const CODE_FORWARD_SLASH = 47;
 const CODE_OPEN_ANGLE_BRACKET = 60;
@@ -86,7 +84,6 @@ const CODE_ASTERISK = 42;
 const CODE_HYPHEN = 45;
 const CODE_HTML_BLOCK_DELIMITER = CODE_HYPHEN;
 const CODE_DOLLAR = 36;
-const CODE_SPACE = 32;
 const CODE_PERCENT = 37;
 const CODE_PERIOD = 46;
 const CODE_COMMA = 44;
@@ -952,6 +949,11 @@ class Parser extends BaseParser {
             }
         }
 
+        function onlyWhitespaceRemainsOnLine(offset) {
+            offset = offset == null ? 1 : offset;
+            return /^\s*\n/.test(parser.substring(parser.pos+offset));
+        }
+
         function consumeWhitespace() {
             var ahead = 1;
             while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) ahead++;
@@ -1024,7 +1026,7 @@ class Parser extends BaseParser {
 
                 parser.skip(htmlBlockIndent.length);
                 // We stay in the same state since we are still parsing a multiline, delimited HTML block
-            } else if(htmlBlockIndent && !/^\s*\n/.test(parser.substring(parser.pos+1))) {
+            } else if(htmlBlockIndent && !onlyWhitespaceRemainsOnLine()) {
                 // the next line does not have enough indentation
                 // so unless it is black (whitespace only),
                 // we will end the block
@@ -1287,10 +1289,7 @@ class Parser extends BaseParser {
             char(ch, code) {
                 if (code === CODE_HTML_BLOCK_DELIMITER) {
                     htmlBlockDelimiter += ch;
-                } else if (isWhitespaceCode(code)) {
-                    // Just whitespace... we are still good
-                } else {
-                    parser.rewind(1);
+                } else if(!onlyWhitespaceRemainsOnLine()) {
                     isWithinSingleLineHtmlBlock = true;
                     beginHtmlBlock();
                 }
