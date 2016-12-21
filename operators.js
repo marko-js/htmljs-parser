@@ -40,7 +40,7 @@ var requiresWhitespace = exports.requiresWhitespace = {
     'typeof':true
 };
 
-exports.pattern = new RegExp('^\\s*('+operators.map(o => {
+var escapedOperators = operators.map(o => {
     if(requiresWhitespace[o]) {
         return '\\s'+escapeNonAlphaNumeric(o)+'\\s';
     }
@@ -48,7 +48,11 @@ exports.pattern = new RegExp('^\\s*('+operators.map(o => {
         return '\\/(?:\\b|\\s)'; //make sure this isn't a comment
     }
     return escapeNonAlphaNumeric(o);
-}).join('|')+')\\s*(?!-)');
+});
+
+exports.longest = operators.sort((a, b) => b.length-a.length)[0].length+1;
+exports.patternNext = new RegExp('^\\s*('+escapedOperators.join('|')+')\\s*(?!-)');
+exports.patternPrev = new RegExp('[^-+](?:'+escapedOperators.join('|')+')(\\s*)$');
 
 function escapeNonAlphaNumeric(str) {
     return str.replace(/([^\w\d])/g, '\\$1');
