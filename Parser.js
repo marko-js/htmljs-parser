@@ -1243,7 +1243,7 @@ class Parser extends BaseParser {
                         return;
                     }
 
-                    if (code === CODE_HTML_BLOCK_DELIMITER) {
+                    if (code === CODE_HTML_BLOCK_DELIMITER && parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
                         htmlBlockDelimiter = ch;
                         return parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
                     } else if (code === CODE_FORWARD_SLASH) {
@@ -1591,7 +1591,7 @@ class Parser extends BaseParser {
             char(ch, code) {
 
                 if (isConcise) {
-                    if (code === CODE_HTML_BLOCK_DELIMITER) {
+                    if (code === CODE_HTML_BLOCK_DELIMITER && parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
                         if (currentOpenTag.withinAttrGroup) {
                             notifyError(currentOpenTag.pos,
                                 'MALFORMED_OPEN_TAG',

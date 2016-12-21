@@ -3,6 +3,6 @@ div
     This is
     multi-line text
     ---
-    span - This is body text of span
-        - This is also body text of span
-    - Hello Universe
+    span -- This is body text of span
+        -- This is also body text of span
+    -- Hello Universe

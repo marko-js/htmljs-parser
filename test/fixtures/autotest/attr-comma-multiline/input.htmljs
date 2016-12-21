@@ -3,4 +3,4 @@ a href="http://www.ebay.com",
   bar,
   style="background-color: yellow",
   class="foo"
-  - This is the body of the a tag
+  -- This is the body of the a tag
