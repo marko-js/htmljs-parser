@@ -992,9 +992,7 @@ class Parser extends BaseParser {
 
             if(match) {
                 var op = match[0];
-                var isIgnoredOperator = isConcise ?
-                                        op.includes('-') || op.includes('[')
-                                      : op.includes('>');
+                var isIgnoredOperator = isConcise ? op.includes('[') : op.includes('>');
                 if(!isIgnoredOperator) {
                     parser.skip(op.length-1);
                     return op;

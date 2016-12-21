@@ -48,7 +48,7 @@ exports.pattern = new RegExp('^\\s*('+operators.map(o => {
         return '\\/(?:\\b|\\s)'; //make sure this isn't a comment
     }
     return escapeNonAlphaNumeric(o);
-}).join('|')+')\\s*');
+}).join('|')+')\\s*(?!-)');
 
 function escapeNonAlphaNumeric(str) {
     return str.replace(/([^\w\d])/g, '\\$1');
