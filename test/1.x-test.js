@@ -49,7 +49,7 @@ function parse(text, filename, options) {
 describe('parser (deprecated)', function() {
 
     require('./autotest').scanDir(
-        path.join(__dirname, 'fixtures/autotest-deprecated'),
+        path.join(__dirname, 'fixtures/autotest-1.x'),
         function (dir) {
             var inputPath = path.join(dir, 'input.htmljs');
             var testOptionsPath = path.join(dir, 'test.js');
