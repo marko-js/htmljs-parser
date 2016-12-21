@@ -328,6 +328,7 @@ class Parser extends BaseParser {
         var notifyCDATA = notifiers.notifyCDATA;
         var notifyComment = notifiers.notifyComment;
         var notifyOpenTag = notifiers.notifyOpenTag;
+        var notifyOpenTagName = notifiers.notifyOpenTagName;
         var notifyCloseTag = notifiers.notifyCloseTag;
         var notifyDocumentType = notifiers.notifyDocumentType;
         var notifyDeclaration = notifiers.notifyDeclaration;
@@ -396,9 +397,13 @@ class Parser extends BaseParser {
                 attributes = currentOpenTag.attributes;
                 for(let i = 0; i < attributes.length-1; i++) {
                     if(!attributes[i].endedWithComma) {
-                        notifyError(attributes[i].pos,
-                            'COMMAS_REQUIRED',
-                            'if commas are used, they must be used to separate all attributes for a tag');
+                        var parseOptions = currentOpenTag.parseOptions;
+
+                        if (!parseOptions || parseOptions.relaxRequireCommas !== true) {
+                            notifyError(attributes[i].pos,
+                                'COMMAS_REQUIRED',
+                                'if commas are used, they must be used to separate all attributes for a tag');
+                        }
                     }
                 }
             }
@@ -1574,6 +1579,14 @@ class Parser extends BaseParser {
 
             eof: openTagEOF,
 
+            enter() {
+                if (!currentOpenTag.notifiedOpenTagName) {
+                    currentOpenTag.notifiedOpenTagName = true;
+                    currentOpenTag.tagNameEndPos = parser.pos;
+                    notifyOpenTagName(currentOpenTag);
+                }
+            },
+
             expression(expression) {
                 var argument = getAndRemoveArgument(expression);
 
@@ -1757,9 +1770,13 @@ class Parser extends BaseParser {
 
             enter(oldState) {
                 if (currentOpenTag.requiresCommas && currentOpenTag.lastAttrNoComma) {
-                    return notifyError(parser.pos,
-                        'COMMAS_REQUIRED',
-                        'if commas are used, they must be used to separate all attributes for a tag');
+                    var parseOptions = currentOpenTag.parseOptions;
+
+                    if (!parseOptions || parseOptions.relaxRequireCommas !== true) {
+                        return notifyError(parser.pos,
+                            'COMMAS_REQUIRED',
+                            'if commas are used, they must be used to separate all attributes for a tag');
+                    }
                 }
 
                 if (oldState !== STATE_EXPRESSION) {

@@ -169,6 +169,7 @@ class TreeBuilder {
         this.stack = [this.root];
 
         var openTagHandlers = options.openTagHandlers;
+        var openTagNameHandlers = options.openTagNameHandlers;
 
         this.listeners = {
             onText: (event) => {
@@ -213,6 +214,18 @@ class TreeBuilder {
                 expect(src.substring(endPos-']]>'.length, endPos)).to.equal(']]>');
 
                 this.last.children.push(new Node(event));
+            },
+
+            onOpenTagName: (event, parser) => {
+                var tagName = event.tagName;
+                if (!event.shorthandId && !event.shorthandClassNames) {
+                    expect(!!tagName).to.equal(true);
+                }
+
+                var openTagNameHandler = openTagNameHandlers && openTagNameHandlers[tagName];
+                if (openTagNameHandler) {
+                    openTagNameHandler.call(parser, event, parser);
+                }
             },
 
             onOpenTag: (event, parser) => {
