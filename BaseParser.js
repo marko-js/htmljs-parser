@@ -24,7 +24,9 @@ class Parser {
         this.state = null;
 
         // The raw string that we are parsing
-        this.data = null;
+        this.data = this.src = null;
+
+        this.filename = null;
     }
 
     setInitialState(initialState) {
@@ -109,7 +111,7 @@ class Parser {
         return this.data.substring(pos, endPos);
     }
 
-    parse(data) {
+    parse(data, filename) {
         if (data == null) {
             return;
         }
@@ -121,6 +123,9 @@ class Parser {
         if (Array.isArray(data)) {
             data = data.join('');
         }
+
+        this.src = data; // This is the unmodified data used for reporting warnings
+        this.filename = filename;
 
         // Strip off the byte order mark (BOM) sequence
         // at the beginning of the file:

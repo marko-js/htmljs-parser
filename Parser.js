@@ -2,6 +2,8 @@
 var BaseParser = require('./BaseParser');
 var operators = require('./operators');
 var notifyUtil = require('./notify-util');
+var complain = require('complain');
+var charProps = require('char-props');
 
 function isWhitespaceCode(code) {
     // For all practical purposes, the space character (32) and all the
@@ -102,12 +104,22 @@ class Parser extends BaseParser {
 
         var parser = this;
 
+        function outputDeprecationWarning(message) {
+            var srcCharProps = charProps(parser.src);
+            var line = srcCharProps.lineAt(parser.pos);
+            var column = srcCharProps.columnAt(parser.pos);
+            var filename = parser.filename;
+            var location = (filename || '(unknown file)') + ':' + line + ':' + column;
+            complain(message, { location: location });
+        }
+
         var notifiers = notifyUtil.createNotifiers(parser, listeners);
         this.notifiers = notifiers;
 
         var defaultMode = options && options.concise === false ? MODE_HTML : MODE_CONCISE;
         var userIsOpenTagOnly = options && options.isOpenTagOnly;
         var ignorePlaceholders = options && options.ignorePlaceholders;
+        var allowSingleHyphen = options.allowSingleHyphen === true;
 
         var currentOpenTag; // Used to reference the current open tag that is being parsed
         var currentAttribute; // Used to reference the current attribute that is being parsed
@@ -988,14 +1000,20 @@ class Parser extends BaseParser {
 
         function checkForOperator() {
             var remaining = parser.data.substring(parser.pos);
-            var match = operators.pattern.exec(remaining);
+            var matches = operators.pattern.exec(remaining);
 
-            if(match) {
-                var op = match[0];
-                var isIgnoredOperator = isConcise ? op.includes('[') : op.includes('>');
-                if(!isIgnoredOperator) {
-                    parser.skip(op.length-1);
-                    return op;
+            if (matches) {
+                var match = matches[0];
+                var operator = matches[1];
+
+                if (allowSingleHyphen && operator === '-') {
+                    return false;
+                }
+
+                var isIgnoredOperator = isConcise ? match.includes('[') : match.includes('>');
+                if (!isIgnoredOperator) {
+                    parser.skip(match.length-1);
+                    return match;
                 }
             }
 
@@ -1241,7 +1259,16 @@ class Parser extends BaseParser {
                         return;
                     }
 
-                    if (code === CODE_HTML_BLOCK_DELIMITER && parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
+                    if (code === CODE_HTML_BLOCK_DELIMITER) {
+                        if (allowSingleHyphen) {
+                            outputDeprecationWarning('The usage of a single hyphen at the start of a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43');
+                        } else if (parser.lookAtCharCodeAhead(1) !== CODE_HTML_BLOCK_DELIMITER) {
+                            notifyError(parser.pos,
+                                'ILLEGAL_LINE_START',
+                                'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43');
+                            return;
+                        }
+
                         htmlBlockDelimiter = ch;
                         return parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
                     } else if (code === CODE_FORWARD_SLASH) {
@@ -1589,9 +1616,20 @@ class Parser extends BaseParser {
             char(ch, code) {
 
                 if (isConcise) {
-                    if (code === CODE_HTML_BLOCK_DELIMITER && parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
+                    if (code === CODE_HTML_BLOCK_DELIMITER) {
+                        if (parser.lookAtCharCodeAhead(1) !== CODE_HTML_BLOCK_DELIMITER) {
+                            if (allowSingleHyphen) {
+                                outputDeprecationWarning('The usage of a single hyphen in a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43');
+                            } else {
+                                notifyError(currentOpenTag.pos,
+                                    'MALFORMED_OPEN_TAG',
+                                    '"-" not allowed as first character of attribute name');
+                                return;
+                            }
+                        }
+
                         if (currentOpenTag.withinAttrGroup) {
-                            notifyError(currentOpenTag.pos,
+                            notifyError(parser.pos,
                                 'MALFORMED_OPEN_TAG',
                                 'Attribute group was not properly ended');
                             return;
@@ -2682,8 +2720,8 @@ class Parser extends BaseParser {
         }
     }
 
-    parse(data) {
-        super.parse(data);
+    parse(data, filename) {
+        super.parse(data, filename);
         this.notifiers.notifyFinish();
     }
 }
