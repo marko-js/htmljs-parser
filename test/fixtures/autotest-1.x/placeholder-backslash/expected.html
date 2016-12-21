@@ -1,0 +1,23 @@
+<foo a="${test" b=("\"+($escapeXml($withinString(test)))) c="$!{test" d=("\"+($noEscapeXml($withinString(test))))>
+    text:"\n\n"
+</foo>
+text:"\n"
+<a>
+    text:"\n    ${test\n"
+</a>
+text:"\n"
+<b>
+    text:"\n    \\"
+    ${"$escapeXml(test)"}
+    text:"\n"
+</b>
+text:"\n"
+<c>
+    text:"\n    $!{test\n"
+</c>
+text:"\n"
+<d>
+    text:"\n    \\"
+    $!{"$noEscapeXml(test)"}
+    text:"\n"
+</d>

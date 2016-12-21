@@ -1,0 +1,19 @@
+<html>
+    <javascript>
+        text:"/* This <javascript> is ignored */\n// this is javascript <a></a>\n"
+    </javascript>
+    <css>
+        text:"/* CSS */\n"
+        text:".a {\n"
+        text:"   image: url(\"<a></a>\")\n"
+        text:"}\n"
+    </css>
+    <text>
+        text:"This is static ${text} so nothing should be parsed\n"
+    </text>
+    <parsedtext>
+        text:"This is parsed "
+        ${"$escapeXml(text)"}
+        text:"!\n"
+    </parsedtext>
+</html>

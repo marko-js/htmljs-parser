@@ -1,0 +1,6 @@
+var colors=['red', 'green', 'blue']
+<img src="marko.png">
+img src="marko2.png"
+foo-img src="marko3.png"
+<FOO-IMG src="marko4.png">
+div class="foo"

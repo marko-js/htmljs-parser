@@ -1,0 +1,7 @@
+div
+    static-text
+        ---
+        This is static text
+        ---
+    span
+        - This is <b>parsed</b>
