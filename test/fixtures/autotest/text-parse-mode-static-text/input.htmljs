@@ -4,4 +4,4 @@ div
         This is static text
         ---
     span
-        - This is <b>parsed</b>
+        -- This is <b>parsed</b>

@@ -1,6 +1,6 @@
 'use strict';
 var BaseParser = require('./BaseParser');
-
+var operators = require('./operators');
 var notifyUtil = require('./notify-util');
 
 function isWhitespaceCode(code) {
@@ -64,8 +64,6 @@ function peek(array) {
 const MODE_HTML = 1;
 const MODE_CONCISE = 2;
 
-const CODE_NEWLINE = 10;
-const CODE_CARRIAGE_RETURN = 13;
 const CODE_BACK_SLASH = 92;
 const CODE_FORWARD_SLASH = 47;
 const CODE_OPEN_ANGLE_BRACKET = 60;
@@ -86,9 +84,10 @@ const CODE_ASTERISK = 42;
 const CODE_HYPHEN = 45;
 const CODE_HTML_BLOCK_DELIMITER = CODE_HYPHEN;
 const CODE_DOLLAR = 36;
-const CODE_SPACE = 32;
 const CODE_PERCENT = 37;
 const CODE_PERIOD = 46;
+const CODE_COMMA = 44;
+const CODE_SEMICOLON = 59;
 const CODE_NUMBER_SIGN = 35;
 
 const BODY_PARSED_TEXT = 1; // Body of a tag is treated as text, but placeholders will be parsed
@@ -282,18 +281,9 @@ class Parser extends BaseParser {
                         return;
                     }
                 } else if (curBlock.type === 'html') {
-                    if (curBlock.delimiter) {
-                        // We reached the end of the file and there is still a delimited HTML block on the stack.
-                        // That means we never found the ending delimiter and should emit a parse error
-                        notifyError(curBlock.pos,
-                            'MISSING_END_DELIMITER',
-                            'End of file reached before finding the ending "' + curBlock.delimiter + '" delimiter');
-                        return;
-                    } else {
-                        // We reached the end of file while still within a single line HTML block. That's okay
-                        // though since we know the line is completely. We'll continue ending all open concise tags.
-                        blockStack.pop();
-                    }
+                    // We reached the end of file while still within a single line HTML block. That's okay
+                    // though since we know the line is completely. We'll continue ending all open concise tags.
+                    blockStack.pop();
                 } else {
                     // There is a bug in our parser...
                     throw new Error('Illegal state. There should not be any non-concise tags on the stack when in concise mode');
@@ -388,6 +378,29 @@ class Parser extends BaseParser {
 
         function finishOpenTag(selfClosed) {
             var tagName = currentOpenTag.tagName;
+            var attributes;
+
+            if(currentOpenTag.requiresCommas) {
+                attributes = currentOpenTag.attributes;
+                for(let i = 0; i < attributes.length-1; i++) {
+                    if(!attributes[i].endedWithComma) {
+                        notifyError(attributes[i].pos,
+                            'COMMAS_REQUIRED',
+                            'if commas are used, they must be used to separate all attributes for a tag');
+                    }
+                }
+            }
+
+            if(currentOpenTag.hasUnenclosedWhitespace) {
+                attributes = currentOpenTag.attributes;
+                for(let i = 0; i < attributes.length-1; i++) {
+                    if(!attributes[i].endedWithComma) {
+                        notifyError(attributes[i].pos,
+                            'COMMAS_REQUIRED',
+                            'commas are required to separate all attributes when using complex attribute values with un-enclosed whitespace');
+                    }
+                }
+            }
 
             currentOpenTag.expectedCloseTagName = expectedCloseTagName =
                 parser.substring(currentOpenTag.tagNameStart, currentOpenTag.tagNameEnd);
@@ -538,6 +551,10 @@ class Parser extends BaseParser {
 
         function endExpression() {
             var expression = endPart();
+            // Probably shouldn't do this, but it makes it easier to test!
+            if(expression.parentState === STATE_ATTRIBUTE_VALUE && expression.hasUnenclosedWhitespace) {
+                expression.value = '('+expression.value+')';
+            }
             expression.parentState.expression(expression);
         }
 
@@ -918,6 +935,31 @@ class Parser extends BaseParser {
             return false;
         }
 
+        function lookPastWhitespaceFor(str, start) {
+            var ahead = start == null ? 1 : start;
+            while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) ahead++;
+            return !!parser.lookAheadFor(str, parser.pos+ahead);
+        }
+
+        function getNextIndent() {
+            var match = /[^\n]*\n(\s+)/.exec(parser.substring(parser.pos));
+            if(match) {
+                var whitespace = match[1].split(/\n/g);
+                return whitespace[whitespace.length-1];
+            }
+        }
+
+        function onlyWhitespaceRemainsOnLine(offset) {
+            offset = offset == null ? 1 : offset;
+            return /^\s*\n/.test(parser.substring(parser.pos+offset));
+        }
+
+        function consumeWhitespace() {
+            var ahead = 1;
+            while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) ahead++;
+            parser.skip(ahead-1);
+        }
+
         function checkForClosingTag() {
             // Look ahead to see if we found the closing tag that will
             // take us out of the EXPRESSION state...
@@ -939,6 +981,22 @@ class Parser extends BaseParser {
                 beginCDATA();
                 parser.skip(8);
                 return true;
+            }
+
+            return false;
+        }
+
+        function checkForOperator() {
+            var remaining = parser.data.substring(parser.pos);
+            var match = operators.pattern.exec(remaining);
+
+            if(match) {
+                var op = match[0];
+                var isIgnoredOperator = isConcise ? op.includes('[') : op.includes('>');
+                if(!isIgnoredOperator) {
+                    parser.skip(op.length-1);
+                    return op;
+                }
             }
 
             return false;
@@ -966,6 +1024,11 @@ class Parser extends BaseParser {
 
                 parser.skip(htmlBlockIndent.length);
                 // We stay in the same state since we are still parsing a multiline, delimited HTML block
+            } else if(htmlBlockIndent && !onlyWhitespaceRemainsOnLine()) {
+                // the next line does not have enough indentation
+                // so unless it is black (whitespace only),
+                // we will end the block
+                endHtmlBlock();
             }
         }
 
@@ -1178,21 +1241,9 @@ class Parser extends BaseParser {
                         return;
                     }
 
-                    if (code === CODE_HTML_BLOCK_DELIMITER) {
-                        if (parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
-                            // Two or more HTML block delimiters means we are starting a multiline, delimited HTML block
-                            htmlBlockDelimiter = ch;
-                            // We enter the following state to read in the full delimiter
-                            return parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
-                        } else {
-
-                            if (parser.lookAtCharCodeAhead(1) === CODE_SPACE) {
-                                // We skip over the first space
-                                parser.skip(1);
-                            }
-                            isWithinSingleLineHtmlBlock = true;
-                            beginHtmlBlock();
-                        }
+                    if (code === CODE_HTML_BLOCK_DELIMITER && parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
+                        htmlBlockDelimiter = ch;
+                        return parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
                     } else if (code === CODE_FORWARD_SLASH) {
                         // Check next character to see if we are in a comment
                         var nextCode = parser.lookAtCharCodeAhead(1);
@@ -1236,14 +1287,9 @@ class Parser extends BaseParser {
             char(ch, code) {
                 if (code === CODE_HTML_BLOCK_DELIMITER) {
                     htmlBlockDelimiter += ch;
-                } else if (isWhitespaceCode(code)) {
-                    // Just whitespace... we are still good
-                } else {
-                    // This is a non-whitespace! We don't allow non-whitespace
-                    // after matching two or more hyphens. This is user error...
-                    notifyError(parser.pos,
-                        'MALFORMED_MULTILINE_HTML_BLOCK',
-                        'A non-whitespace of "' + ch + '" was found on the same line as a multiline HTML block delimiter ("' + htmlBlockDelimiter + '")');
+                } else if(!onlyWhitespaceRemainsOnLine()) {
+                    isWithinSingleLineHtmlBlock = true;
+                    beginHtmlBlock();
                 }
             }
         });
@@ -1543,7 +1589,7 @@ class Parser extends BaseParser {
             char(ch, code) {
 
                 if (isConcise) {
-                    if (code === CODE_HTML_BLOCK_DELIMITER) {
+                    if (code === CODE_HTML_BLOCK_DELIMITER && parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
                         if (currentOpenTag.withinAttrGroup) {
                             notifyError(currentOpenTag.pos,
                                 'MALFORMED_OPEN_TAG',
@@ -1554,15 +1600,12 @@ class Parser extends BaseParser {
                         // The open tag is complete
                         finishOpenTag();
 
-                        let nextCode = parser.lookAtCharCodeAhead(1);
-                        if (nextCode !== CODE_NEWLINE && nextCode !== CODE_CARRIAGE_RETURN &&
-                            isWhitespaceCode(nextCode)) {
-                            // We want to remove the first whitespace character after the `-` symbol
-                            parser.skip(1);
+                        htmlBlockDelimiter = ch;
+                        var nextIndent = getNextIndent();
+                        if(nextIndent > indent) {
+                            indent = nextIndent;
                         }
-
-                        isWithinSingleLineHtmlBlock = true;
-                        beginHtmlBlock();
+                        parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
                         return;
                     } else if (code === CODE_OPEN_SQUARE_BRACKET) {
                         if (currentOpenTag.withinAttrGroup) {
@@ -1658,12 +1701,29 @@ class Parser extends BaseParser {
                     currentAttribute.argument = argument;
                 }
 
+                if(expression.endedWithComma) {
+                    // consume all following whitespace,
+                    // including new lines (which allows attributes to
+                    // span multiple lines in concise mode)
+                    consumeWhitespace();
+                    currentOpenTag.requiresCommas = true;
+                    currentAttribute.endedWithComma = true;
+                } else if(!lookPastWhitespaceFor('=', 0)){
+                    currentOpenTag.lastAttrNoComma = true;
+                }
+
                 currentAttribute.name = currentAttribute.name ? currentAttribute.name + expression.value : expression.value;
                 currentAttribute.pos = expression.pos;
                 currentAttribute.endPos = expression.endPos;
             },
 
             enter(oldState) {
+                if (currentOpenTag.requiresCommas && currentOpenTag.lastAttrNoComma) {
+                    return notifyError(parser.pos,
+                        'COMMAS_REQUIRED',
+                        'if commas are used, they must be used to separate all attributes for a tag');
+                }
+
                 if (oldState !== STATE_EXPRESSION) {
                     beginExpression();
                 }
@@ -1688,6 +1748,22 @@ class Parser extends BaseParser {
                         'ILLEGAL_ATTRIBUTE_VALUE',
                         'No attribute value found after "="');
                 }
+
+                if(expression.endedWithComma) {
+                    // consume all following whitespace,
+                    // including new lines (which allows attributes to
+                    // span multiple lines in concise mode)
+                    consumeWhitespace();
+                    currentOpenTag.requiresCommas = true;
+                    currentAttribute.endedWithComma = true;
+                } else {
+                    currentOpenTag.lastAttrNoComma = true;
+                }
+
+                if(expression.hasUnenclosedWhitespace) {
+                    currentOpenTag.hasUnenclosedWhitespace = true;
+                }
+
                 currentAttribute.value = value;
                 currentAttribute.pos = expression.pos;
                 currentAttribute.endPos = expression.endPos;
@@ -1940,7 +2016,61 @@ class Parser extends BaseParser {
                         }
                     }
 
-                    if (isWhitespaceCode(code)) {
+                    if(code === CODE_SEMICOLON) {
+                        endExpression();
+                        endAttribute();
+                        if(isConcise) {
+                            finishOpenTag();
+                            beginCheckTrailingWhitespace(function(hasChar) {
+                                if(hasChar) {
+                                    var code = hasChar.ch.charCodeAt(0);
+
+                                    if(code === CODE_FORWARD_SLASH) {
+                                        if(parser.lookAheadFor('/')) {
+                                            beginLineComment();
+                                            parser.skip(1);
+                                            return;
+                                        } else if(parser.lookAheadFor('*')) {
+                                            beginBlockComment();
+                                            parser.skip(1);
+                                            return;
+                                        }
+                                    } else if (code === CODE_OPEN_ANGLE_BRACKET && parser.lookAheadFor('!--')) {
+                                        // html comment
+                                        beginHtmlComment();
+                                        parser.skip(3);
+                                        return;
+                                    }
+
+                                    notifyError(parser.pos,
+                                        'INVALID_CODE_AFTER_SEMICOLON',
+                                        'A semicolon indicates the end of a line.  Only comments may follow it.');
+                                }
+                            });
+                        }
+                        return;
+                    }
+
+                    if (code === CODE_COMMA || isWhitespaceCode(code)) {
+                        if (code === CODE_COMMA || lookPastWhitespaceFor(',')) {
+                            if(code !== CODE_COMMA) {
+                                consumeWhitespace();
+                                parser.skip(1);
+                            }
+
+                            currentPart.endedWithComma = true;
+                        } else if (lookPastWhitespaceFor('=')) {
+                            consumeWhitespace();
+                            return;
+                        } else if (parentState === STATE_ATTRIBUTE_VALUE) {
+                            var operator = checkForOperator();
+                            if (operator) {
+                                currentPart.hasUnenclosedWhitespace = true;
+                                currentPart.value += operator;
+                                return;
+                            }
+                        }
+
                         currentPart.endPos = parser.pos;
                         endExpression();
                         endAttribute();
@@ -1955,6 +2085,7 @@ class Parser extends BaseParser {
                         // We encountered "=" which means we need to start reading
                         // the attribute value.
                         parser.enterState(STATE_ATTRIBUTE_VALUE);
+                        consumeWhitespace();
                         return;
                     }
 

@@ -14,9 +14,9 @@ p
     - Avoid accidentally ending a block
     - To improve readability
     -----
-i - This text will be in italics
+i -- This text will be in italics
 b
-    - This text will be bold
-    - This is okay too
+    -- This text will be bold
+    -- This is okay too
 app-hello
     ${data.name} some html - <b>bold</b>

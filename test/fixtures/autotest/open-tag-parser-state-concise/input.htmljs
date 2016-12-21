@@ -5,12 +5,12 @@ html
         // this is javascript <a></a>
         ---
     css
-        - /* CSS */
-        - .a {
-        -    image: url("<a></a>")
-        - }
+        -- /* CSS */
+        -- .a {
+        --    image: url("<a></a>")
+        -- }
     text
-        - This is static ${text} so nothing should be parsed
+        -- This is static ${text} so nothing should be parsed
     parsedtext
         ---
         This is parsed ${text}!
