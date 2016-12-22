@@ -33,9 +33,8 @@ function evaluateStringExpression(expression, pos, notifyError) {
         // Make sure there are no unescaped double quotes in the string expression...
         expression = expression.replace(/\\\\|\\[']|\\["]|["]/g, function(match) {
             if (match === "\\'"){
-                // Return an escaped double quote if we encounter an
-                // unescaped double quote
-                return match;//"'";
+                // Don't escape single quotes since we are using double quotes
+                return "'";
             } else if (match === '"'){
                 // Return an escaped double quote if we encounter an
                 // unescaped double quote
@@ -2124,6 +2123,7 @@ class Parser extends BaseParser {
                         } else if (parentState === STATE_ATTRIBUTE_VALUE) {
                             var operator = checkForOperator();
                             if (operator) {
+                                currentPart.isStringLiteral = false;
                                 currentPart.hasUnenclosedWhitespace = true;
                                 currentPart.value += operator;
                                 return;
