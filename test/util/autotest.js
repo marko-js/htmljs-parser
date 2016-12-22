@@ -46,6 +46,7 @@ function autoTest(name, dir, run, options) {
     //     '\n---------\nACTUAL (' + actualPath + '):\n---------\n' + actualJSON + '\n---------');
 }
 
+
 exports.scanDir = function(autoTestDir, run, options) {
     describe('autotest', function() {
         fs.readdirSync(autoTestDir)
@@ -63,7 +64,7 @@ exports.scanDir = function(autoTestDir, run, options) {
                 var dir = path.join(autoTestDir, name);
 
                 itFunc(`[${name}] `, function() {
-                    autoTest(name, dir, run, options);
+                    run(dir);
                 });
 
             });
