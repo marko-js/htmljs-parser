@@ -31,8 +31,12 @@ function evaluateStringExpression(expression, pos, notifyError) {
         expression = expression.substring(1, expression.length - 1);
 
         // Make sure there are no unescaped double quotes in the string expression...
-        expression = expression.replace(/\\\\|\\["]|["]/g, function(match) {
-            if (match === '"'){
+        expression = expression.replace(/\\\\|\\[']|\\["]|["]/g, function(match) {
+            if (match === "\\'"){
+                // Return an escaped double quote if we encounter an
+                // unescaped double quote
+                return match;//"'";
+            } else if (match === '"'){
                 // Return an escaped double quote if we encounter an
                 // unescaped double quote
                 return '\\"';
