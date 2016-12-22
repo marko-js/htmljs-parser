@@ -122,7 +122,7 @@ class Parser extends BaseParser {
         var defaultMode = options && options.concise === false ? MODE_HTML : MODE_CONCISE;
         var userIsOpenTagOnly = options && options.isOpenTagOnly;
         var ignorePlaceholders = options && options.ignorePlaceholders;
-        var allowSingleHyphen = options.allowSingleHyphen === true;
+        var legacyCompatibility = options.legacyCompatibility === true;
 
         var currentOpenTag; // Used to reference the current open tag that is being parsed
         var currentAttribute; // Used to reference the current attribute that is being parsed
@@ -1012,7 +1012,7 @@ class Parser extends BaseParser {
                 var match = matches[0];
                 var operator = matches[1];
 
-                if (allowSingleHyphen && operator === '-') {
+                if (legacyCompatibility && operator === '-') {
                     return false;
                 }
 
@@ -1280,7 +1280,10 @@ class Parser extends BaseParser {
                         return;
                     }
 
-                    if (code === CODE_OPEN_ANGLE_BRACKET || code === CODE_DOLLAR) {
+                    if (code === CODE_OPEN_ANGLE_BRACKET || (legacyCompatibility && code === CODE_DOLLAR)) {
+                        if (code === CODE_DOLLAR) {
+                            outputDeprecationWarning('Handling of a placeholder (i.e. "${...}") at the start of a concise line will be changing.\nA placeholder at the start of a concise line will now be handled as a tag name placeholder instead of a body text placeholder.\nSwitch to using "-- ${...}" to avoid breakage.\nSee: https://github.com/marko-js/htmljs-parser/issues/48');
+                        }
                         beginMixedMode = true;
                         parser.rewind(1);
                         beginHtmlBlock();
@@ -1288,7 +1291,7 @@ class Parser extends BaseParser {
                     }
 
                     if (code === CODE_HTML_BLOCK_DELIMITER) {
-                        if (allowSingleHyphen) {
+                        if (legacyCompatibility) {
                             outputDeprecationWarning('The usage of a single hyphen at the start of a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43');
                         } else if (parser.lookAtCharCodeAhead(1) !== CODE_HTML_BLOCK_DELIMITER) {
                             notifyError(parser.pos,
@@ -1321,6 +1324,7 @@ class Parser extends BaseParser {
                         currentOpenTag.tagNameStart = parser.pos;
                         parser.rewind(1); // START_TAG_NAME expects to start at the first character
                     }
+
                 }
             }
         });
@@ -1654,7 +1658,7 @@ class Parser extends BaseParser {
                 if (isConcise) {
                     if (code === CODE_HTML_BLOCK_DELIMITER) {
                         if (parser.lookAtCharCodeAhead(1) !== CODE_HTML_BLOCK_DELIMITER) {
-                            if (allowSingleHyphen) {
+                            if (legacyCompatibility) {
                                 outputDeprecationWarning('The usage of a single hyphen in a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43');
                             } else {
                                 notifyError(currentOpenTag.pos,
