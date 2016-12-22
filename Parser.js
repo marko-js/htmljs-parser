@@ -394,10 +394,9 @@ class Parser extends BaseParser {
 
         function finishOpenTag(selfClosed) {
             var tagName = currentOpenTag.tagName;
-            var attributes;
+            var attributes = currentOpenTag.attributes;
 
-            if(currentOpenTag.requiresCommas) {
-                attributes = currentOpenTag.attributes;
+            if (currentOpenTag.requiresCommas && attributes.length > 1) {
                 for(let i = 0; i < attributes.length-1; i++) {
                     if(!attributes[i].endedWithComma) {
                         var parseOptions = currentOpenTag.parseOptions;
@@ -411,8 +410,7 @@ class Parser extends BaseParser {
                 }
             }
 
-            if(currentOpenTag.hasUnenclosedWhitespace) {
-                attributes = currentOpenTag.attributes;
+            if (currentOpenTag.hasUnenclosedWhitespace && attributes.length > 1) {
                 for(let i = 0; i < attributes.length-1; i++) {
                     if(!attributes[i].endedWithComma) {
                         notifyError(attributes[i].pos,
@@ -1023,6 +1021,28 @@ class Parser extends BaseParser {
                     parser.skip(match.length-1);
                     return match;
                 }
+            }
+
+            return false;
+        }
+
+        function checkForTypeofOperator() {
+            var remaining = parser.data.substring(parser.pos);
+            var matches =  /^\s+typeof\s+/.exec(remaining);
+
+            if (matches) {
+                return matches[0];
+            }
+
+            return false;
+        }
+
+        function checkForTypeofOperatorAtStart() {
+            var remaining = parser.data.substring(parser.pos);
+            var matches =  /^typeof\s+/.exec(remaining);
+
+            if (matches) {
+                return matches[0];
             }
 
             return false;
@@ -2055,6 +2075,7 @@ class Parser extends BaseParser {
 
                     return;
                 } else if (depth === 0) {
+
                     if (!isConcise) {
                         if (code === CODE_CLOSE_ANGLE_BRACKET &&
                             (parentState === STATE_TAG_NAME ||
@@ -2074,7 +2095,7 @@ class Parser extends BaseParser {
                         }
                     }
 
-                    if(code === CODE_SEMICOLON) {
+                    if (code === CODE_SEMICOLON) {
                         endExpression();
                         endAttribute();
                         if(isConcise) {
@@ -2117,11 +2138,21 @@ class Parser extends BaseParser {
                             }
 
                             currentPart.endedWithComma = true;
-                        } else if (lookPastWhitespaceFor('=')) {
+                        } else if (currentPart.parentState === STATE_ATTRIBUTE_NAME && lookPastWhitespaceFor('=')) {
                             consumeWhitespace();
                             return;
                         } else if (parentState === STATE_ATTRIBUTE_VALUE) {
+                            var typeofExpression = checkForTypeofOperator();
+                            if (typeofExpression) {
+                                currentPart.value += typeofExpression;
+                                currentPart.isStringLiteral = false;
+                                currentPart.hasUnenclosedWhitespace = true;
+                                parser.skip(typeofExpression.length-1);
+                                return;
+                            }
+
                             var operator = checkForOperator();
+
                             if (operator) {
                                 currentPart.isStringLiteral = false;
                                 currentPart.hasUnenclosedWhitespace = true;
@@ -2146,6 +2177,17 @@ class Parser extends BaseParser {
                         parser.enterState(STATE_ATTRIBUTE_VALUE);
                         consumeWhitespace();
                         return;
+                    }
+
+                    if (currentPart.value === '') {
+                        let typeofExpression = checkForTypeofOperatorAtStart();
+                        if (typeofExpression) {
+                            currentPart.value += typeofExpression;
+                            currentPart.isStringLiteral = false;
+                            currentPart.hasUnenclosedWhitespace = true;
+                            parser.skip(typeofExpression.length-1);
+                            return;
+                        }
                     }
 
                     if (currentPart.parentState === STATE_TAG_NAME) {
