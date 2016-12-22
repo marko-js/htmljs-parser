@@ -34,6 +34,11 @@ var operators = exports.operators = [
     '['
 ];
 
+// Look for longest operators first
+operators.sort(function(a, b) {
+    return b.length - a.length;
+});
+
 var requiresWhitespace = exports.requiresWhitespace = {
     'instanceof':true,
     'in':true,
