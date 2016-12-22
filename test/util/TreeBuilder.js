@@ -21,6 +21,7 @@ function attributesToString(attributes, includeLiteralValues) {
             result += '[Literal: ' + (attr.hasOwnProperty('literalValue') ? JSON.stringify(attr.literalValue) : '(empty)') + ']';
         }
         return result;
+        // return '[' + result + ']';
     }).join(' ');
 }
 
