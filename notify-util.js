@@ -55,6 +55,45 @@ exports.createNotifiers = function(parser, listeners) {
             }
         },
 
+        notifyOpenTagName(tagInfo) {
+            if (hasError) {
+                return;
+            }
+
+            var eventFunc = listeners.onOpenTagName;
+
+            if (eventFunc) {
+                // set the literalValue property for attributes that are simple
+                // string simple values or simple literal values
+
+                var event = {
+                    type: 'openTagName',
+                    tagName: tagInfo.tagName,
+                    tagNameExpression: tagInfo.tagNameExpression,
+                    pos: tagInfo.pos,
+                    endPos: tagInfo.tagNameEndPos,
+                    concise: tagInfo.concise
+                };
+
+                if (tagInfo.shorthandId) {
+                    event.shorthandId = tagInfo.shorthandId;
+                }
+
+                if (tagInfo.shorthandClassNames) {
+                    event.shorthandClassNames = tagInfo.shorthandClassNames;
+                }
+
+                event.setParseOptions = function(parseOptions) {
+                    if (!parseOptions) {
+                        return;
+                    }
+                    tagInfo.parseOptions = parseOptions;
+                };
+
+                eventFunc.call(parser, event, parser);
+            }
+        },
+
         notifyOpenTag(tagInfo) {
             if (hasError) {
                 return;
@@ -73,6 +112,7 @@ exports.createNotifiers = function(parser, listeners) {
                     argument: tagInfo.argument,
                     pos: tagInfo.pos,
                     endPos: tagInfo.endPos,
+                    tagNameEndPos: tagInfo.tagNameEndPos,
                     openTagOnly: tagInfo.openTagOnly,
                     selfClosed: tagInfo.selfClosed,
                     concise: tagInfo.concise
@@ -101,6 +141,23 @@ exports.createNotifiers = function(parser, listeners) {
 
                     return newAttr;
                 });
+
+                event.setParseOptions = function(parseOptions) {
+                    if (!parseOptions) {
+                        return;
+                    }
+                    var newState = parseOptions.state;
+
+                    if (newState) {
+                        if (newState === 'parsed-text') {
+                            parser.enterParsedTextContentState();
+                        } else if (newState === 'static-text') {
+                            parser.enterStaticTextContentState();
+                        }
+                    }
+
+                    tagInfo.parseOptions = parseOptions;
+                };
 
                 eventFunc.call(parser, event, parser);
             }

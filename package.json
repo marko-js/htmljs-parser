@@ -24,7 +24,10 @@
   },
   "author": "Phillip Gates-Idem <phillip.idem@gmail.com>",
   "maintainers": "Phillip Gates-Idem <phillip.idem@gmail.com>",
-  "dependencies": {},
+  "dependencies": {
+    "char-props": "^0.1.5",
+    "complain": "^1.0.0"
+  },
   "devDependencies": {
     "chai": "^3.2.0",
     "colors": "^1.1.2",
@@ -35,5 +38,5 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "version": "1.6.0"
+  "version": "2.1.0"
 }

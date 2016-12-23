@@ -19,4 +19,4 @@ b
     -- This text will be bold
     -- This is okay too
 app-hello
-    ${data.name} some html - <b>bold</b>
+    -- ${data.name} some html - <b>bold</b>

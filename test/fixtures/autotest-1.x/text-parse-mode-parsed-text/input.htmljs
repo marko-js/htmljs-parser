@@ -1,0 +1,7 @@
+div
+    parsed-text
+        ---
+        This is parsed text
+        ---
+    span
+        - This is <b>parsed</b>

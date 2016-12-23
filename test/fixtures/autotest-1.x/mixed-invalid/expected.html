@@ -1,0 +1,16 @@
+<var colors=['red', 'green', 'blue']>
+</var>
+<div>
+    text:"\n    "
+    <span class="foo">
+        text:"\n        Hello "
+        ${"$escapeXml(data.name)"}
+        text:"!\n        "
+    </span>
+    text:"\n"
+</div>
+text:" "
+<b>
+    text:"This is not\n"
+    error:"Missing ending \"b\" tag" (code: "MISSING_END_TAG")
+</b>

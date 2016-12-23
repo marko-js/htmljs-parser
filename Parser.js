@@ -2,6 +2,8 @@
 var BaseParser = require('./BaseParser');
 var operators = require('./operators');
 var notifyUtil = require('./notify-util');
+var complain = require('complain');
+var charProps = require('char-props');
 
 function isWhitespaceCode(code) {
     // For all practical purposes, the space character (32) and all the
@@ -29,8 +31,11 @@ function evaluateStringExpression(expression, pos, notifyError) {
         expression = expression.substring(1, expression.length - 1);
 
         // Make sure there are no unescaped double quotes in the string expression...
-        expression = expression.replace(/\\\\|\\["]|["]/g, function(match) {
-            if (match === '"'){
+        expression = expression.replace(/\\\\|\\[']|\\["]|["]/g, function(match) {
+            if (match === "\\'"){
+                // Don't escape single quotes since we are using double quotes
+                return "'";
+            } else if (match === '"'){
                 // Return an escaped double quote if we encounter an
                 // unescaped double quote
                 return '\\"';
@@ -102,12 +107,22 @@ class Parser extends BaseParser {
 
         var parser = this;
 
+        function outputDeprecationWarning(message) {
+            var srcCharProps = charProps(parser.src);
+            var line = srcCharProps.lineAt(parser.pos);
+            var column = srcCharProps.columnAt(parser.pos);
+            var filename = parser.filename;
+            var location = (filename || '(unknown file)') + ':' + line + ':' + column;
+            complain(message, { location: location });
+        }
+
         var notifiers = notifyUtil.createNotifiers(parser, listeners);
         this.notifiers = notifiers;
 
         var defaultMode = options && options.concise === false ? MODE_HTML : MODE_CONCISE;
         var userIsOpenTagOnly = options && options.isOpenTagOnly;
         var ignorePlaceholders = options && options.ignorePlaceholders;
+        var legacyCompatibility = options.legacyCompatibility === true;
 
         var currentOpenTag; // Used to reference the current open tag that is being parsed
         var currentAttribute; // Used to reference the current attribute that is being parsed
@@ -316,6 +331,7 @@ class Parser extends BaseParser {
         var notifyCDATA = notifiers.notifyCDATA;
         var notifyComment = notifiers.notifyComment;
         var notifyOpenTag = notifiers.notifyOpenTag;
+        var notifyOpenTagName = notifiers.notifyOpenTagName;
         var notifyCloseTag = notifiers.notifyCloseTag;
         var notifyDocumentType = notifiers.notifyDocumentType;
         var notifyDeclaration = notifiers.notifyDeclaration;
@@ -378,21 +394,23 @@ class Parser extends BaseParser {
 
         function finishOpenTag(selfClosed) {
             var tagName = currentOpenTag.tagName;
-            var attributes;
+            var attributes = currentOpenTag.attributes;
 
-            if(currentOpenTag.requiresCommas) {
-                attributes = currentOpenTag.attributes;
+            if (currentOpenTag.requiresCommas && attributes.length > 1) {
                 for(let i = 0; i < attributes.length-1; i++) {
                     if(!attributes[i].endedWithComma) {
-                        notifyError(attributes[i].pos,
-                            'COMMAS_REQUIRED',
-                            'if commas are used, they must be used to separate all attributes for a tag');
+                        var parseOptions = currentOpenTag.parseOptions;
+
+                        if (!parseOptions || parseOptions.relaxRequireCommas !== true) {
+                            notifyError(attributes[i].pos,
+                                'COMMAS_REQUIRED',
+                                'if commas are used, they must be used to separate all attributes for a tag');
+                        }
                     }
                 }
             }
 
-            if(currentOpenTag.hasUnenclosedWhitespace) {
-                attributes = currentOpenTag.attributes;
+            if (currentOpenTag.hasUnenclosedWhitespace && attributes.length > 1) {
                 for(let i = 0; i < attributes.length-1; i++) {
                     if(!attributes[i].endedWithComma) {
                         notifyError(attributes[i].pos,
@@ -992,14 +1010,20 @@ class Parser extends BaseParser {
 
         function checkForOperator() {
             var remaining = parser.data.substring(parser.pos);
-            var match = operators.patternNext.exec(remaining);
+            var matches = operators.patternNext.exec(remaining);
 
-            if(match) {
-                var op = match[0];
-                var isIgnoredOperator = isConcise ? op.includes('[') : op.includes('>');
-                if(!isIgnoredOperator) {
-                    parser.skip(op.length-1);
-                    return op;
+            if (matches) {
+                var match = matches[0];
+                var operator = matches[1];
+
+                if (legacyCompatibility && operator === '-') {
+                    return false;
+                }
+
+                var isIgnoredOperator = isConcise ? match.includes('[') : match.includes('>');
+                if (!isIgnoredOperator) {
+                    parser.skip(match.length-1);
+                    return match;
                 }
             } else {
                 var previous = parser.substring(parser.pos-operators.longest, parser.pos);
@@ -1009,6 +1033,28 @@ class Parser extends BaseParser {
                     var whitespace = consumeWhitespace();
                     return whitespace;
                 }
+            }
+
+            return false;
+        }
+
+        function checkForTypeofOperator() {
+            var remaining = parser.data.substring(parser.pos);
+            var matches =  /^\s+typeof\s+/.exec(remaining);
+
+            if (matches) {
+                return matches[0];
+            }
+
+            return false;
+        }
+
+        function checkForTypeofOperatorAtStart() {
+            var remaining = parser.data.substring(parser.pos);
+            var matches =  /^typeof\s+/.exec(remaining);
+
+            if (matches) {
+                return matches[0];
             }
 
             return false;
@@ -1246,14 +1292,26 @@ class Parser extends BaseParser {
                         return;
                     }
 
-                    if (code === CODE_OPEN_ANGLE_BRACKET || code === CODE_DOLLAR) {
+                    if (code === CODE_OPEN_ANGLE_BRACKET || (legacyCompatibility && code === CODE_DOLLAR)) {
+                        if (code === CODE_DOLLAR) {
+                            outputDeprecationWarning('Handling of a placeholder (i.e. "${...}") at the start of a concise line will be changing.\nA placeholder at the start of a concise line will now be handled as a tag name placeholder instead of a body text placeholder.\nSwitch to using "-- ${...}" to avoid breakage.\nSee: https://github.com/marko-js/htmljs-parser/issues/48');
+                        }
                         beginMixedMode = true;
                         parser.rewind(1);
                         beginHtmlBlock();
                         return;
                     }
 
-                    if (code === CODE_HTML_BLOCK_DELIMITER && parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
+                    if (code === CODE_HTML_BLOCK_DELIMITER) {
+                        if (legacyCompatibility) {
+                            outputDeprecationWarning('The usage of a single hyphen at the start of a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43');
+                        } else if (parser.lookAtCharCodeAhead(1) !== CODE_HTML_BLOCK_DELIMITER) {
+                            notifyError(parser.pos,
+                                'ILLEGAL_LINE_START',
+                                'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43');
+                            return;
+                        }
+
                         htmlBlockDelimiter = ch;
                         return parser.enterState(STATE_BEGIN_DELIMITED_HTML_BLOCK);
                     } else if (code === CODE_FORWARD_SLASH) {
@@ -1278,6 +1336,7 @@ class Parser extends BaseParser {
                         currentOpenTag.tagNameStart = parser.pos;
                         parser.rewind(1); // START_TAG_NAME expects to start at the first character
                     }
+
                 }
             }
         });
@@ -1559,6 +1618,14 @@ class Parser extends BaseParser {
 
             eof: openTagEOF,
 
+            enter() {
+                if (!currentOpenTag.notifiedOpenTagName) {
+                    currentOpenTag.notifiedOpenTagName = true;
+                    currentOpenTag.tagNameEndPos = parser.pos;
+                    notifyOpenTagName(currentOpenTag);
+                }
+            },
+
             expression(expression) {
                 var argument = getAndRemoveArgument(expression);
 
@@ -1601,9 +1668,20 @@ class Parser extends BaseParser {
             char(ch, code) {
 
                 if (isConcise) {
-                    if (code === CODE_HTML_BLOCK_DELIMITER && parser.lookAtCharCodeAhead(1) === CODE_HTML_BLOCK_DELIMITER) {
+                    if (code === CODE_HTML_BLOCK_DELIMITER) {
+                        if (parser.lookAtCharCodeAhead(1) !== CODE_HTML_BLOCK_DELIMITER) {
+                            if (legacyCompatibility) {
+                                outputDeprecationWarning('The usage of a single hyphen in a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43');
+                            } else {
+                                notifyError(currentOpenTag.pos,
+                                    'MALFORMED_OPEN_TAG',
+                                    '"-" not allowed as first character of attribute name');
+                                return;
+                            }
+                        }
+
                         if (currentOpenTag.withinAttrGroup) {
-                            notifyError(currentOpenTag.pos,
+                            notifyError(parser.pos,
                                 'MALFORMED_OPEN_TAG',
                                 'Attribute group was not properly ended');
                             return;
@@ -1731,9 +1809,13 @@ class Parser extends BaseParser {
 
             enter(oldState) {
                 if (currentOpenTag.requiresCommas && currentOpenTag.lastAttrNoComma) {
-                    return notifyError(parser.pos,
-                        'COMMAS_REQUIRED',
-                        'if commas are used, they must be used to separate all attributes for a tag');
+                    var parseOptions = currentOpenTag.parseOptions;
+
+                    if (!parseOptions || parseOptions.relaxRequireCommas !== true) {
+                        return notifyError(parser.pos,
+                            'COMMAS_REQUIRED',
+                            'if commas are used, they must be used to separate all attributes for a tag');
+                    }
                 }
 
                 if (oldState !== STATE_EXPRESSION) {
@@ -2009,6 +2091,7 @@ class Parser extends BaseParser {
 
                     return;
                 } else if (depth === 0) {
+
                     if (!isConcise) {
                         if (code === CODE_CLOSE_ANGLE_BRACKET &&
                             (parentState === STATE_TAG_NAME ||
@@ -2028,7 +2111,7 @@ class Parser extends BaseParser {
                         }
                     }
 
-                    if(code === CODE_SEMICOLON) {
+                    if (code === CODE_SEMICOLON) {
                         endExpression();
                         endAttribute();
                         if(isConcise) {
@@ -2071,12 +2154,23 @@ class Parser extends BaseParser {
                             }
 
                             currentPart.endedWithComma = true;
-                        } else if (lookPastWhitespaceFor('=')) {
+                        } else if (currentPart.parentState === STATE_ATTRIBUTE_NAME && lookPastWhitespaceFor('=')) {
                             consumeWhitespace();
                             return;
                         } else if (parentState === STATE_ATTRIBUTE_VALUE) {
+                            var typeofExpression = checkForTypeofOperator();
+                            if (typeofExpression) {
+                                currentPart.value += typeofExpression;
+                                currentPart.isStringLiteral = false;
+                                currentPart.hasUnenclosedWhitespace = true;
+                                parser.skip(typeofExpression.length-1);
+                                return;
+                            }
+
                             var operator = checkForOperator();
+
                             if (operator) {
+                                currentPart.isStringLiteral = false;
                                 currentPart.hasUnenclosedWhitespace = true;
                                 currentPart.value += operator;
                                 return;
@@ -2099,6 +2193,17 @@ class Parser extends BaseParser {
                         parser.enterState(STATE_ATTRIBUTE_VALUE);
                         consumeWhitespace();
                         return;
+                    }
+
+                    if (currentPart.value === '') {
+                        let typeofExpression = checkForTypeofOperatorAtStart();
+                        if (typeofExpression) {
+                            currentPart.value += typeofExpression;
+                            currentPart.isStringLiteral = false;
+                            currentPart.hasUnenclosedWhitespace = true;
+                            parser.skip(typeofExpression.length-1);
+                            return;
+                        }
                     }
 
                     if (currentPart.parentState === STATE_TAG_NAME) {
@@ -2694,8 +2799,8 @@ class Parser extends BaseParser {
         }
     }
 
-    parse(data) {
-        super.parse(data);
+    parse(data, filename) {
+        super.parse(data, filename);
         this.notifiers.notifyFinish();
     }
 }

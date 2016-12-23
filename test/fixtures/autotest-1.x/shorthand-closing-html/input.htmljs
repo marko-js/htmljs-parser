@@ -1,0 +1,5 @@
+<li>
+    <a.nav-link class=(id === currentPage && 'active') href=href>
+        ${title}
+    </a>
+</li>
