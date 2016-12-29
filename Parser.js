@@ -978,8 +978,12 @@ class Parser extends BaseParser {
 
         function consumeWhitespace() {
             var ahead = 1;
-            while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) ahead++;
-            parser.skip(ahead-1);
+            var whitespace = '';
+            while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) {
+                whitespace += parser.lookAtCharAhead(ahead++);
+            }
+            parser.skip(whitespace.length);
+            return whitespace;
         }
 
         function checkForClosingTag() {
@@ -1010,7 +1014,7 @@ class Parser extends BaseParser {
 
         function checkForOperator() {
             var remaining = parser.data.substring(parser.pos);
-            var matches = operators.pattern.exec(remaining);
+            var matches = operators.patternNext.exec(remaining);
 
             if (matches) {
                 var match = matches[0];
@@ -1024,6 +1028,14 @@ class Parser extends BaseParser {
                 if (!isIgnoredOperator) {
                     parser.skip(match.length-1);
                     return match;
+                }
+            } else {
+                var previous = parser.substring(parser.pos-operators.longest, parser.pos);
+                var match2 = operators.patternPrev.exec(previous);
+                if(match2) {
+                    parser.rewind(1);
+                    var whitespace = consumeWhitespace();
+                    return whitespace;
                 }
             }
 
