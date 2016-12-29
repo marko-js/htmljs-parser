@@ -174,6 +174,10 @@ class Parser extends BaseParser {
          * @param  {String}  tagName The name of the tag (e.g. "img")
          */
         function isOpenTagOnly(tagName) {
+            if (!tagName) {
+                return false;
+            }
+
             tagName = tagName.toLowerCase();
 
             var openTagOnly = userIsOpenTagOnly && userIsOpenTagOnly(tagName);
@@ -441,7 +445,7 @@ class Parser extends BaseParser {
             currentOpenTag.endPos = endPos;
             currentOpenTag.selfClosed = selfClosed === true;
 
-            if (!currentOpenTag.tagName) {
+            if (!currentOpenTag.tagName && !currentOpenTag.emptyTagName) {
                 tagName = currentOpenTag.tagName = 'div';
             }
 
@@ -1654,7 +1658,6 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
-
                 if (isConcise) {
                     if (code === CODE_HTML_BLOCK_DELIMITER) {
                         if (parser.lookAtCharCodeAhead(1) !== CODE_HTML_BLOCK_DELIMITER) {
@@ -2132,6 +2135,39 @@ class Parser extends BaseParser {
                             });
                         }
                         return;
+                    }
+
+                    if (currentPart.parentState === STATE_TAG_NAME) {
+                        if (code === CODE_EQUAL || isWhitespaceCode(code)) {
+                            // Handle the case where are only attributes and no tagname:
+                            // <a=1 b=2/>
+                            var remaining = parser.data.substring(parser.pos);
+                            var equalMatches = /^\s*=\s*/.exec(remaining);
+
+                            if (equalMatches) {
+                                let attrName = currentPart.value;
+                                let parserPos = parser.pos;
+                                currentPart.value = ''; // Reset the expression value to '' for the tag name
+                                // Backtrack to the beginning of the tag before firing the open tag name event:
+                                parser.pos = currentPart.pos;
+                                currentOpenTag.emptyTagName = true; // Set a flag to mark this as an empty tag name
+                                endExpression();
+
+                                // Start the attributes section with the first attribute name being what we thought
+                                // was the tag name
+                                currentAttribute = {
+                                    name: attrName,
+                                    pos: currentOpenTag.pos
+                                };
+
+                                currentOpenTag.attributes = [currentAttribute];
+                                let equalMatch = equalMatches[0];
+                                // Advance past the equal sign and whitespace to start parsing the attribute value
+                                parser.pos = parserPos + equalMatch.length - 1;
+                                parser.enterState(STATE_ATTRIBUTE_VALUE);
+                                return;
+                            }
+                        }
                     }
 
                     if (code === CODE_COMMA || isWhitespaceCode(code)) {

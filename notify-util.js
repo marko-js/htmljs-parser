@@ -70,6 +70,7 @@ exports.createNotifiers = function(parser, listeners) {
                     type: 'openTagName',
                     tagName: tagInfo.tagName,
                     tagNameExpression: tagInfo.tagNameExpression,
+                    emptyTagName: tagInfo.emptyTagName,
                     pos: tagInfo.pos,
                     endPos: tagInfo.tagNameEndPos,
                     concise: tagInfo.concise
@@ -109,6 +110,7 @@ exports.createNotifiers = function(parser, listeners) {
                     type: 'openTag',
                     tagName: tagInfo.tagName,
                     tagNameExpression: tagInfo.tagNameExpression,
+                    emptyTagName: tagInfo.emptyTagName,
                     argument: tagInfo.argument,
                     pos: tagInfo.pos,
                     endPos: tagInfo.endPos,

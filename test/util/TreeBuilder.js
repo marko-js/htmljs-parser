@@ -220,7 +220,12 @@ class TreeBuilder {
             onOpenTagName: (event, parser) => {
                 var tagName = event.tagName;
                 if (!event.shorthandId && !event.shorthandClassNames) {
-                    expect(!!tagName).to.equal(true);
+                    if (event.emptyTagName) {
+                        expect(tagName).to.equal('');
+                    } else {
+                        expect(!!tagName).to.equal(true);
+                    }
+
                 }
 
                 var openTagNameHandler = openTagNameHandlers && openTagNameHandlers[tagName];
