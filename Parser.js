@@ -1478,11 +1478,11 @@ class Parser extends BaseParser {
                         return;
                     }
                 } else if (!ignorePlaceholders && checkForEscapedEscapedPlaceholder(ch, code)) {
-                    text += '\\';
                     parser.skip(1);
                 }  else if (!ignorePlaceholders && checkForEscapedPlaceholder(ch, code)) {
                     text += '$';
                     parser.skip(1);
+                    return;
                 } else if (!ignorePlaceholders && checkForPlaceholder(ch, code)) {
                     // We went into placeholder state...
                     endText();
