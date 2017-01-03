@@ -1307,13 +1307,15 @@ class Parser extends BaseParser {
                     }
 
                     if (code === CODE_HTML_BLOCK_DELIMITER) {
-                        if (legacyCompatibility) {
-                            outputDeprecationWarning('The usage of a single hyphen at the start of a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43');
-                        } else if (parser.lookAtCharCodeAhead(1) !== CODE_HTML_BLOCK_DELIMITER) {
-                            notifyError(parser.pos,
-                                'ILLEGAL_LINE_START',
-                                'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43');
-                            return;
+                        if (parser.lookAtCharCodeAhead(1) !== CODE_HTML_BLOCK_DELIMITER) {
+                            if (legacyCompatibility) {
+                                outputDeprecationWarning('The usage of a single hyphen at the start of a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43');
+                            } else {
+                                notifyError(parser.pos,
+                                    'ILLEGAL_LINE_START',
+                                    'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43');
+                                return;
+                            }
                         }
 
                         htmlBlockDelimiter = ch;
