@@ -992,7 +992,11 @@ class Parser extends BaseParser {
             var lookAhead = '/' + expectedCloseTagName + '>';
             var match = parser.lookAheadFor(lookAhead);
             if (match) {
+                if (parser.state === STATE_JS_COMMENT_LINE) {
+                    endJavaScriptComment();
+                }
                 endText();
+
                 closeTag(expectedCloseTagName, parser.pos, parser.pos + 1 + lookAhead.length);
                 parser.skip(match.length);
                 parser.enterState(STATE_HTML_CONTENT);
@@ -1447,6 +1451,18 @@ class Parser extends BaseParser {
 
             placeholder: STATE_HTML_CONTENT.placeholder,
 
+            comment(comment) {
+                text += comment.rawValue;
+
+                if (htmlBlockDelimiter && comment.eol) {
+                    handleDelimitedBlockEOL(comment.eol);
+                }
+            },
+
+            templateString(templateString) {
+                text += templateString.value;
+            },
+
             eol(newLine) {
                 text += newLine;
 
@@ -1479,7 +1495,43 @@ class Parser extends BaseParser {
                         parser.skip(1);
                         return;
                     }
-                } else if (!ignorePlaceholders && checkForEscapedEscapedPlaceholder(ch, code)) {
+                }
+
+
+                if (code === CODE_FORWARD_SLASH) {
+                    if (parser.lookAtCharCodeAhead(1) === CODE_ASTERISK) {
+                        // Skip over code inside a JavaScript block comment
+                        beginBlockComment();
+                        parser.skip(1);
+                        return;
+                    } else if (parser.lookAtCharCodeAhead(1) === CODE_FORWARD_SLASH) {
+                        beginLineComment();
+                        parser.skip(1);
+                        return;
+                    }
+                }
+
+
+                if (code === CODE_FORWARD_SLASH) {
+                    if (parser.lookAtCharCodeAhead(1) === CODE_ASTERISK) {
+                        // Skip over code inside a JavaScript block comment
+                        beginBlockComment();
+                        parser.skip(1);
+                        return;
+                    } else if (parser.lookAtCharCodeAhead(1) === CODE_FORWARD_SLASH) {
+                        beginLineComment();
+                        parser.skip(1);
+                        return;
+                    }
+                }
+
+                if (code === CODE_BACKTICK) {
+                    beginTemplateString();
+                    return;
+
+                }
+
+                if (!ignorePlaceholders && checkForEscapedEscapedPlaceholder(ch, code)) {
                     parser.skip(1);
                 }  else if (!ignorePlaceholders && checkForEscapedPlaceholder(ch, code)) {
                     text += '$';
@@ -2618,6 +2670,7 @@ class Parser extends BaseParser {
             eol(str) {
                 currentPart.value += str;
                 currentPart.endPos = parser.pos;
+                currentPart.eol = str;
                 endJavaScriptComment();
             },
 
@@ -2627,6 +2680,16 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
+                if (currentPart.parentState === STATE_PARSED_TEXT_CONTENT) {
+                    if (!isConcise && code === CODE_OPEN_ANGLE_BRACKET) {
+                        // First, see if we need to see if we reached the closing tag
+                        // and then check if we encountered CDATA
+                        if (checkForClosingTag()) {
+                            return;
+                        }
+                    }
+                }
+
                 currentPart.value += ch;
             }
         });
