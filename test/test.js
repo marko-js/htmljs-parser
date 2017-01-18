@@ -7,7 +7,7 @@ var runDirTest = require('./util/runDirTest');
 
 describe('parser', function() {
     require('./util/autotest').scanDir(
-        path.join(__dirname, 'fixtures/autotest'),
+        path.join(__dirname, 'autotest'),
         function (dir) {
             runDirTest(dir, {});
         });

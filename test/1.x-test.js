@@ -7,7 +7,7 @@ var runDirTest = require('./util/runDirTest');
 
 describe('parser', function() {
     require('./util/autotest').scanDir(
-        path.join(__dirname, 'fixtures/autotest-1.x'),
+        path.join(__dirname, 'autotest-1.x'),
         function (dir) {
             runDirTest(dir, { legacyCompatibility: true });
         });
