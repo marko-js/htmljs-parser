@@ -15,6 +15,7 @@ var operators = exports.operators = [
     // NOTE: These become reserved words and cannot be used as attribute names
     'instanceof',
     'in',
+    'new',
     // 'from', -- as in <import x from './file'/>
     // 'typeof', -- would need to look behind, not ahead
 
@@ -62,4 +63,3 @@ exports.patternPrev = new RegExp('[^-+](?:'+escapedOperators.join('|')+')(\\s*)$
 function escapeNonAlphaNumeric(str) {
     return str.replace(/([^\w\d])/g, '\\$1');
 }
-

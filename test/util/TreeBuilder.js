@@ -15,6 +15,8 @@ function attributesToString(attributes, includeLiteralValues) {
 
         if (attr.value) {
             result += '=' + attr.value;
+        } else if (!attr.argument) {
+            result += '=(EMPTY)';
         }
 
         if (includeLiteralValues) {
