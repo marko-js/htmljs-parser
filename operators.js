@@ -15,7 +15,6 @@ var operators = exports.operators = [
     // NOTE: These become reserved words and cannot be used as attribute names
     'instanceof',
     'in',
-    'new',
     // 'from', -- as in <import x from './file'/>
     // 'typeof', -- would need to look behind, not ahead
 
@@ -35,30 +34,31 @@ var operators = exports.operators = [
     '['
 ];
 
+var unary = [
+    'typeof',
+    'new',
+    'void'
+];
+
 // Look for longest operators first
 operators.sort(function(a, b) {
     return b.length - a.length;
 });
 
-var requiresWhitespace = exports.requiresWhitespace = {
-    'instanceof':true,
-    'in':true,
-    'typeof':true
-};
+exports.longest = operators.sort((a, b) => b.length-a.length)[0].length+1;
+exports.patternNext = new RegExp('^\\s*('+operators.map(escapeOperator).join('|')+')\\s*(?!-)');
+exports.patternPrev = new RegExp('[^-+](?:'+operators.concat(unary).map(escapeOperator).join('|')+')(\\s*)$');
 
-var escapedOperators = operators.map(o => {
-    if(requiresWhitespace[o]) {
-        return '\\s'+escapeNonAlphaNumeric(o)+'\\s';
+
+function escapeOperator(o) {
+    if(/^[A-Z]+$/i.test(o)) {
+        return '\\b'+escapeNonAlphaNumeric(o)+'\\b';
     }
     if(o === '/') {
         return '\\/(?:\\b|\\s)'; //make sure this isn't a comment
     }
     return escapeNonAlphaNumeric(o);
-});
-
-exports.longest = operators.sort((a, b) => b.length-a.length)[0].length+1;
-exports.patternNext = new RegExp('^\\s*('+escapedOperators.join('|')+')\\s*(?!-)');
-exports.patternPrev = new RegExp('[^-+](?:'+escapedOperators.join('|')+')(\\s*)$');
+}
 
 function escapeNonAlphaNumeric(str) {
     return str.replace(/([^\w\d])/g, '\\$1');
