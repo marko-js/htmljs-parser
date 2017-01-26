@@ -2320,6 +2320,9 @@ class Parser extends BaseParser {
                     }
                 }
 
+                // If we got here then we didn't find a string part so we know
+                // the current expression is not a string literal
+                currentPart.isStringLiteral = false;
                 currentPart.value += ch;
             }
         });
