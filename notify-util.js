@@ -245,6 +245,9 @@ exports.createNotifiers = function(parser, listeners) {
             if (eventFunc && scriptlet.value) {
                 eventFunc.call(parser, {
                     type: 'scriptlet',
+                    tag: scriptlet.tag,
+                    line: scriptlet.line,
+                    block: scriptlet.block,
                     value: scriptlet.value,
                     pos: scriptlet.pos,
                     endPos: scriptlet.endPos

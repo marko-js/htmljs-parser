@@ -625,6 +625,7 @@ class Parser extends BaseParser {
             endText();
 
             var scriptlet = beginPart();
+            scriptlet.tag = true;
             scriptlet.value = '';
             scriptlet.quoteCharCode = null;
             parser.enterState(STATE_SCRIPTLET);
@@ -635,6 +636,33 @@ class Parser extends BaseParser {
             var scriptlet = endPart();
             scriptlet.endPos = endPos;
             notifyScriptlet(scriptlet);
+        }
+
+        // InlineScript
+
+        function beginInlineScript() {
+            endText();
+
+            var inlineScript = beginPart();
+            inlineScript.value = '';
+            inlineScript.endMatches = [];
+            parser.enterState(STATE_INLINE_SCRIPT);
+            return inlineScript;
+        }
+
+        function endInlineScript(endPos) {
+            var inlineScript = endPart();
+            var value = inlineScript.value;
+            inlineScript.endPos = endPos;
+
+            if (value[0] === '{' && value[value.length-1] === '}') {
+                inlineScript.value = value.slice(1, -1);
+                inlineScript.block = true;
+            } else {
+                inlineScript.line = true;
+            }
+
+            notifyScriptlet(inlineScript);
         }
 
         // --------------------------
@@ -986,6 +1014,13 @@ class Parser extends BaseParser {
             return whitespace;
         }
 
+        function isBeginningOfLine() {
+            var before = parser.substring(0, parser.pos);
+            var lines = before.split('\n');
+            var lastLine = lines[lines.length-1];
+            return /^\s*$/.test(lastLine);
+        }
+
         function checkForClosingTag() {
             // Look ahead to see if we found the closing tag that will
             // take us out of the EXPRESSION state...
@@ -1196,6 +1231,9 @@ class Parser extends BaseParser {
                 } else if (!ignorePlaceholders && checkForPlaceholder(ch, code)) {
                     // We went into placeholder state...
                     endText();
+                } else if (code === CODE_DOLLAR && isWhitespaceCode(parser.lookAtCharCodeAhead(1)) && isBeginningOfLine()) {
+                    parser.skip(1);
+                    beginInlineScript();
                 } else {
                     text += ch;
                 }
@@ -1307,6 +1345,12 @@ class Parser extends BaseParser {
                         beginMixedMode = true;
                         parser.rewind(1);
                         beginHtmlBlock();
+                        return;
+                    }
+
+                    if (code === CODE_DOLLAR && isWhitespaceCode(parser.lookAtCharCodeAhead(1))) {
+                        parser.skip(1);
+                        beginInlineScript();
                         return;
                     }
 
@@ -2837,6 +2881,86 @@ class Parser extends BaseParser {
                 }
 
                 currentPart.value += ch;
+            }
+        });
+
+        var STATE_INLINE_SCRIPT = Parser.createState({
+            name: 'STATE_INLINE_SCRIPT',
+
+            eol(str) {
+                if (currentPart.endMatch || currentPart.stringType === CODE_BACKTICK) {
+                    currentPart.value += str;
+                } else {
+                    endInlineScript(parser.pos);
+                    parser.rewind(str.length);
+                }
+            },
+
+            eof() {
+                if (currentPart.endMatch || currentPart.stringType) {
+                    notifyError(currentPart.pos,
+                        'MALFORMED_SCRIPTLET',
+                        'EOF reached while parsing scriptet');
+                } else {
+                    endInlineScript(parser.pos);
+                }
+            },
+
+            comment(comment) {
+                currentPart.value += comment.rawValue;
+            },
+
+            char(ch, code) {
+                currentPart.value += ch;
+
+                if (code === CODE_BACK_SLASH) {
+                    currentPart.value += parser.lookAtCharAhead(1);
+                    parser.skip(1);
+                    return;
+                }
+
+                if (currentPart.stringType) {
+                    if (code === currentPart.stringType) {
+                        currentPart.stringType = null;
+                    }
+                    return;
+                }
+
+                if (code === currentPart.endMatch) {
+                    currentPart.endMatch = currentPart.endMatches.pop();
+                    return;
+                }
+
+                if (code === CODE_FORWARD_SLASH) {
+                    if (parser.lookAtCharCodeAhead(1) === CODE_ASTERISK) {
+                        // Skip over code inside a JavaScript block comment
+                        beginBlockComment();
+                        parser.skip(1);
+                        return;
+                    }
+                }
+
+                if (code === CODE_SINGLE_QUOTE || code === CODE_DOUBLE_QUOTE || code === CODE_BACKTICK) {
+                    currentPart.stringType = code;
+                    return;
+                }
+
+                var nextMatch = null;
+
+                if (code === CODE_OPEN_PAREN) {
+                    nextMatch = CODE_CLOSE_PAREN;
+                } else if (code === CODE_OPEN_CURLY_BRACE) {
+                    nextMatch = CODE_CLOSE_CURLY_BRACE;
+                } else if (code === CODE_OPEN_SQUARE_BRACKET) {
+                    nextMatch = CODE_CLOSE_SQUARE_BRACKET;
+                }
+
+                if (nextMatch) {
+                    if (currentPart.endMatch) {
+                        currentPart.endMatches.push(currentPart.endMatch);
+                    }
+                    currentPart.endMatch = nextMatch;
+                }
             }
         });
 

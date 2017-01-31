@@ -82,7 +82,13 @@ class Node {
             }
 
             case 'scriptlet': {
-                out.writeLine('scriptlet:' + JSON.stringify(event.value));
+                if(event.tag) {
+                    out.writeLine('scriptlet:' + JSON.stringify(event.value));
+                } else if (event.line) {
+                    out.writeLine('scriptlet(line):' + JSON.stringify(event.value));
+                } else if (event.block) {
+                    out.writeLine('scriptlet(block):' + JSON.stringify(event.value));
+                }
                 break;
             }
 
@@ -331,8 +337,10 @@ class TreeBuilder {
             },
 
             onScriptlet: (event) => {
-                expect(src.substring(event.pos, event.pos+2)).to.equal('<%');
-                expect(src.substring(event.endPos-2, event.endPos)).to.equal('%>');
+                if (event.tag) {
+                    expect(src.substring(event.pos, event.pos+2)).to.equal('<%');
+                    expect(src.substring(event.endPos-2, event.endPos)).to.equal('%>');
+                }
                 this.last.children.push(new Node(event));
             },
 
