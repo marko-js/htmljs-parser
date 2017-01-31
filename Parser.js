@@ -1231,7 +1231,7 @@ class Parser extends BaseParser {
                 } else if (!ignorePlaceholders && checkForPlaceholder(ch, code)) {
                     // We went into placeholder state...
                     endText();
-                } else if (code === CODE_DOLLAR && isWhitespaceCode(parser.lookAtCharCodeAhead(1)) && isBeginningOfLine()) {
+                } else if (!legacyCompatibility && code === CODE_DOLLAR && isWhitespaceCode(parser.lookAtCharCodeAhead(1)) && isBeginningOfLine()) {
                     parser.skip(1);
                     beginInlineScript();
                 } else {
@@ -1348,7 +1348,7 @@ class Parser extends BaseParser {
                         return;
                     }
 
-                    if (code === CODE_DOLLAR && isWhitespaceCode(parser.lookAtCharCodeAhead(1))) {
+                    if (!legacyCompatibility && code === CODE_DOLLAR && isWhitespaceCode(parser.lookAtCharCodeAhead(1))) {
                         parser.skip(1);
                         beginInlineScript();
                         return;
