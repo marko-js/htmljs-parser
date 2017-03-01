@@ -399,30 +399,38 @@ class Parser extends BaseParser {
         function finishOpenTag(selfClosed) {
             var tagName = currentOpenTag.tagName;
             var attributes = currentOpenTag.attributes;
+            var parseOptions = currentOpenTag.parseOptions;
 
-            if (currentOpenTag.requiresCommas && attributes.length > 1) {
-                for(let i = 0; i < attributes.length-1; i++) {
-                    if(!attributes[i].endedWithComma) {
-                        var parseOptions = currentOpenTag.parseOptions;
+            var ignoreAttributes = parseOptions && parseOptions.ignoreAttributes === true;
 
-                        if (!parseOptions || parseOptions.relaxRequireCommas !== true) {
+            if (ignoreAttributes) {
+                attributes.length = 0;
+            } else {
+                if (currentOpenTag.requiresCommas && attributes.length > 1) {
+                    for(let i = 0; i < attributes.length-1; i++) {
+                        if(!attributes[i].endedWithComma) {
+
+
+                            if (!parseOptions || parseOptions.relaxRequireCommas !== true) {
+                                notifyError(attributes[i].pos,
+                                    'COMMAS_REQUIRED',
+                                    'if commas are used, they must be used to separate all attributes for a tag');
+                            }
+                        }
+                    }
+                }
+
+                if (currentOpenTag.hasUnenclosedWhitespace && attributes.length > 1) {
+                    for(let i = 0; i < attributes.length-1; i++) {
+                        if(!attributes[i].endedWithComma) {
                             notifyError(attributes[i].pos,
                                 'COMMAS_REQUIRED',
-                                'if commas are used, they must be used to separate all attributes for a tag');
+                                'commas are required to separate all attributes when using complex attribute values with un-enclosed whitespace');
                         }
                     }
                 }
             }
 
-            if (currentOpenTag.hasUnenclosedWhitespace && attributes.length > 1) {
-                for(let i = 0; i < attributes.length-1; i++) {
-                    if(!attributes[i].endedWithComma) {
-                        notifyError(attributes[i].pos,
-                            'COMMAS_REQUIRED',
-                            'commas are required to separate all attributes when using complex attribute values with un-enclosed whitespace');
-                    }
-                }
-            }
 
             currentOpenTag.expectedCloseTagName = expectedCloseTagName =
                 parser.substring(currentOpenTag.tagNameStart, currentOpenTag.tagNameEnd);
