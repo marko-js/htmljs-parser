@@ -245,6 +245,12 @@ class Parser extends BaseParser {
          * and we are exiting out of non-concise mode.
          */
         function endHtmlBlock() {
+            if (text && (isWithinSingleLineHtmlBlock || htmlBlockDelimiter)) {
+                // Remove the new line that was required to end a single line
+                // HTML block or a delimited block
+                text = text.replace(/(\r\n|\n)$/, '');
+            }
+
             // End any text
             endText();
 
