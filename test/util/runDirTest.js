@@ -3,6 +3,7 @@ var fs = require('fs');
 var htmljs = require('../../');
 var TreeBuilder = require('./TreeBuilder');
 var assert = require('assert');
+var updateExpectations = process.env.hasOwnProperty('UPDATE_EXPECTATIONS');
 
 require('colors');
 
@@ -97,7 +98,11 @@ module.exports = function(dir, parserOptions) {
             }
         } else {
             if (actual !== expected) {
-                throw new Error('Unexpected output for "' + name + '"');
+                if (updateExpectations) {
+                    fs.writeFileSync(expectedPath, actual, { encoding: 'utf8' });
+                } else {
+                    throw new Error('Unexpected output for "' + name + '"');
+                }
             }
         }
     }
