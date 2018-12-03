@@ -612,6 +612,7 @@ class Parser extends BaseParser {
 
         function endString() {
             var string = endPart();
+            string.value = notifiers.notifyString(string);
             string.parentState.string(string);
         }
 

@@ -185,6 +185,12 @@ class TreeBuilder {
                 this.last.children.push(new Node(event));
             },
 
+            onString: (event) => {
+                if (!event.isStringLiteral) {
+                    event.value = '$placeholderString(' + event.value + ')';
+                }
+            },
+
             onPlaceholder: (event) => {
                 var escape = event.escape;
                 var withinString = event.withinString;
