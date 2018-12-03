@@ -86,22 +86,13 @@ module.exports = function(dir, parserOptions) {
 
         if (suffix === '.json') {
             var expectedObject = JSON.parse(expected);
-
-            try {
-                assert.deepEqual(
-                    actual,
-                    expectedObject);
-            } catch(e) {
-                // console.error('Unexpected output for "' + name + '":\nEXPECTED (' + expectedPath + '):\n---------\n' + expectedJSON +
-                //     '\n---------\nACTUAL (' + actualPath + '):\n---------\n' + actualJSON + '\n---------');
-                throw new Error('Unexpected output for "' + name + '"');
-            }
+            assert.deepEqual(actual, expectedObject);
         } else {
             if (actual !== expected) {
                 if (updateExpectations) {
                     fs.writeFileSync(expectedPath, actual, { encoding: 'utf8' });
                 } else {
-                    throw new Error('Unexpected output for "' + name + '"');
+                    assert.deepEqual(actual, expected);
                 }
             }
         }
