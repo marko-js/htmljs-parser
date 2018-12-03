@@ -1,4 +1,4 @@
-<custom name=("Hello "+($noEscapeXml($withinString(name)))+"!")>
+<custom name=$placeholderString(("Hello "+($noEscapeXml($withinString(name)))+"!"))>
     text:"\n    Hello "
     $!{"$noEscapeXml(name)"}
     text:"!\n"

@@ -282,6 +282,29 @@ exports.createNotifiers = function(parser, listeners) {
             return placeholder.value;
         },
 
+        notifyString(string) {
+            if (hasError) {
+                return;
+            }
+
+            var eventFunc = listeners.onString;
+            if (eventFunc) {
+                var stringEvent = {
+                    type: 'string',
+                    value: string.value,
+                    pos: string.pos,
+                    endPos: string.endPos,
+                    stringParts: string.stringParts,
+                    isStringLiteral: string.isStringLiteral
+                };
+
+                eventFunc.call(parser, stringEvent, parser);
+                return stringEvent.value;
+            }
+
+            return string.value;
+        },
+
         notifyFinish() {
             if (listeners.onfinish) {
                 listeners.onfinish.call(parser, {}, parser);

@@ -75,6 +75,14 @@ var parser = require('htmljs-parser').createParser({
         var pos = event.pos; // Integer
     },
 
+    onString: function(event) {
+        // Text within ""
+        var value = event.value; // String
+        var stringParts = event.stringParts; // Array
+        var isStringLiteral = event.isStringLiteral // Boolean
+        var pos = event.pos; // Integer
+    },
+
     onCDATA: function(event) {
         // <![CDATA[<value>]]>
         var value = event.value; // String
