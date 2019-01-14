@@ -112,6 +112,7 @@ exports.createNotifiers = function(parser, listeners) {
                     tagNameExpression: tagInfo.tagNameExpression,
                     emptyTagName: tagInfo.emptyTagName,
                     argument: tagInfo.argument,
+                    params: tagInfo.params,
                     pos: tagInfo.pos,
                     endPos: tagInfo.endPos,
                     tagNameEndPos: tagInfo.tagNameEndPos,

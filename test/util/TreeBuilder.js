@@ -115,6 +115,7 @@ class ElementNode {
         var tagName = event.tagName;
         var tagNameExpression = event.tagNameExpression;
         var argument = event.argument;
+        var params = event.params;
         var attributes = event.attributes;
         var openTagOnly = event.openTagOnly === true;
         var selfClosed =  event.selfClosed === true;
@@ -127,6 +128,10 @@ class ElementNode {
 
         if (argument) {
             str += '(' + argument.value + ')';
+        }
+
+        if (params) {
+            str += '|' + params.value + '|';
         }
 
         if (out.includePositions) {
