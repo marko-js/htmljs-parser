@@ -1665,7 +1665,7 @@ class Parser extends BaseParser {
             expression(expression) {
                 var value = expression.value;
                 if (value.charCodeAt(value.length-1) !== CODE_CLOSE_PAREN) {
-                    throw new Error('Invalid argument')
+                    throw new Error('Invalid argument');
                 }
                 expression.value = value.slice(1, value.length-1);
                 expression.pos += 1;
@@ -2197,7 +2197,7 @@ class Parser extends BaseParser {
                         currentPart.groupStack.push(code);
                         currentPart.isStringLiteral = false;
                         currentPart.value += ch;
-                        return
+                        return;
                     } else if (depth === 1) {
                         endExpression();
                         return;
