@@ -94,6 +94,7 @@ const CODE_PERIOD = 46;
 const CODE_COMMA = 44;
 const CODE_SEMICOLON = 59;
 const CODE_NUMBER_SIGN = 35;
+const CODE_PIPE = 124;
 
 const BODY_PARSED_TEXT = 1; // Body of a tag is treated as text, but placeholders will be parsed
 const BODY_STATIC_TEXT = 2;// Body of a tag is treated as text and placeholders will *not* be parsed
@@ -381,6 +382,7 @@ class Parser extends BaseParser {
                 tagNameParts: null,
                 attributes: [],
                 argument: undefined,
+                params: undefined,
                 pos: parser.pos,
                 indent: indent,
                 nestedIndent: null, // This will get set when we know what hte nested indent is
@@ -1615,25 +1617,9 @@ class Parser extends BaseParser {
             eol: openTagEOL,
 
             eof: openTagEOF,
-
+            
             expression(expression) {
-                var argument = getAndRemoveArgument(expression);
-
-                if (argument) {
-                    // The tag has an argument that we need to slice off
-
-                    if (currentOpenTag.argument != null) {
-                        notifyError(expression.endPos,
-                            'ILLEGAL_TAG_ARGUMENT',
-                            'A tag can only have one argument');
-                    }
-
-                    currentOpenTag.argument = argument;
-                    currentOpenTag.tagNameEnd = expression.pos + expression.lastLeftParenPos + 1;
-                } else {
-                    currentOpenTag.tagNameEnd = expression.endPos;
-                }
-
+                currentOpenTag.tagNameEnd = expression.endPos;
 
                 if (expression.value) {
                     currentOpenTag.tagName += expression.value;
@@ -1656,6 +1642,67 @@ class Parser extends BaseParser {
                 currentOpenTag.tagName += parser.substring(placeholder.pos, placeholder.endPos);
                 currentOpenTag.tagNameParts.push('(' + placeholder.value + ')');
                 currentOpenTag.tagNameEnd = placeholder.endPos;
+            },
+
+            enter(oldState) {
+                if (oldState !== STATE_EXPRESSION) {
+                    beginExpression();
+                }
+            },
+
+            char(ch, code) {
+                throw new Error('Illegal state');
+            }
+        });
+
+        var STATE_TAG_ARGS = Parser.createState({
+            name: 'STATE_TAG_ARGS',
+
+            eol: openTagEOL,
+
+            eof: openTagEOF,
+
+            expression(expression) {
+                var value = expression.value;
+                if (value.charCodeAt(value.length-1) !== CODE_CLOSE_PAREN) {
+                    throw new Error('Invalid argument');
+                }
+                expression.value = value.slice(1, value.length-1);
+                expression.pos += 1;
+                expression.endPos -= 1;
+                currentOpenTag.argument = expression;
+
+                if (parser.lookAtCharCodeAhead(1) === CODE_PIPE) {
+                    parser.enterState(STATE_TAG_PARAMS);
+                } else {
+                    parser.enterState(STATE_WITHIN_OPEN_TAG);
+                }
+            },
+
+            enter(oldState) {
+                if (oldState !== STATE_EXPRESSION) {
+                    beginExpression();
+                }
+            },
+
+            char(ch, code) {
+                throw new Error('Illegal state');
+            }
+        });
+
+        var STATE_TAG_PARAMS = Parser.createState({
+            name: 'STATE_TAG_PARAMS',
+
+            eol: openTagEOL,
+
+            eof: openTagEOF,
+
+            expression(expression) {
+                var value = expression.value;
+                expression.value = value.slice(1);
+                expression.pos += 1;
+                currentOpenTag.params = expression;
+                parser.enterState(STATE_WITHIN_OPEN_TAG);
             },
 
             enter(oldState) {
@@ -2086,7 +2133,7 @@ class Parser extends BaseParser {
 
                     return notifyError(currentPart.pos,
                         'INVALID_EXPRESSION',
-                        'EOF reached will parsing expression');
+                        'EOF reached while parsing expression');
                 }
             },
 
@@ -2145,6 +2192,16 @@ class Parser extends BaseParser {
                         }
                         return;
                     }
+                } else if (code === CODE_PIPE && parentState === STATE_TAG_PARAMS) {
+                    if (depth === 0) {
+                        currentPart.groupStack.push(code);
+                        currentPart.isStringLiteral = false;
+                        currentPart.value += ch;
+                        return;
+                    } else if (depth === 1) {
+                        endExpression();
+                        return;
+                    }
                 } else if (code === CODE_OPEN_PAREN ||
                            code === CODE_OPEN_SQUARE_BRACKET ||
                            code === CODE_OPEN_CURLY_BRACE) {
@@ -2199,7 +2256,10 @@ class Parser extends BaseParser {
                     if (currentPart.groupStack.length === 0) {
                         if (code === CODE_CLOSE_PAREN) {
                             currentPart.lastRightParenPos = currentPart.value.length - 1;
-                        } else if (code === CODE_CLOSE_CURLY_BRACE && parentState === STATE_PLACEHOLDER) {
+                        } 
+                        var endPlaceholder = code === CODE_CLOSE_CURLY_BRACE && parentState === STATE_PLACEHOLDER;
+                        var endTagArgs = code === CODE_CLOSE_PAREN && parentState === STATE_TAG_ARGS;
+                        if (endPlaceholder || endTagArgs) {
                             currentPart.endPos = parser.pos + 1;
                             endExpression();
                             return;
@@ -2360,6 +2420,15 @@ class Parser extends BaseParser {
                         }
                     }
 
+                    if (currentPart.parentState === STATE_TAG_PARAMS) {
+                        if (code === CODE_PIPE) {
+                            endExpression();
+                            parser.rewind(1);
+                            parser.enterState(STATE_TAG_PARAMS);
+                            return;
+                        }
+                    }
+
                     if (currentPart.parentState === STATE_TAG_NAME) {
                         if (checkForEscapedEscapedPlaceholder(ch, code)) {
                             currentPart.value += '\\';
@@ -2379,6 +2448,16 @@ class Parser extends BaseParser {
                             endExpression();
                             parser.rewind(1);
                             beginTagNameShorthand();
+                            return;
+                        } else if (parser.lookAtCharCodeAhead(1) === CODE_OPEN_PAREN) {
+                            currentPart.value += ch;
+                            endExpression();
+                            parser.enterState(STATE_TAG_ARGS);
+                            return;
+                        } else if (code === CODE_PIPE) {
+                            endExpression();
+                            parser.rewind(1);
+                            parser.enterState(STATE_TAG_PARAMS);
                             return;
                         }
                     }
