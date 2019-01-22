@@ -1,0 +1,127 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/mirawlings/.nvm/versions/node/v6.14.0/bin/node',
+1 verbose cli   '/Users/mirawlings/.nvm/versions/node/v6.14.0/bin/npm',
+1 verbose cli   'publish' ]
+2 info using npm@3.10.10
+3 info using node@v6.14.0
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec Result {
+7 silly cache add   raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   escapedName: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: '/Users/mirawlings/code/htmljs-parser',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory /Users/mirawlings/.npm/htmljs-parser/2.6.0/package.tgz not in flight; packing
+9 verbose correctMkdir /Users/mirawlings/.npm correctMkdir not in flight; initializing
+10 info lifecycle htmljs-parser@2.6.0~prepublish: htmljs-parser@2.6.0
+11 silly lifecycle htmljs-parser@2.6.0~prepublish: no script for prepublish, continuing
+12 verbose tar pack [ '/Users/mirawlings/.npm/htmljs-parser/2.6.0/package.tgz',
+12 verbose tar pack   '/Users/mirawlings/code/htmljs-parser' ]
+13 verbose tarball /Users/mirawlings/.npm/htmljs-parser/2.6.0/package.tgz
+14 verbose folder /Users/mirawlings/code/htmljs-parser
+15 verbose addLocalTarball adding from inside cache /Users/mirawlings/.npm/htmljs-parser/2.6.0/package.tgz
+16 verbose correctMkdir /Users/mirawlings/.npm correctMkdir not in flight; initializing
+17 silly cache afterAdd htmljs-parser@2.6.0
+18 verbose afterAdd /Users/mirawlings/.npm/htmljs-parser/2.6.0/package/package.json not in flight; writing
+19 verbose correctMkdir /Users/mirawlings/.npm correctMkdir not in flight; initializing
+20 verbose afterAdd /Users/mirawlings/.npm/htmljs-parser/2.6.0/package/package.json written
+21 silly publish { name: 'htmljs-parser',
+21 silly publish   description: 'An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values',
+21 silly publish   keywords:
+21 silly publish    [ 'HTML',
+21 silly publish      'parser',
+21 silly publish      'JavaScript',
+21 silly publish      'expressions',
+21 silly publish      'browser',
+21 silly publish      'server',
+21 silly publish      'nodejs',
+21 silly publish      'template',
+21 silly publish      'compiler' ],
+21 silly publish   main: 'index.js',
+21 silly publish   scripts:
+21 silly publish    { test: 'npm run mocha && npm run jshint',
+21 silly publish      mocha: 'mocha --ui bdd --reporter spec ./test',
+21 silly publish      jshint: 'jshint *.js' },
+21 silly publish   repository:
+21 silly publish    { type: 'git',
+21 silly publish      url: 'git+https://github.com/philidem/htmljs-parser.git' },
+21 silly publish   author: { name: 'Phillip Gates-Idem', email: 'phillip.idem@gmail.com' },
+21 silly publish   maintainers: 'Phillip Gates-Idem <phillip.idem@gmail.com>',
+21 silly publish   dependencies: { 'char-props': '^0.1.5', complain: '^1.0.0' },
+21 silly publish   devDependencies:
+21 silly publish    { chai: '^4.0.0',
+21 silly publish      colors: '^1.1.2',
+21 silly publish      jshint: '^2.8.0',
+21 silly publish      mocha: '^4.0.0' },
+21 silly publish   license: 'MIT',
+21 silly publish   publishConfig: { registry: 'https://registry.npmjs.org/' },
+21 silly publish   version: '2.6.0',
+21 silly publish   readme: 'htmljs-parser\n=============\n\nHTML parsers written according to the HTML spec will interpret all\nattribute values as strings which makes it challenging to properly\ndescribe a value\'s type (boolean, string, number, array, etc.)\nor to provide a complex JavaScript expression as a value.\nThe ability to describe JavaScript expressions within attributes\nis important for HTML-based template compilers.\n\nFor example, consider a HTML-based template that wishes to\nsupport a custom tag named `<say-hello>` that supports an\nattribute named `message` that can be a string literal or a JavaScript expression.\n\n\nIdeally, the template compiler should be able to handle any of the following:\n\n```html\n<say-hello message="Hello world!" />\n<say-hello message=("Hello " + personName + "!") />\n<say-hello message="Hello ${personName}!" />\n```\n\nThis parser extends the HTML grammar to add these important features:\n\n- JavaScript expressions as attribute values\n```html\n<say-hello message=("Hello " + personName) count=2+2 large=true />\n```\n- Placeholders in the content of an element\n```html\n<div>\n    Hello ${personName}\n</div>\n```\n- Placeholders within attribute value strings\n```html\n<div data-message="Hello ${personName}!">\n```\n- JavaScript flow-control statements within HTML elements\n```html\n<div for(a in b) />\n<div if(a === b) />\n```\n- JavaScript flow-control statements as elements\n```html\n<for (a in b)>\n<if (a in b)>\n```\n\n# Installation\n\n```bash\nnpm install htmljs-parser\n```\n\n# Usage\n\n```javascript\nvar parser = require(\'htmljs-parser\').createParser({\n    onText: function(event) {\n        // Text within an HTML element\n        var value = event.value;\n    },\n\n    onPlaceholder: function(event) {\n        //  ${<value>]} // escape = true\n        // $!{<value>]} // escape = false\n        var value = event.value; // String\n        var escaped = event.escaped; // boolean\n        var withinBody = event.withinBody; // boolean\n        var withinAttribute = event.withinAttribute; // boolean\n        var withinString = event.withinString; // boolean\n        var withinOpenTag = event.withinOpenTag; // boolean\n        var pos = event.pos; // Integer\n    },\n\n    onString: function(event) {\n        // Text within ""\n        var value = event.value; // String\n        var stringParts = event.stringParts; // Array\n        var isStringLiteral = event.isStringLiteral // Boolean\n        var pos = event.pos; // Integer\n    },\n\n    onCDATA: function(event) {\n        // <![CDATA[<value>]]>\n        var value = event.value; // String\n        var pos = event.pos; // Integer\n    },\n\n    onOpenTag: function(event) {\n        var tagName = event.tagName; // String\n        var attributes = event.attributes; // Array\n        var argument = event.argument; // Object\n        var pos = event.pos; // Integer\n    },\n\n    onCloseTag: function(event) {\n        // close tag\n        var tagName = event.tagName; // String\n        var pos = event.pos; // Integer\n    },\n\n    onDocumentType: function(event) {\n        // Document Type/DTD\n        // <!<value>>\n        // Example: <!DOCTYPE html>\n        var value = event.value; // String\n        var pos = event.pos; // Integer\n    },\n\n    onDeclaration: function(event) {\n        // Declaration\n        // <?<value>?>\n        // Example: <?xml version="1.0" encoding="UTF-8" ?>\n        var value = event.value; // String\n        var pos = event.pos; // Integer\n    },\n\n    onComment: function(event) {\n        // Text within XML comment\n        var value = event.value; // String\n        var pos = event.pos; // Integer\n    },\n\n    onScriptlet: function(event) {\n        // Text within <% %>\n        var value = event.value; // String\n        var pos = event.pos; // Integer\n    },\n\n    onError: function(event) {\n        // Error\n        var message = event.message; // String\n        var code = event.code; // String\n        var pos = event.pos; // Integer\n    }\n});\n\nparser.parse(str);\n```\n\n## Content Parsing Modes\n\nThe parser, by default, will look for HTML tags within content. This behavior\nmight not be desirable for certain tags, so the parser allows the parsing mode\nto be changed (usually in response to an `onOpenTag` event).\n\nThere are three content parsing modes:\n\n- **HTML Content (DEFAULT):**\n    The parser will look for any HTML tag and content placeholders while in\n    this mode and parse opening and closing tags accordingly.\n\n- **Parsed Text Content**: The parser will look for the closing tag that matches\n    the current open tag as well as content placeholders but all other content\n    will be interpreted as text.\n\n- **Static Text Content**: The parser will look for the closing tag that matches\n    the current open tag but all other content will be interpreted as raw text.\n\n```javascript\nvar htmljs = require(\'htmljs-parser\');\nvar parser = htmljs.createParser({\n    onOpenTag: function(event) {\n        // open tag\n        switch(event.tagName) {\n            case \'textarea\':\n                //fall through\n            case \'script\':\n                //fall through\n            case \'style\':\n                // parse the content within these tags but only\n                // look for placeholders and the closing tag.\n                parser.enterParsedTextContentState();\n                break;\n            case \'dummy\'\n                // treat content within <dummy>...</dummy> as raw\n                // text and ignore other tags and placeholders\n                parser.enterStaticTextContentState();\n                break;\n            default:\n                // The parser will switch to HTML content parsing mode\n                // if the parsing mode is not explicitly changed by\n                // "onOpenTag" function.\n        }\n    }\n});\n\nparser.parse(str);\n```\n\n## Parsing Events\n\nThe `htmljs-parser` is an event-based parser which means that it will emit\nevents as it is parsing the document. Events are emitted via calls\nto `on<eventname>` function which are supplied as properties in the options\nvia call to `require(\'htmljs-parser\').createParser(options)`.\n\n### onOpenTag\n\nThe `onOpenTag` function will be called each time an opening tag is\nencountered.\n\n**EXAMPLE: Simple tag**\n\nINPUT:\n\n```html\n<div>\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'openTag\',\n    tagName: \'div\',\n    attributes: []\n}\n```\n\n**EXAMPLE: Tag with literal attribute values**\n\nINPUT:\n\n```html\n<div class="demo" disabled=false data-number=123>\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'openTag\',\n    tagName: \'div\',\n    attributes: [\n        {\n            name: \'class\',\n            value: \'"demo"\',\n            literalValue: \'demo\'\n        },\n        {\n            name: \'disabled\',\n            value: \'false\',\n            literalValue: false\n        },\n        {\n            name: \'data-number\',\n            value: \'123\',\n            literalValue: 123\n        }\n    ]\n}\n```\n\n**EXAMPLE: Tag with expression attribute**\n\nINPUT:\n\n```html\n<say-something message=("Hello "+data.name)/>\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'openTag\',\n    tagName: \'div\',\n    attributes: [\n        {\n            name: \'message\',\n            value: \'"Hello "+data.name\'\n        }\n    ]\n}\n```\n\n**EXAMPLE: Tag with an argument**\n\nINPUT:\n\n```html\n<for(var i = 0; i < 10; i++)>\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'openTag\',\n    tagName: \'for\',\n    argument: {\n        value: \'var i = 0; i < 10; i++\',\n        pos: ... // Integer\n    },\n    attributes: []\n}\n```\n\n**EXAMPLE: Attribute with an argument**\n\nINPUT:\n\n```html\n<div if(x > y)>\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'openTag\',\n    tagName: \'div\',\n    attributes: [\n        {\n            name: \'if\',\n            argument: {\n                value: \'x > y\',\n                pos: ... // Integer\n            }\n        }\n    ]\n}\n```\n\n### onCloseTag\n\nThe `onCloseTag` function will be called each time a closing tag is\nencountered.\n\n**EXAMPLE: Simple close tag**\n\nINPUT:\n\n```html\n</div>\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'closeTag\',\n    tagName: \'div\'\n}\n```\n\n### onText\n\nThe `onText` function will be called each time within an element\nwhen textual data is encountered.\n\n**NOTE:** Text within `<![CDATA[` `]]>` will be emitted via call\nto `onCDATA`.\n\n**EXAMPLE**\n\nIn the following example code, the `TEXT` sequences will be emitted as\ntext events.\n\nINPUT:\n\n```html\nSimple text\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'text\',\n    value: \'Simple text\'\n}\n```\n\n### onCDATA\n\nThe `onCDATA` function will be called when text within `<![CDATA[` `]]>`\nis encountered.\n\n**EXAMPLE:**\n\nINPUT:\n\n```html\n<![CDATA[This is text]]>\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'cdata\',\n    value: \'This is text\'\n}\n```\n\n### onPlaceholder\n\nThe `onPlaceholder` function will be called each time a placeholder\nis encountered.\n\nIf the placeholder starts with the `$!{` sequence then `event.escape`\nwill be `false`.\n\nIf the placeholder starts with the `${` sequence then `event.escape` will be\n`true`.\n\nText within `<![CDATA[` `]]>` and `<!--` `-->` will not be parsed so you\ncannot use placeholders for these blocks of code.\n\n**EXAMPLE:**\n\nINPUT:\n\n```html\n${"This is an escaped placeholder"}\n$!{"This is a non-escaped placeholder"}\n```\n\nOUTPUT EVENTS\n\n```html\n${name}\n```\n\n```javascript\n{\n    type: \'placeholder\',\n    value: \'name\',\n    escape: true\n}\n```\n\n--------\n\n```html\n$!{name}\n```\n\n```javascript\n{\n    type: \'placeholder\',\n    value: \'name\',\n    escape: true\n}\n```\n\n**NOTE:**\nThe `escape` flag is merely informational. The application code is responsible\nfor interpreting this flag to properly escape the expression.\n\nHere\'s an example of modifying the expression based on the `event.escape` flag:\n\n```javascript\nonPlaceholder: function(event) {\n    if (event.escape) {\n        event.value = \'escapeXml(\' + event.value + \')\';\n    }\n}\n```\n\n### onDocumentType\n\nThe `onDocumentType` function will be called when the document type declaration\nis encountered _anywhere_ in the content.\n\n**EXAMPLE:**\n\nINPUT:\n\n```html\n<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'documentType\',\n    value: \'DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN"\'\n}\n```\n\n### onDeclaration\n\nThe `onDeclaration` function will be called when an XML declaration\nis encountered _anywhere_ in the content.\n\n**EXAMPLE:**\n\nINPUT:\n\n```html\n<?xml version="1.0" encoding="UTF-8"?>\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'declaration\',\n    value: \'xml version="1.0" encoding="UTF-8"\'\n}\n```\n\n### onComment\n\nThe `onComment` function will be called when text within `<!--` `-->`\nis encountered.\n\n**EXAMPLE:**\n\nINPUT:\n\n```html\n<!--This is a comment-->\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'comment\',\n    value: \'This is a comment\'\n}\n```\n\n### onScriptlet\n\nThe `onScriptlet` function will be called when text within `<%` `%>`\nis encountered.\n\n**EXAMPLE:**\n\nINPUT:\n\n```html\n<% console.log("Hello World!"); %>\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'scriptlet\',\n    value: \' console.log("Hello World!"); \'\n}\n```\n\n### onError\n\nThe `onError` function will be called when malformed content is detected.\nThe most common cause for an error is due to reaching the end of the\ninput while still parsing an open tag, close tag, XML comment, CDATA section,\nDTD, XML declaration, or placeholder.\n\nPossible error codes:\n\n- `MISSING_END_TAG`\n- `MISSING_END_DELIMITER`\n- `MALFORMED_OPEN_TAG`\n- `MALFORMED_CLOSE_TAG`\n- `MALFORMED_CDATA`\n- `MALFORMED_PLACEHOLDER`\n- `MALFORMED_DOCUMENT_TYPE`\n- `MALFORMED_DECLARATION`\n- `MALFORMED_COMMENT`\n- `EXTRA_CLOSING_TAG`\n- `MISMATCHED_CLOSING_TAG`\n- ...\n\n**EXAMPLE:**\n\nINPUT:\n\n```html\n<a href="\n```\n\nOUTPUT EVENT:\n\n```javascript\n{\n    type: \'error\',\n    code: \'MALFORMED_OPEN_TAG\',\n    message: \'EOF reached while parsing open tag.\',\n    pos: 0,\n    endPos: 9\n}\n```\n',
+21 silly publish   readmeFilename: 'README.md',
+21 silly publish   gitHead: 'a6223a8ecf90c67893cfbbb33e769008b2f6bdda',
+21 silly publish   bugs: { url: 'https://github.com/philidem/htmljs-parser/issues' },
+21 silly publish   homepage: 'https://github.com/philidem/htmljs-parser#readme',
+21 silly publish   _id: 'htmljs-parser@2.6.0',
+21 silly publish   _shasum: '1eb3fee27e38314e30609f1a98b829fba29ba6f0',
+21 silly publish   _from: '.' }
+22 verbose getPublishConfig { registry: 'https://registry.npmjs.org/' }
+23 silly mapToRegistry name htmljs-parser
+24 silly mapToRegistry using default registry
+25 silly mapToRegistry registry https://registry.npmjs.org/
+26 silly mapToRegistry data Result {
+26 silly mapToRegistry   raw: 'htmljs-parser',
+26 silly mapToRegistry   scope: null,
+26 silly mapToRegistry   escapedName: 'htmljs-parser',
+26 silly mapToRegistry   name: 'htmljs-parser',
+26 silly mapToRegistry   rawSpec: '',
+26 silly mapToRegistry   spec: 'latest',
+26 silly mapToRegistry   type: 'tag' }
+27 silly mapToRegistry uri https://registry.npmjs.org/htmljs-parser
+28 verbose publish registryBase https://registry.npmjs.org/
+29 silly publish uploading /Users/mirawlings/.npm/htmljs-parser/2.6.0/package.tgz
+30 verbose request uri https://registry.npmjs.org/htmljs-parser
+31 verbose request sending authorization for write operation
+32 info attempt registry request try #1 at 1:57:01 PM
+33 verbose request using bearer token for auth
+34 verbose request id 7ec255b320c58dab
+35 http request PUT https://registry.npmjs.org/htmljs-parser
+36 http 401 https://registry.npmjs.org/htmljs-parser
+37 verbose headers { date: 'Wed, 16 Jan 2019 21:57:01 GMT',
+37 verbose headers   'content-type': 'application/json',
+37 verbose headers   'content-length': '100',
+37 verbose headers   connection: 'keep-alive',
+37 verbose headers   'set-cookie': [ '__cfduid=d7aee206c6a501626db87afefcf47dba01547675821; expires=Thu, 16-Jan-20 21:57:01 GMT; path=/; domain=.registry.npmjs.org; HttpOnly' ],
+37 verbose headers   'cf-ray': '49a3d5db9adb9650-SJC',
+37 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+37 verbose headers   vary: 'Accept-Encoding',
+37 verbose headers   'www-authenticate': 'OTP',
+37 verbose headers   server: 'cloudflare' }
+38 verbose request invalidating /Users/mirawlings/.npm/registry.npmjs.org/htmljs-parser on PUT
+39 error publish Failed PUT 401
+40 verbose stack Error: You must provide a one-time pass. Upgrade your client to npm@latest in order to use 2FA. : htmljs-parser
+40 verbose stack     at makeError (/Users/mirawlings/.nvm/versions/node/v6.14.0/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:302:12)
+40 verbose stack     at CachingRegistryClient.<anonymous> (/Users/mirawlings/.nvm/versions/node/v6.14.0/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:290:14)
+40 verbose stack     at Request._callback (/Users/mirawlings/.nvm/versions/node/v6.14.0/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:210:14)
+40 verbose stack     at Request.self.callback (/Users/mirawlings/.nvm/versions/node/v6.14.0/lib/node_modules/npm/node_modules/request/request.js:187:22)
+40 verbose stack     at emitTwo (events.js:106:13)
+40 verbose stack     at Request.emit (events.js:191:7)
+40 verbose stack     at Request.<anonymous> (/Users/mirawlings/.nvm/versions/node/v6.14.0/lib/node_modules/npm/node_modules/request/request.js:1048:10)
+40 verbose stack     at emitOne (events.js:96:13)
+40 verbose stack     at Request.emit (events.js:188:7)
+40 verbose stack     at IncomingMessage.<anonymous> (/Users/mirawlings/.nvm/versions/node/v6.14.0/lib/node_modules/npm/node_modules/request/request.js:969:12)
+41 verbose statusCode 401
+42 verbose pkgid htmljs-parser
+43 verbose cwd /Users/mirawlings/code/htmljs-parser
+44 error Darwin 16.7.0
+45 error argv "/Users/mirawlings/.nvm/versions/node/v6.14.0/bin/node" "/Users/mirawlings/.nvm/versions/node/v6.14.0/bin/npm" "publish"
+46 error node v6.14.0
+47 error npm  v3.10.10
+48 error code E401
+49 error You must provide a one-time pass. Upgrade your client to npm@latest in order to use 2FA. : htmljs-parser
+50 error If you need help, you may report this error at:
+50 error     <https://github.com/npm/npm/issues>
+51 verbose exit [ 1, true ]
