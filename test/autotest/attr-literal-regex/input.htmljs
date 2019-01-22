@@ -1,2 +1,3 @@
 <div data=/foo//>
+<div data=/foo/></div>
 <div data=/foo/i></div>
