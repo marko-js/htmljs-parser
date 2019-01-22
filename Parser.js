@@ -636,6 +636,22 @@ class Parser extends BaseParser {
 
         // --------------------------
 
+        // Regular Expression
+
+        function beginRegularExpression() {
+            var regularExpression = beginPart();
+            regularExpression.value = '/';
+            parser.enterState(STATE_REGULAR_EXPRESSION);
+            return regularExpression;
+        }
+
+        function endRegularExpression() {
+            var regularExpression = endPart();
+            regularExpression.parentState.regularExpression(regularExpression);
+        }
+
+        // --------------------------
+
 
         // Scriptlet
 
@@ -1007,6 +1023,12 @@ class Parser extends BaseParser {
             var ahead = start == null ? 1 : start;
             while(isWhitespaceCode(parser.lookAtCharCodeAhead(ahead))) ahead++;
             return !!parser.lookAheadFor(str, parser.pos+ahead);
+        }
+
+        function getPreviousNonWhitespaceChar(start) {
+            var behind = start == null ? -1 : start;
+            while(isWhitespaceCode(parser.lookAtCharCodeAhead(behind))) behind--;
+            return parser.lookAtCharAhead(behind);
         }
 
         function getNextIndent() {
@@ -2158,6 +2180,11 @@ class Parser extends BaseParser {
                 currentPart.value += templateString.value;
             },
 
+            regularExpression(regularExpression) {
+                currentPart.isStringLiteral = false;
+                currentPart.value += regularExpression.value;
+            },
+
             char(ch, code) {
                 let depth = currentPart.groupStack.length;
                 let parentState = currentPart.parentState;
@@ -2176,7 +2203,6 @@ class Parser extends BaseParser {
                         parser.skip(1);
                         return;
                     } else if (nextCode === CODE_ASTERISK) {
-
                         beginBlockComment();
                         parser.skip(1);
                         return;
@@ -2191,7 +2217,10 @@ class Parser extends BaseParser {
                             parser.enterState(STATE_WITHIN_OPEN_TAG);
                         }
                         return;
-                    }
+                    } else if (!/[\]})A-Z0-9.<]/i.test(getPreviousNonWhitespaceChar())) {
+                        beginRegularExpression();
+                        return;
+                    } 
                 } else if (code === CODE_PIPE && parentState === STATE_TAG_PARAMS) {
                     if (depth === 0) {
                         currentPart.groupStack.push(code);
@@ -2770,6 +2799,39 @@ class Parser extends BaseParser {
                     currentPart.value += nextCh;
                 } else if (code === CODE_BACKTICK) {
                     endTemplateString();
+                }
+            }
+        });
+
+        var STATE_REGULAR_EXPRESSION = Parser.createState({
+            name: 'STATE_REGULAR_EXPRESSION',
+
+            eol() {
+                notifyError(parser.pos,
+                    'INVALID_REGULAR_EXPRESSION',
+                    'EOL reached while parsing regular expression');
+            },
+
+            eof() {
+                notifyError(parser.pos,
+                    'INVALID_REGULAR_EXPRESSION',
+                    'EOF reached while parsing regular expression');
+            },
+
+            char(ch, code) {
+                var nextCh;
+                currentPart.value += ch;
+                if (code === CODE_BACK_SLASH) {
+                    // Handle escape sequence
+                    nextCh = parser.lookAtCharAhead(1);
+                    parser.skip(1);
+                    currentPart.value += nextCh;
+                } else if (code === CODE_OPEN_SQUARE_BRACKET && currentPart.inCharacterSet) {
+                    currentPart.inCharacterSet = true;
+                } else if (code === CODE_CLOSE_SQUARE_BRACKET && currentPart.inCharacterSet) {
+                    currentPart.inCharacterSet = false;
+                } else if (code === CODE_FORWARD_SLASH && !currentPart.inCharacterSet) {
+                    endRegularExpression();
                 }
             }
         });
