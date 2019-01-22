@@ -1,3 +1,4 @@
 <div data=/foo//>
 <div data=/foo/></div>
-<div data=/foo/i></div>
+<div data=/flag/i></div>
+<div data=/with space/></div>
