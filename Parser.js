@@ -859,6 +859,7 @@ class Parser extends BaseParser {
             placeholder.withinBody = withinOpenTag !== true;
             placeholder.withinAttribute = currentAttribute != null;
             placeholder.withinString = placeholder.parentState === STATE_STRING;
+            placeholder.withinTemplateString = placeholder.parentState === STATE_TEMPLATE_STRING;
             placeholder.withinOpenTag = withinOpenTag === true && currentAttribute == null;
             placeholder.withinTagName = withinTagName;
             placeholderDepth++;
@@ -869,9 +870,10 @@ class Parser extends BaseParser {
         function endPlaceholder() {
             var placeholder = endPart();
             placeholderDepth--;
-
-            var newExpression = notifyPlaceholder(placeholder);
-            placeholder.value = newExpression;
+            if (!placeholder.withinTemplateString) {
+                var newExpression = notifyPlaceholder(placeholder);
+                placeholder.value = newExpression;
+            }
             placeholder.parentState.placeholder(placeholder);
         }
 
@@ -2764,22 +2766,11 @@ class Parser extends BaseParser {
             name: 'STATE_TEMPLATE_STRING',
 
             placeholder: function(placeholder) {
-                if (currentPart.currentText) {
-                    currentPart.stringParts.push(currentPart.currentText);
-                    currentPart.currentText = '';
-                }
-                currentPart.isStringLiteral = false;
-                currentPart.stringParts.push(placeholder);
+                currentPart.value += '${' + placeholder.value + '}';
             },
 
             eol(str) {
-                // Convert the EOL sequence ot the equivalent string escape sequences... Not necessary
-                // for template strings but it is equivalent.
-                if (str.length === 2) {
-                    currentPart.value += '\\r\\n';
-                } else {
-                    currentPart.value += '\\n';
-                }
+                currentPart.value += str;
             },
 
             eof() {
@@ -2790,15 +2781,19 @@ class Parser extends BaseParser {
 
             char(ch, code) {
                 var nextCh;
-                currentPart.value += ch;
-                if (code === CODE_BACK_SLASH) {
-                    // Handle string escape sequence
-                    nextCh = parser.lookAtCharAhead(1);
-                    parser.skip(1);
+                if (code === CODE_DOLLAR && parser.lookAtCharCodeAhead(1) === CODE_OPEN_CURLY_BRACE) {
+                    beginPlaceholder(false);
+                } else {
+                    currentPart.value += ch;
+                    if (code === CODE_BACK_SLASH) {
+                        // Handle string escape sequence
+                        nextCh = parser.lookAtCharAhead(1);
+                        parser.skip(1);
 
-                    currentPart.value += nextCh;
-                } else if (code === CODE_BACKTICK) {
-                    endTemplateString();
+                        currentPart.value += nextCh;
+                    } else if (code === CODE_BACKTICK) {
+                        endTemplateString();
+                    }
                 }
             }
         });
