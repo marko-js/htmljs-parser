@@ -1288,6 +1288,7 @@ class Parser extends BaseParser {
 
             eol(newLine) {
                 text += newLine;
+                indent = '';
             },
 
             eof: htmlEOF,
