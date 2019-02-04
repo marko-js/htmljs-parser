@@ -889,16 +889,32 @@ class Parser extends BaseParser {
                 shorthand.currentPart = {
                     type: type,
                     stringParts: [],
+                    rawParts: [],
                     text: '',
                     _endText() {
-                        if (this.text) {
-                            this.stringParts.push(JSON.stringify(this.text));
+                        var text = this.text;
+
+                        if (text) {
+                            this.stringParts.push(JSON.stringify(text));
+                            this.rawParts.push({
+                                text: text,
+                                pos: parser.pos - text.length,
+                                endPos: parser.pos
+                            });
                         }
+
                         this.text = '';
                     },
                     addPlaceholder(placeholder) {
+                        var startPos = placeholder.pos + (placeholder.escape ? 2 : 3);
+                        var endPos = placeholder.endPos - 1;
                         this._endText();
                         this.stringParts.push('(' + placeholder.value + ')');
+                        this.rawParts.push({
+                            expression: parser.src.slice(startPos, endPos),
+                            pos: startPos,
+                            endPos: endPos
+                        });
                     },
                     end() {
                         this._endText();
@@ -907,7 +923,8 @@ class Parser extends BaseParser {
 
                         if (type === 'id') {
                             currentOpenTag.shorthandId = {
-                                value: expression
+                                value: expression,
+                                rawParts: this.rawParts
                             };
                         } else if (type === 'class') {
                             if (!currentOpenTag.shorthandClassNames) {
@@ -915,10 +932,9 @@ class Parser extends BaseParser {
                             }
 
                             currentOpenTag.shorthandClassNames.push({
-                                value: expression
+                                value: expression,
+                                rawParts: this.rawParts
                             });
-
-
                         }
                     }
                 };
