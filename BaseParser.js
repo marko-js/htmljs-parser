@@ -126,15 +126,6 @@ class Parser {
 
         this.src = data; // This is the unmodified data used for reporting warnings
         this.filename = filename;
-
-        // Strip off the byte order mark (BOM) sequence
-        // at the beginning of the file:
-        // - https://en.wikipedia.org/wiki/Byte_order_mark
-        // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
-        if (data.charCodeAt(0) === 0xFEFF) {
-    		data = data.slice(1);
-    	}
-
         this.data = data;
         this.maxPos = data.length - 1;
 
@@ -144,7 +135,11 @@ class Parser {
         }
 
         // Move to first position
-        this.pos = 0;
+        // Skip the byte order mark (BOM) sequence
+        // at the beginning of the file if there is one:
+        // - https://en.wikipedia.org/wiki/Byte_order_mark
+        // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
+        this.pos = data.charCodeAt(0) === 0xFEFF ? 1 : 0;
 
         if (!this.state) {
             // Cannot resume when parser has no state

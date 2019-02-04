@@ -168,12 +168,6 @@ class TreeBuilder {
     constructor(src, options) {
         options = options || {};
 
-        // Strip off the BOM character sequence so that substring tests
-        // will match the parsed result
-        if (src.charCodeAt(0) === 0xFEFF) {
-    		src = src.slice(1);
-    	}
-
         this.src = src;
         this.includePositions = options && options.includePositions === true;
         this.includeLiteralValues = options && options.includeLiteralValues === true;
