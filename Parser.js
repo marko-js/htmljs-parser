@@ -1683,6 +1683,11 @@ class Parser extends BaseParser {
                 currentOpenTag.tagName += parser.substring(placeholder.pos, placeholder.endPos);
                 currentOpenTag.tagNameParts.push('(' + placeholder.value + ')');
                 currentOpenTag.tagNameEnd = placeholder.endPos;
+                var nextCode = parser.lookAtCharCodeAhead(1);
+                if (nextCode === CODE_OPEN_PAREN) {
+                    endExpression();
+                    parser.enterState(STATE_TAG_ARGS);
+                }
             },
 
             enter(oldState) {
@@ -2602,6 +2607,14 @@ class Parser extends BaseParser {
                     parser.skip(1);
                 } else if (!ignorePlaceholders && checkForPlaceholder(ch, code)) {
                     // We went into placeholder state...
+                } else if (code === CODE_OPEN_PAREN) {
+                    endTagNameShorthand();
+                    parser.rewind(1);
+                    parser.enterState(STATE_TAG_ARGS);
+                } else if (code === CODE_PIPE) {
+                    endTagNameShorthand();
+                    parser.rewind(1);
+                    parser.enterState(STATE_TAG_PARAMS);
                 } else {
                     shorthand.currentPart.text += ch;
                 }
