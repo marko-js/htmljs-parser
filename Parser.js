@@ -3131,7 +3131,7 @@ class Parser extends BaseParser {
                      } else {
                          notifyError(parser.pos,
                              'ILLEGAL_LINE_START',
-                             'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment');
+                             'A line in inline script mode cannot start with "/" unless it starts a "//" or "/*" comment');
                          return;
                      }
                 }
