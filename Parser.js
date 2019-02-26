@@ -3118,12 +3118,22 @@ class Parser extends BaseParser {
                 }
 
                 if (code === CODE_FORWARD_SLASH) {
-                    if (parser.lookAtCharCodeAhead(1) === CODE_ASTERISK) {
-                        // Skip over code inside a JavaScript block comment
-                        beginBlockComment();
-                        parser.skip(1);
-                        return;
-                    }
+                     // Check next character to see if we are in a comment
+                     var nextCode = parser.lookAtCharCodeAhead(1);
+                     if (nextCode === CODE_FORWARD_SLASH) {
+                         beginLineComment();
+                         parser.skip(1);
+                         return;
+                     } else if (nextCode === CODE_ASTERISK) {
+                         beginBlockComment();
+                         parser.skip(1);
+                         return;
+                     } else {
+                         notifyError(parser.pos,
+                             'ILLEGAL_LINE_START',
+                             'A line in inline script mode cannot start with "/" unless it starts a "//" or "/*" comment');
+                         return;
+                     }
                 }
 
                 if (code === CODE_SINGLE_QUOTE || code === CODE_DOUBLE_QUOTE || code === CODE_BACKTICK) {
