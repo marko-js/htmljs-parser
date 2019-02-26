@@ -3128,11 +3128,6 @@ class Parser extends BaseParser {
                          beginBlockComment();
                          parser.skip(1);
                          return;
-                     } else {
-                         notifyError(parser.pos,
-                             'ILLEGAL_LINE_START',
-                             'A line in inline script mode cannot start with "/" unless it starts a "//" or "/*" comment');
-                         return;
                      }
                 }
 
