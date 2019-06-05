@@ -3080,6 +3080,12 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
+                if (code === CODE_BACK_SLASH) {
+                    currentPart.value += ch + parser.lookAtCharAhead(1);
+                    parser.skip(1);
+                    return;
+                }
+
                 if (code === CODE_FORWARD_SLASH) {
                     // Check next character to see if we are in a comment
                     var nextCode = parser.lookAtCharCodeAhead(1);
@@ -3095,12 +3101,6 @@ class Parser extends BaseParser {
                }
 
                 currentPart.value += ch;
-
-                if (code === CODE_BACK_SLASH) {
-                    currentPart.value += parser.lookAtCharAhead(1);
-                    parser.skip(1);
-                    return;
-                }
 
                 if (currentPart.stringType) {
                     if (code === currentPart.stringType) {
