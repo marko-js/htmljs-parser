@@ -2886,7 +2886,7 @@ class Parser extends BaseParser {
 
             eol(str) {
                 parser.rewind(str.length);
-                currentPart.endPos = parser.pos - str.length;
+                currentPart.endPos = parser.pos;
                 endJavaScriptComment();
             },
 
@@ -3060,8 +3060,8 @@ class Parser extends BaseParser {
                 if (currentPart.endMatch || currentPart.stringType === CODE_BACKTICK) {
                     currentPart.value += str;
                 } else {
-                    endInlineScript(parser.pos - str.length);
                     parser.rewind(str.length);
+                    endInlineScript(parser.pos);
                 }
             },
 
