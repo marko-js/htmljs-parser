@@ -828,7 +828,7 @@ class Parser extends BaseParser {
             return;
         }
 
-        function handleTrailingWhitespaceMultilineHtmlBlcok(err, eof) {
+        function handleTrailingWhitespaceMultilineHtmlBlock(err, eof) {
             if (err) {
                 // This is a non-whitespace! We don't allow non-whitespace
                 // after matching two or more hyphens. This is user error...
@@ -1174,7 +1174,7 @@ class Parser extends BaseParser {
 
                 parser.enterState(STATE_CONCISE_HTML_CONTENT);
 
-                beginCheckTrailingWhitespace(handleTrailingWhitespaceMultilineHtmlBlcok);
+                beginCheckTrailingWhitespace(handleTrailingWhitespaceMultilineHtmlBlock);
                 return;
             } else if (parser.lookAheadFor(htmlBlockIndent, parser.pos + newLine.length)) {
                 // We know the next line does not end the multiline HTML block, but we need to check if there
@@ -1595,20 +1595,6 @@ class Parser extends BaseParser {
                         return;
                     } else if (parser.lookAtCharCodeAhead(1) === CODE_PERCENT) {
                         beginScriptlet();
-                        parser.skip(1);
-                        return;
-                    }
-                }
-
-
-                if (code === CODE_FORWARD_SLASH) {
-                    if (parser.lookAtCharCodeAhead(1) === CODE_ASTERISK) {
-                        // Skip over code inside a JavaScript block comment
-                        beginBlockComment();
-                        parser.skip(1);
-                        return;
-                    } else if (parser.lookAtCharCodeAhead(1) === CODE_FORWARD_SLASH) {
-                        beginLineComment();
                         parser.skip(1);
                         return;
                     }
@@ -2878,8 +2864,6 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
-
-
                 if (code === CODE_ASTERISK) {
                     var nextCode = parser.lookAtCharCodeAhead(1);
                     if (nextCode === CODE_FORWARD_SLASH) {
@@ -2901,9 +2885,8 @@ class Parser extends BaseParser {
             name: 'STATE_JS_COMMENT_LINE',
 
             eol(str) {
-                currentPart.value += str;
-                currentPart.endPos = parser.pos;
-                currentPart.eol = str;
+                parser.rewind(str.length);
+                currentPart.endPos = parser.pos - str.length;
                 endJavaScriptComment();
             },
 
@@ -3077,7 +3060,7 @@ class Parser extends BaseParser {
                 if (currentPart.endMatch || currentPart.stringType === CODE_BACKTICK) {
                     currentPart.value += str;
                 } else {
-                    endInlineScript(parser.pos);
+                    endInlineScript(parser.pos - str.length);
                     parser.rewind(str.length);
                 }
             },
@@ -3097,6 +3080,20 @@ class Parser extends BaseParser {
             },
 
             char(ch, code) {
+                if (code === CODE_FORWARD_SLASH) {
+                    // Check next character to see if we are in a comment
+                    var nextCode = parser.lookAtCharCodeAhead(1);
+                    if (nextCode === CODE_FORWARD_SLASH) {
+                        beginLineComment();
+                        parser.skip(1);
+                        return;
+                    } else if (nextCode === CODE_ASTERISK) {
+                        beginBlockComment();
+                        parser.skip(1);
+                        return;
+                    }
+               }
+
                 currentPart.value += ch;
 
                 if (code === CODE_BACK_SLASH) {
@@ -3115,20 +3112,6 @@ class Parser extends BaseParser {
                 if (code === currentPart.endMatch) {
                     currentPart.endMatch = currentPart.endMatches.pop();
                     return;
-                }
-
-                if (code === CODE_FORWARD_SLASH) {
-                     // Check next character to see if we are in a comment
-                     var nextCode = parser.lookAtCharCodeAhead(1);
-                     if (nextCode === CODE_FORWARD_SLASH) {
-                         beginLineComment();
-                         parser.skip(1);
-                         return;
-                     } else if (nextCode === CODE_ASTERISK) {
-                         beginBlockComment();
-                         parser.skip(1);
-                         return;
-                     }
                 }
 
                 if (code === CODE_SINGLE_QUOTE || code === CODE_DOUBLE_QUOTE || code === CODE_BACKTICK) {
