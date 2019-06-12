@@ -3086,6 +3086,15 @@ class Parser extends BaseParser {
                     return;
                 }
 
+                if (currentPart.stringType) {
+                    if (code === currentPart.stringType) {
+                        currentPart.stringType = null;
+                    }
+
+                    currentPart.value += ch;
+                    return;
+                }
+
                 if (code === CODE_FORWARD_SLASH) {
                     // Check next character to see if we are in a comment
                     var nextCode = parser.lookAtCharCodeAhead(1);
@@ -3098,16 +3107,9 @@ class Parser extends BaseParser {
                         parser.skip(1);
                         return;
                     }
-               }
+                }
 
                 currentPart.value += ch;
-
-                if (currentPart.stringType) {
-                    if (code === currentPart.stringType) {
-                        currentPart.stringType = null;
-                    }
-                    return;
-                }
 
                 if (code === currentPart.endMatch) {
                     currentPart.endMatch = currentPart.endMatches.pop();
