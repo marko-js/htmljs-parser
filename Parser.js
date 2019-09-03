@@ -123,6 +123,7 @@ class Parser extends BaseParser {
         var defaultMode = options && options.concise === false ? MODE_HTML : MODE_CONCISE;
         var userIsOpenTagOnly = options && options.isOpenTagOnly;
         var ignorePlaceholders = options && options.ignorePlaceholders;
+        var ignoreNonstandardStringPlaceholders = options && options.ignoreNonstandardStringPlaceholders;
         var legacyCompatibility = options.legacyCompatibility === true;
         var reflectiveAttributes = options.reflectiveAttributes === true;
 
@@ -2717,7 +2718,7 @@ class Parser extends BaseParser {
                         } else {
                             currentPart.currentText += '\\';
                         }
-                    }  else if (checkForEscapedPlaceholder(ch, code)) {
+                    } else if (checkForEscapedPlaceholder(ch, code)) {
                         if (ignorePlaceholders) {
                             // We are actually adding one escaped backslashes here...
                             currentPart.currentText += '\\\\$';
@@ -2764,7 +2765,7 @@ class Parser extends BaseParser {
 
                     currentPart.value = stringExpr;
                     endString();
-                } else if (!ignorePlaceholders && checkForPlaceholder(ch, code)) {
+                } else if (!ignorePlaceholders && !ignoreNonstandardStringPlaceholders && checkForPlaceholder(ch, code)) {
                     if (currentPart.currentText) {
                         stringParts.push(currentPart.currentText);
                     }
