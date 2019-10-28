@@ -2228,7 +2228,7 @@ class Parser extends BaseParser {
                             parser.enterState(STATE_WITHIN_OPEN_TAG);
                         }
                         return;
-                    } else if (!/[\]})A-Z0-9.<]/i.test(getPreviousNonWhitespaceChar())) {
+                    } else if (!/[\]})A-Z0-9.<%]/i.test(getPreviousNonWhitespaceChar())) {
                         beginRegularExpression();
                         return;
                     } 
