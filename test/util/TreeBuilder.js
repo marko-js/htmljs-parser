@@ -115,6 +115,7 @@ class ElementNode {
         var tagName = event.tagName;
         var tagNameExpression = event.tagNameExpression;
         var argument = event.argument;
+        var variable = event.var;
         var params = event.params;
         var attributes = event.attributes;
         var openTagOnly = event.openTagOnly === true;
@@ -124,6 +125,10 @@ class ElementNode {
 
         if (tagNameExpression) {
             str += '[' + tagNameExpression + ']';
+        }
+
+        if (variable) {
+            str += '/(' + variable.value + ')';
         }
 
         if (argument) {

@@ -1749,7 +1749,37 @@ class Parser extends BaseParser {
             }
         });
 
+        var STATE_TAG_VAR = Parser.createState({
+            name: 'STATE_TAG_VAR',
 
+            eol: openTagEOL,
+
+            eof: openTagEOF,
+
+            expression(expression) {
+                var value = expression.value;
+                expression.value = value.slice(1);
+                expression.pos += 1;
+                currentOpenTag.var = expression;
+                if (parser.lookAtCharCodeAhead(1) === CODE_PIPE) {
+                    parser.enterState(STATE_TAG_PARAMS);
+                } else if (parser.lookAtCharCodeAhead(1) === CODE_OPEN_PAREN) {
+                    parser.enterState(STATE_TAG_ARGS);
+                } else {
+                    parser.enterState(STATE_WITHIN_OPEN_TAG);
+                }
+            },
+
+            enter(oldState) {
+                if (oldState !== STATE_EXPRESSION) {
+                    beginExpression();
+                }
+            },
+
+            char(ch, code) {
+                throw new Error('Illegal state');
+            }
+        });
 
         // We enter STATE_CDATA after we see "<![CDATA["
         var STATE_CDATA = Parser.createState({
@@ -2307,7 +2337,9 @@ class Parser extends BaseParser {
                     }
 
                     return;
-                } else if (depth === 0) {
+                } 
+                
+                if (depth === 0) {
 
                     if (!isConcise) {
                         if (code === CODE_CLOSE_ANGLE_BRACKET &&
@@ -2411,7 +2443,7 @@ class Parser extends BaseParser {
                         } else if (currentPart.parentState === STATE_ATTRIBUTE_NAME && lookPastWhitespaceFor('=')) {
                             consumeWhitespace();
                             return;
-                        } else if (parentState === STATE_ATTRIBUTE_VALUE) {
+                        } else if (parentState !== STATE_TAG_NAME) {
                             var typeofExpression = checkForTypeofOperator();
                             if (typeofExpression) {
                                 currentPart.value += typeofExpression;
@@ -2469,6 +2501,18 @@ class Parser extends BaseParser {
                         }
                     }
 
+                    if (currentPart.parentState === STATE_TAG_VAR) {
+                        if (code === CODE_EQUAL || code === CODE_CLOSE_ANGLE_BRACKET) {
+                            endExpression();
+                            parser.rewind(1);
+                            if (parser.state !== STATE_WITHIN_OPEN_TAG) {
+                                // Make sure we transition into parsing within the open tag
+                                parser.enterState(STATE_WITHIN_OPEN_TAG);
+                            }
+                            return;
+                        }
+                    }
+
                     if (currentPart.parentState === STATE_TAG_NAME) {
                         if (checkForEscapedEscapedPlaceholder(ch, code)) {
                             currentPart.value += '\\';
@@ -2498,6 +2542,11 @@ class Parser extends BaseParser {
                             endExpression();
                             parser.rewind(1);
                             parser.enterState(STATE_TAG_PARAMS);
+                            return;
+                        } else if (code === CODE_FORWARD_SLASH) {
+                            endExpression();
+                            parser.rewind(1);
+                            parser.enterState(STATE_TAG_VAR);
                             return;
                         }
                     }
