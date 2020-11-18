@@ -2,29 +2,48 @@
 var expect = require('chai').expect;
 
 function attributesToString(attributes, includeLiteralValues) {
-    if (!attributes || attributes.length === 0) {
+    var len = attributes && attributes.length || 0;
+    if (!len) {
         return '';
     }
 
-    return ' ' + attributes.map(function(attr) {
-        var result = attr.name;
+    var i = 0;
+    var result = "";
+    var attr = attributes[0];
+
+    if (attr.default) {
+        i = 1;
+        result = attributeAssignmentToString(attr, includeLiteralValues);
+    }
+
+    for (;i < len; i++) {
+        attr = attributes[i];
+        result += " " + attr.name;
 
         if (attr.argument) {
             result += '(' + attr.argument.value + ')';
         }
 
-        if (attr.value) {
-            result += '=' + attr.value;
-        } else if (!attr.argument) {
-            result += '=(EMPTY)';
-        }
+        result += attributeAssignmentToString(attr, includeLiteralValues);
+    }
 
-        if (includeLiteralValues) {
-            result += '[Literal: ' + (attr.hasOwnProperty('literalValue') ? JSON.stringify(attr.literalValue) : '(empty)') + ']';
-        }
-        return result;
-        // return '[' + result + ']';
-    }).join(' ');
+    return result;
+}
+
+function attributeAssignmentToString(attr, includeLiteralValues) {
+    var result = "";
+
+    if (attr.value) {
+        result += '=' + attr.value;
+    } else if (!attr.argument) {
+        result += '=(EMPTY)';
+    }
+
+    if (includeLiteralValues) {
+        result += '[Literal: ' + (attr.hasOwnProperty('literalValue') ? JSON.stringify(attr.literalValue) : '(empty)') + ']';
+    }
+
+    return result;
 }
 
 class RootNode {

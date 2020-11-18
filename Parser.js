@@ -125,7 +125,6 @@ class Parser extends BaseParser {
         var ignorePlaceholders = options && options.ignorePlaceholders;
         var ignoreNonstandardStringPlaceholders = options && options.ignoreNonstandardStringPlaceholders;
         var legacyCompatibility = options.legacyCompatibility === true;
-        var reflectiveAttributes = options.reflectiveAttributes === true;
 
         var currentOpenTag; // Used to reference the current open tag that is being parsed
         var currentAttribute; // Used to reference the current attribute that is being parsed
@@ -2403,22 +2402,14 @@ class Parser extends BaseParser {
                             var equalMatches = /^\s*=\s*/.exec(remaining);
 
                             if (equalMatches) {
-                                let attrName = currentPart.value;
                                 let parserPos = parser.pos;
-                                
-                                if (!reflectiveAttributes) {
-                                    currentPart.value = ''; // Reset the expression value to '' for the tag name
-                                    // Backtrack to the beginning of the tag before firing the open tag name event:
-                                    parser.pos = currentPart.pos;
-                                    currentOpenTag.emptyTagName = true; // Set a flag to mark this as an empty tag name
-                                }
-
                                 endExpression();
 
                                 // Start the attributes section with the first attribute name being what we thought
                                 // was the tag name
                                 currentAttribute = {
-                                    name: attrName,
+                                    default: true,
+                                    name: "default",
                                     pos: currentOpenTag.pos
                                 };
 
