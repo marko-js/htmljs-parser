@@ -132,6 +132,7 @@ exports.createNotifiers = function(parser, listeners) {
 
                 event.attributes = tagInfo.attributes.map((attr) => {
                     var newAttr = {
+                        default: attr.default,
                         name: attr.name,
                         value: attr.value,
                         pos: attr.pos,
