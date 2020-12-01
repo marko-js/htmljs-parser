@@ -2031,6 +2031,11 @@ class Parser extends BaseParser {
                 currentAttribute.name = currentAttribute.name ? currentAttribute.name + expression.value : expression.value;
                 currentAttribute.pos = expression.pos;
                 currentAttribute.endPos = expression.endPos;
+
+                if (!currentAttribute.name) {
+                    currentAttribute.name = "default";
+                    currentAttribute.default = true;
+                }
             },
 
             enter(oldState) {
@@ -2394,35 +2399,6 @@ class Parser extends BaseParser {
                         return;
                     }
 
-                    if (currentPart.parentState === STATE_TAG_NAME) {
-                        if (code === CODE_EQUAL || isWhitespaceCode(code)) {
-                            // Handle the case where are only attributes and no tagname:
-                            // <a=1 b=2/>
-                            var remaining = parser.data.substring(parser.pos);
-                            var equalMatches = /^\s*=\s*/.exec(remaining);
-
-                            if (equalMatches) {
-                                let parserPos = parser.pos;
-                                endExpression();
-
-                                // Start the attributes section with the first attribute name being what we thought
-                                // was the tag name
-                                currentAttribute = {
-                                    default: true,
-                                    name: "default",
-                                    pos: currentOpenTag.pos
-                                };
-
-                                currentOpenTag.attributes = [currentAttribute];
-                                let equalMatch = equalMatches[0];
-                                // Advance past the equal sign and whitespace to start parsing the attribute value
-                                parser.pos = parserPos + equalMatch.length - 1;
-                                parser.enterState(STATE_ATTRIBUTE_VALUE);
-                                return;
-                            }
-                        }
-                    }
-
                     if (code === CODE_COMMA || isWhitespaceCode(code)) {
                         if (code === CODE_COMMA || lookPastWhitespaceFor(',')) {
                             if(code !== CODE_COMMA) {
@@ -2538,6 +2514,11 @@ class Parser extends BaseParser {
                             endExpression();
                             parser.rewind(1);
                             parser.enterState(STATE_TAG_VAR);
+                            return;
+                        } else if (code === CODE_EQUAL) {
+                            endExpression();
+                            parser.rewind(1);
+                            parser.enterState(STATE_WITHIN_OPEN_TAG);
                             return;
                         }
                     }
