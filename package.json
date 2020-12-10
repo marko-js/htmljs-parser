@@ -29,10 +29,12 @@
     "complain": "^1.0.0"
   },
   "devDependencies": {
+    "@babel/runtime": "^7.12.5",
     "chai": "^4.0.0",
     "colors": "^1.1.2",
     "jshint": "^2.8.0",
-    "mocha": "^4.0.0"
+    "mocha": "^4.0.0",
+    "mocha-autotest": "^1.0.3"
   },
   "license": "MIT",
   "publishConfig": {
