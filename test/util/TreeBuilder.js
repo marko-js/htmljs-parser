@@ -13,7 +13,7 @@ function attributesToString(attributes, includeLiteralValues) {
 
     if (attr.default) {
         i = 1;
-        result = attributeAssignmentToString(attr, includeLiteralValues);
+        result = " DEFAULT" + attributeAssignmentToString(attr, includeLiteralValues);
     }
 
     for (;i < len; i++) {
@@ -140,22 +140,24 @@ class ElementNode {
         var openTagOnly = event.openTagOnly === true;
         var selfClosed =  event.selfClosed === true;
 
-        var str = '<' + tagName;
+        var str = '<';
 
         if (tagNameExpression) {
-            str += '[' + tagNameExpression + ']';
+            str += '(' + tagNameExpression + ')';
+        } else {
+            str += tagName;
         }
 
         if (variable) {
-            str += '/(' + variable.value + ')';
+            str += ' VAR=(' + variable.value + ')';
         }
 
         if (argument) {
-            str += '(' + argument.value + ')';
+            str += ' ARGS=(' + argument.value + ')';
         }
 
         if (params) {
-            str += '|' + params.value + '|';
+            str += ' PARAMS=(' + params.value + ')';
         }
 
         if (out.includePositions) {
