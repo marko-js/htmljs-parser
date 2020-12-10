@@ -2485,7 +2485,7 @@ class Parser extends BaseParser {
                             currentPart.value += '\\';
                             parser.skip(1);
                             return;
-                        }  else if (checkForEscapedPlaceholder(ch, code)) {
+                        } else if (checkForEscapedPlaceholder(ch, code)) {
                             currentPart.value += '$';
                             parser.skip(1);
                             return;
@@ -2500,15 +2500,19 @@ class Parser extends BaseParser {
                             parser.rewind(1);
                             beginTagNameShorthand();
                             return;
-                        } else if (code === CODE_PIPE) {
-                            endExpression();
-                            parser.rewind(1);
-                            parser.enterState(STATE_TAG_PARAMS);
-                            return;
                         } else if (code === CODE_FORWARD_SLASH) {
                             endExpression();
                             parser.rewind(1);
                             parser.enterState(STATE_TAG_VAR);
+                            return;
+                        }
+                    }
+                    
+                    if (currentPart.parentState === STATE_TAG_NAME || currentPart.parentState === STATE_TAG_VAR) {
+                        if (code === CODE_PIPE) {
+                            endExpression();
+                            parser.rewind(1);
+                            parser.enterState(STATE_TAG_PARAMS);
                             return;
                         } else if (code === CODE_EQUAL) {
                             endExpression();
