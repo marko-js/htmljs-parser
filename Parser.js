@@ -2519,7 +2519,7 @@ class Parser extends BaseParser {
                             parser.rewind(1);
                             parser.enterState(STATE_WITHIN_OPEN_TAG);
                             return;
-                        } else if (parser.lookAtCharCodeAhead(1) === CODE_OPEN_PAREN) {
+                        } else if (parser.lookAtCharCodeAhead(1) === CODE_OPEN_PAREN && currentPart.value) {
                             currentPart.value += ch;
                             endExpression();
                             parser.enterState(STATE_TAG_ARGS);
