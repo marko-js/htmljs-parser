@@ -1082,15 +1082,19 @@ class Parser extends BaseParser {
         function checkForClosingTag() {
             // Look ahead to see if we found the closing tag that will
             // take us out of the EXPRESSION state...
-            var lookAhead = '/' + expectedCloseTagName + '>';
-            var match = parser.lookAheadFor(lookAhead);
+            var match = (
+                parser.lookAheadFor('/>') ||
+                parser.lookAheadFor('/' + peek(blockStack).tagName + '>') ||
+                parser.lookAheadFor('/' + expectedCloseTagName + '>')
+            );
+
             if (match) {
                 if (parser.state === STATE_JS_COMMENT_LINE) {
                     endJavaScriptComment();
                 }
                 endText();
 
-                closeTag(expectedCloseTagName, parser.pos, parser.pos + 1 + lookAhead.length);
+                closeTag(expectedCloseTagName, parser.pos, parser.pos + 1 + match.length);
                 parser.skip(match.length);
                 parser.enterState(STATE_HTML_CONTENT);
                 return true;
