@@ -977,6 +977,27 @@ class Parser extends BaseParser {
             return undefined;
         }
 
+        function getAndRemoveMethod(expression) {
+            if (expression.method) {
+                let start = expression.lastLeftParenPos;
+                let end = expression.value.length;
+                var method = {
+                    value: 'function' + expression.value.substring(start, end),
+                    pos: expression.pos + start,
+                    endPos: expression.pos + end
+                };
+
+                // Chop off the method from the expression
+                expression.value = expression.value.substring(0, start);
+                // Fix the end position for the expression
+                expression.endPos = expression.pos + expression.value.length;
+
+                return method;
+            }
+
+            return undefined;
+        }
+
         // --------------------------
 
         function checkForPlaceholder(ch, code) {
@@ -1699,19 +1720,35 @@ class Parser extends BaseParser {
             eof: openTagEOF,
 
             expression(expression) {
-                var value = expression.value;
-                if (value.charCodeAt(value.length-1) !== CODE_CLOSE_PAREN) {
-                    throw new Error('Invalid argument');
-                }
-                expression.value = value.slice(1, value.length-1);
-                expression.pos += 1;
-                expression.endPos -= 1;
-                currentOpenTag.argument = expression;
-
-                if (parser.lookAtCharCodeAhead(1) === CODE_PIPE) {
-                    parser.enterState(STATE_TAG_PARAMS);
+                var method = getAndRemoveMethod(expression);
+                if (method) {
+                    console.log(method);
+                    beginAttribute();
+                    currentAttribute.name = "default";
+                    currentAttribute.default = true;
+                    currentAttribute.method = true;
+                    currentAttribute.value = method.value;
+                    currentAttribute.pos = method.pos;
+                    currentAttribute.endPos = method.endPos;
+                    endAttribute();
+                    if (STATE_WITHIN_OPEN_TAG !== parser.state) {
+                        parser.enterState(STATE_WITHIN_OPEN_TAG);
+                    }
                 } else {
-                    parser.enterState(STATE_WITHIN_OPEN_TAG);
+                    var value = expression.value;
+                    if (value.charCodeAt(value.length-1) !== CODE_CLOSE_PAREN) {
+                        throw new Error('Invalid argument');
+                    }
+                    expression.value = value.slice(1, value.length-1);
+                    expression.pos += 1;
+                    expression.endPos -= 1;
+                    currentOpenTag.argument = expression;
+
+                    if (parser.lookAtCharCodeAhead(1) === CODE_PIPE) {
+                        parser.enterState(STATE_TAG_PARAMS);
+                    } else {
+                        parser.enterState(STATE_WITHIN_OPEN_TAG);
+                    }
                 }
             },
 
@@ -1859,8 +1896,22 @@ class Parser extends BaseParser {
 
             expression(expression) {
                 var argument = getAndRemoveArgument(expression);
+                var method = getAndRemoveMethod(expression);
 
-                if (argument) {
+                if (method) {
+                    let targetAttribute;
+                    if (currentOpenTag.attributes.length === 0) {
+                        targetAttribute = beginAttribute();
+                        currentAttribute.name = "default";
+                        currentAttribute.default = true;
+                    } else {
+                        targetAttribute = currentAttribute || peek(currentOpenTag.attributes);
+                    }
+                    targetAttribute.method = true;
+                    targetAttribute.value = method.value;
+                    targetAttribute.pos = method.pos;
+                    targetAttribute.endPos = method.endPos;
+                } else if (argument) {
                     // We found an argument... the argument could be for an attribute or the tag
                     if (currentOpenTag.attributes.length === 0) {
                         if (currentOpenTag.argument != null) {
@@ -2016,10 +2067,7 @@ class Parser extends BaseParser {
 
             expression(expression) {
                 var argument = getAndRemoveArgument(expression);
-                if (argument) {
-                    // The tag has an argument that we need to slice off
-                    currentAttribute.argument = argument;
-                }
+                var method = getAndRemoveMethod(expression);
 
                 if(expression.endedWithComma) {
                     // consume all following whitespace,
@@ -2039,6 +2087,15 @@ class Parser extends BaseParser {
                 if (!currentAttribute.name) {
                     currentAttribute.name = "default";
                     currentAttribute.default = true;
+                }
+
+                if (argument) {
+                    currentAttribute.argument = argument;
+                } else if (method) {   
+                    currentAttribute.method = true;
+                    currentAttribute.value = method.value;
+                    currentAttribute.pos = method.pos;
+                    currentAttribute.endPos = method.endPos;
                 }
             },
 
@@ -2334,6 +2391,11 @@ class Parser extends BaseParser {
                     if (currentPart.groupStack.length === 0) {
                         if (code === CODE_CLOSE_PAREN) {
                             currentPart.lastRightParenPos = currentPart.value.length - 1;
+                            if  ((parentState == STATE_ATTRIBUTE_NAME || parentState == STATE_TAG_ARGS || parentState == STATE_WITHIN_OPEN_TAG) && lookPastWhitespaceFor('{')) {
+                                currentPart.method = true;
+                                currentPart.value += consumeWhitespace();
+                                return;
+                            }
                         } 
                         var endPlaceholder = code === CODE_CLOSE_CURLY_BRACE && parentState === STATE_PLACEHOLDER;
                         var endTagArgs = code === CODE_CLOSE_PAREN && parentState === STATE_TAG_ARGS;

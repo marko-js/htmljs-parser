@@ -137,7 +137,8 @@ exports.createNotifiers = function(parser, listeners) {
                         value: attr.value,
                         pos: attr.pos,
                         endPos: attr.endPos,
-                        argument: attr.argument
+                        argument: attr.argument,
+                        method: attr.method,
                     };
 
                     if (attr.hasOwnProperty('literalValue')) {
