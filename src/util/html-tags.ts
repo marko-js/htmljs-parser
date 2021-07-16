@@ -1,22 +1,22 @@
 var openTagOnly = {};
 
 [
-    'base',
-    'br',
-    'col',
-    'hr',
-    'embed',
-    'img',
-    'input',
-    'keygen',
-    'link',
-    'meta',
-    'param',
-    'source',
-    'track',
-    'wbr'
-].forEach(function(tagName) {
-    openTagOnly[tagName] = true;
+  "base",
+  "br",
+  "col",
+  "hr",
+  "embed",
+  "img",
+  "input",
+  "keygen",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+].forEach(function (tagName) {
+  openTagOnly[tagName] = true;
 });
 
 // [
@@ -121,6 +121,6 @@ var openTagOnly = {};
 //     };
 // });
 
-exports.isOpenTagOnly = function(tagName) {
-    return openTagOnly.hasOwnProperty(tagName);
+export const isOpenTagOnly = function (tagName) {
+  return openTagOnly.hasOwnProperty(tagName);
 };
