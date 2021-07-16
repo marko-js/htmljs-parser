@@ -1,0 +1,19 @@
+{
+  "rootDir": "src/",
+  "ts-node": {
+    "transpileOnly": true
+  },
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "target": "es2017",
+    "module": "commonjs",
+    "composite": true,
+    "declaration": true,
+    "stripInternal": true,
+    "importHelpers": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true
+  }
+}

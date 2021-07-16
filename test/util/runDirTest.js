@@ -1,7 +1,7 @@
 var fs = require('fs');
 var chai = require('chai');
 var TreeBuilder = require('./TreeBuilder');
-var htmljs = require('../../');
+var htmljs = require('../../src/');
 chai.config.includeStack = true;
 require('chai').should();
 
