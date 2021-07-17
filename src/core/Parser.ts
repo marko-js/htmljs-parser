@@ -601,25 +601,6 @@ export class Parser extends BaseParser {
 
   // --------------------------
 
-  // Regular Expression
-
-  beginRegularExpression() {
-    var regularExpression = this.beginPart();
-    regularExpression.value = "/";
-    this.enterState(STATE.REGULAR_EXPRESSION);
-    return regularExpression;
-  }
-
-  endRegularExpression() {
-    var regularExpression = this.endPart();
-    regularExpression.parentState.regularExpression.call(
-      this,
-      regularExpression
-    );
-  }
-
-  // --------------------------
-
   // Scriptlet
 
   beginScriptlet() {
@@ -666,87 +647,6 @@ export class Parser extends BaseParser {
     this.notifiers.notifyScriptlet(inlineScript);
   }
 
-  // --------------------------
-
-  // DTD
-
-  beginDocumentType() {
-    this.endText();
-
-    var documentType = this.beginPart();
-    documentType.value = "";
-
-    this.enterState(STATE.DTD);
-    return documentType;
-  }
-
-  endDocumentType() {
-    var documentType = this.endPart();
-    this.notifiers.notifyDocumentType(documentType);
-  }
-
-  // --------------------------
-
-  // Declaration
-  beginDeclaration() {
-    this.endText();
-
-    var declaration = this.beginPart();
-    declaration.value = "";
-    this.enterState(STATE.DECLARATION);
-    return declaration;
-  }
-
-  endDeclaration() {
-    var declaration = this.endPart();
-    this.notifiers.notifyDeclaration(declaration);
-  }
-
-  // --------------------------
-
-  // CDATA
-
-  beginCDATA() {
-    this.endText();
-
-    var cdata = this.beginPart();
-    cdata.value = "";
-    this.enterState(STATE.CDATA);
-    return cdata;
-  }
-
-  endCDATA() {
-    var cdata = this.endPart();
-    this.notifiers.notifyCDATA(cdata.value, cdata.pos, this.pos + 3);
-  }
-
-  // --------------------------
-
-  // JavaScript Comments
-  beginLineComment() {
-    var comment = this.beginPart();
-    comment.value = "";
-    comment.type = "line";
-    this.enterState(STATE.JS_COMMENT_LINE);
-    return comment;
-  }
-
-  beginBlockComment() {
-    var comment = this.beginPart();
-    comment.value = "";
-    comment.type = "block";
-    this.enterState(STATE.JS_COMMENT_BLOCK);
-    return comment;
-  }
-
-  endJavaScriptComment() {
-    var comment = this.endPart();
-    comment.rawValue =
-      comment.type === "line"
-        ? "//" + comment.value
-        : "/*" + comment.value + "*/";
-    comment.parentState.comment.call(this, comment);
-  }
   // --------------------------
 
   // HTML Comment
@@ -1089,7 +989,7 @@ export class Parser extends BaseParser {
 
     if (match) {
       if (this.state === STATE.JS_COMMENT_LINE) {
-        this.endJavaScriptComment();
+        this.exitState();
       }
       this.endText();
 
@@ -1108,7 +1008,7 @@ export class Parser extends BaseParser {
 
   checkForCDATA() {
     if (this.lookAheadFor("![CDATA[")) {
-      this.beginCDATA();
+      this.enterState(STATE.CDATA);
       this.skip(8);
       return true;
     }

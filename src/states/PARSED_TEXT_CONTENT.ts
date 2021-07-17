@@ -11,15 +11,22 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
     this.textParseMode = "parsed-text";
   },
 
-  placeholder: HTML_CONTENT.placeholder,
+  return(childState, childPart) {
+    switch (childState) {
+      case STATE.JS_COMMENT_LINE:
+      case STATE.JS_COMMENT_BLOCK: {
+        this.text += childPart.rawValue;
 
-  comment(comment) {
-    this.text += comment.rawValue;
+        if (this.htmlBlockDelimiter && childPart.eol) {
+          this.handleDelimitedBlockEOL(childPart.eol);
+        }
 
-    if (this.htmlBlockDelimiter && comment.eol) {
-      this.handleDelimitedBlockEOL(comment.eol);
+        break;
+      }
     }
   },
+
+  placeholder: HTML_CONTENT.placeholder,
 
   templateString(templateString) {
     this.text += templateString.value;
@@ -62,11 +69,11 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
     if (code === CODE.FORWARD_SLASH) {
       if (this.lookAtCharCodeAhead(1) === CODE.ASTERISK) {
         // Skip over code inside a JavaScript block comment
-        this.beginBlockComment();
+        this.enterState(STATE.JS_COMMENT_BLOCK);
         this.skip(1);
         return;
       } else if (this.lookAtCharCodeAhead(1) === CODE.FORWARD_SLASH) {
-        this.beginLineComment();
+        this.enterState(STATE.JS_COMMENT_LINE);
         this.skip(1);
         return;
       }
