@@ -667,65 +667,6 @@ export class Parser extends BaseParser {
 
   // --------------------------
 
-  // Trailing whitespace
-
-  beginCheckTrailingWhitespace(handler) {
-    var part = this.beginPart();
-    part.handler = handler;
-    if (typeof handler !== "function") {
-      throw new Error("Invalid handler");
-    }
-    this.enterState(STATE.CHECK_TRAILING_WHITESPACE);
-  }
-
-  endCheckTrailingWhitespace(err, eof: boolean) {
-    var part = this.endPart();
-    part.handler.call(this, err, eof);
-  }
-
-  handleTrailingWhitespaceJavaScriptComment(err) {
-    if (err) {
-      // This is a non-whitespace! We don't allow non-whitespace
-      // after matching two or more hyphens. This is user error...
-      this.notifyError(
-        this.pos,
-        "INVALID_CHARACTER",
-        'A non-whitespace of "' +
-          err.ch +
-          '" was found after a JavaScript block comment.'
-      );
-    }
-
-    return;
-  }
-
-  handleTrailingWhitespaceMultilineHtmlBlock(err, eof) {
-    if (err) {
-      // This is a non-whitespace! We don't allow non-whitespace
-      // after matching two or more hyphens. This is user error...
-      this.notifyError(
-        this.pos,
-        "INVALID_CHARACTER",
-        'A non-whitespace of "' +
-          err.ch +
-          '" was found on the same line as the ending delimiter ("' +
-          this.htmlBlockDelimiter +
-          '") for a multiline HTML block'
-      );
-      return;
-    }
-
-    this.endHtmlBlock();
-
-    if (eof) {
-      this.htmlEOF();
-    }
-
-    return;
-  }
-
-  // --------------------------
-
   // Placeholder
 
   beginPlaceholder(escape: boolean, withinTagName?) {
@@ -1082,10 +1023,30 @@ export class Parser extends BaseParser {
       this.skip(this.htmlBlockDelimiter.length);
 
       this.enterState(STATE.CONCISE_HTML_CONTENT);
+      this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
+        handler(err, eof) {
+          if (err) {
+            // This is a non-whitespace! We don't allow non-whitespace
+            // after matching two or more hyphens. This is user error...
+            this.notifyError(
+              this.pos,
+              "INVALID_CHARACTER",
+              'A non-whitespace of "' +
+                err.ch +
+                '" was found on the same line as the ending delimiter ("' +
+                this.htmlBlockDelimiter +
+                '") for a multiline HTML block'
+            );
+            return;
+          }
 
-      this.beginCheckTrailingWhitespace(
-        this.handleTrailingWhitespaceMultilineHtmlBlock
-      );
+          this.endHtmlBlock();
+
+          if (eof) {
+            this.htmlEOF();
+          }
+        },
+      });
       return;
     } else if (
       this.lookAheadFor(this.htmlBlockIndent, this.pos + newLine.length)
