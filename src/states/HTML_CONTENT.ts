@@ -113,7 +113,7 @@ export const HTML_CONTENT = Parser.createState({
       this.isBeginningOfLine()
     ) {
       this.skip(1);
-      this.beginInlineScript();
+      this.enterState(STATE.INLINE_SCRIPT);
     } else {
       this.text += ch;
     }

@@ -3,53 +3,71 @@ import { Parser, CODE, STATE } from "../internal";
 export const INLINE_SCRIPT = Parser.createState({
   name: "INLINE_SCRIPT",
 
-  eol(str) {
-    if (
-      this.currentPart.endMatch ||
-      this.currentPart.stringType === CODE.BACKTICK
-    ) {
-      this.currentPart.value += str;
+  enter(oldState, inlineScript) {
+    this.endText();
+
+    inlineScript.value = "";
+    inlineScript.endMatches = [];
+  },
+
+  exit(inlineScript) {
+    var value = inlineScript.value;
+    inlineScript.endPos = this.pos;
+
+    if (value[0] === "{" && value[value.length - 1] === "}") {
+      inlineScript.value = value.slice(1, -1);
+      inlineScript.block = true;
+    } else {
+      inlineScript.line = true;
+    }
+
+    this.notifiers.notifyScriptlet(inlineScript);
+  },
+
+  eol(str, inlineScript) {
+    if (inlineScript.endMatch || inlineScript.stringType === CODE.BACKTICK) {
+      inlineScript.value += str;
     } else {
       this.rewind(str.length);
-      this.endInlineScript(this.pos);
+      this.exitState();
     }
   },
 
-  eof() {
-    if (this.currentPart.endMatch || this.currentPart.stringType) {
+  eof(inlineScript) {
+    if (inlineScript.endMatch || inlineScript.stringType) {
       this.notifyError(
-        this.currentPart.pos,
+        inlineScript.pos,
         "MALFORMED_SCRIPTLET",
         "EOF reached while parsing scriptet"
       );
     } else {
-      this.endInlineScript(this.pos);
+      this.exitState();
     }
   },
 
-  return(childState, childPart) {
+  return(childState, childPart, inlineScript) {
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK: {
-        this.currentPart.value += childPart.rawValue;
+        inlineScript.value += childPart.rawValue;
         break;
       }
     }
   },
 
-  char(ch, code) {
+  char(ch, code, inlineScript) {
     if (code === CODE.BACK_SLASH) {
-      this.currentPart.value += ch + this.lookAtCharAhead(1);
+      inlineScript.value += ch + this.lookAtCharAhead(1);
       this.skip(1);
       return;
     }
 
-    if (this.currentPart.stringType) {
-      if (code === this.currentPart.stringType) {
-        this.currentPart.stringType = null;
+    if (inlineScript.stringType) {
+      if (code === inlineScript.stringType) {
+        inlineScript.stringType = null;
       }
 
-      this.currentPart.value += ch;
+      inlineScript.value += ch;
       return;
     }
 
@@ -67,10 +85,10 @@ export const INLINE_SCRIPT = Parser.createState({
       }
     }
 
-    this.currentPart.value += ch;
+    inlineScript.value += ch;
 
-    if (code === this.currentPart.endMatch) {
-      this.currentPart.endMatch = this.currentPart.endMatches.pop();
+    if (code === inlineScript.endMatch) {
+      inlineScript.endMatch = inlineScript.endMatches.pop();
       return;
     }
 
@@ -79,7 +97,7 @@ export const INLINE_SCRIPT = Parser.createState({
       code === CODE.DOUBLE_QUOTE ||
       code === CODE.BACKTICK
     ) {
-      this.currentPart.stringType = code;
+      inlineScript.stringType = code;
       return;
     }
 
@@ -94,10 +112,10 @@ export const INLINE_SCRIPT = Parser.createState({
     }
 
     if (nextMatch) {
-      if (this.currentPart.endMatch) {
-        this.currentPart.endMatches.push(this.currentPart.endMatch);
+      if (inlineScript.endMatch) {
+        inlineScript.endMatches.push(inlineScript.endMatch);
       }
-      this.currentPart.endMatch = nextMatch;
+      inlineScript.endMatch = nextMatch;
     }
   },
 });
