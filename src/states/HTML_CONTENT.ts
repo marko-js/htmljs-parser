@@ -50,7 +50,7 @@ export const HTML_CONTENT = Parser.createState({
       var nextCode = this.lookAtCharCodeAhead(1);
 
       if (nextCode === CODE.PERCENT) {
-        this.beginScriptlet();
+        this.enterState(STATE.SCRIPTLET);
         this.skip(1);
       } else if (this.lookAheadFor("!--")) {
         this.beginHtmlComment();
