@@ -4,28 +4,34 @@ import { Parser, CODE } from "../internal";
 export const CDATA = Parser.createState({
   name: "CDATA",
 
-  enter() {
+  enter(oldState, cdata) {
+    this.endText();
     this.textParseMode = "cdata";
+    cdata.value = "";
   },
 
-  eof() {
+  exit(cdata) {
+    this.notifiers.notifyCDATA(cdata.value, cdata.pos, this.pos + 3);
+  },
+
+  eof(cdata) {
     this.notifyError(
-      this.currentPart.pos,
+      cdata.pos,
       "MALFORMED_CDATA",
       "EOF reached while parsing CDATA"
     );
   },
 
-  char(ch, code) {
+  char(ch, code, cdata) {
     if (code === CODE.CLOSE_SQUARE_BRACKET) {
       var match = this.lookAheadFor("]>");
       if (match) {
-        this.endCDATA();
+        this.exitState();
         this.skip(match.length);
         return;
       }
     }
 
-    this.currentPart.value += ch;
+    cdata.value += ch;
   },
 });

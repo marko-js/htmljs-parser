@@ -59,12 +59,12 @@ export const HTML_CONTENT = Parser.createState({
         // something like:
         // <!DOCTYPE html>
         // NOTE: We already checked for CDATA earlier and <!--
-        this.beginDocumentType();
+        this.enterState(STATE.DTD);
         this.skip(1);
       } else if (nextCode === CODE.QUESTION) {
         // something like:
         // <?xml version="1.0"?>
-        this.beginDeclaration();
+        this.enterState(STATE.DECLARATION);
         this.skip(1);
       } else if (nextCode === CODE.FORWARD_SLASH) {
         this.closeTagPos = this.pos;

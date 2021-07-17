@@ -5,24 +5,33 @@ import { Parser, CODE } from "../internal";
 export const DTD = Parser.createState({
   name: "DTD",
 
+  enter(oldState, documentType) {
+    this.endText();
+    documentType.value = "";
+  },
+
+  exit(documentType) {
+    this.notifiers.notifyDocumentType(documentType);
+  },
+
   eol(str) {
     this.currentPart.value += str;
   },
 
-  eof() {
+  eof(documentType) {
     this.notifyError(
-      this.currentPart.pos,
+      documentType.pos,
       "MALFORMED_DOCUMENT_TYPE",
       "EOF reached while parsing document type"
     );
   },
 
-  char(ch, code) {
+  char(ch, code, documentType) {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.currentPart.endPos = this.pos + 1;
-      this.endDocumentType();
+      documentType.endPos = this.pos + 1;
+      this.exitState();
     } else {
-      this.currentPart.value += ch;
+      documentType.value += ch;
     }
   },
 });

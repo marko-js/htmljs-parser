@@ -6,29 +6,38 @@ import { Parser, CODE, STATE } from "../internal";
 export const JS_COMMENT_BLOCK = Parser.createState({
   name: "JS_COMMENT_BLOCK",
 
-  eol(str) {
-    this.currentPart.value += str;
+  enter(oldState, comment) {
+    comment.value = "";
+    comment.type = "block";
   },
 
-  eof() {
+  exit(comment) {
+    comment.rawValue = "/*" + comment.value + "*/";
+  },
+
+  eol(str, comment) {
+    comment.value += str;
+  },
+
+  eof(comment) {
     this.notifyError(
-      this.currentPart.pos,
+      comment.pos,
       "MALFORMED_COMMENT",
       "EOF reached while parsing multi-line JavaScript comment"
     );
   },
 
-  char(ch, code) {
+  char(ch, code, comment) {
     if (code === CODE.ASTERISK) {
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.FORWARD_SLASH) {
-        this.currentPart.endPos = this.pos + 2;
-        this.endJavaScriptComment();
+        comment.endPos = this.pos + 2;
+        this.exitState();
         this.skip(1);
         return;
       }
     }
 
-    this.currentPart.value += ch;
+    comment.value += ch;
   },
 });

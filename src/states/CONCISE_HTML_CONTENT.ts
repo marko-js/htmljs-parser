@@ -16,23 +16,30 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
     this.indent = "";
   },
 
-  comment(comment) {
-    var value = comment.value;
+  return(childState, childPart) {
+    switch (childState) {
+      case STATE.JS_COMMENT_LINE:
+      case STATE.JS_COMMENT_BLOCK: {
+        var value = childPart.value;
 
-    value = value.trim();
+        value = value.trim();
 
-    this.notifiers.notifyComment({
-      value: value,
-      pos: comment.pos,
-      endPos: comment.endPos,
-    });
+        this.notifiers.notifyComment({
+          value: value,
+          pos: childPart.pos,
+          endPos: childPart.endPos,
+        });
 
-    if (comment.type === "block") {
-      // Make sure there is only whitespace on the line
-      // after the ending "*/" sequence
-      this.beginCheckTrailingWhitespace(
-        this.handleTrailingWhitespaceJavaScriptComment
-      );
+        if (childPart.type === "block") {
+          // Make sure there is only whitespace on the line
+          // after the ending "*/" sequence
+          this.beginCheckTrailingWhitespace(
+            this.handleTrailingWhitespaceJavaScriptComment
+          );
+        }
+
+        break;
+      }
     }
   },
 
@@ -159,11 +166,11 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
         // Check next character to see if we are in a comment
         var nextCode = this.lookAtCharCodeAhead(1);
         if (nextCode === CODE.FORWARD_SLASH) {
-          this.beginLineComment();
+          this.enterState(STATE.JS_COMMENT_LINE);
           this.skip(1);
           return;
         } else if (nextCode === CODE.ASTERISK) {
-          this.beginBlockComment();
+          this.enterState(STATE.JS_COMMENT_BLOCK);
           this.skip(1);
           return;
         } else {

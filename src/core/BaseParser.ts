@@ -1,20 +1,28 @@
 "use strict";
 
-import { Parser, CODE } from "../internal";
-export interface StateDefinition {
+import { Parser, CODE, peek } from "../internal";
+export type StateDefinition = {
   name: string;
-  eol?: (this: Parser, str?: string) => void;
-  eof?: (this: Parser) => void;
-  enter?: (this: Parser, parentState?: StateDefinition) => void;
+  eol?: (this: Parser, str?: string, activePart?: any) => void;
+  eof?: (this: Parser, activePart?: any) => void;
+  enter?: (
+    this: Parser,
+    parentState?: StateDefinition,
+    activePart?: any
+  ) => unknown;
+  exit?: (this: Parser, activePart?: any) => unknown;
+  return?: (
+    this: Parser,
+    childState?: StateDefinition,
+    childPart?: any
+  ) => unknown;
   expression?: (this: Parser, expression: any) => void;
   placeholder?: (this: Parser, placeholder: any) => void;
   string?: (this: Parser, string: any) => void;
   templateString?: (this: Parser, templateString: any) => void;
-  regularExpression?: (this: Parser, regularExpression: any) => void;
   endTrailingWhitespace?: (this: Parser, eof: any) => void;
-  comment?: (this: Parser, comment: any) => void;
-  char?: (this: Parser, char: string, code: number) => void;
-}
+  char?: (this: Parser, char: string, code: number, activePart?: any) => void;
+};
 
 export class BaseParser {
   public pos: number;
@@ -24,6 +32,8 @@ export class BaseParser {
   public filename: string;
   public state: StateDefinition;
   public initialState: StateDefinition;
+  public parts: any[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
+  public activePart: any; // The current part at the top of the part stack
 
   static createState(def: StateDefinition) {
     return def;
@@ -48,13 +58,16 @@ export class BaseParser {
     this.data = this.src = null;
 
     this.filename = null;
+
+    this.parts = [];
+    this.activePart = undefined;
   }
 
   setInitialState(initialState) {
     this.initialState = initialState;
   }
 
-  enterState(state) {
+  enterState(state: StateDefinition, part = {}) {
     if (this.state === state) {
       // Re-entering the same state can lead to unexpected behavior
       // so we should throw error to catch these types of mistakes
@@ -63,18 +76,42 @@ export class BaseParser {
       );
     }
 
-    var oldState;
-    if ((oldState = this.state) && oldState.leave) {
-      // console.log('Leaving state ' + oldState.name);
-      oldState.leave.call(this, state);
-    }
-
-    // console.log('Entering state ' + state.name);
+    var parentState = this.state;
+    var activePart = (this.activePart = Object.assign(part, {
+      pos: this.pos,
+      parentState: parentState,
+    }));
 
     this.state = state;
+    this.parts.push(activePart);
 
     if (state.enter) {
-      state.enter.call(this, oldState);
+      state.enter.call(this, parentState, activePart);
+    }
+
+    return this.activePart;
+  }
+
+  enterStateIfNotParent(state: StateDefinition, part = {}) {
+    if (this.activePart.parentState !== state) {
+      return this.enterState(state, part);
+    }
+  }
+
+  exitState() {
+    const childPart = this.parts.pop();
+    const childState = this.state;
+    const parentState = (this.state = childPart.parentState);
+    const parentPart = (this.activePart = this.parts.length
+      ? peek(this.parts)
+      : undefined);
+
+    if (childState.exit) {
+      childState.exit.call(this, childPart);
+    }
+
+    if (parentState.return) {
+      parentState.return.call(this, childState, childPart, parentPart);
     }
   }
 
@@ -171,7 +208,7 @@ export class BaseParser {
 
       if (code === CODE.NEWLINE) {
         if (state.eol) {
-          state.eol.call(this, ch);
+          state.eol.call(this, ch, this.activePart);
         }
         this.pos++;
         continue;
@@ -182,7 +219,7 @@ export class BaseParser {
           data.charCodeAt(nextPos) === CODE.NEWLINE
         ) {
           if (state.eol) {
-            state.eol.call(this, "\r\n");
+            state.eol.call(this, "\r\n", this.activePart);
           }
           this.pos += 2;
           continue;
@@ -192,7 +229,7 @@ export class BaseParser {
       // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
 
       // We assume that every state will have "char" function
-      state.char.call(this, ch, code);
+      state.char.call(this, ch, code, this.activePart);
 
       // move to next position
       this.pos++;
@@ -200,7 +237,7 @@ export class BaseParser {
 
     let state = this.state;
     if (state && state.eof) {
-      state.eof.call(this);
+      state.eof.call(this, this.activePart);
     }
   }
 }
