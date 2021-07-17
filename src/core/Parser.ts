@@ -30,8 +30,6 @@ export class Parser extends BaseParser {
   public text; // Used to buffer text that is found within the body of a tag
   public withinOpenTag; // Set to true if the parser is within the open tag
   public blockStack; // Used to keep track of HTML tags and HTML blocks
-  public partStack; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
-  public currentPart; // The current part at the top of the part stack
   public indent; // Used to build the indent for the current concise line
   public isConcise; // Set to true if parser is currently in concise mode
   public isWithinSingleLineHtmlBlock; // Set to true if the current block is for a single line HTML block
@@ -79,8 +77,6 @@ export class Parser extends BaseParser {
     this.expectedCloseTagName = undefined;
     this.withinOpenTag = false;
     this.blockStack = [];
-    this.partStack = [];
-    this.currentPart = undefined;
     this.indent = "";
     this.isConcise = this.defaultMode === MODE.CONCISE;
     this.isWithinSingleLineHtmlBlock = false;
@@ -520,192 +516,6 @@ export class Parser extends BaseParser {
     this.expectedCloseTagName = lastTag && lastTag.expectedCloseTagName;
   }
 
-  beginPart() {
-    this.currentPart = {
-      pos: this.pos,
-      parentState: this.state,
-    };
-
-    this.partStack.push(this.currentPart);
-
-    return this.currentPart;
-  }
-
-  endPart() {
-    var last = this.partStack.pop();
-    this.enterState(last.parentState);
-    this.currentPart = this.partStack.length ? peek(this.partStack) : undefined;
-    return last;
-  }
-
-  // Expression
-
-  beginExpression(endAfterGroup?: boolean) {
-    var expression = this.beginPart();
-    expression.value = "";
-    expression.groupStack = [];
-    expression.endAfterGroup = endAfterGroup === true;
-    expression.isStringLiteral = null;
-    this.enterState(STATE.EXPRESSION);
-    return expression;
-  }
-
-  endExpression() {
-    var expression = this.endPart();
-    // Probably shouldn't do this, but it makes it easier to test!
-    if (
-      expression.parentState === STATE.ATTRIBUTE_VALUE &&
-      expression.hasUnenclosedWhitespace
-    ) {
-      expression.value = "(" + expression.value + ")";
-    }
-    expression.parentState.expression.call(this, expression);
-  }
-
-  // --------------------------
-
-  // String
-
-  beginString(quoteChar, quoteCharCode) {
-    var string = this.beginPart();
-    string.stringParts = [];
-    string.currentText = "";
-    string.quoteChar = quoteChar;
-    string.quoteCharCode = quoteCharCode;
-    string.isStringLiteral = true;
-    this.enterState(STATE.STRING);
-    return string;
-  }
-
-  endString() {
-    var string = this.endPart();
-    string.value = this.notifiers.notifyString(string);
-    string.parentState.string.call(this, string);
-  }
-
-  // --------------------------
-
-  // Template String
-
-  beginTemplateString() {
-    var templateString = this.beginPart();
-    templateString.value = "`";
-    this.enterState(STATE.TEMPLATE_STRING);
-    return templateString;
-  }
-
-  endTemplateString() {
-    var templateString = this.endPart();
-    templateString.parentState.templateString.call(this, templateString);
-  }
-
-  // --------------------------
-
-  // Placeholder
-
-  beginPlaceholder(escape: boolean, withinTagName?) {
-    var placeholder = this.beginPart();
-    placeholder.value = "";
-    placeholder.escape = escape !== false;
-    placeholder.type = "placeholder";
-    placeholder.withinBody = this.withinOpenTag !== true;
-    placeholder.withinAttribute = this.currentAttribute != null;
-    placeholder.withinString = placeholder.parentState === STATE.STRING;
-    placeholder.withinTemplateString =
-      placeholder.parentState === STATE.TEMPLATE_STRING;
-    placeholder.withinOpenTag =
-      this.withinOpenTag === true && this.currentAttribute == null;
-    placeholder.withinTagName = withinTagName;
-    this.placeholderDepth++;
-    this.enterState(STATE.PLACEHOLDER);
-    return placeholder;
-  }
-
-  endPlaceholder() {
-    var placeholder = this.endPart();
-    this.placeholderDepth--;
-    if (!placeholder.withinTemplateString) {
-      var newExpression = this.notifiers.notifyPlaceholder(placeholder);
-      placeholder.value = newExpression;
-    }
-    placeholder.parentState.placeholder.call(this, placeholder);
-  }
-
-  // --------------------------
-
-  // Placeholder
-
-  beginTagNameShorthand() {
-    var parser = this;
-    var shorthand = this.beginPart();
-    shorthand.currentPart = null;
-    shorthand.hasId = false;
-    shorthand.beginPart = function (type) {
-      shorthand.currentPart = {
-        type: type,
-        stringParts: [],
-        rawParts: [],
-        text: "",
-        _endText() {
-          var text = this.text;
-
-          if (text) {
-            this.stringParts.push(JSON.stringify(text));
-            this.rawParts.push({
-              text: text,
-              pos: parser.pos - text.length,
-              endPos: parser.pos,
-            });
-          }
-
-          this.text = "";
-        },
-        addPlaceholder(placeholder) {
-          var startPos = placeholder.pos + (placeholder.escape ? 2 : 3);
-          var endPos = placeholder.endPos - 1;
-          this._endText();
-          this.stringParts.push("(" + placeholder.value + ")");
-          this.rawParts.push({
-            expression: parser.src.slice(startPos, endPos),
-            pos: startPos,
-            endPos: endPos,
-          });
-        },
-        end() {
-          this._endText();
-
-          var expression = this.stringParts.join("+");
-
-          if (type === "id") {
-            parser.currentOpenTag.shorthandId = {
-              value: expression,
-              rawParts: this.rawParts,
-            };
-          } else if (type === "class") {
-            if (!parser.currentOpenTag.shorthandClassNames) {
-              parser.currentOpenTag.shorthandClassNames = [];
-            }
-
-            parser.currentOpenTag.shorthandClassNames.push({
-              value: expression,
-              rawParts: this.rawParts,
-            });
-          }
-        },
-      };
-    };
-    this.enterState(STATE.TAG_NAME_SHORTHAND);
-    return shorthand;
-  }
-
-  endTagNameShorthand() {
-    var shorthand = this.endPart();
-    if (shorthand.currentPart) {
-      shorthand.currentPart.end();
-    }
-    this.enterState(STATE.WITHIN_OPEN_TAG);
-  }
-
   // --------------------------
 
   getAndRemoveArgument(expression) {
@@ -760,14 +570,14 @@ export class Parser extends BaseParser {
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.OPEN_CURLY_BRACE) {
         // We expect to start a placeholder at the first curly brace (the next character)
-        this.beginPlaceholder(true);
+        this.enterState(STATE.PLACEHOLDER, { escape: true });
         return true;
       } else if (nextCode === CODE.EXCLAMATION) {
         var afterExclamationCode = this.lookAtCharCodeAhead(2);
         if (afterExclamationCode === CODE.OPEN_CURLY_BRACE) {
           // We expect to start a placeholder at the first curly brace so skip
           // past the exclamation point
-          this.beginPlaceholder(false);
+          this.enterState(STATE.PLACEHOLDER, { escape: false });
           this.skip(1);
           return true;
         }

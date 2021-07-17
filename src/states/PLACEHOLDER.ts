@@ -3,10 +3,42 @@ import { Parser, STATE } from "../internal";
 export const PLACEHOLDER = Parser.createState({
   name: "PLACEHOLDER",
 
-  expression(expression) {
-    this.currentPart.value = expression.value.slice(1, -1); // Chop off the curly braces
-    this.currentPart.endPos = expression.endPos;
-    this.endPlaceholder();
+  // { escape: boolean, withinTagName? }
+  enter(oldState, placeholder) {
+    placeholder.value = "";
+    placeholder.escape = placeholder.escape !== false;
+    placeholder.type = "placeholder";
+    placeholder.withinBody = this.withinOpenTag !== true;
+    placeholder.withinAttribute = this.currentAttribute != null;
+    placeholder.withinString = placeholder.parentState === STATE.STRING;
+    placeholder.withinTemplateString =
+      placeholder.parentState === STATE.TEMPLATE_STRING;
+    placeholder.withinOpenTag =
+      this.withinOpenTag === true && this.currentAttribute == null;
+    this.placeholderDepth++;
+
+    if (oldState !== STATE.EXPRESSION) {
+      this.enterState(STATE.EXPRESSION);
+    }
+  },
+
+  exit(placeholder) {
+    this.placeholderDepth--;
+    if (!placeholder.withinTemplateString) {
+      var newExpression = this.notifiers.notifyPlaceholder(placeholder);
+      placeholder.value = newExpression;
+    }
+  },
+
+  return(childState, childPart, placeholder) {
+    switch (childState) {
+      case STATE.EXPRESSION: {
+        placeholder.value = childPart.value.slice(1, -1); // Chop off the curly braces
+        placeholder.endPos = childPart.endPos;
+        this.exitState();
+        break;
+      }
+    }
   },
 
   eol(str) {
@@ -15,11 +47,5 @@ export const PLACEHOLDER = Parser.createState({
 
   eof() {
     throw new Error("Illegal state. EOF not expected");
-  },
-
-  enter(oldState) {
-    if (oldState !== STATE.EXPRESSION) {
-      this.beginExpression();
-    }
   },
 });

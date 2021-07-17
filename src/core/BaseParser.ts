@@ -17,10 +17,6 @@ export type StateDefinition = {
     childPart?: any,
     activePart?: any
   ) => unknown;
-  expression?: (this: Parser, expression: any) => void;
-  placeholder?: (this: Parser, placeholder: any) => void;
-  string?: (this: Parser, string: any) => void;
-  templateString?: (this: Parser, templateString: any) => void;
   char?: (this: Parser, char: string, code: number, activePart?: any) => void;
 };
 
@@ -229,6 +225,13 @@ export class BaseParser {
       // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
 
       // We assume that every state will have "char" function
+      if (!state.char) {
+        throw new Error(
+          `State ${state.name} has no "char" function (${JSON.stringify(
+            ch
+          )}, ${code})`
+        );
+      }
       state.char.call(this, ch, code, this.activePart);
 
       // move to next position
