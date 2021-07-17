@@ -20,7 +20,6 @@ export type StateDefinition = {
   placeholder?: (this: Parser, placeholder: any) => void;
   string?: (this: Parser, string: any) => void;
   templateString?: (this: Parser, templateString: any) => void;
-  endTrailingWhitespace?: (this: Parser, eof: any) => void;
   char?: (this: Parser, char: string, code: number, activePart?: any) => void;
 };
 
