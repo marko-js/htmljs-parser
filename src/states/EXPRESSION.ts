@@ -318,7 +318,7 @@ export const EXPRESSION = Parser.createState({
                   this.lookAheadFor("!--")
                 ) {
                   // html comment
-                  this.beginHtmlComment();
+                  this.enterState(STATE.HTML_COMMENT);
                   this.skip(3);
                   return;
                 }
