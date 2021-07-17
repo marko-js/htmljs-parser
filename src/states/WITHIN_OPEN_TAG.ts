@@ -5,10 +5,6 @@ import { Parser, CODE, STATE, isWhitespaceCode, peek } from "../internal";
 export const WITHIN_OPEN_TAG = Parser.createState({
   name: "WITHIN_OPEN_TAG",
 
-  eol: Parser.prototype.openTagEOL,
-
-  eof: Parser.prototype.openTagEOF,
-
   enter() {
     if (!this.currentOpenTag.notifiedOpenTagName) {
       this.currentOpenTag.notifiedOpenTagName = true;
@@ -17,69 +13,74 @@ export const WITHIN_OPEN_TAG = Parser.createState({
     }
   },
 
-  expression(expression) {
-    var argument = this.getAndRemoveArgument(expression);
-    var method = this.getAndRemoveMethod(expression);
-
-    if (method) {
-      let targetAttribute;
-      if (this.currentOpenTag.attributes.length === 0) {
-        targetAttribute = this.beginAttribute();
-        this.currentAttribute.name = "default";
-        this.currentAttribute.default = true;
-      } else {
-        targetAttribute =
-          this.currentAttribute || peek(this.currentOpenTag.attributes);
-      }
-      targetAttribute.method = true;
-      targetAttribute.value = method.value;
-      targetAttribute.pos = method.pos;
-      targetAttribute.endPos = method.endPos;
-    } else if (argument) {
-      // We found an argument... the argument could be for an attribute or the tag
-      if (this.currentOpenTag.attributes.length === 0) {
-        if (this.currentOpenTag.argument != null) {
-          this.notifyError(
-            expression.endPos,
-            "ILLEGAL_TAG_ARGUMENT",
-            "A tag can only have one argument"
-          );
-          return;
-        }
-        this.currentOpenTag.argument = argument;
-      } else {
-        let targetAttribute =
-          this.currentAttribute || peek(this.currentOpenTag.attributes);
-
-        if (targetAttribute.argument != null) {
-          this.notifyError(
-            expression.endPos,
-            "ILLEGAL_ATTRIBUTE_ARGUMENT",
-            "An attribute can only have one argument"
-          );
-          return;
-        }
-        targetAttribute.argument = argument;
-      }
-    }
-  },
-
-  placeholder(placeholder) {
-    var attr = this.beginAttribute();
-    attr.value = placeholder.value;
-    this.endAttribute();
-
-    this.enterState(STATE.AFTER_PLACEHOLDER_WITHIN_TAG);
-  },
-
   return(childState, childPart) {
     switch (childState) {
       case STATE.JS_COMMENT_BLOCK: {
         /* Ignore comments within an open tag */
         break;
       }
+      case STATE.PLACEHOLDER: {
+        var attr = this.beginAttribute();
+        attr.value = childPart.value;
+        this.endAttribute();
+
+        this.enterState(STATE.AFTER_PLACEHOLDER_WITHIN_TAG);
+        break;
+      }
+      case STATE.EXPRESSION: {
+        const expression = childPart;
+        var argument = this.getAndRemoveArgument(expression);
+        var method = this.getAndRemoveMethod(expression);
+
+        if (method) {
+          let targetAttribute;
+          if (this.currentOpenTag.attributes.length === 0) {
+            targetAttribute = this.beginAttribute();
+            this.currentAttribute.name = "default";
+            this.currentAttribute.default = true;
+          } else {
+            targetAttribute =
+              this.currentAttribute || peek(this.currentOpenTag.attributes);
+          }
+          targetAttribute.method = true;
+          targetAttribute.value = method.value;
+          targetAttribute.pos = method.pos;
+          targetAttribute.endPos = method.endPos;
+        } else if (argument) {
+          // We found an argument... the argument could be for an attribute or the tag
+          if (this.currentOpenTag.attributes.length === 0) {
+            if (this.currentOpenTag.argument != null) {
+              this.notifyError(
+                expression.endPos,
+                "ILLEGAL_TAG_ARGUMENT",
+                "A tag can only have one argument"
+              );
+              return;
+            }
+            this.currentOpenTag.argument = argument;
+          } else {
+            let targetAttribute =
+              this.currentAttribute || peek(this.currentOpenTag.attributes);
+
+            if (targetAttribute.argument != null) {
+              this.notifyError(
+                expression.endPos,
+                "ILLEGAL_ATTRIBUTE_ARGUMENT",
+                "An attribute can only have one argument"
+              );
+              return;
+            }
+            targetAttribute.argument = argument;
+          }
+        }
+        break;
+      }
     }
   },
+
+  eol: Parser.prototype.openTagEOL,
+
+  eof: Parser.prototype.openTagEOF,
 
   char(ch, code) {
     if (this.isConcise) {
@@ -193,7 +194,7 @@ export const WITHIN_OPEN_TAG = Parser.createState({
       // ignore whitespace within element...
     } else if (code === CODE.OPEN_PAREN) {
       this.rewind(1);
-      this.beginExpression();
+      this.enterState(STATE.EXPRESSION);
       // encountered something like:
       // <for (var i = 0; i < len; i++)>
     } else {

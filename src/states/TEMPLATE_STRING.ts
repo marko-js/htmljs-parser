@@ -1,14 +1,23 @@
-import { Parser, CODE } from "../internal";
+import { Parser, CODE, STATE } from "../internal";
 
 export const TEMPLATE_STRING = Parser.createState({
   name: "TEMPLATE_STRING",
 
-  placeholder: function (placeholder) {
-    this.currentPart.value += "${" + placeholder.value + "}";
+  enter(oldState, templateString) {
+    templateString.value = "`";
   },
 
-  eol(str) {
-    this.currentPart.value += str;
+  return(childState, childPart, templateString) {
+    switch (childState) {
+      case STATE.PLACEHOLDER: {
+        templateString.value += "${" + childPart.value + "}";
+        break;
+      }
+    }
+  },
+
+  eol(str, templateString) {
+    templateString.value += str;
   },
 
   eof() {
@@ -19,23 +28,23 @@ export const TEMPLATE_STRING = Parser.createState({
     );
   },
 
-  char(ch, code) {
+  char(ch, code, templateString) {
     var nextCh;
     if (
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      this.beginPlaceholder(false);
+      this.enterState(STATE.PLACEHOLDER, { escape: false });
     } else {
-      this.currentPart.value += ch;
+      templateString.value += ch;
       if (code === CODE.BACK_SLASH) {
         // Handle string escape sequence
         nextCh = this.lookAtCharAhead(1);
         this.skip(1);
 
-        this.currentPart.value += nextCh;
+        templateString.value += nextCh;
       } else if (code === CODE.BACKTICK) {
-        this.endTemplateString();
+        this.exitState();
       }
     }
   },

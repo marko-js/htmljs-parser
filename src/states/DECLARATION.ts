@@ -6,8 +6,8 @@ import { Parser, CODE } from "../internal";
 export const DECLARATION = Parser.createState({
   name: "DECLARATION",
 
-  eol(str) {
-    this.currentPart.value += str;
+  eol(str, declaration) {
+    declaration.value += str;
   },
 
   eof(declaration) {

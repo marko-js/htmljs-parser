@@ -5,9 +5,13 @@ import { Parser, CODE, STATE, isWhitespaceCode } from "../internal";
 export const HTML_CONTENT = Parser.createState({
   name: "HTML_CONTENT",
 
-  placeholder(placeholder) {
-    // We found a placeholder while parsing the HTML content. This function is called
-    // from endPlaceholder(). We have already notified the listener of the placeholder so there is
+  enter() {
+    this.textParseMode = "html";
+    this.isConcise = false; // Back into non-concise HTML parsing
+  },
+
+  return() {
+    // Our children have already notified the listener of their presence so there is
     // nothing to do here
   },
 
@@ -35,11 +39,6 @@ export const HTML_CONTENT = Parser.createState({
   },
 
   eof: Parser.prototype.htmlEOF,
-
-  enter() {
-    this.textParseMode = "html";
-    this.isConcise = false; // Back into non-concise HTML parsing
-  },
 
   char(ch, code) {
     if (code === CODE.OPEN_ANGLE_BRACKET) {
