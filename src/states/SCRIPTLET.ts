@@ -5,39 +5,53 @@ import { Parser, CODE, STATE } from "../internal";
 export const SCRIPTLET = Parser.createState({
   name: "SCRIPTLET",
 
-  eol(str) {
-    this.currentPart.value += str;
+  // Scriptlet
+
+  enter(oldState, scriptlet) {
+    this.endText();
+    scriptlet.tag = true;
+    scriptlet.value = "";
+    scriptlet.quoteCharCode = null;
   },
 
-  eof() {
+  exit(scriptlet) {
+    scriptlet.endPos = this.pos + 2;
+    this.notifiers.notifyScriptlet(scriptlet);
+  },
+
+  eol(str, scriptlet) {
+    scriptlet.value += str;
+  },
+
+  eof(scriptlet) {
     this.notifyError(
-      this.currentPart.pos,
+      scriptlet.pos,
       "MALFORMED_SCRIPTLET",
       "EOF reached while parsing scriptlet"
     );
   },
 
-  return(childState, childPart) {
+  return(childState, childPart, scriptlet) {
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK: {
-        this.currentPart.value += childPart.rawValue;
+        scriptlet.value += childPart.rawValue;
         break;
       }
     }
   },
 
-  char(ch, code) {
-    if (this.currentPart.quoteCharCode) {
-      this.currentPart.value += ch;
+  char(ch, code, scriptlet) {
+    if (scriptlet.quoteCharCode) {
+      scriptlet.value += ch;
 
       // We are within a string... only look for ending string code
       if (code === CODE.BACK_SLASH) {
         // Handle string escape sequence
-        this.currentPart.value += this.lookAtCharAhead(1);
+        scriptlet.value += this.lookAtCharAhead(1);
         this.skip(1);
-      } else if (code === this.currentPart.quoteCharCode) {
-        this.currentPart.quoteCharCode = null;
+      } else if (code === scriptlet.quoteCharCode) {
+        scriptlet.quoteCharCode = null;
       }
       return;
     } else if (code === CODE.FORWARD_SLASH) {
@@ -48,15 +62,15 @@ export const SCRIPTLET = Parser.createState({
         return;
       }
     } else if (code === CODE.SINGLE_QUOTE || code === CODE.DOUBLE_QUOTE) {
-      this.currentPart.quoteCharCode = code;
+      scriptlet.quoteCharCode = code;
     } else if (code === CODE.PERCENT) {
       if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
-        this.endScriptlet(this.pos + 2 /* end pos */);
+        this.exitState();
         this.skip(1); // Skip over the closing right angle bracket
         return;
       }
     }
 
-    this.currentPart.value += ch;
+    scriptlet.value += ch;
   },
 });
