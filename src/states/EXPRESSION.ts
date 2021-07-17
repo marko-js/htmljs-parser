@@ -102,19 +102,25 @@ export const EXPRESSION = Parser.createState({
     this.currentPart.value += string.value;
   },
 
-  comment(comment) {
-    this.currentPart.isStringLiteral = false;
-    this.currentPart.value += comment.rawValue;
-  },
-
   templateString(templateString) {
     this.currentPart.isStringLiteral = false;
     this.currentPart.value += templateString.value;
   },
 
-  regularExpression(regularExpression) {
-    this.currentPart.isStringLiteral = false;
-    this.currentPart.value += regularExpression.value;
+  return(childState, childPart) {
+    switch (childState) {
+      case STATE.REGULAR_EXPRESSION: {
+        this.currentPart.isStringLiteral = false;
+        this.currentPart.value += childPart.value;
+        break;
+      }
+      case STATE.JS_COMMENT_LINE:
+      case STATE.JS_COMMENT_BLOCK: {
+        this.currentPart.isStringLiteral = false;
+        this.currentPart.value += childPart.rawValue;
+        break;
+      }
+    }
   },
 
   char(ch, code) {
@@ -131,11 +137,11 @@ export const EXPRESSION = Parser.createState({
       // Check next character to see if we are in a comment
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.FORWARD_SLASH) {
-        this.beginLineComment();
+        this.enterState(STATE.JS_COMMENT_LINE);
         this.skip(1);
         return;
       } else if (nextCode === CODE.ASTERISK) {
-        this.beginBlockComment();
+        this.enterState(STATE.JS_COMMENT_BLOCK);
         this.skip(1);
         return;
       } else if (
@@ -156,7 +162,7 @@ export const EXPRESSION = Parser.createState({
       } else if (
         !/[\]})A-Z0-9.<%]/i.test(this.getPreviousNonWhitespaceChar())
       ) {
-        this.beginRegularExpression();
+        this.enterState(STATE.REGULAR_EXPRESSION);
         return;
       }
     } else if (code === CODE.PIPE && parentState === STATE.TAG_PARAMS) {
@@ -298,11 +304,11 @@ export const EXPRESSION = Parser.createState({
 
               if (code === CODE.FORWARD_SLASH) {
                 if (this.lookAheadFor("/")) {
-                  this.beginLineComment();
+                  this.enterState(STATE.JS_COMMENT_LINE);
                   this.skip(1);
                   return;
                 } else if (this.lookAheadFor("*")) {
-                  this.beginBlockComment();
+                  this.enterState(STATE.JS_COMMENT_BLOCK);
                   this.skip(1);
                   return;
                 }

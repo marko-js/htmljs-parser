@@ -15,7 +15,6 @@ export const CHECK_TRAILING_WHITESPACE = Parser.createState({
     if (isWhitespaceCode(code)) {
       // Just whitespace... we are still good
     } else {
-      debugger;
       this.endCheckTrailingWhitespace(
         {
           ch: ch,

@@ -72,8 +72,13 @@ export const WITHIN_OPEN_TAG = Parser.createState({
     this.enterState(STATE.AFTER_PLACEHOLDER_WITHIN_TAG);
   },
 
-  comment(comment) {
-    /* Ignore comments within an open tag */
+  return(childState, childPart) {
+    switch (childState) {
+      case STATE.JS_COMMENT_BLOCK: {
+        /* Ignore comments within an open tag */
+        break;
+      }
+    }
   },
 
   char(ch, code) {
@@ -179,7 +184,7 @@ export const WITHIN_OPEN_TAG = Parser.createState({
       this.lookAtCharCodeAhead(1) === CODE.ASTERISK
     ) {
       // Skip over code inside a JavaScript block comment
-      this.beginBlockComment();
+      this.enterState(STATE.JS_COMMENT_BLOCK);
       this.skip(1);
       return;
     }

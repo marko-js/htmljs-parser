@@ -6,19 +6,30 @@ import { Parser, CODE, STATE } from "../internal";
 export const JS_COMMENT_LINE = Parser.createState({
   name: "JS_COMMENT_LINE",
 
-  eol(str) {
+  enter(oldState, comment) {
+    comment.value = "";
+    comment.type = "line";
+  },
+
+  exit(comment) {
+    comment.rawValue = "//" + comment.value;
+  },
+
+  eol(str, comment) {
     this.rewind(str.length);
-    this.currentPart.endPos = this.pos;
-    this.endJavaScriptComment();
+    comment.endPos = this.pos;
+    this.exitState();
   },
 
-  eof() {
-    this.currentPart.endPos = this.pos;
-    this.endJavaScriptComment();
+  eof(comment) {
+    comment.endPos = this.pos;
+    this.exitState();
   },
 
-  char(ch, code) {
-    if (this.currentPart.parentState === STATE.PARSED_TEXT_CONTENT) {
+  char(ch, code, comment) {
+    // TODO: this really shouldn't be done.
+    // nothing should end a JS_COMMENT_LINE except a newline
+    if (comment.parentState === STATE.PARSED_TEXT_CONTENT) {
       if (!this.isConcise && code === CODE.OPEN_ANGLE_BRACKET) {
         // First, see if we need to see if we reached the closing tag
         // and then check if we encountered CDATA
@@ -28,6 +39,6 @@ export const JS_COMMENT_LINE = Parser.createState({
       }
     }
 
-    this.currentPart.value += ch;
+    comment.value += ch;
   },
 });
