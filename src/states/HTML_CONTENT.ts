@@ -53,7 +53,7 @@ export const HTML_CONTENT = Parser.createState({
         this.enterState(STATE.SCRIPTLET);
         this.skip(1);
       } else if (this.lookAheadFor("!--")) {
-        this.beginHtmlComment();
+        this.enterState(STATE.HTML_COMMENT);
         this.skip(3);
       } else if (nextCode === CODE.EXCLAMATION) {
         // something like:
