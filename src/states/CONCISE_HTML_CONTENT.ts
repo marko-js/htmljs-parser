@@ -146,7 +146,7 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
         isWhitespaceCode(this.lookAtCharCodeAhead(1))
       ) {
         this.skip(1);
-        this.beginInlineScript();
+        this.enterState(STATE.INLINE_SCRIPT);
         return;
       }
 
