@@ -3,16 +3,34 @@ import { Parser, CODE, STATE, isWhitespaceCode } from "../internal";
 export const EXPRESSION = Parser.createState({
   name: "EXPRESSION",
 
-  eol(str) {
-    let depth = this.currentPart.groupStack.length;
+  // { endAfterGroup }
+  enter(oldState, expression) {
+    expression.value = "";
+    expression.groupStack = [];
+    expression.endAfterGroup = expression.endAfterGroup === true;
+    expression.isStringLiteral = null;
+  },
+
+  exit(expression) {
+    // TODO: Probably shouldn't do this, but it makes it easier to test!
+    if (
+      expression.parentState === STATE.ATTRIBUTE_VALUE &&
+      expression.hasUnenclosedWhitespace
+    ) {
+      expression.value = "(" + expression.value + ")";
+    }
+  },
+
+  eol(str, expression) {
+    let depth = expression.groupStack.length;
 
     if (depth === 0) {
       if (
-        this.currentPart.parentState === STATE.ATTRIBUTE_NAME ||
-        this.currentPart.parentState === STATE.ATTRIBUTE_VALUE
+        expression.parentState === STATE.ATTRIBUTE_NAME ||
+        expression.parentState === STATE.ATTRIBUTE_VALUE
       ) {
-        this.currentPart.endPos = this.pos;
-        this.endExpression();
+        expression.endPos = this.pos;
+        this.exitState();
         // We encountered a whitespace character while parsing the attribute name. That
         // means the attribute name has ended and we should continue parsing within the
         // open tag
@@ -22,9 +40,9 @@ export const EXPRESSION = Parser.createState({
           this.openTagEOL();
         }
         return;
-      } else if (this.currentPart.parentState === STATE.TAG_NAME) {
-        this.currentPart.endPos = this.pos;
-        this.endExpression();
+      } else if (expression.parentState === STATE.TAG_NAME) {
+        expression.endPos = this.pos;
+        this.exitState();
 
         // We encountered a whitespace character while parsing the attribute name. That
         // means the attribute name has ended and we should continue parsing within the
@@ -42,20 +60,20 @@ export const EXPRESSION = Parser.createState({
       }
     }
 
-    this.currentPart.value += str;
+    expression.value += str;
   },
 
-  eof() {
-    if (this.isConcise && this.currentPart.groupStack.length === 0) {
-      this.currentPart.endPos = this.pos;
-      this.endExpression();
+  eof(expression) {
+    if (this.isConcise && expression.groupStack.length === 0) {
+      expression.endPos = this.pos;
+      this.exitState();
       this.openTagEOF();
     } else {
-      let parentState = this.currentPart.parentState;
+      let parentState = expression.parentState;
 
       if (parentState === STATE.ATTRIBUTE_NAME) {
         return this.notifyError(
-          this.currentPart.pos,
+          expression.pos,
           "MALFORMED_OPEN_TAG",
           'EOF reached while parsing attribute name for the "' +
             this.currentOpenTag.tagName +
@@ -63,7 +81,7 @@ export const EXPRESSION = Parser.createState({
         );
       } else if (parentState === STATE.ATTRIBUTE_VALUE) {
         return this.notifyError(
-          this.currentPart.pos,
+          expression.pos,
           "MALFORMED_OPEN_TAG",
           'EOF reached while parsing attribute value for the "' +
             this.currentAttribute.name +
@@ -71,68 +89,70 @@ export const EXPRESSION = Parser.createState({
         );
       } else if (parentState === STATE.TAG_NAME) {
         return this.notifyError(
-          this.currentPart.pos,
+          expression.pos,
           "MALFORMED_OPEN_TAG",
           "EOF reached while parsing tag name"
         );
       } else if (parentState === STATE.PLACEHOLDER) {
         return this.notifyError(
-          this.currentPart.pos,
+          expression.pos,
           "MALFORMED_PLACEHOLDER",
           "EOF reached while parsing placeholder"
         );
       }
 
       return this.notifyError(
-        this.currentPart.pos,
+        expression.pos,
         "INVALID_EXPRESSION",
         "EOF reached while parsing expression"
       );
     }
   },
 
-  string(string) {
-    if (this.currentPart.value === "") {
-      this.currentPart.isStringLiteral = string.isStringLiteral === true;
-    } else {
-      // More than one strings means it is for sure not a string literal...
-      this.currentPart.isStringLiteral = false;
-    }
-
-    this.currentPart.value += string.value;
-  },
-
-  templateString(templateString) {
-    this.currentPart.isStringLiteral = false;
-    this.currentPart.value += templateString.value;
-  },
-
-  return(childState, childPart) {
+  return(childState, childPart, expression) {
     switch (childState) {
+      case STATE.STRING: {
+        if (expression.value === "") {
+          expression.isStringLiteral = childPart.isStringLiteral === true;
+        } else {
+          // More than one strings means it is for sure not a string literal...
+          expression.isStringLiteral = false;
+        }
+
+        expression.value += childPart.value;
+        break;
+      }
+      case STATE.TEMPLATE_STRING:
       case STATE.REGULAR_EXPRESSION: {
-        this.currentPart.isStringLiteral = false;
-        this.currentPart.value += childPart.value;
+        expression.isStringLiteral = false;
+        expression.value += childPart.value;
         break;
       }
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK: {
-        this.currentPart.isStringLiteral = false;
-        this.currentPart.value += childPart.rawValue;
+        expression.isStringLiteral = false;
+        expression.value += childPart.rawValue;
         break;
       }
     }
   },
 
-  char(ch, code) {
-    let depth = this.currentPart.groupStack.length;
-    let parentState = this.currentPart.parentState;
+  char(ch, code, expression) {
+    let depth = expression.groupStack.length;
+    let parentState = expression.parentState;
 
     if (code === CODE.SINGLE_QUOTE) {
-      return this.beginString("'", CODE.SINGLE_QUOTE);
+      return this.enterState(STATE.STRING, {
+        quoteChar: "'",
+        quoteCharCode: CODE.SINGLE_QUOTE,
+      });
     } else if (code === CODE.DOUBLE_QUOTE) {
-      return this.beginString('"', CODE.DOUBLE_QUOTE);
+      return this.enterState(STATE.STRING, {
+        quoteChar: '"',
+        quoteCharCode: CODE.DOUBLE_QUOTE,
+      });
     } else if (code === CODE.BACKTICK) {
-      return this.beginTemplateString();
+      return this.enterState(STATE.TEMPLATE_STRING);
     } else if (code === CODE.FORWARD_SLASH) {
       // Check next character to see if we are in a comment
       var nextCode = this.lookAtCharCodeAhead(1);
@@ -150,8 +170,8 @@ export const EXPRESSION = Parser.createState({
         nextCode === CODE.CLOSE_ANGLE_BRACKET
       ) {
         // Let the STATE.WITHIN_OPEN_TAG state deal with the ending tag sequence
-        this.currentPart.endPos = this.pos;
-        this.endExpression();
+        expression.endPos = this.pos;
+        this.exitState();
         this.rewind(1);
 
         if (this.state !== STATE.WITHIN_OPEN_TAG) {
@@ -167,12 +187,12 @@ export const EXPRESSION = Parser.createState({
       }
     } else if (code === CODE.PIPE && parentState === STATE.TAG_PARAMS) {
       if (depth === 0) {
-        this.currentPart.groupStack.push(code);
-        this.currentPart.isStringLiteral = false;
-        this.currentPart.value += ch;
+        expression.groupStack.push(code);
+        expression.isStringLiteral = false;
+        expression.value += ch;
         return;
       } else if (depth === 1) {
-        this.endExpression();
+        this.exitState();
         return;
       }
     } else if (
@@ -181,12 +201,12 @@ export const EXPRESSION = Parser.createState({
       code === CODE.OPEN_CURLY_BRACE
     ) {
       if (depth === 0 && code === CODE.OPEN_PAREN) {
-        this.currentPart.lastLeftParenPos = this.currentPart.value.length;
+        expression.lastLeftParenPos = expression.value.length;
       }
 
-      this.currentPart.groupStack.push(code);
-      this.currentPart.isStringLiteral = false;
-      this.currentPart.value += ch;
+      expression.groupStack.push(code);
+      expression.isStringLiteral = false;
+      expression.value += ch;
       return;
     } else if (
       code === CODE.CLOSE_PAREN ||
@@ -198,8 +218,8 @@ export const EXPRESSION = Parser.createState({
           // We are ending the attribute group so end this expression and let the
           // STATE.WITHIN_OPEN_TAG state deal with the ending attribute group
           if (this.currentOpenTag.withinAttrGroup) {
-            this.currentPart.endPos = this.pos + 1;
-            this.endExpression();
+            expression.endPos = this.pos + 1;
+            this.exitState();
             // Let the STATE.WITHIN_OPEN_TAG state deal with the ending tag sequence
             this.rewind(1);
             if (this.state !== STATE.WITHIN_OPEN_TAG) {
@@ -210,7 +230,7 @@ export const EXPRESSION = Parser.createState({
           }
         } else {
           return this.notifyError(
-            this.currentPart.pos,
+            expression.pos,
             "INVALID_EXPRESSION",
             'Mismatched group. A closing "' +
               ch +
@@ -219,7 +239,7 @@ export const EXPRESSION = Parser.createState({
         }
       }
 
-      let matchingGroupCharCode = this.currentPart.groupStack.pop();
+      let matchingGroupCharCode = expression.groupStack.pop();
 
       if (
         (code === CODE.CLOSE_PAREN &&
@@ -230,7 +250,7 @@ export const EXPRESSION = Parser.createState({
           matchingGroupCharCode !== CODE.OPEN_CURLY_BRACE)
       ) {
         return this.notifyError(
-          this.currentPart.pos,
+          expression.pos,
           "INVALID_EXPRESSION",
           'Mismatched group. A "' +
             ch +
@@ -240,20 +260,19 @@ export const EXPRESSION = Parser.createState({
         );
       }
 
-      this.currentPart.value += ch;
+      expression.value += ch;
 
-      if (this.currentPart.groupStack.length === 0) {
+      if (expression.groupStack.length === 0) {
         if (code === CODE.CLOSE_PAREN) {
-          this.currentPart.lastRightParenPos =
-            this.currentPart.value.length - 1;
+          expression.lastRightParenPos = expression.value.length - 1;
           if (
             (parentState == STATE.ATTRIBUTE_NAME ||
               parentState == STATE.TAG_ARGS ||
               parentState == STATE.WITHIN_OPEN_TAG) &&
             this.lookPastWhitespaceFor("{")
           ) {
-            this.currentPart.method = true;
-            this.currentPart.value += this.consumeWhitespace();
+            expression.method = true;
+            expression.value += this.consumeWhitespace();
             return;
           }
         }
@@ -262,8 +281,8 @@ export const EXPRESSION = Parser.createState({
         var endTagArgs =
           code === CODE.CLOSE_PAREN && parentState === STATE.TAG_ARGS;
         if (endPlaceholder || endTagArgs) {
-          this.currentPart.endPos = this.pos + 1;
-          this.endExpression();
+          expression.endPos = this.pos + 1;
+          this.exitState();
           return;
         }
       }
@@ -280,8 +299,8 @@ export const EXPRESSION = Parser.createState({
             parentState === STATE.ATTRIBUTE_VALUE ||
             parentState === STATE.WITHIN_OPEN_TAG)
         ) {
-          this.currentPart.endPos = this.pos;
-          this.endExpression();
+          expression.endPos = this.pos;
+          this.exitState();
           this.endAttribute();
           // Let the STATE.WITHIN_OPEN_TAG state deal with the ending tag sequence
           this.rewind(1);
@@ -294,7 +313,7 @@ export const EXPRESSION = Parser.createState({
       }
 
       if (code === CODE.SEMICOLON) {
-        this.endExpression();
+        this.exitState();
         this.endAttribute();
         if (this.isConcise) {
           this.finishOpenTag();
@@ -342,9 +361,9 @@ export const EXPRESSION = Parser.createState({
             this.skip(1);
           }
 
-          this.currentPart.endedWithComma = true;
+          expression.endedWithComma = true;
         } else if (
-          this.currentPart.parentState === STATE.ATTRIBUTE_NAME &&
+          expression.parentState === STATE.ATTRIBUTE_NAME &&
           this.lookPastWhitespaceFor("=")
         ) {
           this.consumeWhitespace();
@@ -352,9 +371,9 @@ export const EXPRESSION = Parser.createState({
         } else if (parentState !== STATE.TAG_NAME) {
           var typeofExpression = this.checkForTypeofOperator();
           if (typeofExpression) {
-            this.currentPart.value += typeofExpression;
-            this.currentPart.isStringLiteral = false;
-            this.currentPart.hasUnenclosedWhitespace = true;
+            expression.value += typeofExpression;
+            expression.isStringLiteral = false;
+            expression.hasUnenclosedWhitespace = true;
             this.skip(typeofExpression.length - 1);
             return;
           }
@@ -362,15 +381,15 @@ export const EXPRESSION = Parser.createState({
           var operator = this.checkForOperator();
 
           if (operator) {
-            this.currentPart.isStringLiteral = false;
-            this.currentPart.hasUnenclosedWhitespace = true;
-            this.currentPart.value += operator;
+            expression.isStringLiteral = false;
+            expression.hasUnenclosedWhitespace = true;
+            expression.value += operator;
             return;
           }
         }
 
-        this.currentPart.endPos = this.pos;
-        this.endExpression();
+        expression.endPos = this.pos;
+        this.exitState();
         this.endAttribute();
         if (this.state !== STATE.WITHIN_OPEN_TAG) {
           // Make sure we transition into parsing within the open tag
@@ -378,8 +397,8 @@ export const EXPRESSION = Parser.createState({
         }
         return;
       } else if (code === CODE.EQUAL && parentState === STATE.ATTRIBUTE_NAME) {
-        this.currentPart.endPos = this.pos;
-        this.endExpression();
+        expression.endPos = this.pos;
+        this.exitState();
         // We encountered "=" which means we need to start reading
         // the attribute value.
         this.enterState(STATE.ATTRIBUTE_VALUE);
@@ -387,29 +406,29 @@ export const EXPRESSION = Parser.createState({
         return;
       }
 
-      if (this.currentPart.value === "") {
+      if (expression.value === "") {
         let typeofExpression = this.checkForTypeofOperatorAtStart();
         if (typeofExpression) {
-          this.currentPart.value += typeofExpression;
-          this.currentPart.isStringLiteral = false;
-          this.currentPart.hasUnenclosedWhitespace = true;
+          expression.value += typeofExpression;
+          expression.isStringLiteral = false;
+          expression.hasUnenclosedWhitespace = true;
           this.skip(typeofExpression.length - 1);
           return;
         }
       }
 
-      if (this.currentPart.parentState === STATE.TAG_PARAMS) {
+      if (expression.parentState === STATE.TAG_PARAMS) {
         if (code === CODE.PIPE) {
-          this.endExpression();
+          this.exitState();
           this.rewind(1);
           this.enterState(STATE.TAG_PARAMS);
           return;
         }
       }
 
-      if (this.currentPart.parentState === STATE.TAG_VAR) {
+      if (expression.parentState === STATE.TAG_VAR) {
         if (code === CODE.EQUAL || code === CODE.CLOSE_ANGLE_BRACKET) {
-          this.endExpression();
+          this.exitState();
           this.rewind(1);
           if (this.state !== STATE.WITHIN_OPEN_TAG) {
             // Make sure we transition into parsing within the open tag
@@ -419,31 +438,35 @@ export const EXPRESSION = Parser.createState({
         }
       }
 
-      if (this.currentPart.parentState === STATE.TAG_NAME) {
+      if (expression.parentState === STATE.TAG_NAME) {
         if (this.checkForEscapedEscapedPlaceholder(ch, code)) {
-          this.currentPart.value += "\\";
+          expression.value += "\\";
           this.skip(1);
           return;
         } else if (this.checkForEscapedPlaceholder(ch, code)) {
-          this.currentPart.value += "$";
+          expression.value += "$";
           this.skip(1);
           return;
         } else if (
           code === CODE.DOLLAR &&
           this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
         ) {
-          this.currentPart.endPos = this.pos;
-          this.endExpression();
+          expression.endPos = this.pos;
+          debugger;
+          this.exitState();
           // We expect to start a placeholder at the first curly brace (the next character)
-          this.beginPlaceholder(true, true /* tag name */);
+          this.enterState(STATE.PLACEHOLDER, {
+            escape: true,
+            withinTagName: true,
+          });
           return;
         } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
-          this.endExpression();
+          this.exitState();
           this.rewind(1);
-          this.beginTagNameShorthand();
+          this.enterState(STATE.TAG_NAME_SHORTHAND);
           return;
         } else if (code === CODE.FORWARD_SLASH) {
-          this.endExpression();
+          this.exitState();
           this.rewind(1);
           this.enterState(STATE.TAG_VAR);
           return;
@@ -451,25 +474,25 @@ export const EXPRESSION = Parser.createState({
       }
 
       if (
-        this.currentPart.parentState === STATE.TAG_NAME ||
-        this.currentPart.parentState === STATE.TAG_VAR
+        expression.parentState === STATE.TAG_NAME ||
+        expression.parentState === STATE.TAG_VAR
       ) {
         if (code === CODE.PIPE) {
-          this.endExpression();
+          this.exitState();
           this.rewind(1);
           this.enterState(STATE.TAG_PARAMS);
           return;
         } else if (code === CODE.EQUAL) {
-          this.endExpression();
+          this.exitState();
           this.rewind(1);
           this.enterState(STATE.WITHIN_OPEN_TAG);
           return;
         } else if (
           this.lookAtCharCodeAhead(1) === CODE.OPEN_PAREN &&
-          this.currentPart.value
+          expression.value
         ) {
-          this.currentPart.value += ch;
-          this.endExpression();
+          expression.value += ch;
+          this.exitState();
           this.enterState(STATE.TAG_ARGS);
           return;
         }
@@ -478,7 +501,7 @@ export const EXPRESSION = Parser.createState({
 
     // If we got here then we didn't find a string part so we know
     // the current expression is not a string literal
-    this.currentPart.isStringLiteral = false;
-    this.currentPart.value += ch;
+    expression.isStringLiteral = false;
+    expression.value += ch;
   },
 });
