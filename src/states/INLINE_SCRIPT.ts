@@ -27,8 +27,14 @@ export const INLINE_SCRIPT = Parser.createState({
     }
   },
 
-  comment(comment) {
-    this.currentPart.value += comment.rawValue;
+  return(childState, childPart) {
+    switch (childState) {
+      case STATE.JS_COMMENT_LINE:
+      case STATE.JS_COMMENT_BLOCK: {
+        this.currentPart.value += childPart.rawValue;
+        break;
+      }
+    }
   },
 
   char(ch, code) {
@@ -51,11 +57,11 @@ export const INLINE_SCRIPT = Parser.createState({
       // Check next character to see if we are in a comment
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.FORWARD_SLASH) {
-        this.beginLineComment();
+        this.enterState(STATE.JS_COMMENT_LINE);
         this.skip(1);
         return;
       } else if (nextCode === CODE.ASTERISK) {
-        this.beginBlockComment();
+        this.enterState(STATE.JS_COMMENT_BLOCK);
         this.skip(1);
         return;
       }

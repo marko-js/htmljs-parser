@@ -1,4 +1,4 @@
-import { Parser, CODE } from "../internal";
+import { Parser, CODE, STATE } from "../internal";
 
 // We enter STATE.SCRIPTLET after we encounter a "<%" while in STATE.HTML_CONTENT.
 // We leave STATE.SCRIPTLET if we see a "%>".
@@ -17,8 +17,14 @@ export const SCRIPTLET = Parser.createState({
     );
   },
 
-  comment(comment) {
-    this.currentPart.value += comment.rawValue;
+  return(childState, childPart) {
+    switch (childState) {
+      case STATE.JS_COMMENT_LINE:
+      case STATE.JS_COMMENT_BLOCK: {
+        this.currentPart.value += childPart.rawValue;
+        break;
+      }
+    }
   },
 
   char(ch, code) {
@@ -37,7 +43,7 @@ export const SCRIPTLET = Parser.createState({
     } else if (code === CODE.FORWARD_SLASH) {
       if (this.lookAtCharCodeAhead(1) === CODE.ASTERISK) {
         // Skip over code inside a JavaScript block comment
-        this.beginBlockComment();
+        this.enterState(STATE.JS_COMMENT_BLOCK);
         this.skip(1);
         return;
       }

@@ -10,27 +10,36 @@ export const DECLARATION = Parser.createState({
     this.currentPart.value += str;
   },
 
-  eof() {
+  eof(declaration) {
     this.notifyError(
-      this.currentPart.pos,
+      declaration.pos,
       "MALFORMED_DECLARATION",
       "EOF reached while parsing declaration"
     );
   },
 
-  char(ch, code) {
+  enter(oldState, declaration) {
+    this.endText();
+    declaration.value = "";
+  },
+
+  exit(declaration) {
+    this.notifiers.notifyDeclaration(declaration);
+  },
+
+  char(ch, code, declaration) {
     if (code === CODE.QUESTION) {
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.CLOSE_ANGLE_BRACKET) {
-        this.currentPart.endPos = this.pos + 2;
-        this.endDeclaration();
+        declaration.endPos = this.pos + 2;
+        this.exitState();
         this.skip(1);
       }
     } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.currentPart.endPos = this.pos + 1;
-      this.endDeclaration();
+      declaration.endPos = this.pos + 1;
+      this.exitState();
     } else {
-      this.currentPart.value += ch;
+      declaration.value += ch;
     }
   },
 });

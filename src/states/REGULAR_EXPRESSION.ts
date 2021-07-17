@@ -3,6 +3,10 @@ import { Parser, CODE, STATE } from "../internal";
 export const REGULAR_EXPRESSION = Parser.createState({
   name: "REGULAR_EXPRESSION",
 
+  enter(oldState, regularExpression) {
+    regularExpression.value = "/";
+  },
+
   eol() {
     this.notifyError(
       this.pos,
@@ -19,29 +23,29 @@ export const REGULAR_EXPRESSION = Parser.createState({
     );
   },
 
-  char(ch, code) {
+  char(ch, code, regularExpression) {
     var nextCh;
-    this.currentPart.value += ch;
+    regularExpression.value += ch;
     if (code === CODE.BACK_SLASH) {
       // Handle escape sequence
       nextCh = this.lookAtCharAhead(1);
       this.skip(1);
-      this.currentPart.value += nextCh;
+      regularExpression.value += nextCh;
     } else if (
       code === CODE.OPEN_SQUARE_BRACKET &&
-      this.currentPart.inCharacterSet
+      regularExpression.inCharacterSet
     ) {
-      this.currentPart.inCharacterSet = true;
+      regularExpression.inCharacterSet = true;
     } else if (
       code === CODE.CLOSE_SQUARE_BRACKET &&
-      this.currentPart.inCharacterSet
+      regularExpression.inCharacterSet
     ) {
-      this.currentPart.inCharacterSet = false;
+      regularExpression.inCharacterSet = false;
     } else if (
       code === CODE.FORWARD_SLASH &&
-      !this.currentPart.inCharacterSet
+      !regularExpression.inCharacterSet
     ) {
-      this.endRegularExpression();
+      this.exitState();
     }
   },
 });
