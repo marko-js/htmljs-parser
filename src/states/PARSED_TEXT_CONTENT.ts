@@ -60,7 +60,7 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
       } else if (this.checkForCDATA()) {
         return;
       } else if (this.lookAtCharCodeAhead(1) === CODE.PERCENT) {
-        this.beginScriptlet();
+        this.enterState(STATE.SCRIPTLET);
         this.skip(1);
         return;
       }

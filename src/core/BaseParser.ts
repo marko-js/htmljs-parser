@@ -14,7 +14,8 @@ export type StateDefinition = {
   return?: (
     this: Parser,
     childState?: StateDefinition,
-    childPart?: any
+    childPart?: any,
+    activePart?: any
   ) => unknown;
   expression?: (this: Parser, expression: any) => void;
   placeholder?: (this: Parser, placeholder: any) => void;
