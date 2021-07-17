@@ -6,30 +6,40 @@ import { Parser, CODE } from "../internal";
 export const HTML_COMMENT = Parser.createState({
   name: "HTML_COMMENT",
 
-  eol(newLineChars) {
-    this.currentPart.value += newLineChars;
+  enter(oldState, comment) {
+    this.endText();
+    comment.value = "";
   },
 
-  eof() {
+  exit(comment) {
+    comment.endPos = this.pos + 3;
+    this.notifiers.notifyComment(comment);
+  },
+
+  eol(newLineChars, comment) {
+    comment.value += newLineChars;
+  },
+
+  eof(comment) {
     this.notifyError(
-      this.currentPart.pos,
+      comment.pos,
       "MALFORMED_COMMENT",
       "EOF reached while parsing comment"
     );
   },
 
-  char(ch, code) {
+  char(ch, code, comment) {
     if (code === CODE.HYPHEN) {
       var match = this.lookAheadFor("->");
       if (match) {
-        this.currentPart.endPos = this.pos + 3;
-        this.endHtmlComment();
+        comment.endPos = this.pos + 3;
+        this.exitState();
         this.skip(match.length);
       } else {
-        this.currentPart.value += ch;
+        comment.value += ch;
       }
     } else {
-      this.currentPart.value += ch;
+      comment.value += ch;
     }
   },
 });
