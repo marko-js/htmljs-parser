@@ -298,36 +298,38 @@ export const EXPRESSION = Parser.createState({
         this.endAttribute();
         if (this.isConcise) {
           this.finishOpenTag();
-          this.beginCheckTrailingWhitespace(function (hasChar) {
-            if (hasChar) {
-              var code = hasChar.ch.charCodeAt(0);
+          this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
+            handler(err) {
+              if (err) {
+                var code = err.ch.charCodeAt(0);
 
-              if (code === CODE.FORWARD_SLASH) {
-                if (this.lookAheadFor("/")) {
-                  this.enterState(STATE.JS_COMMENT_LINE);
-                  this.skip(1);
-                  return;
-                } else if (this.lookAheadFor("*")) {
-                  this.enterState(STATE.JS_COMMENT_BLOCK);
-                  this.skip(1);
+                if (code === CODE.FORWARD_SLASH) {
+                  if (this.lookAheadFor("/")) {
+                    this.enterState(STATE.JS_COMMENT_LINE);
+                    this.skip(1);
+                    return;
+                  } else if (this.lookAheadFor("*")) {
+                    this.enterState(STATE.JS_COMMENT_BLOCK);
+                    this.skip(1);
+                    return;
+                  }
+                } else if (
+                  code === CODE.OPEN_ANGLE_BRACKET &&
+                  this.lookAheadFor("!--")
+                ) {
+                  // html comment
+                  this.beginHtmlComment();
+                  this.skip(3);
                   return;
                 }
-              } else if (
-                code === CODE.OPEN_ANGLE_BRACKET &&
-                this.lookAheadFor("!--")
-              ) {
-                // html comment
-                this.beginHtmlComment();
-                this.skip(3);
-                return;
-              }
 
-              this.notifyError(
-                this.pos,
-                "INVALID_CODE_AFTER_SEMICOLON",
-                "A semicolon indicates the end of a line.  Only comments may follow it."
-              );
-            }
+                this.notifyError(
+                  this.pos,
+                  "INVALID_CODE_AFTER_SEMICOLON",
+                  "A semicolon indicates the end of a line.  Only comments may follow it."
+                );
+              }
+            },
           });
         }
         return;

@@ -17,6 +17,8 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
   },
 
   return(childState, childPart) {
+    this.indent = "";
+
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK: {
@@ -33,21 +35,25 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
         if (childPart.type === "block") {
           // Make sure there is only whitespace on the line
           // after the ending "*/" sequence
-          this.beginCheckTrailingWhitespace(
-            this.handleTrailingWhitespaceJavaScriptComment
-          );
+          this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
+            handler(err) {
+              if (err) {
+                // This is a non-whitespace! We don't allow non-whitespace
+                // after matching two or more hyphens. This is user error...
+                this.notifyError(
+                  this.pos,
+                  "INVALID_CHARACTER",
+                  'A non-whitespace of "' +
+                    err.ch +
+                    '" was found after a JavaScript block comment.'
+                );
+              }
+            },
+          });
         }
 
         break;
       }
-    }
-  },
-
-  endTrailingWhitespace(eof) {
-    this.endHtmlBlock();
-
-    if (eof) {
-      this.htmlEOF();
     }
   },
 
