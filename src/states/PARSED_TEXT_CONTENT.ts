@@ -1,5 +1,4 @@
 import { Parser, STATE, CODE } from "../internal";
-import { HTML_CONTENT } from "./HTML_CONTENT";
 
 // We enter STATE.PARSED_TEXT_CONTENT when we are parsing
 // the body of a tag does not contain HTML tags but may contains
@@ -23,13 +22,16 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
 
         break;
       }
+      case STATE.TEMPLATE_STRING: {
+        this.text += childPart.value;
+        break;
+      }
+      case STATE.PLACEHOLDER: {
+        // This child has already notified the listener of their presence so there is
+        // nothing to do here
+        break;
+      }
     }
-  },
-
-  placeholder: HTML_CONTENT.placeholder,
-
-  templateString(templateString) {
-    this.text += templateString.value;
   },
 
   eol(newLine) {
@@ -80,7 +82,7 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
     }
 
     if (code === CODE.BACKTICK) {
-      this.beginTemplateString();
+      this.enterState(STATE.TEMPLATE_STRING);
       return;
     }
 

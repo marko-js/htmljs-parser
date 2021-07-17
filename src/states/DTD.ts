@@ -14,8 +14,8 @@ export const DTD = Parser.createState({
     this.notifiers.notifyDocumentType(documentType);
   },
 
-  eol(str) {
-    this.currentPart.value += str;
+  eol(str, documentType) {
+    documentType.value += str;
   },
 
   eof(documentType) {
