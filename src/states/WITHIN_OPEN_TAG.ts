@@ -20,9 +20,9 @@ export const WITHIN_OPEN_TAG = Parser.createState({
         break;
       }
       case STATE.PLACEHOLDER: {
-        var attr = this.beginAttribute();
-        attr.value = childPart.value;
-        this.endAttribute();
+        this.enterState(STATE.ATTRIBUTE)
+        this.currentAttribute.value = childPart.value;
+        this.exitState();
 
         this.enterState(STATE.AFTER_PLACEHOLDER_WITHIN_TAG);
         break;
@@ -35,13 +35,11 @@ export const WITHIN_OPEN_TAG = Parser.createState({
         if (method) {
           let targetAttribute;
           if (this.currentOpenTag.attributes.length === 0) {
-            targetAttribute = this.beginAttribute();
+            this.enterState(STATE.ATTRIBUTE)
             this.currentAttribute.name = "default";
             this.currentAttribute.default = true;
-          } else {
-            targetAttribute =
-              this.currentAttribute || peek(this.currentOpenTag.attributes);
           }
+          targetAttribute = this.currentAttribute || peek(this.currentOpenTag.attributes);
           targetAttribute.method = true;
           targetAttribute.value = method.value;
           targetAttribute.pos = method.pos;
@@ -84,6 +82,44 @@ export const WITHIN_OPEN_TAG = Parser.createState({
 
   char(ch, code) {
     if (this.isConcise) {
+      if (code === CODE.SEMICOLON) {
+        this.finishOpenTag();
+        this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
+          handler(err) {
+            if (err) {
+              var code = err.ch.charCodeAt(0);
+
+              if (code === CODE.FORWARD_SLASH) {
+                if (this.lookAheadFor("/")) {
+                  this.enterState(STATE.JS_COMMENT_LINE);
+                  this.skip(1);
+                  return;
+                } else if (this.lookAheadFor("*")) {
+                  this.enterState(STATE.JS_COMMENT_BLOCK);
+                  this.skip(1);
+                  return;
+                }
+              } else if (
+                code === CODE.OPEN_ANGLE_BRACKET &&
+                this.lookAheadFor("!--")
+              ) {
+                // html comment
+                this.enterState(STATE.HTML_COMMENT);
+                this.skip(3);
+                return;
+              }
+
+              this.notifyError(
+                this.pos,
+                "INVALID_CODE_AFTER_SEMICOLON",
+                "A semicolon indicates the end of a line.  Only comments may follow it."
+              );
+            }
+          },
+        });
+        return;
+      }
+
       if (code === CODE.HTML_BLOCK_DELIMITER) {
         if (this.lookAtCharCodeAhead(1) !== CODE.HTML_BLOCK_DELIMITER) {
           if (this.legacyCompatibility) {
@@ -158,17 +194,7 @@ export const WITHIN_OPEN_TAG = Parser.createState({
       }
     }
 
-    if (this.checkForEscapedEscapedPlaceholder(ch, code)) {
-      let attr = this.beginAttribute();
-      attr.name = "\\";
-      this.skip(1);
-      return;
-    } else if (this.checkForEscapedPlaceholder(ch, code)) {
-      let attr = this.beginAttribute();
-      attr.name = "$";
-      this.skip(1);
-      return;
-    } else if (this.checkForPlaceholder(ch, code)) {
+    if (this.checkForPlaceholder(ch, code)) {
       return;
     }
 
@@ -192,6 +218,8 @@ export const WITHIN_OPEN_TAG = Parser.createState({
 
     if (isWhitespaceCode(code)) {
       // ignore whitespace within element...
+    } else if (code === CODE.COMMA) {
+      this.consumeWhitespace();
     } else if (code === CODE.OPEN_PAREN) {
       this.rewind(1);
       this.enterState(STATE.EXPRESSION);
@@ -201,7 +229,7 @@ export const WITHIN_OPEN_TAG = Parser.createState({
       this.rewind(1);
       // attribute name is initially the first non-whitespace
       // character that we found
-      this.beginAttribute();
+      this.enterState(STATE.ATTRIBUTE)
     }
   },
 });
