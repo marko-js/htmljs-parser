@@ -111,6 +111,27 @@ export class BaseParser {
     }
   }
 
+  checkForTerminator(terminator: string | string[], ch: string) {
+    if (typeof terminator === "string") {
+      if (ch === terminator) {
+        return true;
+      } else if (terminator.length > 1) {
+        for (var i = 0; i < terminator.length; i++) {
+          if (this.src[this.pos+i] !== terminator[i]) {
+            return false;
+          }
+        }
+        return true;
+      }
+    } else {
+      for (var i = 0; i < terminator.length; i++) {
+        if (this.checkForTerminator(terminator[i], ch)) {
+          return true;
+        }
+      }
+    }
+  }
+
   /**
    * Look ahead to see if the given str matches the substring sequence
    * beyond
