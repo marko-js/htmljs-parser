@@ -10,7 +10,6 @@ export const CHECK_TRAILING_WHITESPACE = Parser.createState({
   },
 
   exit({ handler, err, eof }) {
-    debugger;
     handler.call(this, err, eof);
   },
 

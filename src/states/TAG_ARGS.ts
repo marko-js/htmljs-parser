@@ -19,14 +19,14 @@ export const TAG_ARGS = Parser.createState({
         const expression = childPart;
         var method = this.getAndRemoveMethod(expression);
         if (method) {
-          this.beginAttribute();
+          this.enterState(STATE.ATTRIBUTE);
           this.currentAttribute.name = "default";
           this.currentAttribute.default = true;
           this.currentAttribute.method = true;
           this.currentAttribute.value = method.value;
           this.currentAttribute.pos = method.pos;
           this.currentAttribute.endPos = method.endPos;
-          this.endAttribute();
+          this.exitState();
           if (STATE.WITHIN_OPEN_TAG !== this.state) {
             this.enterState(STATE.WITHIN_OPEN_TAG);
           }

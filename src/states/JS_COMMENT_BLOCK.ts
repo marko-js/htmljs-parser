@@ -1,7 +1,6 @@
 import { Parser, CODE, STATE } from "../internal";
 
 // We enter STATE.JS_COMMENT_BLOCK after we encounter a "/*" sequence
-// while in STATE.ATTRIBUTE_VALUE or STATE.DELIMITED_EXPRESSION.
 // We leave STATE.JS_COMMENT_BLOCK when we see a "*/" sequence.
 export const JS_COMMENT_BLOCK = Parser.createState({
   name: "JS_COMMENT_BLOCK",

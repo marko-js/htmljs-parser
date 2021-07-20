@@ -14,7 +14,7 @@ export const EXPRESSION = Parser.createState({
   exit(expression) {
     // TODO: Probably shouldn't do this, but it makes it easier to test!
     if (
-      expression.parentState === STATE.ATTRIBUTE_VALUE &&
+      expression.parentState === STATE.ATTRIBUTE &&
       expression.hasUnenclosedWhitespace
     ) {
       expression.value = "(" + expression.value + ")";
@@ -25,20 +25,10 @@ export const EXPRESSION = Parser.createState({
     let depth = expression.groupStack.length;
 
     if (depth === 0) {
-      if (
-        expression.parentState === STATE.ATTRIBUTE_NAME ||
-        expression.parentState === STATE.ATTRIBUTE_VALUE
-      ) {
+      if (expression.terminatedByWhitespace) {
         expression.endPos = this.pos;
+        this.rewind(1);
         this.exitState();
-        // We encountered a whitespace character while parsing the attribute name. That
-        // means the attribute name has ended and we should continue parsing within the
-        // open tag
-        this.endAttribute();
-
-        if (this.isConcise) {
-          this.openTagEOL();
-        }
         return;
       } else if (expression.parentState === STATE.TAG_NAME) {
         expression.endPos = this.pos;
@@ -71,7 +61,7 @@ export const EXPRESSION = Parser.createState({
     } else {
       let parentState = expression.parentState;
 
-      if (parentState === STATE.ATTRIBUTE_NAME) {
+      if (parentState === STATE.ATTRIBUTE && !this.currentAttribute.name) {
         return this.notifyError(
           expression.pos,
           "MALFORMED_OPEN_TAG",
@@ -79,7 +69,7 @@ export const EXPRESSION = Parser.createState({
             this.currentOpenTag.tagName +
             '" tag'
         );
-      } else if (parentState === STATE.ATTRIBUTE_VALUE) {
+      } else if (parentState === STATE.ATTRIBUTE) {
         return this.notifyError(
           expression.pos,
           "MALFORMED_OPEN_TAG",
@@ -141,15 +131,42 @@ export const EXPRESSION = Parser.createState({
     let depth = expression.groupStack.length;
     let parentState = expression.parentState;
 
-    if (code === CODE.SINGLE_QUOTE) {
+    if (depth === 0) {
+      if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
+        var operator = this.checkForOperator();
+
+        if (operator) {
+          expression.isStringLiteral = false;
+          expression.hasUnenclosedWhitespace = true;
+          expression.value += operator;
+          return;
+        } else {
+          expression.endPos = this.pos;
+          this.rewind(1);
+          this.exitState();
+          return;
+        }
+      } else if (
+        expression.terminator &&
+          this.checkForTerminator(expression.terminator, ch)
+      ) {
+        expression.endPos = this.pos;
+        this.rewind(1);
+        this.exitState();
+        return;
+      } else if (expression.allowEscapes && code === CODE.BACK_SLASH) {
+        // TODO: this is kinda stupid
+        expression.isStringLiteral = false;
+        expression.value += this.src[this.pos+1];
+        this.skip(1);
+        return;
+      }
+    }
+
+    if (code === CODE.SINGLE_QUOTE || code === CODE.DOUBLE_QUOTE) {
       return this.enterState(STATE.STRING, {
-        quoteChar: "'",
-        quoteCharCode: CODE.SINGLE_QUOTE,
-      });
-    } else if (code === CODE.DOUBLE_QUOTE) {
-      return this.enterState(STATE.STRING, {
-        quoteChar: '"',
-        quoteCharCode: CODE.DOUBLE_QUOTE,
+        quoteChar: ch,
+        quoteCharCode: code,
       });
     } else if (code === CODE.BACKTICK) {
       return this.enterState(STATE.TEMPLATE_STRING);
@@ -266,8 +283,7 @@ export const EXPRESSION = Parser.createState({
         if (code === CODE.CLOSE_PAREN) {
           expression.lastRightParenPos = expression.value.length - 1;
           if (
-            (parentState == STATE.ATTRIBUTE_NAME ||
-              parentState == STATE.TAG_ARGS ||
+            (parentState == STATE.TAG_ARGS ||
               parentState == STATE.WITHIN_OPEN_TAG) &&
             this.lookPastWhitespaceFor("{")
           ) {
@@ -290,18 +306,15 @@ export const EXPRESSION = Parser.createState({
       return;
     }
 
-    if (depth === 0) {
+    if (depth === 0 && !expression.hasOwnProperty("terminator")) {
       if (!this.isConcise) {
         if (
           code === CODE.CLOSE_ANGLE_BRACKET &&
           (parentState === STATE.TAG_NAME ||
-            parentState === STATE.ATTRIBUTE_NAME ||
-            parentState === STATE.ATTRIBUTE_VALUE ||
             parentState === STATE.WITHIN_OPEN_TAG)
         ) {
           expression.endPos = this.pos;
           this.exitState();
-          this.endAttribute();
           // Let the STATE.WITHIN_OPEN_TAG state deal with the ending tag sequence
           this.rewind(1);
           if (this.state !== STATE.WITHIN_OPEN_TAG) {
@@ -314,7 +327,6 @@ export const EXPRESSION = Parser.createState({
 
       if (code === CODE.SEMICOLON) {
         this.exitState();
-        this.endAttribute();
         if (this.isConcise) {
           this.finishOpenTag();
           this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
@@ -362,12 +374,6 @@ export const EXPRESSION = Parser.createState({
           }
 
           expression.endedWithComma = true;
-        } else if (
-          expression.parentState === STATE.ATTRIBUTE_NAME &&
-          this.lookPastWhitespaceFor("=")
-        ) {
-          this.consumeWhitespace();
-          return;
         } else if (parentState !== STATE.TAG_NAME) {
           var typeofExpression = this.checkForTypeofOperator();
           if (typeofExpression) {
@@ -390,19 +396,10 @@ export const EXPRESSION = Parser.createState({
 
         expression.endPos = this.pos;
         this.exitState();
-        this.endAttribute();
         if (this.state !== STATE.WITHIN_OPEN_TAG) {
           // Make sure we transition into parsing within the open tag
           this.enterState(STATE.WITHIN_OPEN_TAG);
         }
-        return;
-      } else if (code === CODE.EQUAL && parentState === STATE.ATTRIBUTE_NAME) {
-        expression.endPos = this.pos;
-        this.exitState();
-        // We encountered "=" which means we need to start reading
-        // the attribute value.
-        this.enterState(STATE.ATTRIBUTE_VALUE);
-        this.consumeWhitespace();
         return;
       }
 
@@ -452,7 +449,6 @@ export const EXPRESSION = Parser.createState({
           this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
         ) {
           expression.endPos = this.pos;
-          debugger;
           this.exitState();
           // We expect to start a placeholder at the first curly brace (the next character)
           this.enterState(STATE.PLACEHOLDER, {

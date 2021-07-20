@@ -13,8 +13,6 @@ import {
   htmlTags,
   operators,
 } from "../internal";
-
-const EMPTY_ATTRIBUTES = [];
 export class Parser extends BaseParser {
   public notifiers: ReturnType<typeof createNotifiers>;
   public defaultMode: MODE.HTML | MODE.CONCISE;
@@ -291,25 +289,6 @@ export class Parser extends BaseParser {
   notifyError(pos, errorCode, message) {
     this.end();
     this.notifiers.notifyError(pos, errorCode, message);
-  }
-
-  beginAttribute() {
-    this.currentAttribute = {};
-    if (this.currentOpenTag.attributes === EMPTY_ATTRIBUTES) {
-      this.currentOpenTag.attributes = [this.currentAttribute];
-    } else {
-      this.currentOpenTag.attributes.push(this.currentAttribute);
-    }
-    this.enterState(STATE.ATTRIBUTE_NAME);
-    return this.currentAttribute;
-  }
-
-  endAttribute() {
-    this.currentAttribute = null;
-
-    if (this.state !== STATE.WITHIN_OPEN_TAG) {
-      this.enterState(STATE.WITHIN_OPEN_TAG);
-    }
   }
 
   beginOpenTag() {
