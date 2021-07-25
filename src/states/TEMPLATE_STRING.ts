@@ -35,6 +35,7 @@ export const TEMPLATE_STRING = Parser.createState({
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
       this.enterState(STATE.PLACEHOLDER, { escape: false });
+      this.skip(1);
     } else {
       templateString.value += ch;
       if (code === CODE.BACK_SLASH) {

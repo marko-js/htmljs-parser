@@ -18,7 +18,7 @@ export const PLACEHOLDER = Parser.createState({
     this.placeholderDepth++;
 
     if (oldState !== STATE.EXPRESSION) {
-      this.enterState(STATE.EXPRESSION);
+      this.enterState(STATE.EXPRESSION, { terminator: "}" });
     }
   },
 
@@ -33,9 +33,10 @@ export const PLACEHOLDER = Parser.createState({
   return(childState, childPart, placeholder) {
     switch (childState) {
       case STATE.EXPRESSION: {
-        placeholder.value = childPart.value.slice(1, -1); // Chop off the curly braces
-        placeholder.endPos = childPart.endPos;
+        placeholder.value = childPart.value;
+        placeholder.endPos = childPart.endPos+1;
         this.exitState();
+        this.skip(1); // skip over the closing }
         break;
       }
     }

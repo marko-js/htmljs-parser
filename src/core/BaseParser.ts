@@ -64,13 +64,13 @@ export class BaseParser {
   }
 
   enterState(state: StateDefinition, part = {}) {
-    if (this.state === state) {
-      // Re-entering the same state can lead to unexpected behavior
-      // so we should throw error to catch these types of mistakes
-      throw new Error(
-        "Re-entering the current state is illegal - " + state.name
-      );
-    }
+    // if (this.state === state) {
+    //   // Re-entering the same state can lead to unexpected behavior
+    //   // so we should throw error to catch these types of mistakes
+    //   throw new Error(
+    //     "Re-entering the current state is illegal - " + state.name
+    //   );
+    // }
 
     var parentState = this.state;
     var activePart = (this.activePart = Object.assign(part, {
@@ -94,13 +94,28 @@ export class BaseParser {
     }
   }
 
-  exitState() {
+  exitState(includedEndChars?: string) {
+    // if (!includedEndChars) {
+    //   this.rewind(1);
+    // } else {
+    //   for (let i = 0; i < includedEndChars.length; i++) {
+    //     if (this.src[this.pos+i] !== includedEndChars[i]) {
+    //       throw new Error(
+    //         "Unexpected end character at position " + (this.pos+i)
+    //       );
+    //     }
+    //   }
+    //   this.skip(includedEndChars.length - 1);
+    // }
+
     const childPart = this.parts.pop();
     const childState = this.state;
     const parentState = (this.state = childPart.parentState);
     const parentPart = (this.activePart = this.parts.length
       ? peek(this.parts)
       : undefined);
+
+    // childPart.endPos = this.pos + 1;
 
     if (childState.exit) {
       childState.exit.call(this, childPart);
@@ -198,7 +213,7 @@ export class BaseParser {
     this.src = data; // This is the unmodified data used for reporting warnings
     this.filename = filename;
     this.data = data;
-    this.maxPos = data.length - 1;
+    this.maxPos = data.length;
 
     // Enter initial state
     if (this.initialState) {
@@ -220,7 +235,7 @@ export class BaseParser {
     var pos;
     while ((pos = this.pos) <= this.maxPos) {
       let ch = data[pos];
-      let code = ch.charCodeAt(0);
+      let code = ch && ch.charCodeAt(0);
       let state = this.state;
 
       if (code === CODE.NEWLINE) {
@@ -241,6 +256,12 @@ export class BaseParser {
           this.pos += 2;
           continue;
         }
+      } else if (!code) {
+        if (state.eof) {
+          state.eof.call(this, this.activePart);
+        }
+        this.pos++;
+        continue;
       }
 
       // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
@@ -257,11 +278,6 @@ export class BaseParser {
 
       // move to next position
       this.pos++;
-    }
-
-    let state = this.state;
-    if (state && state.eof) {
-      state.eof.call(this, this.activePart);
-    }
+    }    
   }
 }
