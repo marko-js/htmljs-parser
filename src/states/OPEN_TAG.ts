@@ -1,20 +1,45 @@
 import { Parser, CODE, STATE, isWhitespaceCode, peek } from "../internal";
 
-// We enter STATE.WITHIN_OPEN_TAG after we have fully
-// read in the tag name and encountered a whitespace character
-export const WITHIN_OPEN_TAG = Parser.createState({
-  name: "WITHIN_OPEN_TAG",
+export const OPEN_TAG = Parser.createState({
+  name: "OPEN_TAG",
 
   enter() {
-    if (!this.currentOpenTag.notifiedOpenTagName) {
-      this.currentOpenTag.notifiedOpenTagName = true;
-      this.currentOpenTag.tagNameEndPos = this.pos;
-      this.notifiers.notifyOpenTagName(this.currentOpenTag);
-    }
+    
   },
 
   return(childState, childPart) {
     switch (childState) {
+      case STATE.TAG_NAME: {
+        this.currentOpenTag.tagName = childPart.rawValue;
+        this.currentOpenTag.tagNameParts = childPart.stringParts;
+        this.currentOpenTag.shorthandId = childPart.shorthandId;
+        this.currentOpenTag.shorthandClassNames = childPart.shorthandClassNames;
+        this.currentOpenTag.tagNameStart = childPart.pos;
+        // TODO: why both?
+        this.currentOpenTag.tagNameEnd = this.currentOpenTag.tagNameEndPos = childPart.endPos;
+
+
+        if (!this.currentOpenTag.notifiedOpenTagName) {
+          this.currentOpenTag.notifiedOpenTagName = true;
+          this.notifiers.notifyOpenTagName(this.currentOpenTag);
+        }
+
+        break;
+      }
+      case STATE.ATTRIBUTE: {
+        const attr = childPart;
+        if (this.currentOpenTag.argument && childPart.block && !this.currentOpenTag.attributes.length) {
+          attr.name = "default";
+          attr.default = true;
+          attr.method = true;
+          attr.pos = this.currentOpenTag.argument.pos;
+          attr.value = "function" + this.data.substring(attr.pos, attr.endPos);
+          this.currentOpenTag.argument = undefined;
+        } 
+        this.currentOpenTag.attributes.push(attr);
+        this.currentOpenTag.requiresCommas ||= attr.endedWithComma;
+        break;
+      }
       case STATE.JS_COMMENT_BLOCK: {
         /* Ignore comments within an open tag */
         break;
@@ -28,47 +53,47 @@ export const WITHIN_OPEN_TAG = Parser.createState({
         break;
       }
       case STATE.EXPRESSION: {
-        const expression = childPart;
-        var argument = this.getAndRemoveArgument(expression);
-        var method = this.getAndRemoveMethod(expression);
+        switch (childPart.part) {
+          case "NAME": {
+            this.currentOpenTag.tagNameEnd = childPart.endPos;
+            this.currentOpenTag.tagName = childPart.value;
 
-        if (method) {
-          let targetAttribute;
-          if (this.currentOpenTag.attributes.length === 0) {
-            this.enterState(STATE.ATTRIBUTE)
-            this.currentAttribute.name = "default";
-            this.currentAttribute.default = true;
+            if (!this.currentOpenTag.notifiedOpenTagName) {
+              this.currentOpenTag.notifiedOpenTagName = true;
+              this.currentOpenTag.tagNameEndPos = this.pos;
+              this.notifiers.notifyOpenTagName(this.currentOpenTag);
+            }
+
+            const nextCharCode = this.lookAtCharCodeAhead(1);
+            if (nextCharCode === CODE.PERIOD || nextCharCode === CODE.NUMBER_SIGN) {
+              this.enterState(STATE.EXPRESSION, {
+                part: "NAME",
+                terminatedByWhitespace: true,
+                terminator: [this.isConcise ? ";" : ">", "/>", "(", "|", ".", "#"] 
+              });
+            }
+            break;
           }
-          targetAttribute = this.currentAttribute || peek(this.currentOpenTag.attributes);
-          targetAttribute.method = true;
-          targetAttribute.value = method.value;
-          targetAttribute.pos = method.pos;
-          targetAttribute.endPos = method.endPos;
-        } else if (argument) {
-          // We found an argument... the argument could be for an attribute or the tag
-          if (this.currentOpenTag.attributes.length === 0) {
-            if (this.currentOpenTag.argument != null) {
-              this.notifyError(
-                expression.endPos,
-                "ILLEGAL_TAG_ARGUMENT",
-                "A tag can only have one argument"
+          case "VARIABLE": {
+            if (!childPart.value) {
+              return this.notifyError(
+                this.pos,
+                "MISSING_TAG_VARIABLE",
+                "A slash was found that was not followed by a variable name or lhs expression"
               );
-              return;
             }
-            this.currentOpenTag.argument = argument;
-          } else {
-            let targetAttribute =
-              this.currentAttribute || peek(this.currentOpenTag.attributes);
-
-            if (targetAttribute.argument != null) {
-              this.notifyError(
-                expression.endPos,
-                "ILLEGAL_ATTRIBUTE_ARGUMENT",
-                "An attribute can only have one argument"
-              );
-              return;
-            }
-            targetAttribute.argument = argument;
+            this.currentOpenTag.var = childPart;
+            break;
+          }
+          case "ARGUMENT": {
+            this.currentOpenTag.argument = childPart;
+            this.skip(1); // skip closing )
+            break;
+          }
+          case "PARAMETERS": {
+            this.currentOpenTag.params = childPart;
+            this.skip(1); // skip closing |
+            break;
           }
         }
         break;
@@ -194,10 +219,6 @@ export const WITHIN_OPEN_TAG = Parser.createState({
       }
     }
 
-    if (this.checkForPlaceholder(ch, code)) {
-      return;
-    }
-
     if (code === CODE.OPEN_ANGLE_BRACKET) {
       return this.notifyError(
         this.pos,
@@ -220,16 +241,40 @@ export const WITHIN_OPEN_TAG = Parser.createState({
       // ignore whitespace within element...
     } else if (code === CODE.COMMA) {
       this.consumeWhitespace();
-    } else if (code === CODE.OPEN_PAREN) {
-      this.rewind(1);
-      this.enterState(STATE.EXPRESSION);
-      // encountered something like:
-      // <for (var i = 0; i < len; i++)>
+    } else if (code === CODE.FORWARD_SLASH && !this.currentOpenTag.attributes.length) {
+      this.enterState(STATE.EXPRESSION, {
+        part: "VARIABLE",
+        terminatedByWhitespace: true,
+        terminator: [this.isConcise ? ";" : ">", "/>", "(", "|", "="] 
+      });
+    } else if (code === CODE.OPEN_PAREN && !this.currentOpenTag.attributes.length) {
+      if (this.currentOpenTag.argument != null) {
+        this.notifyError(
+          this.pos,
+          "ILLEGAL_TAG_ARGUMENT",
+          "A tag can only have one argument"
+        );
+        return;
+      }
+      this.enterState(STATE.EXPRESSION, {
+        part: "ARGUMENT",
+        terminator: ")" 
+      });
+    } else if (code === CODE.PIPE && !this.currentOpenTag.attributes.length) {
+      this.enterState(STATE.EXPRESSION, {
+        part: "PARAMETERS",
+        terminator: "|" 
+      });
     } else {
-      this.rewind(1);
       // attribute name is initially the first non-whitespace
       // character that we found
-      this.enterState(STATE.ATTRIBUTE)
+      if (!this.currentOpenTag.notifiedOpenTagName) {
+        this.enterState(STATE.TAG_NAME);
+        this.rewind(1);
+      } else if (!this.checkForPlaceholder(ch, code)) {
+        this.enterState(STATE.ATTRIBUTE);
+        this.rewind(1);
+      }
     }
   },
 });

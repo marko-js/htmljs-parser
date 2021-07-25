@@ -318,7 +318,7 @@ export class Parser extends BaseParser {
 
     this.currentOpenTag = tagInfo;
 
-    this.enterState(STATE.TAG_NAME);
+    this.enterState(STATE.OPEN_TAG);
 
     return this.currentOpenTag;
   }
@@ -548,16 +548,18 @@ export class Parser extends BaseParser {
     if (code === CODE.DOLLAR) {
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.OPEN_CURLY_BRACE) {
-        // We expect to start a placeholder at the first curly brace (the next character)
+        // The placeholder expression starts after first curly brace so skip
+        // past the {
         this.enterState(STATE.PLACEHOLDER, { escape: true });
+        this.skip(1);
         return true;
       } else if (nextCode === CODE.EXCLAMATION) {
         var afterExclamationCode = this.lookAtCharCodeAhead(2);
         if (afterExclamationCode === CODE.OPEN_CURLY_BRACE) {
-          // We expect to start a placeholder at the first curly brace so skip
-          // past the exclamation point
+          // The placeholder expression starts after first curly brace so skip
+          // past the !{
           this.enterState(STATE.PLACEHOLDER, { escape: false });
-          this.skip(1);
+          this.skip(2);
           return true;
         }
       }

@@ -5,41 +5,34 @@ import { Parser, STATE, evaluateStringExpression, CODE, NUMBER_REGEX, isWhitespa
 export const ATTRIBUTE = Parser.createState({
   name: "ATTRIBUTE",
 
-  enter(oldState) {
-    this.currentAttribute = {};
-    this.currentOpenTag.attributes.push(this.currentAttribute);
+  enter(oldState, attr) {
+    this.currentAttribute = attr;
   },
 
-  exit() {
+  exit(attr) {
     if (this.lookAtCharCodeAhead(1) === CODE.COMMA) {
-      this.currentOpenTag.requiresCommas = true;
-      this.currentAttribute.endedWithComma = true;
+      attr.endedWithComma = true;
     }
-
     this.currentAttribute = null;
-
-    if (this.state !== STATE.WITHIN_OPEN_TAG) {
-      this.enterState(STATE.WITHIN_OPEN_TAG);
-    }
   },
 
   eol() {
     if (this.isConcise) {
-      this.rewind(1);
       this.exitState();
+      this.rewind(1);
     }
   },
 
-  eof(attribute) {
+  eof(attr) {
     if (this.isConcise) {
-      this.rewind(1);
       this.exitState();
+      this.rewind(1);
     } else {
       return this.notifyError(
-        attribute.pos,
+        attr.pos,
         "MALFORMED_OPEN_TAG",
         'EOF reached while parsing attribute "' +
-          this.currentAttribute.name +
+          attr.name +
           '" for the "' +
           this.currentOpenTag.tagName +
           '" tag'
@@ -47,21 +40,21 @@ export const ATTRIBUTE = Parser.createState({
     }
   },
 
-  return(childState, childPart) {
+  return(childState, childPart, attr) {
     switch (childState) {
       case STATE.EXPRESSION: {
         switch (childPart.part) {
           case "NAME": {
             // TODO: why is this needed?
-            this.currentAttribute.name = this.currentAttribute.name
-              ? this.currentAttribute.name + childPart.value
+            attr.name = attr.name
+              ? attr.name + childPart.value
               : childPart.value;
-            this.currentAttribute.pos = childPart.pos;
-            this.currentAttribute.endPos = childPart.endPos;
+            attr.pos = childPart.pos;
+            attr.endPos = childPart.endPos;
             break;
           }
           case "ARGUMENT": {
-            if (this.currentAttribute.argument != null) {
+            if (attr.argument != null) {
               this.notifyError(
                 childPart.endPos,
                 "ILLEGAL_ATTRIBUTE_ARGUMENT",
@@ -70,22 +63,23 @@ export const ATTRIBUTE = Parser.createState({
               return;
             }
 
-            this.currentAttribute.argument = childPart;
+            attr.argument = childPart;
             this.skip(1); // skip closing paren
             break;
           }
           case "BLOCK": {
-            if (this.currentAttribute.argument) {
-              this.currentAttribute.method = true;
-              this.currentAttribute.pos = this.currentAttribute.argument.pos;
-              this.currentAttribute.endPos = childPart.endPos + 1;
-              this.currentAttribute.value = "function" + this.data.substring(this.currentAttribute.pos, this.currentAttribute.endPos);
-              this.currentAttribute.argument = undefined;
+            if (attr.argument) {
+              attr.method = true;
+              attr.pos = attr.argument.pos;
+              attr.endPos = childPart.endPos + 1;
+              attr.value = "function" + this.data.substring(attr.pos, attr.endPos);
+              attr.argument = undefined;
               this.exitState();
             } else {
-              this.currentAttribute.name = "{" + childPart.value + "}";
-              this.currentAttribute.pos = childPart.pos - 1;
-              this.currentAttribute.endPos = childPart.endPos + 1;
+              attr.name = "{" + childPart.value + "}";
+              attr.pos = childPart.pos - 1;
+              attr.endPos = childPart.endPos + 1;
+              attr.block = true;
               this.exitState();
             }
             this.skip(1); // skip closing brace
@@ -106,33 +100,33 @@ export const ATTRIBUTE = Parser.createState({
               this.currentOpenTag.hasUnenclosedWhitespace = true;
             }
 
-            if (!this.currentAttribute.name) {
-              this.currentAttribute.name = "default";
-              this.currentAttribute.default = true;
+            if (!attr.name) {
+              attr.name = "default";
+              attr.default = true;
             }
 
-            this.currentAttribute.value = value;
-            this.currentAttribute.pos = childPart.pos;
-            this.currentAttribute.endPos = childPart.endPos;
+            attr.value = value;
+            attr.pos = childPart.pos;
+            attr.endPos = childPart.endPos;
 
             // If the expression evaluates to a literal value then add the
             // `literalValue` property to the attribute
             if (childPart.isStringLiteral) {
-              this.currentAttribute.literalValue = evaluateStringExpression(
+              attr.literalValue = evaluateStringExpression(
                 value,
                 childPart.pos,
                 this
               );
             } else if (value === "true") {
-              this.currentAttribute.literalValue = true;
+              attr.literalValue = true;
             } else if (value === "false") {
-              this.currentAttribute.literalValue = false;
+              attr.literalValue = false;
             } else if (value === "null") {
-              this.currentAttribute.literalValue = null;
+              attr.literalValue = null;
             } else if (value === "undefined") {
-              this.currentAttribute.literalValue = undefined;
+              attr.literalValue = undefined;
             } else if (NUMBER_REGEX.test(value)) {
-              this.currentAttribute.literalValue = Number(value);
+              attr.literalValue = Number(value);
             }
 
             this.exitState();
@@ -143,7 +137,7 @@ export const ATTRIBUTE = Parser.createState({
     }
   },
 
-  char(ch, code) {
+  char(ch, code, attr) {
     if (isWhitespaceCode(code)) {
       return;
     } else if (code === CODE.EQUAL) {
@@ -152,7 +146,11 @@ export const ATTRIBUTE = Parser.createState({
       this.enterState(STATE.EXPRESSION, { 
         part: "VALUE",
         terminatedByWhitespace: true, 
-        terminator: [this.isConcise ? ";" : ">", ","]
+        terminator: [
+          this.isConcise ? "]" : "/>", 
+          this.isConcise ? ";" : ">", 
+          ","
+        ]
       });
     } else if (code === CODE.OPEN_PAREN) {
       this.enterState(STATE.EXPRESSION, { 
@@ -160,18 +158,24 @@ export const ATTRIBUTE = Parser.createState({
         terminatedByWhitespace: false, 
         terminator: ")"
       });
-    } else if (code === CODE.OPEN_CURLY_BRACE && (!this.currentAttribute.name || this.currentAttribute.argument)) {
+    } else if (code === CODE.OPEN_CURLY_BRACE && (!attr.name || attr.argument)) {
       this.enterState(STATE.EXPRESSION, { 
         part: "BLOCK",
         terminatedByWhitespace: false, 
         terminator: "}"
       });
-    } else if (!this.currentAttribute.name) {
+    } else if (!attr.name) {
       this.rewind(1);
       this.enterState(STATE.EXPRESSION, { 
         part: "NAME",
         terminatedByWhitespace: true, 
-        terminator: [this.isConcise ? ";" : ">", "=", ",", "("],
+        terminator: [
+          this.isConcise ? "]" : "/>", 
+          this.isConcise ? ";" : ">", 
+          "=", 
+          ",", 
+          "("
+        ],
         allowEscapes: true
       });
     } else {
