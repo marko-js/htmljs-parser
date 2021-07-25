@@ -1,69 +1,135 @@
-import { Parser, CODE, STATE } from "../internal";
+import { Parser, CODE, STATE, isWhitespaceCode } from "../internal";
 
 // We enter STATE.TAG_NAME after we encounter a "<"
 // followed by a non-special character
 export const TAG_NAME = Parser.createState({
   name: "TAG_NAME",
 
-  enter(oldState) {
-    if (oldState !== STATE.EXPRESSION) {
-      this.enterState(STATE.EXPRESSION);
+  enter(oldState, tagName) {
+    tagName.text = tagName.rawValue = "";
+  },
+
+  exit(tagName) {
+    tagName.endPos = this.pos;
+    if (tagName.text && tagName.stringParts) {
+      tagName.stringParts.push(JSON.stringify(tagName.text));
+      tagName.rawParts.push({
+        text: tagName.text,
+        pos: this.pos - tagName.text.length,
+        endPos: this.pos
+      });
     }
   },
 
-  return(childState, childPart) {
+  return(childState, childPart, tagName) {
     switch (childState) {
-      case STATE.EXPRESSION: {
-        const expression = childPart;
-        this.currentOpenTag.tagNameEnd = expression.endPos;
-
-        if (expression.value) {
-          this.currentOpenTag.tagName += expression.value;
-
-          if (this.currentOpenTag.tagNameParts) {
-            this.currentOpenTag.tagNameParts.push(
-              JSON.stringify(expression.value)
-            );
-          }
-        }
+      case STATE.STRING: {
+        tagName.text += childPart.value;
+        tagName.rawValue += childPart.value;
         break;
       }
       case STATE.PLACEHOLDER: {
-        // TODO: why do we need to do this?
-        this.enterState(STATE.EXPRESSION);
+        tagName.rawParts = tagName.rawParts || [];
+        tagName.stringParts = tagName.stringParts || [];
 
-        const placeholder = childPart;
-        if (!this.currentOpenTag.tagNameParts) {
-          this.currentOpenTag.tagNameParts = [];
+        if (tagName.text) {
+          tagName.stringParts.push(JSON.stringify(tagName.text));
+          tagName.rawParts.push({
+            text: tagName.text,
+            pos: this.pos - tagName.text.length,
+            endPos: this.pos
+          });
+          tagName.text = "";
+        }
 
-          if (this.currentOpenTag.tagName) {
-            this.currentOpenTag.tagNameParts.push(
-              JSON.stringify(this.currentOpenTag.tagName)
+        tagName.rawValue += this.substring(
+          childPart.pos,
+          childPart.endPos
+        );
+
+        tagName.stringParts.push("(" + childPart.value + ")");
+        tagName.rawParts.push({
+          expression: childPart.value,
+          pos: childPart.pos,
+          endPos: childPart.endPos
+        });
+        break;
+      }
+      case STATE.TAG_NAME: {
+        const expression = childPart.stringParts ? childPart.stringParts.join("+") : JSON.stringify(childPart.text);
+        if (childPart.shorthandCharCode === CODE.NUMBER_SIGN) {
+          if (tagName.shorthandId) {
+            return this.notifyError(
+              childPart.pos,
+              "INVALID_TAG_SHORTHAND",
+              "Multiple shorthand ID parts are not allowed on the same tag"
             );
           }
-        }
+          tagName.shorthandId = {
+            value: expression,
+            rawParts: childPart.rawParts,
+          };
+        } else {
+          if (!tagName.shorthandClassNames) {
+            tagName.shorthandClassNames = [];
+          }
 
-        this.currentOpenTag.tagName += this.substring(
-          placeholder.pos,
-          placeholder.endPos
-        );
-        this.currentOpenTag.tagNameParts.push("(" + placeholder.value + ")");
-        this.currentOpenTag.tagNameEnd = placeholder.endPos;
-        var nextCode = this.lookAtCharCodeAhead(1);
-        if (nextCode === CODE.OPEN_PAREN) {
-          // TODO: figure out if this is needed
-          this.exitState(/* STATE.EXPRESSION */);
-          this.enterState(STATE.TAG_ARGS);
+          tagName.shorthandClassNames.push({
+            value: expression,
+            rawParts: childPart.rawParts,
+          });
         }
+        break;
       }
     }
   },
 
-  eol: Parser.prototype.openTagEOL,
+  eol() {
+    if (this.isConcise && !this.currentOpenTag.withinAttrGroup) {
+      this.exitState();
+      this.rewind(1);
+    }
+  },
 
-  eof: Parser.prototype.openTagEOF,
+  eof() {
+    this.exitState();
+    this.rewind(1);
+  },
 
-  char(ch, code) {
-    throw new Error("Illegal state");
+  char(ch, code, tagName) {
+    var nextCh;
+    if (code === CODE.SINGLE_QUOTE || code === CODE.DOUBLE_QUOTE) {
+      // TODO: why are we supporting this?
+      return this.enterState(STATE.STRING, {
+        quoteChar: ch,
+        quoteCharCode: code,
+      });
+    } else if (
+      code === CODE.DOLLAR &&
+      this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
+    ) {
+      this.enterState(STATE.PLACEHOLDER, { withinTagName: !tagName.shorthandCharCode });
+      this.skip(1);
+    } else if (code === CODE.BACK_SLASH) {
+      // Handle string escape sequence
+      nextCh = this.lookAtCharAhead(1);
+      this.skip(1);
+
+      tagName.text += nextCh;
+      tagName.rawValue += ch + nextCh;
+    } else if (isWhitespaceCode(code) || code === CODE.EQUAL || code === CODE.OPEN_PAREN || code === CODE.FORWARD_SLASH || code === CODE.PIPE || (this.isConcise ? code === CODE.SEMICOLON : code === CODE.CLOSE_ANGLE_BRACKET)) {
+      this.exitState();
+      this.rewind(1);
+    } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
+      if (!tagName.shorthandCharCode) {
+        this.enterState(STATE.TAG_NAME, { shorthandCharCode: code });
+      } else {
+        this.exitState();
+        this.rewind(1);
+      }
+    } else {
+      tagName.text += ch;
+      tagName.rawValue += ch;
+    }
   },
 });

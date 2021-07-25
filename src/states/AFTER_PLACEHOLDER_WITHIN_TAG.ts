@@ -1,6 +1,6 @@
-import { Parser, CODE, STATE, isWhitespaceCode } from "../internal";
+import { Parser, CODE, isWhitespaceCode } from "../internal";
 
-// We enter STATE.WITHIN_OPEN_TAG after we have fully
+// We return to STATE.OPEN_TAG after we have fully
 // read in the tag name and encountered a whitespace character
 export const AFTER_PLACEHOLDER_WITHIN_TAG = Parser.createState({
   name: "AFTER_PLACEHOLDER_WITHIN_TAG",
@@ -25,7 +25,7 @@ export const AFTER_PLACEHOLDER_WITHIN_TAG = Parser.createState({
     }
 
     if (isWhitespaceCode(code)) {
-      this.enterState(STATE.WITHIN_OPEN_TAG);
+      this.exitState();
     } else {
       this.notifyError(
         this.pos,

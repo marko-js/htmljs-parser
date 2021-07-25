@@ -289,6 +289,7 @@ class TreeBuilder {
                     if (event.concise) {
                         expect(src.substring(startPos, startPos + tagName.length)).to.equal(tagName);
                     } else {
+                        debugger;
                         expect(src.substring(startPos, startPos + 1 + tagName.length)).to.equal('<' + tagName);
 
                         if (event.selfClosed) {
