@@ -17,3 +17,13 @@
   console.log("hello"); 
   event.preventDefault();
 }/>
+
+<foo/bar(event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}/>
+
+<foo/bar (event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}/>
