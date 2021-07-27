@@ -1723,7 +1723,6 @@ class Parser extends BaseParser {
             expression(expression) {
                 var method = getAndRemoveMethod(expression);
                 if (method) {
-                    console.log(method);
                     beginAttribute();
                     currentAttribute.name = "default";
                     currentAttribute.default = true;
@@ -1754,9 +1753,7 @@ class Parser extends BaseParser {
             },
 
             enter(oldState) {
-                if (oldState !== STATE_EXPRESSION) {
-                    beginExpression();
-                }
+                beginExpression();
             },
 
             char(ch, code) {
