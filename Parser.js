@@ -92,6 +92,7 @@ const CODE_DOLLAR = 36;
 const CODE_PERCENT = 37;
 const CODE_PERIOD = 46;
 const CODE_COMMA = 44;
+const CODE_COLON = 58;
 const CODE_SEMICOLON = 59;
 const CODE_NUMBER_SIGN = 35;
 const CODE_PIPE = 124;
@@ -2486,7 +2487,23 @@ class Parser extends BaseParser {
                                 return;
                             }
 
+                            var prevPos = parser.pos;
                             var operator = checkForOperator();
+
+                            if (parser.src[parser.pos] === ":" && parser.src[parser.pos+1] === "=") {
+                                currentPart.endPos = prevPos;
+                                endExpression();
+                                if (parentState === STATE_ATTRIBUTE_NAME) {
+                                    parser.skip(1);
+                                    parser.enterState(STATE_ATTRIBUTE_VALUE);
+                                    currentAttribute.bound = true;
+                                    consumeWhitespace();
+                                } else {
+                                    parser.rewind(1);
+                                    beginAttribute();
+                                }
+                                return;
+                            }
 
                             if (operator) {
                                 currentPart.isStringLiteral = false;
@@ -2504,12 +2521,19 @@ class Parser extends BaseParser {
                             parser.enterState(STATE_WITHIN_OPEN_TAG);
                         }
                         return;
-                    } else if (code === CODE_EQUAL && parentState === STATE_ATTRIBUTE_NAME) {
+                    } else if ((code === CODE_EQUAL || (code === CODE_COLON && parser.lookAtCharCodeAhead(1) === CODE_EQUAL)) && parentState === STATE_ATTRIBUTE_NAME) {
                         currentPart.endPos = parser.pos;
                         endExpression();
                         // We encountered "=" which means we need to start reading
                         // the attribute value.
+
+                        if (code === CODE_COLON) {
+                            parser.skip(1);
+                        }
                         parser.enterState(STATE_ATTRIBUTE_VALUE);
+                        if (code === CODE_COLON) {
+                            currentAttribute.bound = true;
+                        }
                         consumeWhitespace();
                         return;
                     }
@@ -2535,7 +2559,7 @@ class Parser extends BaseParser {
                     }
 
                     if (currentPart.parentState === STATE_TAG_VAR) {
-                        if (code === CODE_EQUAL || code === CODE_CLOSE_ANGLE_BRACKET) {
+                        if (code === CODE_EQUAL || (code === CODE_COLON && parser.lookAtCharCodeAhead(1) === CODE_EQUAL) || code === CODE_CLOSE_ANGLE_BRACKET) {
                             endExpression();
                             parser.rewind(1);
                             if (parser.state !== STATE_WITHIN_OPEN_TAG) {
@@ -2580,7 +2604,7 @@ class Parser extends BaseParser {
                             parser.rewind(1);
                             parser.enterState(STATE_TAG_PARAMS);
                             return;
-                        } else if (code === CODE_EQUAL) {
+                        } else if (code === CODE_EQUAL || (code === CODE_COLON && parser.lookAtCharCodeAhead(1) === CODE_EQUAL)) {
                             endExpression();
                             parser.rewind(1);
                             parser.enterState(STATE_WITHIN_OPEN_TAG);

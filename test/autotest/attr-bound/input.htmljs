@@ -1,0 +1,6 @@
+<a x:=foo>test</a>
+<a x := foo>test</a>
+<a:=foo>test</a>
+<a := foo>test</a>
+<a/bar:=foo>test</a>
+<a/bar := foo>test</a>
