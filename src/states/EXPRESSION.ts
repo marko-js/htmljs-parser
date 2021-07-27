@@ -106,11 +106,10 @@ export const EXPRESSION = Parser.createState({
 
   char(ch, code, expression) {
     let depth = expression.groupStack.length;
-    let parentState = expression.parentState;
 
     if (depth === 0) {
       if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
-        var operator = this.checkForOperator();
+        var operator = !expression.skipOperators && this.checkForOperator();
 
         if (operator) {
           expression.isStringLiteral = false;

@@ -34,7 +34,11 @@ function attributeAssignmentToString(attr, includeLiteralValues) {
     var result = "";
 
     if (attr.value) {
-        result += '=' + attr.value;
+        if (attr.bound) {
+            result += '=BOUND(' + attr.value + ")";
+        } else {
+            result += '=' + attr.value;
+        }
     } else if (!attr.argument) {
         result += '=(EMPTY)';
     }
@@ -285,7 +289,6 @@ class TreeBuilder {
                     if (event.concise) {
                         expect(src.substring(startPos, startPos + tagName.length)).to.equal(tagName);
                     } else {
-                        debugger;
                         expect(src.substring(startPos, startPos + 1 + tagName.length)).to.equal('<' + tagName);
 
                         if (event.selfClosed) {
