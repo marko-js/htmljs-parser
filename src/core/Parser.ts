@@ -128,13 +128,6 @@ export class Parser extends BaseParser {
     this.text = "";
   }
 
-  openTagEOL() {
-    if (this.isConcise && !this.currentOpenTag.withinAttrGroup) {
-      // In concise mode we always end the open tag
-      this.finishOpenTag();
-    }
-  }
-
   /**
    * This is used to enter into "HTML" parsing mode instead
    * of concise HTML. We push a block on to the stack so that we know when
@@ -250,32 +243,6 @@ export class Parser extends BaseParser {
     }
   }
 
-  openTagEOF() {
-    if (this.isConcise) {
-      if (this.currentOpenTag.withinAttrGroup) {
-        this.notifyError(
-          this.currentOpenTag.pos,
-          "MALFORMED_OPEN_TAG",
-          'EOF reached while within an attribute group (e.g. "[ ... ]").'
-        );
-        return;
-      }
-
-      // If we reach EOF inside an open tag when in concise-mode
-      // then we just end the tag and all other open tags on the stack
-      this.finishOpenTag();
-      this.htmlEOF();
-    } else {
-      // Otherwise, in non-concise mode we consider this malformed input
-      // since the end '>' was not found.
-      this.notifyError(
-        this.currentOpenTag.pos,
-        "MALFORMED_OPEN_TAG",
-        "EOF reached while parsing open tag"
-      );
-    }
-  }
-
   // var this.notifiers.notifyCDATA = notifiers.notifyCDATA;
   // var this.notifiers.notifyComment = notifiers.notifyComment;
   // var this.notifiers.notifyOpenTag = notifiers.notifyOpenTag;
@@ -289,161 +256,6 @@ export class Parser extends BaseParser {
   notifyError(pos, errorCode, message) {
     this.end();
     this.notifiers.notifyError(pos, errorCode, message);
-  }
-
-  beginOpenTag() {
-    this.endText();
-
-    var tagInfo = {
-      type: "tag",
-      tagName: "",
-      tagNameParts: null,
-      attributes: [],
-      argument: undefined,
-      params: undefined,
-      pos: this.pos,
-      indent: this.indent,
-      nestedIndent: null, // This will get set when we know what hte nested indent is
-      concise: this.isConcise,
-      beginMixedMode: this.beginMixedMode,
-    };
-
-    this.withinOpenTag = true;
-
-    if (this.beginMixedMode) {
-      this.beginMixedMode = false;
-    }
-
-    this.blockStack.push(tagInfo);
-
-    this.currentOpenTag = tagInfo;
-
-    this.enterState(STATE.OPEN_TAG);
-
-    return this.currentOpenTag;
-  }
-
-  finishOpenTag(selfClosed = false) {
-    var tagName = this.currentOpenTag.tagName;
-    var attributes = this.currentOpenTag.attributes;
-    var parseOptions = this.currentOpenTag.parseOptions;
-
-    var ignoreAttributes =
-      parseOptions && parseOptions.ignoreAttributes === true;
-
-    if (ignoreAttributes) {
-      attributes.length = 0;
-    } else {
-      if (this.currentOpenTag.requiresCommas && attributes.length > 1) {
-        for (let i = 0; i < attributes.length - 1; i++) {
-          if (!attributes[i].endedWithComma) {
-            if (!parseOptions || parseOptions.relaxRequireCommas !== true) {
-              this.notifyError(
-                attributes[i].pos,
-                "COMMAS_REQUIRED",
-                "if commas are used, they must be used to separate all attributes for a tag"
-              );
-            }
-          }
-        }
-      }
-
-      if (
-        this.currentOpenTag.hasUnenclosedWhitespace &&
-        attributes.length > 1
-      ) {
-        for (let i = 0; i < attributes.length - 1; i++) {
-          if (!attributes[i].endedWithComma) {
-            this.notifyError(
-              attributes[i].pos,
-              "COMMAS_REQUIRED",
-              "commas are required to separate all attributes when using complex attribute values with un-enclosed whitespace"
-            );
-          }
-        }
-      }
-    }
-
-    this.currentOpenTag.expectedCloseTagName = this.expectedCloseTagName =
-      this.substring(
-        this.currentOpenTag.tagNameStart,
-        this.currentOpenTag.tagNameEnd
-      );
-
-    var openTagOnly = (this.currentOpenTag.openTagOnly =
-      this.isOpenTagOnly(tagName));
-    var endPos = this.pos;
-
-    if (!this.isConcise) {
-      if (selfClosed) {
-        endPos += 2; // Skip past '/>'
-      } else {
-        endPos += 1;
-      }
-    }
-
-    if (this.currentOpenTag.tagNameParts) {
-      this.currentOpenTag.tagNameExpression =
-        this.currentOpenTag.tagNameParts.join("+");
-    }
-
-    this.currentOpenTag.endPos = endPos;
-    this.currentOpenTag.selfClosed = selfClosed === true;
-
-    if (!this.currentOpenTag.tagName && !this.currentOpenTag.emptyTagName) {
-      tagName = this.currentOpenTag.tagName = "div";
-    }
-
-    var origState = this.state;
-    this.notifiers.notifyOpenTag(this.currentOpenTag);
-
-    var shouldClose = false;
-
-    if (selfClosed) {
-      shouldClose = true;
-    } else if (openTagOnly) {
-      if (!this.isConcise) {
-        // Only close the tag if we are not in concise mode. In concise mode
-        // we want to keep the tag on the stack to make sure nothing is nested below it
-        shouldClose = true;
-      }
-    }
-
-    if (shouldClose) {
-      this.closeTag(this.expectedCloseTagName);
-    }
-
-    this.withinOpenTag = false;
-
-    if (shouldClose) {
-      if (this.isConcise) {
-        this.enterConciseHtmlContentState();
-      } else {
-        this.enterHtmlContentState();
-      }
-    } else {
-      // Did the parser stay in the same state after
-      // this.notifiers.notifying listeners about openTag?
-      if (this.state === origState) {
-        // The listener didn't transition the parser to a new state
-        // so we use some simple rules to find the appropriate state.
-        if (tagName === "script") {
-          this.enterJsContentState();
-        } else if (tagName === "style") {
-          this.enterCssContentState();
-        } else {
-          if (this.isConcise) {
-            this.enterConciseHtmlContentState();
-          } else {
-            this.enterHtmlContentState();
-          }
-        }
-      }
-    }
-
-    // We need to record the "expected close tag name" if we transition into
-    // either STATE.STATIC_TEXT_CONTENT or STATE.PARSED_TEXT_CONTENT
-    this.currentOpenTag = undefined;
   }
 
   closeTag(tagName: string, pos?: number, endPos?: number) {
@@ -656,6 +468,7 @@ export class Parser extends BaseParser {
     if (match) {
       if (this.state === STATE.JS_COMMENT_LINE) {
         this.exitState();
+        this.forward = true;
       }
       this.endText();
 

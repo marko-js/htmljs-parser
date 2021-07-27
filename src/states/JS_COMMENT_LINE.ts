@@ -16,13 +16,10 @@ export const JS_COMMENT_LINE = Parser.createState({
   },
 
   eol(str, comment) {
-    this.rewind(str.length);
-    comment.endPos = this.pos;
     this.exitState();
   },
 
   eof(comment) {
-    comment.endPos = this.pos;
     this.exitState();
   },
 

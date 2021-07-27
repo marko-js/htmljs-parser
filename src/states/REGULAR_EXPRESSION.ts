@@ -45,7 +45,7 @@ export const REGULAR_EXPRESSION = Parser.createState({
       code === CODE.FORWARD_SLASH &&
       !regularExpression.inCharacterSet
     ) {
-      this.exitState();
+      this.exitState("/");
     }
   },
 });

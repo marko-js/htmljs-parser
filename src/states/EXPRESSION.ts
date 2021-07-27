@@ -25,8 +25,6 @@ export const EXPRESSION = Parser.createState({
     let depth = expression.groupStack.length;
 
     if (depth === 0 && expression.terminatedByWhitespace) {
-      expression.endPos = this.pos;
-      this.rewind(1);
       this.exitState();
       return;
     }
@@ -36,9 +34,7 @@ export const EXPRESSION = Parser.createState({
 
   eof(expression) {
     if (this.isConcise && expression.groupStack.length === 0) {
-      expression.endPos = this.pos;
       this.exitState();
-      this.openTagEOF();
     } else {
       let parentState = expression.parentState;
 
@@ -122,8 +118,6 @@ export const EXPRESSION = Parser.createState({
           expression.value += operator;
           return;
         } else {
-          expression.endPos = this.pos;
-          this.rewind(1);
           this.exitState();
           return;
         }
@@ -131,8 +125,6 @@ export const EXPRESSION = Parser.createState({
         expression.terminator &&
           this.checkForTerminator(expression.terminator, ch)
       ) {
-        expression.endPos = this.pos;
-        this.rewind(1);
         this.exitState();
         return;
       } else if (expression.allowEscapes && code === CODE.BACK_SLASH) {
