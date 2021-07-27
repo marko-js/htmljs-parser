@@ -31,13 +31,10 @@ export const DECLARATION = Parser.createState({
     if (code === CODE.QUESTION) {
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.CLOSE_ANGLE_BRACKET) {
-        declaration.endPos = this.pos + 2;
-        this.exitState();
-        this.skip(1);
+        this.exitState("?>");
       }
     } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      declaration.endPos = this.pos + 1;
-      this.exitState();
+      this.exitState(">");
     } else {
       declaration.value += ch;
     }

@@ -10,7 +10,7 @@ export const ATTRIBUTE = Parser.createState({
   },
 
   exit(attr) {
-    if (this.lookAtCharCodeAhead(1) === CODE.COMMA) {
+    if (this.lookAtCharCodeAhead(0) === CODE.COMMA) {
       attr.endedWithComma = true;
     }
     this.currentAttribute = null;
@@ -19,14 +19,12 @@ export const ATTRIBUTE = Parser.createState({
   eol() {
     if (this.isConcise) {
       this.exitState();
-      this.rewind(1);
     }
   },
 
   eof(attr) {
     if (this.isConcise) {
       this.exitState();
-      this.rewind(1);
     } else {
       return this.notifyError(
         attr.pos,
@@ -74,15 +72,14 @@ export const ATTRIBUTE = Parser.createState({
               attr.endPos = childPart.endPos + 1;
               attr.value = "function" + this.data.substring(attr.pos, attr.endPos);
               attr.argument = undefined;
-              this.exitState();
+              this.exitState("}");
             } else {
               attr.name = "{" + childPart.value + "}";
               attr.pos = childPart.pos - 1;
               attr.endPos = childPart.endPos + 1;
               attr.block = true;
-              this.exitState();
+              this.exitState("}");
             }
-            this.skip(1); // skip closing brace
             break;
           }
           case "VALUE": {
@@ -179,7 +176,6 @@ export const ATTRIBUTE = Parser.createState({
         allowEscapes: true
       });
     } else {
-      this.rewind(1);
       this.exitState();
     }
   },

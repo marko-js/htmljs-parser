@@ -3,8 +3,143 @@ import { Parser, CODE, STATE, isWhitespaceCode, peek } from "../internal";
 export const OPEN_TAG = Parser.createState({
   name: "OPEN_TAG",
 
-  enter() {
-    
+  enter(oldState, tag) {
+    this.endText();
+
+    tag.type = "tag";
+    tag.tagName = "";
+    tag.tagNameParts = null;
+    tag.attributes = [];
+    tag.argument = undefined;
+    tag.params = undefined;
+    tag.pos = this.pos;
+    tag.indent = this.indent;
+    tag.nestedIndent = null; // This will get set when we know what the nested indent is
+    tag.concise = this.isConcise;
+    tag.beginMixedMode = this.beginMixedMode;
+
+    this.withinOpenTag = true;
+
+    if (this.beginMixedMode) {
+      this.beginMixedMode = false;
+    }
+
+    this.blockStack.push(tag);
+
+    this.currentOpenTag = tag;
+  },
+
+  exit(tag) {
+    var tagName = tag.tagName;
+    var attributes = tag.attributes;
+    var parseOptions = tag.parseOptions;
+    var selfClosed = tag.selfClosed
+
+    var ignoreAttributes =
+      parseOptions && parseOptions.ignoreAttributes === true;
+
+    if (ignoreAttributes) {
+      attributes.length = 0;
+    } else {
+      if (tag.requiresCommas && attributes.length > 1) {
+        for (let i = 0; i < attributes.length - 1; i++) {
+          if (!attributes[i].endedWithComma) {
+            if (!parseOptions || parseOptions.relaxRequireCommas !== true) {
+              this.notifyError(
+                attributes[i].pos,
+                "COMMAS_REQUIRED",
+                "if commas are used, they must be used to separate all attributes for a tag"
+              );
+            }
+          }
+        }
+      }
+
+      if (
+        tag.hasUnenclosedWhitespace &&
+        attributes.length > 1
+      ) {
+        for (let i = 0; i < attributes.length - 1; i++) {
+          if (!attributes[i].endedWithComma) {
+            this.notifyError(
+              attributes[i].pos,
+              "COMMAS_REQUIRED",
+              "commas are required to separate all attributes when using complex attribute values with un-enclosed whitespace"
+            );
+          }
+        }
+      }
+    }
+
+    tag.expectedCloseTagName = this.expectedCloseTagName =
+      this.substring(
+        tag.tagNameStart,
+        tag.tagNameEnd
+      );
+
+    var openTagOnly = (tag.openTagOnly =
+      this.isOpenTagOnly(tagName));
+
+    if (tag.tagNameParts) {
+      tag.tagNameExpression =
+        tag.tagNameParts.join("+");
+    }
+    tag.selfClosed = selfClosed === true;
+
+    if (!tag.tagName && !tag.emptyTagName) {
+      tagName = tag.tagName = "div";
+    }
+
+    var origState = this.state;
+    this.notifiers.notifyOpenTag(tag);
+
+    var shouldClose = false;
+
+    if (selfClosed) {
+      shouldClose = true;
+    } else if (openTagOnly) {
+      if (!this.isConcise) {
+        // Only close the tag if we are not in concise mode. In concise mode
+        // we want to keep the tag on the stack to make sure nothing is nested below it
+        shouldClose = true;
+      }
+    }
+
+    if (shouldClose) {
+      this.closeTag(this.expectedCloseTagName);
+    }
+
+    this.withinOpenTag = false;
+
+    if (shouldClose) {
+      if (this.isConcise) {
+        this.enterConciseHtmlContentState();
+      } else {
+        this.enterHtmlContentState();
+      }
+    } else {
+      // Did the parser stay in the same state after
+      // this.notifiers.notifying listeners about openTag?
+      if (this.state === origState) {
+        // The listener didn't transition the parser to a new state
+        // so we use some simple rules to find the appropriate state.
+        if (tagName === "script") {
+          this.enterJsContentState();
+        } else if (tagName === "style") {
+          this.enterCssContentState();
+        } else {
+          if (this.isConcise) {
+            this.enterConciseHtmlContentState();
+          } else {
+            this.enterHtmlContentState();
+          }
+        }
+      }
+    }
+
+    // We need to record the "expected close tag name" if we transition into
+    // either STATE.STATIC_TEXT_CONTENT or STATE.PARSED_TEXT_CONTENT
+    this.currentOpenTag = undefined;
   },
 
   return(childState, childPart) {
@@ -101,14 +236,42 @@ export const OPEN_TAG = Parser.createState({
     }
   },
 
-  eol: Parser.prototype.openTagEOL,
+  eol(linebreak) {
+    if (this.isConcise && !this.currentOpenTag.withinAttrGroup) {
+      // In concise mode we always end the open tag
+      this.exitState(linebreak);
+    }
+  },
 
-  eof: Parser.prototype.openTagEOF,
+  eof() {
+    if (this.isConcise) {
+      if (this.currentOpenTag.withinAttrGroup) {
+        this.notifyError(
+          this.currentOpenTag.pos,
+          "MALFORMED_OPEN_TAG",
+          'EOF reached while within an attribute group (e.g. "[ ... ]").'
+        );
+        return;
+      }
+
+      // If we reach EOF inside an open tag when in concise-mode
+      // then we just end the tag and all other open tags on the stack
+      this.exitState();
+    } else {
+      // Otherwise, in non-concise mode we consider this malformed input
+      // since the end '>' was not found.
+      this.notifyError(
+        this.currentOpenTag.pos,
+        "MALFORMED_OPEN_TAG",
+        "EOF reached while parsing open tag"
+      );
+    }
+  },
 
   char(ch, code) {
     if (this.isConcise) {
       if (code === CODE.SEMICOLON) {
-        this.finishOpenTag();
+        this.exitState(";");
         this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
           handler(err) {
             if (err) {
@@ -117,11 +280,11 @@ export const OPEN_TAG = Parser.createState({
               if (code === CODE.FORWARD_SLASH) {
                 if (this.lookAheadFor("/")) {
                   this.enterState(STATE.JS_COMMENT_LINE);
-                  this.skip(1);
+                  this.skip(2);
                   return;
                 } else if (this.lookAheadFor("*")) {
                   this.enterState(STATE.JS_COMMENT_BLOCK);
-                  this.skip(1);
+                  this.skip(2);
                   return;
                 }
               } else if (
@@ -130,7 +293,7 @@ export const OPEN_TAG = Parser.createState({
               ) {
                 // html comment
                 this.enterState(STATE.HTML_COMMENT);
-                this.skip(3);
+                this.skip(4);
                 return;
               }
 
@@ -171,9 +334,9 @@ export const OPEN_TAG = Parser.createState({
         }
 
         // The open tag is complete
-        this.finishOpenTag();
+        this.exitState();
 
-        this.htmlBlockDelimiter = ch;
+        this.htmlBlockDelimiter = "";
         var nextIndent = this.getNextIndent();
         if (nextIndent > this.indent) {
           this.indent = nextIndent;
@@ -207,13 +370,13 @@ export const OPEN_TAG = Parser.createState({
       }
     } else {
       if (code === CODE.CLOSE_ANGLE_BRACKET) {
-        this.finishOpenTag();
+        this.exitState(">");
         return;
       } else if (code === CODE.FORWARD_SLASH) {
         let nextCode = this.lookAtCharCodeAhead(1);
         if (nextCode === CODE.CLOSE_ANGLE_BRACKET) {
-          this.finishOpenTag(true /* self closed */);
-          this.skip(1);
+          this.currentOpenTag.selfClosed = true;
+          this.exitState("/>");
           return;
         }
       }

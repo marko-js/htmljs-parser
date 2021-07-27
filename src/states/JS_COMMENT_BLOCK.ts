@@ -30,9 +30,7 @@ export const JS_COMMENT_BLOCK = Parser.createState({
     if (code === CODE.ASTERISK) {
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.FORWARD_SLASH) {
-        comment.endPos = this.pos + 2;
-        this.exitState();
-        this.skip(1);
+        this.exitState("*/");
         return;
       }
     }

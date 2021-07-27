@@ -28,7 +28,6 @@ export const INLINE_SCRIPT = Parser.createState({
     if (inlineScript.endMatch || inlineScript.stringType === CODE.BACKTICK) {
       inlineScript.value += str;
     } else {
-      this.rewind(str.length);
       this.exitState();
     }
   },

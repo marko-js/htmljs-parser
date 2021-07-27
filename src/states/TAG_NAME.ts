@@ -87,13 +87,11 @@ export const TAG_NAME = Parser.createState({
   eol() {
     if (this.isConcise && !this.currentOpenTag.withinAttrGroup) {
       this.exitState();
-      this.rewind(1);
     }
   },
 
   eof() {
     this.exitState();
-    this.rewind(1);
   },
 
   char(ch, code, tagName) {
@@ -119,13 +117,11 @@ export const TAG_NAME = Parser.createState({
       tagName.rawValue += ch + nextCh;
     } else if (isWhitespaceCode(code) || code === CODE.EQUAL || code === CODE.OPEN_PAREN || code === CODE.FORWARD_SLASH || code === CODE.PIPE || (this.isConcise ? code === CODE.SEMICOLON : code === CODE.CLOSE_ANGLE_BRACKET)) {
       this.exitState();
-      this.rewind(1);
     } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
       if (!tagName.shorthandCharCode) {
         this.enterState(STATE.TAG_NAME, { shorthandCharCode: code });
       } else {
         this.exitState();
-        this.rewind(1);
       }
     } else {
       tagName.text += ch;

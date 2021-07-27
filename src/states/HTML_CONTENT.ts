@@ -87,8 +87,7 @@ export const HTML_CONTENT = Parser.createState({
         // We'll treat this left angle brakect as text
         this.text += "<";
       } else {
-        this.beginOpenTag();
-        this.currentOpenTag.tagNameStart = this.pos + 1;
+        this.enterState(STATE.OPEN_TAG);
       }
     } else if (
       !this.ignorePlaceholders &&
