@@ -5,20 +5,23 @@ import { Parser, CODE, isWhitespaceCode } from "../internal";
 export const AFTER_PLACEHOLDER_WITHIN_TAG = Parser.createState({
   name: "AFTER_PLACEHOLDER_WITHIN_TAG",
 
-  eol: Parser.prototype.openTagEOL,
+  eol() {
+    this.exitState();
+  },
 
-  eof: Parser.prototype.openTagEOF,
+  eof() {
+    this.exitState();
+  },
 
   char(ch, code) {
     if (!this.isConcise) {
       if (code === CODE.CLOSE_ANGLE_BRACKET) {
-        this.finishOpenTag();
+        this.exitState();
         return;
       } else if (code === CODE.FORWARD_SLASH) {
         let nextCode = this.lookAtCharCodeAhead(1);
         if (nextCode === CODE.CLOSE_ANGLE_BRACKET) {
-          this.finishOpenTag(true /* self closed */);
-          this.skip(1);
+          this.exitState();
           return;
         }
       }

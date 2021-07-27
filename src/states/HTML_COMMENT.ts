@@ -12,7 +12,6 @@ export const HTML_COMMENT = Parser.createState({
   },
 
   exit(comment) {
-    comment.endPos = this.pos + 3;
     this.notifiers.notifyComment(comment);
   },
 
@@ -32,9 +31,7 @@ export const HTML_COMMENT = Parser.createState({
     if (code === CODE.HYPHEN) {
       var match = this.lookAheadFor("->");
       if (match) {
-        comment.endPos = this.pos + 3;
-        this.exitState();
-        this.skip(match.length);
+        this.exitState("-->");
       } else {
         comment.value += ch;
       }

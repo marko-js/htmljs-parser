@@ -30,6 +30,7 @@ export class BaseParser {
   public initialState: StateDefinition;
   public parts: any[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
   public activePart: any; // The current part at the top of the part stack
+  public forward: boolean;
 
   static createState(def: StateDefinition) {
     return def;
@@ -57,6 +58,7 @@ export class BaseParser {
 
     this.parts = [];
     this.activePart = undefined;
+    this.forward = true;
   }
 
   setInitialState(initialState) {
@@ -95,18 +97,16 @@ export class BaseParser {
   }
 
   exitState(includedEndChars?: string) {
-    // if (!includedEndChars) {
-    //   this.rewind(1);
-    // } else {
-    //   for (let i = 0; i < includedEndChars.length; i++) {
-    //     if (this.src[this.pos+i] !== includedEndChars[i]) {
-    //       throw new Error(
-    //         "Unexpected end character at position " + (this.pos+i)
-    //       );
-    //     }
-    //   }
-    //   this.skip(includedEndChars.length - 1);
-    // }
+    if (includedEndChars) {
+      for (let i = 0; i < includedEndChars.length; i++) {
+        if (this.src[this.pos+i] !== includedEndChars[i]) {
+          throw new Error(
+            "Unexpected end character at position " + (this.pos+i)
+          );
+        }
+      }
+      this.skip(includedEndChars.length);
+    }
 
     const childPart = this.parts.pop();
     const childState = this.state;
@@ -115,7 +115,7 @@ export class BaseParser {
       ? peek(this.parts)
       : undefined);
 
-    // childPart.endPos = this.pos + 1;
+    childPart.endPos = this.pos;
 
     if (childState.exit) {
       childState.exit.call(this, childPart);
@@ -124,6 +124,8 @@ export class BaseParser {
     if (parentState.return) {
       parentState.return.call(this, childState, childPart, parentPart);
     }
+
+    this.forward = false;
   }
 
   checkForTerminator(terminator: string | string[], ch: string) {
@@ -237,13 +239,12 @@ export class BaseParser {
       let ch = data[pos];
       let code = ch && ch.charCodeAt(0);
       let state = this.state;
+      let length = 1;
 
       if (code === CODE.NEWLINE) {
         if (state.eol) {
           state.eol.call(this, ch, this.activePart);
         }
-        this.pos++;
-        continue;
       } else if (code === CODE.CARRIAGE_RETURN) {
         let nextPos = pos + 1;
         if (
@@ -253,31 +254,30 @@ export class BaseParser {
           if (state.eol) {
             state.eol.call(this, "\r\n", this.activePart);
           }
-          this.pos += 2;
-          continue;
+          length = 2;
         }
-      } else if (!code) {
+      } else if (code) {
+        // We assume that every state will have "char" function
+        if (!state.char) {
+          throw new Error(
+            `State ${state.name} has no "char" function (${JSON.stringify(
+              ch
+            )}, ${code})`
+          );
+        }
+        state.char.call(this, ch, code, this.activePart);
+      } else {
         if (state.eof) {
           state.eof.call(this, this.activePart);
         }
-        this.pos++;
-        continue;
       }
-
-      // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
-
-      // We assume that every state will have "char" function
-      if (!state.char) {
-        throw new Error(
-          `State ${state.name} has no "char" function (${JSON.stringify(
-            ch
-          )}, ${code})`
-        );
-      }
-      state.char.call(this, ch, code, this.activePart);
 
       // move to next position
-      this.pos++;
+      if (this.forward) {
+        this.pos += length;
+      } else {
+        this.forward = true;
+      }
     }    
   }
 }

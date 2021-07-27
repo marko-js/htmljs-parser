@@ -34,9 +34,7 @@ export const PLACEHOLDER = Parser.createState({
     switch (childState) {
       case STATE.EXPRESSION: {
         placeholder.value = childPart.value;
-        placeholder.endPos = childPart.endPos+1;
-        this.exitState();
-        this.skip(1); // skip over the closing }
+        this.exitState("}");
         break;
       }
     }

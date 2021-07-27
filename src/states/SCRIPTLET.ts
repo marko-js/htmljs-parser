@@ -15,7 +15,6 @@ export const SCRIPTLET = Parser.createState({
   },
 
   exit(scriptlet) {
-    scriptlet.endPos = this.pos + 2;
     this.notifiers.notifyScriptlet(scriptlet);
   },
 
@@ -65,8 +64,7 @@ export const SCRIPTLET = Parser.createState({
       scriptlet.quoteCharCode = code;
     } else if (code === CODE.PERCENT) {
       if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
-        this.exitState();
-        this.skip(1); // Skip over the closing right angle bracket
+        this.exitState("%>");
         return;
       }
     }

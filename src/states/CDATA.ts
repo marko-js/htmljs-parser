@@ -11,7 +11,7 @@ export const CDATA = Parser.createState({
   },
 
   exit(cdata) {
-    this.notifiers.notifyCDATA(cdata.value, cdata.pos, this.pos + 3);
+    this.notifiers.notifyCDATA(cdata.value, cdata.pos, this.pos);
   },
 
   eof(cdata) {
@@ -26,8 +26,7 @@ export const CDATA = Parser.createState({
     if (code === CODE.CLOSE_SQUARE_BRACKET) {
       var match = this.lookAheadFor("]>");
       if (match) {
-        this.exitState();
-        this.skip(match.length);
+        this.exitState("]]>");
         return;
       }
     }
