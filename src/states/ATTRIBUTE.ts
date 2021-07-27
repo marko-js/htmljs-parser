@@ -137,7 +137,15 @@ export const ATTRIBUTE = Parser.createState({
   char(ch, code, attr) {
     if (isWhitespaceCode(code)) {
       return;
-    } else if (code === CODE.EQUAL) {
+    } else if (
+      code === CODE.EQUAL ||
+      (code === CODE.COLON && this.lookAtCharCodeAhead(1) === CODE.EQUAL)
+    ) {
+      if (code === CODE.COLON) {
+        attr.bound = true;
+        this.skip(1);
+      }
+
       // TODO: make expressions consume beginning whitespace?
       this.consumeWhitespace();
       this.enterState(STATE.EXPRESSION, { 
@@ -166,9 +174,11 @@ export const ATTRIBUTE = Parser.createState({
       this.enterState(STATE.EXPRESSION, { 
         part: "NAME",
         terminatedByWhitespace: true, 
+        skipOperators: true,
         terminator: [
           this.isConcise ? "]" : "/>", 
           this.isConcise ? ";" : ">", 
+          ":=",
           "=", 
           ",", 
           "("
