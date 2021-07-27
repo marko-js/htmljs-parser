@@ -188,6 +188,7 @@ export const OPEN_TAG = Parser.createState({
             if (nextCharCode === CODE.PERIOD || nextCharCode === CODE.NUMBER_SIGN) {
               this.enterState(STATE.EXPRESSION, {
                 part: "NAME",
+                skipOperators: true,
                 terminatedByWhitespace: true,
                 terminator: [
                   this.isConcise ? ";" : ">",
@@ -195,7 +196,9 @@ export const OPEN_TAG = Parser.createState({
                   "(",
                   "|",
                   ".",
-                  "#"
+                  "#",
+                  "=",
+                  ":="
                 ]
               });
             }
@@ -394,10 +397,11 @@ export const OPEN_TAG = Parser.createState({
     } else if (code === CODE.FORWARD_SLASH && !this.currentOpenTag.attributes.length) {
       this.enterState(STATE.EXPRESSION, {
         part: "VARIABLE",
+        skipOperators: true,
         terminatedByWhitespace: true,
         terminator: this.isConcise
-          ? [";", "(", "|", "="]
-          : [">", "/>", "(", "|", "="]
+          ? [";", "(", "|", "=", ":="]
+          : [">", "/>", "(", "|", "=", ":="]
       });
     } else if (code === CODE.OPEN_PAREN && !this.currentOpenTag.attributes.length) {
       if (this.currentOpenTag.argument != null) {

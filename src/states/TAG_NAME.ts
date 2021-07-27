@@ -119,7 +119,17 @@ export const TAG_NAME = Parser.createState({
 
       tagName.text += nextCh;
       tagName.rawValue += ch + nextCh;
-    } else if (isWhitespaceCode(code) || code === CODE.EQUAL || code === CODE.OPEN_PAREN || code === CODE.FORWARD_SLASH || code === CODE.PIPE || (this.isConcise ? code === CODE.SEMICOLON : code === CODE.CLOSE_ANGLE_BRACKET)) {
+    } else if (
+      isWhitespaceCode(code) ||
+      code === CODE.EQUAL ||
+      (code === CODE.COLON && this.lookAtCharCodeAhead(1) === CODE.EQUAL) ||
+      code === CODE.OPEN_PAREN ||
+      code === CODE.FORWARD_SLASH ||
+      code === CODE.PIPE ||
+      (this.isConcise
+        ? code === CODE.SEMICOLON
+        : code === CODE.CLOSE_ANGLE_BRACKET)
+    ) {
       this.exitState();
     } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
       if (!tagName.shorthandCharCode) {

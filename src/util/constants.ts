@@ -22,6 +22,7 @@ export enum CODE {
   PERCENT = 37,
   PERIOD = 46,
   COMMA = 44,
+  COLON = 58,
   SEMICOLON = 59,
   NUMBER_SIGN = 35,
   PIPE = 124,
