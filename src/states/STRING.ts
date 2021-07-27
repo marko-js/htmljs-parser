@@ -115,7 +115,7 @@ export const STRING = Parser.createState({
       }
 
       string.value = stringExpr;
-      this.exitState();
+      this.exitState(quoteChar);
     } else if (
       !this.ignorePlaceholders &&
       !this.ignoreNonstandardStringPlaceholders &&

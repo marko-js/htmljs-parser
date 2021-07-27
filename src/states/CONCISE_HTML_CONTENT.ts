@@ -188,8 +188,7 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
           return;
         }
       } else {
-        this.beginOpenTag();
-        this.currentOpenTag.tagNameStart = this.pos;
+        this.enterState(STATE.OPEN_TAG);
         this.rewind(1); // START_TAG_NAME expects to start at the first character
       }
     }

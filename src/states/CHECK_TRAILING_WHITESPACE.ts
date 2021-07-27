@@ -15,6 +15,7 @@ export const CHECK_TRAILING_WHITESPACE = Parser.createState({
 
   eol: function () {
     this.exitState();
+    this.forward = true;
   },
 
   eof: function (part) {

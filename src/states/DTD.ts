@@ -28,8 +28,7 @@ export const DTD = Parser.createState({
 
   char(ch, code, documentType) {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      documentType.endPos = this.pos + 1;
-      this.exitState();
+      this.exitState(">");
     } else {
       documentType.value += ch;
     }

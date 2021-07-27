@@ -45,7 +45,7 @@ export const TEMPLATE_STRING = Parser.createState({
 
         templateString.value += nextCh;
       } else if (code === CODE.BACKTICK) {
-        this.exitState();
+        this.exitState("`");
       }
     }
   },
