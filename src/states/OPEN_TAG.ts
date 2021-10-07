@@ -54,21 +54,6 @@ export const OPEN_TAG = Parser.createState({
           }
         }
       }
-
-      if (
-        tag.hasUnenclosedWhitespace &&
-        attributes.length > 1
-      ) {
-        for (let i = 0; i < attributes.length - 1; i++) {
-          if (!attributes[i].endedWithComma) {
-            this.notifyError(
-              attributes[i].pos,
-              "COMMAS_REQUIRED",
-              "commas are required to separate all attributes when using complex attribute values with un-enclosed whitespace"
-            );
-          }
-        }
-      }
     }
 
     tag.expectedCloseTagName = this.expectedCloseTagName =
