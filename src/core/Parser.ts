@@ -252,8 +252,8 @@ export class Parser extends BaseParser {
   // var this.notifiers.notifyScriptlet = notifiers.notifyScriptlet;
 
   notifyError(pos, errorCode, message) {
-    this.end();
     this.notifiers.notifyError(pos, errorCode, message);
+    this.end();
   }
 
   closeTag(tagName: string, pos?: number, endPos?: number) {
@@ -464,18 +464,18 @@ export class Parser extends BaseParser {
       this.lookAheadFor("/" + this.expectedCloseTagName + ">");
 
     if (match) {
+      const startPos = this.pos;
       if (this.state === STATE.JS_COMMENT_LINE) {
         this.exitState();
         this.forward = true;
       }
       this.endText();
-
+      this.skip(match.length);
       this.closeTag(
         this.expectedCloseTagName,
-        this.pos,
-        this.pos + 1 + match.length
+        startPos,
+        this.pos + 1
       );
-      this.skip(match.length);
       this.enterState(STATE.HTML_CONTENT);
       return true;
     }
