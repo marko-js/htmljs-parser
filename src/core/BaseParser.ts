@@ -100,9 +100,17 @@ export class BaseParser {
     if (includedEndChars) {
       for (let i = 0; i < includedEndChars.length; i++) {
         if (this.src[this.pos+i] !== includedEndChars[i]) {
-          throw new Error(
-            "Unexpected end character at position " + (this.pos+i)
-          );
+          if (this.pos+i >= this.maxPos) {
+            (this as any as Parser).notifyError(
+              this.activePart.pos,
+              "UNEXPECTED_EOF",
+              "EOF reached with current part incomplete"
+            );
+          } else {
+            throw new Error(
+              "Unexpected end character at position " + (this.pos+i)
+            );
+          }
         }
       }
       this.skip(includedEndChars.length);
