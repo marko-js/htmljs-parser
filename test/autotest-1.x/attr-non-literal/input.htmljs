@@ -1,2 +1,0 @@
-<div data=('a') a=a+b b='foo'+'bar' template-string=`foo`></div>
-span test='123'"abc"

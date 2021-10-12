@@ -1,1 +1,0 @@
-<custom data=("Hello $!{name}!" + " This is a test.")></custom>
