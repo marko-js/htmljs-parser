@@ -246,7 +246,8 @@ export const OPEN_TAG = Parser.createState({
   eol(linebreak) {
     if (this.isConcise && !this.currentOpenTag.withinAttrGroup) {
       // In concise mode we always end the open tag
-      this.exitState(linebreak);
+      this.exitState();
+      this.skip(linebreak.length)
     }
   },
 
