@@ -204,7 +204,14 @@ export const OPEN_TAG = Parser.createState({
               this.enterState(STATE.EXPRESSION, {
                 part: "NAME",
                 terminatedByWhitespace: true,
-                terminator: [this.isConcise ? ";" : ">", "/>", "(", "|", ".", "#"] 
+                terminator: [
+                  this.isConcise ? ";" : ">",
+                  "/",
+                  "(",
+                  "|",
+                  ".",
+                  "#"
+                ]
               });
             }
             break;
@@ -402,7 +409,9 @@ export const OPEN_TAG = Parser.createState({
       this.enterState(STATE.EXPRESSION, {
         part: "VARIABLE",
         terminatedByWhitespace: true,
-        terminator: [this.isConcise ? ";" : ">", "/>", "(", "|", "="] 
+        terminator: this.isConcise
+          ? [";", "(", "|", "="]
+          : [">", "/>", "(", "|", "="]
       });
     } else if (code === CODE.OPEN_PAREN && !this.currentOpenTag.attributes.length) {
       if (this.currentOpenTag.argument != null) {
