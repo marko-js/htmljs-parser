@@ -100,13 +100,7 @@ export const TAG_NAME = Parser.createState({
 
   char(ch, code, tagName) {
     var nextCh;
-    if (code === CODE.SINGLE_QUOTE || code === CODE.DOUBLE_QUOTE) {
-      // TODO: why are we supporting this?
-      return this.enterState(STATE.STRING, {
-        quoteChar: ch,
-        quoteCharCode: code,
-      });
-    } else if (
+    if (
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
