@@ -310,18 +310,12 @@ export const OPEN_TAG = Parser.createState({
 
       if (code === CODE.HTML_BLOCK_DELIMITER) {
         if (this.lookAtCharCodeAhead(1) !== CODE.HTML_BLOCK_DELIMITER) {
-          if (this.legacyCompatibility) {
-            this.outputDeprecationWarning(
-              'The usage of a single hyphen in a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43'
-            );
-          } else {
-            this.notifyError(
-              this.currentOpenTag.pos,
-              "MALFORMED_OPEN_TAG",
-              '"-" not allowed as first character of attribute name'
-            );
-            return;
-          }
+          this.notifyError(
+            this.currentOpenTag.pos,
+            "MALFORMED_OPEN_TAG",
+            '"-" not allowed as first character of attribute name'
+          );
+          return;
         }
 
         if (this.currentOpenTag.withinAttrGroup) {

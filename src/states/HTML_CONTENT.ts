@@ -105,7 +105,6 @@ export const HTML_CONTENT = Parser.createState({
       // We went into placeholder state...
       this.endText();
     } else if (
-      !this.legacyCompatibility &&
       code === CODE.DOLLAR &&
       isWhitespaceCode(this.lookAtCharCodeAhead(1)) &&
       this.isBeginningOfLine()

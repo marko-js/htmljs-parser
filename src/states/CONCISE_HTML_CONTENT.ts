@@ -125,15 +125,7 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
         return;
       }
 
-      if (
-        code === CODE.OPEN_ANGLE_BRACKET ||
-        (this.legacyCompatibility && code === CODE.DOLLAR)
-      ) {
-        if (code === CODE.DOLLAR) {
-          this.outputDeprecationWarning(
-            'Handling of a placeholder (i.e. "${...}") at the start of a concise line will be changing.\nA placeholder at the start of a concise line will now be handled as a tag name placeholder instead of a body text placeholder.\nSwitch to using "-- ${...}" to avoid breakage.\nSee: https://github.com/marko-js/htmljs-parser/issues/48'
-          );
-        }
+      if (code === CODE.OPEN_ANGLE_BRACKET) {
         this.beginMixedMode = true;
         this.rewind(1);
         this.beginHtmlBlock();
@@ -141,7 +133,6 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
       }
 
       if (
-        !this.legacyCompatibility &&
         code === CODE.DOLLAR &&
         isWhitespaceCode(this.lookAtCharCodeAhead(1))
       ) {
@@ -152,18 +143,12 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
 
       if (code === CODE.HTML_BLOCK_DELIMITER) {
         if (this.lookAtCharCodeAhead(1) !== CODE.HTML_BLOCK_DELIMITER) {
-          if (this.legacyCompatibility) {
-            this.outputDeprecationWarning(
-              'The usage of a single hyphen at the start of a concise line is now deprecated. Use "--" instead.\nSee: https://github.com/marko-js/htmljs-parser/issues/43'
-            );
-          } else {
-            this.notifyError(
-              this.pos,
-              "ILLEGAL_LINE_START",
-              'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43'
-            );
-            return;
-          }
+          this.notifyError(
+            this.pos,
+            "ILLEGAL_LINE_START",
+            'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43'
+          );
+          return;
         }
 
         this.htmlBlockDelimiter = ch;

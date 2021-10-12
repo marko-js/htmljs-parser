@@ -1,7 +1,0 @@
-script
-    ---
-    This is text
-    within the </script> block
-    ---
-    - This should be okay too
-div

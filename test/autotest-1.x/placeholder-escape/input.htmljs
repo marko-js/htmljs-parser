@@ -1,3 +1,0 @@
-<custom name="Hello ${name}!">
-    Hello ${name}!
-</custom>

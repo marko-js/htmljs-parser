@@ -1,2 +1,0 @@
-<hello message=`Hello
-    ${foo}!></hello>
