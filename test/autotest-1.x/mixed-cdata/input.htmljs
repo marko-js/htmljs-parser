@@ -1,3 +1,0 @@
-p class="foo"
-    <![CDATA[Hello World]]> This is after CDATA
-div class="bar" - <![CDATA[Hello World]]>
