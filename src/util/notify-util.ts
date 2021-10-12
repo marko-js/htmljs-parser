@@ -60,7 +60,7 @@ export function createNotifiers(parser, listeners) {
             code: errorCode,
             message: message,
             pos: pos,
-            endPos: parser.pos,
+            endPos: Math.min(parser.pos + 1, parser.maxPos)
           },
           parser
         );
