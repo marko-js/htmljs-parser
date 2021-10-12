@@ -7,6 +7,10 @@ export const TAG_NAME = Parser.createState({
 
   enter(oldState, tagName) {
     tagName.text = tagName.rawValue = "";
+    if (tagName.shorthandCharCode) {
+      tagName.rawParts = [];
+      tagName.stringParts = [];
+    }
   },
 
   exit(tagName) {
@@ -29,7 +33,7 @@ export const TAG_NAME = Parser.createState({
         break;
       }
       case STATE.PLACEHOLDER: {
-        tagName.rawParts = tagName.rawParts || [];
+        tagName.rawParts = [];
         tagName.stringParts = tagName.stringParts || [];
 
         if (tagName.text) {
@@ -56,7 +60,7 @@ export const TAG_NAME = Parser.createState({
         break;
       }
       case STATE.TAG_NAME: {
-        const expression = childPart.stringParts ? childPart.stringParts.join("+") : JSON.stringify(childPart.text);
+        const expression = childPart.stringParts.join("+");
         if (childPart.shorthandCharCode === CODE.NUMBER_SIGN) {
           if (tagName.shorthandId) {
             return this.notifyError(
