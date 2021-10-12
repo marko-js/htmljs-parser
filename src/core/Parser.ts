@@ -266,7 +266,7 @@ export class Parser extends BaseParser {
 
     if (pos == null && this.closeTagPos != null) {
       pos = this.closeTagPos;
-      endPos = this.pos + 1;
+      endPos = this.pos;
     }
 
     if (!lastTag || lastTag.type !== "tag") {
