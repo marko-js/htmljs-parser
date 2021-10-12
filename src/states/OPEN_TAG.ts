@@ -135,7 +135,6 @@ export const OPEN_TAG = Parser.createState({
         this.currentOpenTag.shorthandId = childPart.shorthandId;
         this.currentOpenTag.shorthandClassNames = childPart.shorthandClassNames;
         this.currentOpenTag.tagNameStart = childPart.pos;
-        // TODO: why both?
         this.currentOpenTag.tagNameEnd = this.currentOpenTag.tagNameEndPos = childPart.endPos;
 
 

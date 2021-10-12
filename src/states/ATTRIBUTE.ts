@@ -43,10 +43,7 @@ export const ATTRIBUTE = Parser.createState({
       case STATE.EXPRESSION: {
         switch (childPart.part) {
           case "NAME": {
-            // TODO: why is this needed?
-            attr.name = attr.name
-              ? attr.name + childPart.value
-              : childPart.value;
+            attr.name = childPart.value;
             attr.pos = childPart.pos;
             attr.endPos = childPart.endPos;
             break;
@@ -146,7 +143,6 @@ export const ATTRIBUTE = Parser.createState({
         this.skip(1);
       }
 
-      // TODO: make expressions consume beginning whitespace?
       this.consumeWhitespace();
       this.enterState(STATE.EXPRESSION, { 
         part: "VALUE",
