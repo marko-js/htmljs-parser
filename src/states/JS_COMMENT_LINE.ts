@@ -26,6 +26,7 @@ export const JS_COMMENT_LINE = Parser.createState({
   char(ch, code, comment) {
     // TODO: this really shouldn't be done.
     // nothing should end a JS_COMMENT_LINE except a newline
+    // eg: <script>//foo</script>
     if (comment.parentState === STATE.PARSED_TEXT_CONTENT) {
       if (!this.isConcise && code === CODE.OPEN_ANGLE_BRACKET) {
         // First, see if we need to see if we reached the closing tag
