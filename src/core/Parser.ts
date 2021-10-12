@@ -19,7 +19,6 @@ export class Parser extends BaseParser {
   public userIsOpenTagOnly: (tagName: string) => boolean;
   public ignorePlaceholders: boolean;
   public ignoreNonstandardStringPlaceholders: boolean;
-  public legacyCompatibility: boolean;
   public currentOpenTag; // Used to reference the current open tag that is being parsed
   public currentAttribute; // Used to reference the current attribute that is being parsed
   public closeTagName; // Used to keep track of the current close tag name as it is being parsed
@@ -48,7 +47,6 @@ export class Parser extends BaseParser {
     this.ignorePlaceholders = options && options.ignorePlaceholders;
     this.ignoreNonstandardStringPlaceholders =
       options && options.ignoreNonstandardStringPlaceholders;
-    this.legacyCompatibility = options.legacyCompatibility === true;
     this.textParseMode = "html";
     this.setInitialState(
       this.defaultMode === MODE.CONCISE
@@ -501,12 +499,6 @@ export class Parser extends BaseParser {
 
     if (matches) {
       var match = matches[0];
-      var operator = matches[1];
-
-      if (this.legacyCompatibility && operator === "-") {
-        return false;
-      }
-
       var isIgnoredOperator = this.isConcise
         ? match.includes("[")
         : match.includes(">");
