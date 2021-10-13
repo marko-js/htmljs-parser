@@ -152,7 +152,7 @@ export const OPEN_TAG = Parser.createState({
           attr.default = true;
           attr.method = true;
           attr.pos = this.currentOpenTag.argument.pos;
-          attr.value = "function" + this.data.substring(attr.pos, attr.endPos);
+          attr.value = this.data.substring(attr.pos, attr.endPos);
           this.currentOpenTag.argument = undefined;
         } 
         this.currentOpenTag.attributes.push(attr);
