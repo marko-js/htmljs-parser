@@ -102,16 +102,12 @@ export const STRING = Parser.createState({
           if (typeof part === "string") {
             stringExpr += quoteChar + part + quoteChar;
           } else {
-            stringExpr += "(" + part.value + ")";
+            stringExpr += part.value;
           }
         }
       } else {
         // Just an empty string...
         stringExpr = quoteChar + quoteChar;
-      }
-
-      if (stringParts.length > 1) {
-        stringExpr = "(" + stringExpr + ")";
       }
 
       string.value = stringExpr;

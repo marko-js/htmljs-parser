@@ -11,16 +11,6 @@ export const EXPRESSION = Parser.createState({
     expression.isStringLiteral = null;
   },
 
-  exit(expression) {
-    // TODO: Probably shouldn't do this, but it makes it easier to test!
-    if (
-      expression.parentState === STATE.ATTRIBUTE &&
-      expression.hasUnenclosedWhitespace
-    ) {
-      expression.value = "(" + expression.value + ")";
-    }
-  },
-
   eol(str, expression) {
     let depth = expression.groupStack.length;
 

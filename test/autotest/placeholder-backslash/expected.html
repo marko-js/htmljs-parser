@@ -1,4 +1,4 @@
-<foo a="${test" b=$placeholderString(("\"+($escapeXml($withinString(test))))) c="$!{test" d=$placeholderString(("\"+($noEscapeXml($withinString(test)))))>
+<foo a=("${test") b=($placeholderString("\"+$escapeXml($withinString(test)))) c=("$!{test") d=($placeholderString("\"+$noEscapeXml($withinString(test))))>
     text:"\n\n"
 </foo>
 text:"\n"
