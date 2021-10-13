@@ -336,7 +336,7 @@ export class Parser extends BaseParser {
       let start = expression.lastLeftParenPos;
       let end = expression.value.length;
       var method = {
-        value: "function" + expression.value.substring(start, end),
+        value: expression.value.substring(start, end),
         pos: expression.pos + start,
         endPos: expression.pos + end,
       };

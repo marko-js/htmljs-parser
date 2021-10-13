@@ -37,7 +37,7 @@ function attributeAssignmentToString(attr, includeLiteralValues) {
         if (attr.bound) {
             result += '=BOUND(' + attr.value + ")";
         } else {
-            result += '=' + attr.value;
+            result += '=(' + attr.value + ')';
         }
     } else if (!attr.argument) {
         result += '=(EMPTY)';

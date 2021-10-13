@@ -67,7 +67,7 @@ export const ATTRIBUTE = Parser.createState({
               attr.method = true;
               attr.pos = attr.argument.pos;
               attr.endPos = childPart.endPos + 1;
-              attr.value = "function" + this.data.substring(attr.pos, attr.endPos);
+              attr.value = this.data.substring(attr.pos, attr.endPos);
               attr.argument = undefined;
               this.exitState("}");
             } else {
