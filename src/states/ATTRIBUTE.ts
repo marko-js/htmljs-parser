@@ -102,27 +102,6 @@ export const ATTRIBUTE = Parser.createState({
             attr.value = value;
             attr.pos = childPart.pos;
             attr.endPos = childPart.endPos;
-
-            // If the expression evaluates to a literal value then add the
-            // `literalValue` property to the attribute
-            if (childPart.isStringLiteral) {
-              attr.literalValue = evaluateStringExpression(
-                value,
-                childPart.pos,
-                this
-              );
-            } else if (value === "true") {
-              attr.literalValue = true;
-            } else if (value === "false") {
-              attr.literalValue = false;
-            } else if (value === "null") {
-              attr.literalValue = null;
-            } else if (value === "undefined") {
-              attr.literalValue = undefined;
-            } else if (NUMBER_REGEX.test(value)) {
-              attr.literalValue = Number(value);
-            }
-
             this.exitState();
             break;
           }

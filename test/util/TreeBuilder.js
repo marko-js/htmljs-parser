@@ -1,7 +1,7 @@
 'use strict';
 var expect = require('chai').expect;
 
-function attributesToString(attributes, includeLiteralValues) {
+function attributesToString(attributes) {
     var len = attributes && attributes.length || 0;
     if (!len) {
         return '';
@@ -13,7 +13,7 @@ function attributesToString(attributes, includeLiteralValues) {
 
     if (attr.default) {
         i = 1;
-        result = " DEFAULT" + attributeAssignmentToString(attr, includeLiteralValues);
+        result = " DEFAULT" + attributeAssignmentToString(attr);
     }
 
     for (;i < len; i++) {
@@ -24,13 +24,13 @@ function attributesToString(attributes, includeLiteralValues) {
             result += '(' + attr.argument.value + ')';
         }
 
-        result += attributeAssignmentToString(attr, includeLiteralValues);
+        result += attributeAssignmentToString(attr);
     }
 
     return result;
 }
 
-function attributeAssignmentToString(attr, includeLiteralValues) {
+function attributeAssignmentToString(attr) {
     var result = "";
 
     if (attr.value) {
@@ -41,10 +41,6 @@ function attributeAssignmentToString(attr, includeLiteralValues) {
         }
     } else if (!attr.argument) {
         result += '=(EMPTY)';
-    }
-
-    if (includeLiteralValues) {
-        result += '[Literal: ' + (attr.hasOwnProperty('literalValue') ? JSON.stringify(attr.literalValue) : '(empty)') + ']';
     }
 
     return result;
@@ -178,7 +174,7 @@ class ElementNode {
             }).join(', ') + ']';
         }
 
-        str += attributesToString(attributes, out.includeLiteralValues) + (openTagOnly ? ' OPEN_ONLY' : '') + (selfClosed ? ' SELF_CLOSED' : '') + '>';
+        str += attributesToString(attributes) + (openTagOnly ? ' OPEN_ONLY' : '') + (selfClosed ? ' SELF_CLOSED' : '') + '>';
         out.writeLine(str);
 
         out.incIndent();
@@ -200,7 +196,6 @@ class TreeBuilder {
 
         this.src = src;
         this.includePositions = options && options.includePositions === true;
-        this.includeLiteralValues = options && options.includeLiteralValues === true;
         this.includeTextParserState = options.includeTextParserState === true;
 
         this.root = new RootNode();
@@ -394,7 +389,6 @@ class TreeBuilder {
         var buffer = '';
         var out = {
             includePositions: this.includePositions === true,
-            includeLiteralValues: this.includeLiteralValues === true,
             includeTextParserState: this.includeTextParserState === true,
             incIndent() {
                 indent += '    ';
