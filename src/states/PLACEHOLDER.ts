@@ -28,6 +28,14 @@ export const PLACEHOLDER = Parser.createState({
       var newExpression = this.notifiers.notifyPlaceholder(placeholder);
       placeholder.value = newExpression;
     }
+
+    if (!placeholder.value) {
+      this.notifyError(
+        placeholder.pos,
+        "PLACEHOLDER_EXPRESSION_REQUIRED",
+        "Invalid placeholder, the expression cannot be missing"
+      );
+    }
   },
 
   return(childState, childPart, placeholder) {
