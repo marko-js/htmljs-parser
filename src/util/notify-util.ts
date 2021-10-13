@@ -139,10 +139,6 @@ export function createNotifiers(parser, listeners) {
               bound: attr.bound,
             };
 
-            if (attr.hasOwnProperty("literalValue")) {
-              (newAttr as any).literalValue = attr.literalValue;
-            }
-
             return newAttr;
           }),
           setParseOptions(parseOptions) {
