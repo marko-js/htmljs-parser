@@ -44,8 +44,8 @@ export const ATTRIBUTE = Parser.createState({
         switch (childPart.part) {
           case "NAME": {
             attr.name = childPart.value;
-            attr.pos = childPart.pos;
-            attr.endPos = childPart.endPos;
+            attr.pos = attr.nameStartPos = childPart.pos;
+            attr.endPos = attr.nameEndPos = childPart.endPos;
             break;
           }
           case "ARGUMENT": {
@@ -97,11 +97,12 @@ export const ATTRIBUTE = Parser.createState({
             if (!attr.name) {
               attr.name = "default";
               attr.default = true;
+              attr.pos = attr.nameStartPos = attr.nameEndPos = childPart.pos;
             }
 
             attr.value = value;
-            attr.pos = childPart.pos;
-            attr.endPos = childPart.endPos;
+            attr.valueStartPos = childPart.pos;
+            attr.endPos = attr.valueEndPos = childPart.endPos;
             this.exitState();
             break;
           }
