@@ -58,8 +58,8 @@ export const OPEN_TAG = Parser.createState({
 
     tag.expectedCloseTagName = this.expectedCloseTagName =
       this.substring(
-        tag.tagNameStart,
-        tag.tagNameEnd
+        tag.tagNameStartPos,
+        tag.tagNameEndPos
       );
 
     var openTagOnly = (tag.openTagOnly =
@@ -134,8 +134,8 @@ export const OPEN_TAG = Parser.createState({
         this.currentOpenTag.tagNameParts = childPart.stringParts;
         this.currentOpenTag.shorthandId = childPart.shorthandId;
         this.currentOpenTag.shorthandClassNames = childPart.shorthandClassNames;
-        this.currentOpenTag.tagNameStart = childPart.pos;
-        this.currentOpenTag.tagNameEnd = this.currentOpenTag.tagNameEndPos = childPart.endPos;
+        this.currentOpenTag.tagNameStartPos = childPart.pos;
+        this.currentOpenTag.tagNameEndPos = childPart.endPos;
 
 
         if (!this.currentOpenTag.notifiedOpenTagName) {

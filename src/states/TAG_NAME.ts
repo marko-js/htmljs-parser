@@ -71,6 +71,8 @@ export const TAG_NAME = Parser.createState({
           }
           tagName.shorthandId = {
             value: expression,
+            pos: childPart.pos,
+            endPos: childPart.endPos,
             rawParts: childPart.rawParts,
           };
         } else {
@@ -80,6 +82,8 @@ export const TAG_NAME = Parser.createState({
 
           tagName.shorthandClassNames.push({
             value: expression,
+            pos: childPart.pos,
+            endPos: childPart.endPos,
             rawParts: childPart.rawParts,
           });
         }

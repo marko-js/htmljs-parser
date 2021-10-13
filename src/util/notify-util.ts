@@ -85,6 +85,8 @@ export function createNotifiers(parser, listeners) {
           emptyTagName: tagInfo.emptyTagName,
           pos: tagInfo.pos,
           endPos: tagInfo.tagNameEndPos,
+          tagNameStartPos: tagInfo.tagNameStartPos,
+          tagNameEndPos: tagInfo.tagNameEndPos,
           concise: tagInfo.concise,
           shorthandId: tagInfo.shorthandId,
           shorthandClassNames: tagInfo.shorthandClassNames,
