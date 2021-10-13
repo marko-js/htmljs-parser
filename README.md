@@ -238,18 +238,15 @@ OUTPUT EVENT:
     attributes: [
         {
             name: 'class',
-            value: '"demo"',
-            literalValue: 'demo'
+            value: '"demo"'
         },
         {
             name: 'disabled',
-            value: 'false',
-            literalValue: false
+            value: 'false'
         },
         {
             name: 'data-number',
-            value: '123',
-            literalValue: 123
+            value: '123'
         }
     ]
 }
