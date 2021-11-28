@@ -146,7 +146,7 @@ proto.notifyOpenTag = function notifyOpenTag(tagInfo) {
             bound: attr.bound
         };
 
-        if (attr.hasOwnProperty('literalValue')) {
+        if ('literalValue' in attr) {
             newAttr.literalValue = attr.literalValue;
         }
 

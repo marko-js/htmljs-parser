@@ -9,6 +9,7 @@ class Parser {
     }
 
     constructor(options) {
+        this.options = options;
         this.reset();
     }
 
@@ -33,6 +34,10 @@ class Parser {
         this.initialState = initialState;
     }
 
+    enterDefaultState() {
+        this.enterState(this.initialState);
+    }
+
     enterState(state) {
         if (this.state === state) {
             // Re-entering the same state can lead to unexpected behavior
@@ -51,7 +56,7 @@ class Parser {
         this.state = state;
 
         if (state.enter) {
-            state.enter.call(this, oldState);
+            state.enter(oldState);
         }
     }
 
@@ -148,21 +153,21 @@ class Parser {
 
         var pos;
         while ((pos = this.pos) <= this.maxPos) {
-            let ch = data[pos];
-            let code = ch.charCodeAt(0);
-            let state = this.state;
+            const ch = data[pos];
+            const code = ch.charCodeAt(0);
+            const state = this.state;
 
             if (code === CODE_NEWLINE) {
                 if (state.eol) {
-                    state.eol.call(this, ch);
+                    state.eol(ch);
                 }
                 this.pos++;
                 continue;
             } else if (code === CODE_CARRIAGE_RETURN) {
-                let nextPos = pos + 1;
+                const nextPos = pos + 1;
                 if (nextPos < data.length && data.charCodeAt(nextPos) === CODE_NEWLINE) {
-                    if (state.eol) {
-                        state.eol.call(this, '\r\n');
+                    if (state) {
+                        state.eol('\r\n');
                     }
                     this.pos+=2;
                     continue;
@@ -172,16 +177,28 @@ class Parser {
             // console.log('-- ' + JSON.stringify(ch) + ' --  ' + this.state.name.gray);
 
             // We assume that every state will have "char" function
-            state.char.call(this, ch, code);
+            state.char(ch, code);
 
             // move to next position
             this.pos++;
         }
 
-        let state = this.state;
-        if (state && state.eof) {
-            state.eof.call(this);
+        const state = this.state;
+        if (state) {
+            state.eof();
         }
+    }
+    isWhitespaceCode(code) {
+        return (code <= 32);
+    }
+    consumeWhitespace() {
+        var ahead = 1;
+        var whitespace = '';
+        while (this.isWhitespaceCode(this.lookAtCharCodeAhead(ahead))) {
+            whitespace += this.lookAtCharAhead(ahead++);
+        }
+        this.skip(whitespace.length);
+        return whitespace;
     }
 }
 

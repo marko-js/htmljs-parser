@@ -14,9 +14,10 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "npm run mocha && npm run jshint",
+    "test": "npm run mocha",
+    "posttest": "npm run jshint",
     "mocha": "node_modules/.bin/mocha --ui bdd --reporter spec ./test",
-    "jshint": "node_modules/.bin/jshint *.js"
+    "jshint": "node_modules/.bin/jshint *.js lib/"
   },
   "repository": {
     "type": "git",
