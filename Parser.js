@@ -1,7 +1,7 @@
 'use strict';
 var BaseParser = require('./BaseParser');
 var operators = require('./operators');
-var notifyUtil = require('./notify-util');
+var Notifiers = require('./notify-util');
 var complain = require('complain');
 var charProps = require('char-props');
 
@@ -118,7 +118,7 @@ class Parser extends BaseParser {
             complain(message, { location: location });
         }
 
-        var notifiers = notifyUtil.createNotifiers(parser, listeners);
+        var notifiers = new Notifiers(parser, listeners);
         this.notifiers = notifiers;
 
         var defaultMode = options && options.concise === false ? MODE_HTML : MODE_CONCISE;
@@ -341,16 +341,6 @@ class Parser extends BaseParser {
             }
         }
 
-        var notifyCDATA = notifiers.notifyCDATA;
-        var notifyComment = notifiers.notifyComment;
-        var notifyOpenTag = notifiers.notifyOpenTag;
-        var notifyOpenTagName = notifiers.notifyOpenTagName;
-        var notifyCloseTag = notifiers.notifyCloseTag;
-        var notifyDocumentType = notifiers.notifyDocumentType;
-        var notifyDeclaration = notifiers.notifyDeclaration;
-        var notifyPlaceholder = notifiers.notifyPlaceholder;
-        var notifyScriptlet = notifiers.notifyScriptlet;
-
         function notifyError(pos, errorCode, message) {
             parser.end();
             notifiers.notifyError(pos, errorCode, message);
@@ -458,7 +448,7 @@ class Parser extends BaseParser {
             }
 
             var origState = parser.state;
-            notifyOpenTag(currentOpenTag);
+            notifiers.notifyOpenTag(currentOpenTag);
 
             var shouldClose = false;
 
@@ -535,7 +525,7 @@ class Parser extends BaseParser {
 
             tagName = lastTag.tagName;
 
-            notifyCloseTag(tagName, pos, endPos);
+            notifiers.notifyCloseTag(tagName, pos, endPos);
 
             if (lastTag.beginMixedMode) {
                 endingMixedModeAtEOL = true;
@@ -660,7 +650,7 @@ class Parser extends BaseParser {
         function endScriptlet(endPos) {
             var scriptlet = endPart();
             scriptlet.endPos = endPos;
-            notifyScriptlet(scriptlet);
+            notifiers.notifyScriptlet(scriptlet);
         }
 
         // InlineScript
@@ -687,7 +677,7 @@ class Parser extends BaseParser {
                 inlineScript.line = true;
             }
 
-            notifyScriptlet(inlineScript);
+            notifiers.notifyScriptlet(inlineScript);
         }
 
         // --------------------------
@@ -707,7 +697,7 @@ class Parser extends BaseParser {
 
         function endDocumentType() {
             var documentType = endPart();
-            notifyDocumentType(documentType);
+            notifiers.notifyDocumentType(documentType);
         }
 
         // --------------------------
@@ -724,7 +714,7 @@ class Parser extends BaseParser {
 
         function endDeclaration() {
             var declaration = endPart();
-            notifyDeclaration(declaration);
+            notifiers.notifyDeclaration(declaration);
         }
 
         // --------------------------
@@ -742,7 +732,7 @@ class Parser extends BaseParser {
 
         function endCDATA() {
             var cdata = endPart();
-            notifyCDATA(cdata.value, cdata.pos, parser.pos + 3);
+            notifiers.notifyCDATA(cdata.value, cdata.pos, parser.pos + 3);
         }
 
         // --------------------------
@@ -786,7 +776,7 @@ class Parser extends BaseParser {
         function endHtmlComment() {
             var comment = endPart();
             comment.endPos = parser.pos + 3;
-            notifyComment(comment);
+            notifiers.notifyComment(comment);
         }
 
         // --------------------------
@@ -862,7 +852,7 @@ class Parser extends BaseParser {
             var placeholder = endPart();
             placeholderDepth--;
             if (!placeholder.withinTemplateString) {
-                var newExpression = notifyPlaceholder(placeholder);
+                var newExpression = notifiers.notifyPlaceholder(placeholder);
                 placeholder.value = newExpression;
             }
             placeholder.parentState.placeholder(placeholder);
@@ -1335,7 +1325,7 @@ class Parser extends BaseParser {
 
                 value = value.trim();
 
-                notifyComment({
+                notifiers.notifyComment({
                     value: value,
                     pos: comment.pos,
                     endPos: comment.endPos
@@ -1660,7 +1650,7 @@ class Parser extends BaseParser {
             eol: openTagEOL,
 
             eof: openTagEOF,
-            
+
             expression(expression) {
                 currentOpenTag.tagNameEnd = expression.endPos;
 
@@ -1878,7 +1868,7 @@ class Parser extends BaseParser {
                 if (!currentOpenTag.notifiedOpenTagName) {
                     currentOpenTag.notifiedOpenTagName = true;
                     currentOpenTag.tagNameEndPos = parser.pos;
-                    notifyOpenTagName(currentOpenTag);
+                    notifiers.notifyOpenTagName(currentOpenTag);
                 }
             },
 
@@ -2079,7 +2069,7 @@ class Parser extends BaseParser {
 
                 if (argument) {
                     currentAttribute.argument = argument;
-                } else if (method) {   
+                } else if (method) {
                     currentAttribute.method = true;
                     currentAttribute.value = method.value;
                     currentAttribute.pos = method.pos;
@@ -2314,7 +2304,7 @@ class Parser extends BaseParser {
                     } else if (!/[\]})A-Z0-9.<%]/i.test(getPreviousNonWhitespaceChar())) {
                         beginRegularExpression();
                         return;
-                    } 
+                    }
                 } else if (code === CODE_PIPE && parentState === STATE_TAG_PARAMS) {
                     if (depth === 0) {
                         currentPart.groupStack.push(code);
@@ -2384,7 +2374,7 @@ class Parser extends BaseParser {
                                 currentPart.value += consumeWhitespace();
                                 return;
                             }
-                        } 
+                        }
                         var endPlaceholder = code === CODE_CLOSE_CURLY_BRACE && parentState === STATE_PLACEHOLDER;
                         var endTagArgs = code === CODE_CLOSE_PAREN && parentState === STATE_TAG_ARGS;
                         if (endPlaceholder || endTagArgs) {
@@ -2395,8 +2385,8 @@ class Parser extends BaseParser {
                     }
 
                     return;
-                } 
-                
+                }
+
                 if (depth === 0) {
 
                     if (!isConcise) {
@@ -2584,7 +2574,7 @@ class Parser extends BaseParser {
                             return;
                         }
                     }
-                    
+
                     if (currentPart.parentState === STATE_TAG_NAME || currentPart.parentState === STATE_TAG_VAR) {
                         if (code === CODE_PIPE) {
                             endExpression();

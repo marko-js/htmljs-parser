@@ -1,319 +1,313 @@
-exports.createNotifiers = function(parser, listeners) {
-    var hasError = false;
+module.exports = Notifiers;
 
-    return {
-        notifyText(value, textParseMode) {
-            if (hasError) {
-                return;
-            }
+function Notifiers(parser, listeners) {
+    this.hasError = false;
+    this.parser = parser;
+    this.listeners = listeners;
+}
 
-            var eventFunc = listeners.onText;
+const proto = Notifiers.prototype;
 
-            if (eventFunc && (value.length > 0)) {
-                eventFunc.call(parser, {
-                    type: 'text',
-                    value: value,
-                    parseMode: textParseMode
-                }, parser);
-            }
-        },
+proto.notifyText = function notifyText(value, textParseMode) {
+    if (this.hasError) {
+        return;
+    }
 
-        notifyCDATA(value, pos, endPos) {
-            if (hasError) {
-                return;
-            }
+    var eventFunc = this.listeners.onText;
 
-            var eventFunc = listeners.onCDATA;
+    if (eventFunc && (value.length > 0)) {
+        eventFunc.call(this.listeners, {
+            type: 'text',
+            value: value,
+            parseMode: textParseMode
+        }, this.parser);
+    }
+};
 
-            if (eventFunc && value) {
-                eventFunc.call(parser, {
-                    type: 'cdata',
-                    value: value,
-                    pos: pos,
-                    endPos: endPos
-                }, parser);
-            }
-        },
+proto.notifyCDATA = function notifyCDATA(value, pos, endPos) {
+    if (this.hasError) {
+        return;
+    }
 
-        notifyError(pos, errorCode, message) {
-            if (hasError) {
-                return;
-            }
+    var eventFunc = this.listeners.onCDATA;
 
-            hasError = true;
+    if (eventFunc && value) {
+        eventFunc.call(this.listeners, {
+            type: 'cdata',
+            value: value,
+            pos: pos,
+            endPos: endPos
+        }, this.parser);
+    }
+};
 
-            var eventFunc = listeners.onError;
+proto.notifyError = function notifyError(pos, errorCode, message) {
+    if (this.hasError) {
+        return;
+    }
 
-            if (eventFunc) {
-                eventFunc.call(parser, {
-                    type: 'error',
-                    code: errorCode,
-                    message: message,
-                    pos: pos,
-                    endPos: parser.pos
-                }, parser);
-            }
-        },
+    this.hasError = true;
 
-        notifyOpenTagName(tagInfo) {
-            if (hasError) {
-                return;
-            }
+    var eventFunc = this.listeners.onError;
+    if (!eventFunc) return;
 
-            var eventFunc = listeners.onOpenTagName;
+    eventFunc.call(this.listeners, {
+        type: 'error',
+        code: errorCode,
+        message: message,
+        pos: pos,
+        endPos: this.parser.pos
+    }, this.parser);
+};
 
-            if (eventFunc) {
-                // set the literalValue property for attributes that are simple
-                // string simple values or simple literal values
+proto.notifyOpenTagName = function notifyOpenTagName(tagInfo) {
+    if (this.hasError) {
+        return;
+    }
 
-                var event = {
-                    type: 'openTagName',
-                    tagName: tagInfo.tagName,
-                    tagNameExpression: tagInfo.tagNameExpression,
-                    emptyTagName: tagInfo.emptyTagName,
-                    pos: tagInfo.pos,
-                    endPos: tagInfo.tagNameEndPos,
-                    concise: tagInfo.concise
-                };
+    var eventFunc = this.listeners.onOpenTagName;
+    if (!eventFunc) return;
 
-                if (tagInfo.shorthandId) {
-                    event.shorthandId = tagInfo.shorthandId;
-                }
+    // set the literalValue property for attributes that are simple
+    // string simple values or simple literal values
 
-                if (tagInfo.shorthandClassNames) {
-                    event.shorthandClassNames = tagInfo.shorthandClassNames;
-                }
+    var event = {
+        type: 'openTagName',
+        tagName: tagInfo.tagName,
+        tagNameExpression: tagInfo.tagNameExpression,
+        emptyTagName: tagInfo.emptyTagName,
+        pos: tagInfo.pos,
+        endPos: tagInfo.tagNameEndPos,
+        concise: tagInfo.concise
+    };
 
-                event.setParseOptions = function(parseOptions) {
-                    if (!parseOptions) {
-                        return;
-                    }
-                    tagInfo.parseOptions = parseOptions;
-                };
+    if (tagInfo.shorthandId) {
+        event.shorthandId = tagInfo.shorthandId;
+    }
 
-                eventFunc.call(parser, event, parser);
-            }
-        },
+    if (tagInfo.shorthandClassNames) {
+        event.shorthandClassNames = tagInfo.shorthandClassNames;
+    }
 
-        notifyOpenTag(tagInfo) {
-            if (hasError) {
-                return;
-            }
+    event.setParseOptions = function (parseOptions) {
+        if (!parseOptions) {
+            return;
+        }
+        tagInfo.parseOptions = parseOptions;
+    };
 
-            var eventFunc = listeners.onOpenTag;
+    eventFunc.call(this.listeners, event, this.parser);
+};
 
-            if (eventFunc) {
-                // set the literalValue property for attributes that are simple
-                // string simple values or simple literal values
+proto.notifyOpenTag = function notifyOpenTag(tagInfo) {
+    if (this.hasError) {
+        return;
+    }
 
-                var event = {
-                    type: 'openTag',
-                    tagName: tagInfo.tagName,
-                    tagNameExpression: tagInfo.tagNameExpression,
-                    emptyTagName: tagInfo.emptyTagName,
-                    var: tagInfo.var,
-                    argument: tagInfo.argument,
-                    params: tagInfo.params,
-                    pos: tagInfo.pos,
-                    endPos: tagInfo.endPos,
-                    tagNameEndPos: tagInfo.tagNameEndPos,
-                    openTagOnly: tagInfo.openTagOnly,
-                    selfClosed: tagInfo.selfClosed,
-                    concise: tagInfo.concise
-                };
+    var eventFunc = this.listeners.onOpenTag;
+    if (!eventFunc) return;
 
-                if (tagInfo.shorthandId) {
-                    event.shorthandId = tagInfo.shorthandId;
-                }
+    // set the literalValue property for attributes that are simple
+    // string simple values or simple literal values
 
-                if (tagInfo.shorthandClassNames) {
-                    event.shorthandClassNames = tagInfo.shorthandClassNames;
-                }
+    var event = {
+        type: 'openTag',
+        tagName: tagInfo.tagName,
+        tagNameExpression: tagInfo.tagNameExpression,
+        emptyTagName: tagInfo.emptyTagName,
+        var: tagInfo.var,
+        argument: tagInfo.argument,
+        params: tagInfo.params,
+        pos: tagInfo.pos,
+        endPos: tagInfo.endPos,
+        tagNameEndPos: tagInfo.tagNameEndPos,
+        openTagOnly: tagInfo.openTagOnly,
+        selfClosed: tagInfo.selfClosed,
+        concise: tagInfo.concise
+    };
 
-                event.attributes = tagInfo.attributes.map((attr) => {
-                    var newAttr = {
-                        default: attr.default,
-                        name: attr.name,
-                        value: attr.value,
-                        pos: attr.pos,
-                        endPos: attr.endPos,
-                        argument: attr.argument,
-                        method: attr.method,
-                        bound: attr.bound
-                    };
+    if (tagInfo.shorthandId) {
+        event.shorthandId = tagInfo.shorthandId;
+    }
 
-                    if (attr.hasOwnProperty('literalValue')) {
-                        newAttr.literalValue = attr.literalValue;
-                    }
+    if (tagInfo.shorthandClassNames) {
+        event.shorthandClassNames = tagInfo.shorthandClassNames;
+    }
 
-                    return newAttr;
-                });
+    event.attributes = tagInfo.attributes.map((attr) => {
+        var newAttr = {
+            default: attr.default,
+            name: attr.name,
+            value: attr.value,
+            pos: attr.pos,
+            endPos: attr.endPos,
+            argument: attr.argument,
+            method: attr.method,
+            bound: attr.bound
+        };
 
-                event.setParseOptions = function(parseOptions) {
-                    if (!parseOptions) {
-                        return;
-                    }
-                    var newState = parseOptions.state;
+        if (attr.hasOwnProperty('literalValue')) {
+            newAttr.literalValue = attr.literalValue;
+        }
 
-                    if (newState) {
-                        if (newState === 'parsed-text') {
-                            parser.enterParsedTextContentState();
-                        } else if (newState === 'static-text') {
-                            parser.enterStaticTextContentState();
-                        }
-                    }
+        return newAttr;
+    });
 
-                    tagInfo.parseOptions = parseOptions;
-                };
+    event.setParseOptions = function (parseOptions) {
+        if (!parseOptions) {
+            return;
+        }
+        var newState = parseOptions.state;
 
-                eventFunc.call(parser, event, parser);
-            }
-        },
-
-        notifyCloseTag(tagName, pos, endPos) {
-            if (hasError) {
-                return;
-            }
-
-            var eventFunc = listeners.onCloseTag;
-
-            if (eventFunc) {
-                var event = {
-                    type: 'closeTag',
-                    tagName: tagName,
-                    pos: pos,
-                    endPos: endPos
-                };
-
-                eventFunc.call(parser, event, parser);
-            }
-        },
-
-        notifyDocumentType(documentType) {
-            if (hasError) {
-                return;
-            }
-
-            var eventFunc = listeners.onDocumentType;
-
-            if (eventFunc) {
-                eventFunc.call(this, {
-                    type: 'documentType',
-                    value: documentType.value,
-                    pos: documentType.pos,
-                    endPos: documentType.endPos
-                }, parser);
-            }
-        },
-
-        notifyDeclaration(declaration) {
-            if (hasError) {
-                return;
-            }
-
-            var eventFunc = listeners.onDeclaration;
-
-            if (eventFunc) {
-                eventFunc.call(parser, {
-                    type: 'declaration',
-                    value: declaration.value,
-                    pos: declaration.pos,
-                    endPos: declaration.endPos
-                }, parser);
-            }
-        },
-
-        notifyComment(comment) {
-            if (hasError) {
-                return;
-            }
-
-            var eventFunc = listeners.onComment;
-
-            if (eventFunc && comment.value) {
-                eventFunc.call(parser, {
-                    type: 'comment',
-                    value: comment.value,
-                    pos: comment.pos,
-                    endPos: comment.endPos
-                }, parser);
-            }
-        },
-
-        notifyScriptlet(scriptlet) {
-            if (hasError) {
-                return;
-            }
-
-            var eventFunc = listeners.onScriptlet;
-
-            if (eventFunc && scriptlet.value) {
-                eventFunc.call(parser, {
-                    type: 'scriptlet',
-                    tag: scriptlet.tag,
-                    line: scriptlet.line,
-                    block: scriptlet.block,
-                    value: scriptlet.value,
-                    pos: scriptlet.pos,
-                    endPos: scriptlet.endPos
-                }, parser);
-            }
-        },
-
-        notifyPlaceholder(placeholder) {
-            if (hasError) {
-                return;
-            }
-
-            var eventFunc = listeners.onPlaceholder;
-            if (eventFunc) {
-                var placeholderEvent = {
-                    type: 'placeholder',
-                    value: placeholder.value,
-                    pos: placeholder.pos,
-                    endPos: placeholder.endPos,
-                    escape: placeholder.escape !== false,
-                    withinBody: placeholder.withinBody === true,
-                    withinAttribute: placeholder.withinAttribute === true,
-                    withinString: placeholder.withinString === true,
-                    withinOpenTag: placeholder.withinOpenTag === true,
-                    withinTagName: placeholder.withinTagName === true
-                };
-
-                eventFunc.call(parser, placeholderEvent, parser);
-                return placeholderEvent.value;
-            }
-
-            return placeholder.value;
-        },
-
-        notifyString(string) {
-            if (hasError) {
-                return;
-            }
-
-            var eventFunc = listeners.onString;
-            if (eventFunc) {
-                var stringEvent = {
-                    type: 'string',
-                    value: string.value,
-                    pos: string.pos,
-                    endPos: string.endPos,
-                    stringParts: string.stringParts,
-                    isStringLiteral: string.isStringLiteral
-                };
-
-                eventFunc.call(parser, stringEvent, parser);
-                return stringEvent.value;
-            }
-
-            return string.value;
-        },
-
-        notifyFinish() {
-            if (listeners.onfinish) {
-                listeners.onfinish.call(parser, {}, parser);
+        if (newState) {
+            if (newState === 'parsed-text') {
+                this.parser.enterParsedTextContentState();
+            } else if (newState === 'static-text') {
+                this.parser.enterStaticTextContentState();
             }
         }
+
+        tagInfo.parseOptions = parseOptions;
     };
+
+    eventFunc.call(this.listeners, event, this.parser);
+};
+
+proto.notifyCloseTag = function notifyCloseTag(tagName, pos, endPos) {
+    if (this.hasError) {
+        return;
+    }
+
+    var eventFunc = this.listeners.onCloseTag;
+    if (!eventFunc) return;
+
+    var event = {
+        type: 'closeTag',
+        tagName: tagName,
+        pos: pos,
+        endPos: endPos
+    };
+
+    eventFunc.call(this.listeners, event, this.parser);
+};
+
+proto.notifyDocumentType = function notifyDocumentType(documentType) {
+    if (this.hasError) {
+        return;
+    }
+
+    var eventFunc = this.listeners.onDocumentType;
+    if (!eventFunc) return;
+
+    eventFunc.call(this.listeners, {
+        type: 'documentType',
+        value: documentType.value,
+        pos: documentType.pos,
+        endPos: documentType.endPos
+    }, this.parser);
+};
+
+proto.notifyDeclaration = function notifyDeclaration(declaration) {
+    if (this.hasError) {
+        return;
+    }
+
+    var eventFunc = this.listeners.onDeclaration;
+    if (!eventFunc) return;
+
+    eventFunc.call(this.listeners, {
+        type: 'declaration',
+        value: declaration.value,
+        pos: declaration.pos,
+        endPos: declaration.endPos
+    }, this.parser);
+};
+
+proto.notifyComment = function notifyComment(comment) {
+    if (this.hasError) {
+        return;
+    }
+
+    var eventFunc = this.listeners.onComment;
+
+    if (eventFunc && comment.value) {
+        eventFunc.call(this.listeners, {
+            type: 'comment',
+            value: comment.value,
+            pos: comment.pos,
+            endPos: comment.endPos
+        }, this.parser);
+    }
+};
+
+proto.notifyScriptlet = function notifyScriptlet(scriptlet) {
+    if (this.hasError) {
+        return;
+    }
+
+    var eventFunc = this.listeners.onScriptlet;
+
+    if (eventFunc && scriptlet.value) {
+        eventFunc.call(this.listeners, {
+            type: 'scriptlet',
+            tag: scriptlet.tag,
+            line: scriptlet.line,
+            block: scriptlet.block,
+            value: scriptlet.value,
+            pos: scriptlet.pos,
+            endPos: scriptlet.endPos
+        }, this.parser);
+    }
+};
+
+proto.notifyPlaceholder = function notifyPlaceholder(placeholder) {
+    if (this.hasError) {
+        return;
+    }
+
+    var eventFunc = this.listeners.onPlaceholder;
+    if (!eventFunc) return placeholder.value;
+
+    var placeholderEvent = {
+        type: 'placeholder',
+        value: placeholder.value,
+        pos: placeholder.pos,
+        endPos: placeholder.endPos,
+        escape: placeholder.escape !== false,
+        withinBody: placeholder.withinBody === true,
+        withinAttribute: placeholder.withinAttribute === true,
+        withinString: placeholder.withinString === true,
+        withinOpenTag: placeholder.withinOpenTag === true,
+        withinTagName: placeholder.withinTagName === true
+    };
+
+    eventFunc.call(this.listeners, placeholderEvent, this.parser);
+    return placeholderEvent.value;
+};
+
+proto.notifyString = function notifyString(string) {
+    if (this.hasError) {
+        return;
+    }
+
+    var eventFunc = this.listeners.onString;
+    if (!eventFunc) return string.value;
+
+    var stringEvent = {
+        type: 'string',
+        value: string.value,
+        pos: string.pos,
+        endPos: string.endPos,
+        stringParts: string.stringParts,
+        isStringLiteral: string.isStringLiteral
+    };
+
+    eventFunc.call(this.listeners, stringEvent, this.parser);
+    return stringEvent.value;
+};
+
+proto.notifyFinish = function notifyFinish() {
+    if (this.listeners.onfinish) {
+        this.listeners.onfinish.call(this.listeners, {}, this.parser);
+    }
 };
