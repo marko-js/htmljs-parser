@@ -41,5 +41,14 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "version": "2.11.1"
+  "version": "2.11.1",
+  "files": [
+    "lib",
+    "BaseParser.js",
+    "html-tags.js",
+    "index.js",
+    "notify-util.js",
+    "operators.js",
+    "Parser.js"
+  ]
 }

@@ -1,6 +1,7 @@
 module.exports = Notifiers;
 
 function Notifiers(parser, listeners) {
+    if (!(this instanceof Notifiers)) return new Notifiers(parser, listeners);
     this.hasError = false;
     this.parser = parser;
     this.listeners = listeners;

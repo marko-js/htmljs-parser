@@ -45,19 +45,11 @@ class Parser {
             throw new Error('Re-entering the current state is illegal - ' + state.name);
         }
 
-        var oldState;
-        if ((oldState = this.state) && oldState.leave) {
-            // console.log('Leaving state ' + oldState.name);
-            oldState.leave.call(this, state);
-        }
-
-        // console.log('Entering state ' + state.name);
+        var oldState = this.state;
 
         this.state = state;
 
-        if (state.enter) {
-            state.enter(oldState);
-        }
+        state.enter(oldState);
     }
 
     /**
@@ -158,17 +150,13 @@ class Parser {
             const state = this.state;
 
             if (code === CODE_NEWLINE) {
-                if (state.eol) {
-                    state.eol(ch);
-                }
+                state.eol(ch);
                 this.pos++;
                 continue;
             } else if (code === CODE_CARRIAGE_RETURN) {
                 const nextPos = pos + 1;
                 if (nextPos < data.length && data.charCodeAt(nextPos) === CODE_NEWLINE) {
-                    if (state) {
-                        state.eol('\r\n');
-                    }
+                    state.eol('\r\n');
                     this.pos+=2;
                     continue;
                 }
