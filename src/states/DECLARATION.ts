@@ -29,8 +29,7 @@ export const DECLARATION = Parser.createState({
 
   char(ch, code, declaration) {
     if (code === CODE.QUESTION) {
-      var nextCode = this.lookAtCharCodeAhead(1);
-      if (nextCode === CODE.CLOSE_ANGLE_BRACKET) {
+      if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
         this.exitState("?>");
       }
     } else if (code === CODE.CLOSE_ANGLE_BRACKET) {

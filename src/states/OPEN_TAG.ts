@@ -1,4 +1,4 @@
-import { Parser, CODE, STATE, isWhitespaceCode, peek } from "../internal";
+import { Parser, CODE, STATE, isWhitespaceCode, peek, getTagName, cloneValue } from "../internal";
 
 export const OPEN_TAG = Parser.createState({
   name: "OPEN_TAG",
@@ -7,26 +7,25 @@ export const OPEN_TAG = Parser.createState({
     this.endText();
 
     tag.type = "tag";
-    tag.tagName = "";
-    tag.tagNameParts = null;
+    tag.tagName = undefined;
     tag.attributes = [];
     tag.argument = undefined;
     tag.params = undefined;
-    tag.pos = this.pos;
     tag.indent = this.indent;
     tag.nestedIndent = null; // This will get set when we know what the nested indent is
     tag.concise = this.isConcise;
-    tag.beginMixedMode = this.beginMixedMode;
+    tag.beginMixedMode = this.beginMixedMode || this.endingMixedModeAtEOL;
+    tag.selfClosed = false;
+    tag.openTagOnly = false;
+    tag.shorthandId = undefined;
+    tag.shorthandClassNames = undefined;
 
     this.withinOpenTag = true;
-
-    if (this.beginMixedMode) {
-      this.beginMixedMode = false;
-    }
-
+    this.beginMixedMode = false;
+    this.endingMixedModeAtEOL = false;
+    this.currentOpenTag = tag;
     this.blockStack.push(tag);
 
-    this.currentOpenTag = tag;
   },
 
   exit(tag) {
@@ -40,85 +39,33 @@ export const OPEN_TAG = Parser.createState({
 
     if (ignoreAttributes) {
       attributes.length = 0;
-    } else {
-      if (tag.requiresCommas && attributes.length > 1) {
-        for (let i = 0; i < attributes.length - 1; i++) {
-          if (!attributes[i].endedWithComma) {
-            if (!parseOptions || parseOptions.relaxRequireCommas !== true) {
-              this.notifyError(
-                attributes[i].pos,
-                "COMMAS_REQUIRED",
-                "if commas are used, they must be used to separate all attributes for a tag"
-              );
-            }
-          }
-        }
-      }
     }
-
-    tag.expectedCloseTagName = this.expectedCloseTagName =
-      this.substring(
-        tag.tagNameStartPos,
-        tag.tagNameEndPos
-      );
 
     var openTagOnly = (tag.openTagOnly =
-      this.isOpenTagOnly(tagName));
-
-    if (tag.tagNameParts) {
-      tag.tagNameExpression =
-        tag.tagNameParts.join("+");
-    }
-    tag.selfClosed = selfClosed === true;
-
-    if (!tag.tagName && !tag.emptyTagName) {
-      tagName = tag.tagName = "div";
-    }
+      this.isOpenTagOnly(tagName.value));
 
     var origState = this.state;
     this.notifiers.notifyOpenTag(tag);
 
-    var shouldClose = false;
-
-    if (selfClosed) {
-      shouldClose = true;
-    } else if (openTagOnly) {
-      if (!this.isConcise) {
-        // Only close the tag if we are not in concise mode. In concise mode
-        // we want to keep the tag on the stack to make sure nothing is nested below it
-        shouldClose = true;
-      }
-    }
-
-    if (shouldClose) {
-      this.closeTag(this.expectedCloseTagName);
-    }
-
     this.withinOpenTag = false;
 
-    if (shouldClose) {
-      if (this.isConcise) {
+    if (!this.isConcise && (selfClosed || openTagOnly)) {
+      this.closeTag({
+        tagName: { value: "" },
+      });
+
+      this.enterHtmlContentState();
+    } else if (this.state === origState) {
+      // The listener didn't transition the parser to a new state
+      // so we use some simple rules to find the appropriate state.
+      if (tagName.value === "script") {
+        this.enterJsContentState();
+      } else if (tagName.value === "style") {
+        this.enterCssContentState();
+      } else if (this.isConcise) {
         this.enterConciseHtmlContentState();
       } else {
         this.enterHtmlContentState();
-      }
-    } else {
-      // Did the parser stay in the same state after
-      // this.notifiers.notifying listeners about openTag?
-      if (this.state === origState) {
-        // The listener didn't transition the parser to a new state
-        // so we use some simple rules to find the appropriate state.
-        if (tagName === "script") {
-          this.enterJsContentState();
-        } else if (tagName === "style") {
-          this.enterCssContentState();
-        } else {
-          if (this.isConcise) {
-            this.enterConciseHtmlContentState();
-          } else {
-            this.enterHtmlContentState();
-          }
-        }
       }
     }
 
@@ -130,13 +77,7 @@ export const OPEN_TAG = Parser.createState({
   return(childState, childPart) {
     switch (childState) {
       case STATE.TAG_NAME: {
-        this.currentOpenTag.tagName = childPart.rawValue;
-        this.currentOpenTag.tagNameParts = childPart.stringParts;
-        this.currentOpenTag.shorthandId = childPart.shorthandId;
-        this.currentOpenTag.shorthandClassNames = childPart.shorthandClassNames;
-        this.currentOpenTag.tagNameStartPos = childPart.pos;
-        this.currentOpenTag.tagNameEndPos = childPart.endPos;
-
+        this.currentOpenTag.tagName = childPart;
 
         if (!this.currentOpenTag.notifiedOpenTagName) {
           this.currentOpenTag.notifiedOpenTagName = true;
@@ -147,16 +88,12 @@ export const OPEN_TAG = Parser.createState({
       }
       case STATE.ATTRIBUTE: {
         const attr = childPart;
-        if (this.currentOpenTag.argument && childPart.block && !this.currentOpenTag.attributes.length) {
-          attr.name = "default";
-          attr.default = true;
-          attr.method = true;
+        if (this.currentOpenTag.argument && attr.default && attr.method) {
           attr.pos = this.currentOpenTag.argument.pos;
-          attr.value = this.data.substring(attr.pos, attr.endPos);
+          attr.argument = this.currentOpenTag.argument;
           this.currentOpenTag.argument = undefined;
         } 
         this.currentOpenTag.attributes.push(attr);
-        this.currentOpenTag.requiresCommas ||= attr.endedWithComma;
         break;
       }
       case STATE.JS_COMMENT_BLOCK: {
@@ -165,21 +102,18 @@ export const OPEN_TAG = Parser.createState({
       }
       case STATE.PLACEHOLDER: {
         this.enterState(STATE.ATTRIBUTE)
-        this.currentAttribute.value = childPart.value;
+        this.currentAttribute.value = cloneValue(childPart);
         this.exitState();
-
         this.enterState(STATE.AFTER_PLACEHOLDER_WITHIN_TAG);
         break;
       }
       case STATE.EXPRESSION: {
         switch (childPart.part) {
           case "NAME": {
-            this.currentOpenTag.tagNameEnd = childPart.endPos;
-            this.currentOpenTag.tagName = childPart.value;
+            this.currentOpenTag.tagName = childPart;
 
             if (!this.currentOpenTag.notifiedOpenTagName) {
               this.currentOpenTag.notifiedOpenTagName = true;
-              this.currentOpenTag.tagNameEndPos = this.pos;
               this.notifiers.notifyOpenTagName(this.currentOpenTag);
             }
 
@@ -231,7 +165,7 @@ export const OPEN_TAG = Parser.createState({
   },
 
   eol(linebreak) {
-    if (this.isConcise && !this.currentOpenTag.withinAttrGroup) {
+    if (this.isConcise && !this.withinAttrGroup) {
       // In concise mode we always end the open tag
       this.exitState();
       this.skip(linebreak.length)
@@ -240,7 +174,7 @@ export const OPEN_TAG = Parser.createState({
 
   eof() {
     if (this.isConcise) {
-      if (this.currentOpenTag.withinAttrGroup) {
+      if (this.withinAttrGroup) {
         this.notifyError(
           this.currentOpenTag.pos,
           "MALFORMED_OPEN_TAG",
@@ -313,7 +247,7 @@ export const OPEN_TAG = Parser.createState({
           return;
         }
 
-        if (this.currentOpenTag.withinAttrGroup) {
+        if (this.withinAttrGroup) {
           this.notifyError(
             this.pos,
             "MALFORMED_OPEN_TAG",
@@ -333,7 +267,7 @@ export const OPEN_TAG = Parser.createState({
         this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
         return;
       } else if (code === CODE.OPEN_SQUARE_BRACKET) {
-        if (this.currentOpenTag.withinAttrGroup) {
+        if (this.withinAttrGroup) {
           this.notifyError(
             this.pos,
             "MALFORMED_OPEN_TAG",
@@ -342,10 +276,10 @@ export const OPEN_TAG = Parser.createState({
           return;
         }
 
-        this.currentOpenTag.withinAttrGroup = true;
+        this.withinAttrGroup = true;
         return;
       } else if (code === CODE.CLOSE_SQUARE_BRACKET) {
-        if (!this.currentOpenTag.withinAttrGroup) {
+        if (!this.withinAttrGroup) {
           this.notifyError(
             this.pos,
             "MALFORMED_OPEN_TAG",
@@ -354,7 +288,7 @@ export const OPEN_TAG = Parser.createState({
           return;
         }
 
-        this.currentOpenTag.withinAttrGroup = false;
+        this.withinAttrGroup = false;
         return;
       }
     } else {

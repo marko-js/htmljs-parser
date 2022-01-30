@@ -33,7 +33,7 @@ export const AFTER_PLACEHOLDER_WITHIN_TAG = Parser.createState({
       this.notifyError(
         this.pos,
         "UNEXPECTED_TEXT_AFTER_PLACEHOLDER_IN_TAG",
-        `An unexpected "${ch}" character was found after a placeoholder within the open tag.`
+        `An unexpected "${ch}" character was found after a placeholder within the open tag.`
       );
       return;
     }

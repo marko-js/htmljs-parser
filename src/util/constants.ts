@@ -40,5 +40,3 @@ export enum BODY_MODE {
   PARSED_TEXT = 1, // Body of a tag is treated as text, but placeholders will be parsed
   STATIC_TEXT = 2, // Body of a tag is treated as text and placeholders will *not* be parsed
 }
-
-export const NUMBER_REGEX = /^[\-\+]?\d*(?:\.\d+)?(?:e[\-\+]?\d+)?$/;

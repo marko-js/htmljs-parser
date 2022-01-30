@@ -14,7 +14,7 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK: {
-        this.text += childPart.rawValue;
+        this.text += childPart.value;
 
         if (this.htmlBlockDelimiter && childPart.eol) {
           this.handleDelimitedBlockEOL(childPart.eol);
