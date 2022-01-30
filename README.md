@@ -70,7 +70,6 @@ var parser = require('htmljs-parser').createParser({
         var escaped = event.escaped; // boolean
         var withinBody = event.withinBody; // boolean
         var withinAttribute = event.withinAttribute; // boolean
-        var withinString = event.withinString; // boolean
         var withinOpenTag = event.withinOpenTag; // boolean
         var pos = event.pos; // Integer
     },
@@ -78,8 +77,6 @@ var parser = require('htmljs-parser').createParser({
     onString: function(event) {
         // Text within ""
         var value = event.value; // String
-        var stringParts = event.stringParts; // Array
-        var isStringLiteral = event.isStringLiteral // Boolean
         var pos = event.pos; // Integer
     },
 

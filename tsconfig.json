@@ -1,9 +1,9 @@
 {
-  "rootDir": "src/",
   "ts-node": {
     "transpileOnly": true
   },
   "compilerOptions": {
+    "rootDir": "./src/",
     "outDir": "./dist/",
     "target": "es2017",
     "module": "commonjs",
