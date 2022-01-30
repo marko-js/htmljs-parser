@@ -1,5 +1,5 @@
-<#foo>Hello</#foo>
-<#foo.bar name="Frank"></#foo.bar>
+<#foo>Hello</>
+<#foo.bar name="Frank"></>
 <.bar.baz></.bar.baz>
 <div.foo></>
 <span.foo></span.foo>

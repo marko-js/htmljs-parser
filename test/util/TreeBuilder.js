@@ -9,16 +9,14 @@ function attributesToString(attributes) {
 
     var i = 0;
     var result = "";
-    var attr = attributes[0];
-
-    if (attr.default) {
-        i = 1;
-        result = " DEFAULT" + attributeAssignmentToString(attr);
-    }
 
     for (;i < len; i++) {
-        attr = attributes[i];
-        result += " " + attr.name;
+        var attr = attributes[i];
+        result += " ";
+
+        if (attr.name) {
+            result += attr.default ? "DEFAULT" : attr.name.value;
+        }
 
         if (attr.argument) {
             result += '(' + attr.argument.value + ')';
@@ -34,10 +32,16 @@ function attributeAssignmentToString(attr) {
     var result = "";
 
     if (attr.value) {
+        if (attr.name) {
+            result += attr.method ? " " : "=";
+        }
+
         if (attr.bound) {
-            result += '=BOUND(' + attr.value + ")";
+            result += 'BOUND(' + attr.value.value + ")";
+        } else if (attr.method) {
+            result += '{' + attr.value.value + '}';
         } else {
-            result += '=(' + attr.value + ')';
+            result += '(' + attr.value.value + ')';
         }
     } else if (!attr.argument) {
         result += '=(EMPTY)';
@@ -132,20 +136,19 @@ class ElementNode {
     write(out) {
         var event = this.event;
         var tagName = event.tagName;
-        var tagNameExpression = event.tagNameExpression;
         var argument = event.argument;
         var variable = event.var;
         var params = event.params;
         var attributes = event.attributes;
-        var openTagOnly = event.openTagOnly === true;
-        var selfClosed =  event.selfClosed === true;
+        var openTagOnly = event.openTagOnly;
+        var selfClosed =  event.selfClosed;
 
         var str = '<';
 
-        if (tagNameExpression) {
-            str += '(' + tagNameExpression + ')';
+        if (tagName.expression) {
+            str += '(' + tagName.expression.value + ')';
         } else {
-            str += tagName;
+            str += tagName.value || 'div';
         }
 
         if (variable) {
@@ -165,13 +168,11 @@ class ElementNode {
         }
 
         if (event.shorthandId) {
-            str += ' shorthandId=' + event.shorthandId.value;
+            str += ' shorthandId=`' + event.shorthandId.value + '`';
         }
 
         if (event.shorthandClassNames) {
-            str += ' shorthandClassNames=[' + event.shorthandClassNames.map((classNamePart) => {
-                return classNamePart.value;
-            }).join(', ') + ']';
+            str += ' shorthandClassNames=`' + event.shorthandClassNames.map(it => it.value).join(" ") + '`';
         }
 
         str += attributesToString(attributes) + (openTagOnly ? ' OPEN_ONLY' : '') + (selfClosed ? ' SELF_CLOSED' : '') + '>';
@@ -183,7 +184,7 @@ class ElementNode {
         });
         out.decIndent();
 
-        out.writeLine('</' + tagName + '>');
+        out.writeLine('</' + (/\${/.test(tagName.value) ? "" : tagName.value) + '>');
     }
 }
 
@@ -207,12 +208,6 @@ class TreeBuilder {
         this.listeners = {
             onText: (event) => {
                 this.last.children.push(new Node(event));
-            },
-
-            onString: (event) => {
-                if (!event.isStringLiteral) {
-                    event.value = '$placeholderString(' + event.value + ')';
-                }
             },
 
             onPlaceholder: (event) => {
@@ -256,16 +251,7 @@ class TreeBuilder {
             },
 
             onOpenTagName: (event, parser) => {
-                var tagName = event.tagName;
-                if (!event.shorthandId && !event.shorthandClassNames) {
-                    if (event.emptyTagName) {
-                        expect(tagName).to.equal('');
-                    } else {
-                        expect(!!tagName).to.equal(true);
-                    }
-
-                }
-
+                var tagName = event.tagName.value;
                 var openTagNameHandler = openTagNameHandlers && openTagNameHandlers[tagName];
                 if (openTagNameHandler) {
                     openTagNameHandler.call(parser, event, parser);
@@ -275,16 +261,15 @@ class TreeBuilder {
             onOpenTag: (event, parser) => {
                 var startPos = event.pos;
                 var endPos = event.endPos;
-
                 var tagName = event.tagName;
 
-                if (!event.shorthandId && !event.shorthandClassNames) {
+                if (!event.shorthandId && !event.shorthandClassNames && tagName.pos !== undefined) {
                     // Make sure the position information is correct, but only if the
                     // shorthand syntax was not used on the tag name
                     if (event.concise) {
-                        expect(src.substring(startPos, startPos + tagName.length)).to.equal(tagName);
+                        expect(src.substring(startPos, tagName.endPos)).to.equal(tagName.value);
                     } else {
-                        expect(src.substring(startPos, startPos + 1 + tagName.length)).to.equal('<' + tagName);
+                        expect(src.substring(startPos, tagName.endPos)).to.equal('<' + tagName.value);
 
                         if (event.selfClosed) {
                             expect(src.substring(endPos - 2, endPos)).to.equal('/>');
@@ -300,14 +285,14 @@ class TreeBuilder {
                 this.last.children.push(el);
                 this.stack.push(el);
 
-                var openTagHandler = openTagHandlers && openTagHandlers[tagName];
+                var openTagHandler = openTagHandlers && openTagHandlers[tagName.value];
                 if (openTagHandler) {
                     openTagHandler.call(parser, event, parser);
                 }
             },
 
             onCloseTag: (event) => {
-                var tagName = event.tagName;
+                var tagName = event.tagName.value;
 
                 var last = this.stack.pop();
 
@@ -317,8 +302,23 @@ class TreeBuilder {
 
                 var lastEvent = last.event;
 
-                if (last.event.tagName !== event.tagName) {
-                    throw new Error('Illegal state: incorrectly close tag: ' + last.event.tagName + ' != ' + tagName);
+                if (tagName && (last.event.tagName.value || "div") !== tagName) {
+                    if (
+                        // accepts including the tag class/id shorthands as part of the close tag name.
+                        tagName !== src.slice(
+                            lastEvent.tagName.pos,
+                            Math.max(
+                                lastEvent.shorthandId ? lastEvent.shorthandId.endPos : 0,
+                                lastEvent.shorthandClassNames
+                                    ? lastEvent.shorthandClassNames[
+                                        lastEvent.shorthandClassNames.length - 1
+                                    ].endPos
+                                    : 0
+                            )
+                        )
+                    ) {
+                        throw new Error('Illegal state: incorrectly close tag: ' + last.event.tagName.value + ' != ' + tagName);
+                    }
                 }
 
                 // Make sure the position information is correct
@@ -328,12 +328,11 @@ class TreeBuilder {
                 if (lastEvent.concise || lastEvent.selfClosed || lastEvent.openTagOnly) {
                     expect(startPos == null).to.equal(true);
                     expect(endPos == null).to.equal(true);
-                } else {
-                    if (!lastEvent.shorthandId && !lastEvent.shorthandClassNames) {
-                        var actualEndTag = src.substring(startPos, endPos);
-                        if (actualEndTag !== '</' + tagName + '>' && actualEndTag !== '</>') {
-                            throw new Error('Incorrect start/stop pos for close tag: ' + actualEndTag);
-                        }
+                } else if (!lastEvent.tagName.shorthandId && !lastEvent.tagName.shorthandClassNames && startPos !== undefined) {
+                    var actualEndTag = src.substring(startPos, endPos);
+
+                    if (actualEndTag !== '</' + tagName + '>' && actualEndTag !== '</>') {
+                        throw new Error('Incorrect start/stop pos for close tag: ' + actualEndTag);
                     }
                 }
 
