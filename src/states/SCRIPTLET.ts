@@ -34,7 +34,11 @@ export const SCRIPTLET = Parser.createState({
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK: {
-        scriptlet.value += childPart.rawValue;
+        scriptlet.value += this.src.slice(childPart.pos, childPart.endPos);
+        break;
+      }
+      case STATE.REGULAR_EXPRESSION: {
+        scriptlet.value += childPart.value;
         break;
       }
     }
@@ -54,10 +58,20 @@ export const SCRIPTLET = Parser.createState({
       }
       return;
     } else if (code === CODE.FORWARD_SLASH) {
-      if (this.lookAtCharCodeAhead(1) === CODE.ASTERISK) {
-        // Skip over code inside a JavaScript block comment
+      // Check next character to see if we are in a comment or regexp
+      var nextCode = this.lookAtCharCodeAhead(1);
+      if (nextCode === CODE.FORWARD_SLASH) {
+        this.enterState(STATE.JS_COMMENT_LINE);
+        this.skip(1);
+        return;
+      } else if (nextCode === CODE.ASTERISK) {
         this.enterState(STATE.JS_COMMENT_BLOCK);
         this.skip(1);
+        return;
+      } else if (
+        !/[\]})A-Z0-9.<%]/i.test(this.getPreviousNonWhitespaceChar())
+      ) {
+        this.enterState(STATE.REGULAR_EXPRESSION);
         return;
       }
     } else if (code === CODE.SINGLE_QUOTE || code === CODE.DOUBLE_QUOTE) {

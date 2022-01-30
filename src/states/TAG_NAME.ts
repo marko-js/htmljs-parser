@@ -1,4 +1,4 @@
-import { Parser, CODE, STATE, isWhitespaceCode } from "../internal";
+import { Parser, CODE, STATE, isWhitespaceCode, cloneValue } from "../internal";
 
 // We enter STATE.TAG_NAME after we encounter a "<"
 // followed by a non-special character
@@ -6,86 +6,47 @@ export const TAG_NAME = Parser.createState({
   name: "TAG_NAME",
 
   enter(oldState, tagName) {
-    tagName.text = tagName.rawValue = "";
-    if (tagName.shorthandCharCode) {
-      tagName.rawParts = [];
-      tagName.stringParts = [];
-    }
+    tagName.value = "";
+    tagName.expressions = [];
+    tagName.quasis = [{ value: "", pos: tagName.pos, endPos: tagName.pos }];
   },
 
   exit(tagName) {
-    tagName.endPos = this.pos;
-    if (tagName.text && tagName.stringParts) {
-      tagName.stringParts.push(JSON.stringify(tagName.text));
-      tagName.rawParts.push({
-        text: tagName.text,
-        pos: this.pos - tagName.text.length,
-        endPos: this.pos
-      });
-    }
+    // even though we parse shorthands here, we don't want to include those in the tagName pos.
+    tagName.quasis[tagName.quasis.length - 1].endPos = tagName.endPos =
+      tagName.pos + tagName.value.length + (tagName.shorthandCharCode ? 1 : 0);
   },
 
   return(childState, childPart, tagName) {
     switch (childState) {
-      case STATE.STRING: {
-        tagName.text += childPart.value;
-        tagName.rawValue += childPart.value;
-        break;
-      }
       case STATE.PLACEHOLDER: {
-        tagName.rawParts = [];
-        tagName.stringParts = tagName.stringParts || [];
-
-        if (tagName.text) {
-          tagName.stringParts.push(JSON.stringify(tagName.text));
-          tagName.rawParts.push({
-            text: tagName.text,
-            pos: this.pos - tagName.text.length,
-            endPos: this.pos
-          });
-          tagName.text = "";
-        }
-
-        tagName.rawValue += this.substring(
-          childPart.pos,
-          childPart.endPos
-        );
-
-        tagName.stringParts.push("(" + childPart.value + ")");
-        tagName.rawParts.push({
-          expression: childPart.value,
-          pos: childPart.pos,
-          endPos: childPart.endPos
+        tagName.value += `\${${childPart.value}}`;
+        tagName.expressions.push(cloneValue(childPart));
+        tagName.quasis[tagName.quasis.length - 1].endPos = childPart.pos;
+        tagName.quasis.push({
+          value: "",
+          pos: childPart.endPos + 1,
+          endPos: childPart.endPos + 1,
         });
+
         break;
       }
       case STATE.TAG_NAME: {
-        const expression = childPart.stringParts.join("+");
+        const tag = this.currentOpenTag;
         if (childPart.shorthandCharCode === CODE.NUMBER_SIGN) {
-          if (tagName.shorthandId) {
+          if (tag.shorthandId) {
             return this.notifyError(
               childPart.pos,
               "INVALID_TAG_SHORTHAND",
               "Multiple shorthand ID parts are not allowed on the same tag"
             );
           }
-          tagName.shorthandId = {
-            value: expression,
-            pos: childPart.pos,
-            endPos: childPart.endPos,
-            rawParts: childPart.rawParts,
-          };
-        } else {
-          if (!tagName.shorthandClassNames) {
-            tagName.shorthandClassNames = [];
-          }
 
-          tagName.shorthandClassNames.push({
-            value: expression,
-            pos: childPart.pos,
-            endPos: childPart.endPos,
-            rawParts: childPart.rawParts,
-          });
+          tag.shorthandId = cloneValue(childPart);
+        } else if (tag.shorthandClassNames) {
+          tag.shorthandClassNames.push(cloneValue(childPart));
+        } else {
+          tag.shorthandClassNames = [cloneValue(childPart)];
         }
         break;
       }
@@ -103,20 +64,28 @@ export const TAG_NAME = Parser.createState({
   },
 
   char(ch, code, tagName) {
-    var nextCh;
     if (
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      this.enterState(STATE.PLACEHOLDER, { withinTagName: !tagName.shorthandCharCode });
+      if (tagName.expression) {
+        return this.notifyError(
+          this.pos,
+          "INVALID_DYNAMIC_TAG_NAME",
+          "Only a single interpolated value can be placed into the tag name"
+        );
+      }
+
+      this.enterState(STATE.PLACEHOLDER, {
+        withinTagName: !tagName.shorthandCharCode,
+      });
       this.skip(1);
     } else if (code === CODE.BACK_SLASH) {
       // Handle string escape sequence
-      nextCh = this.lookAtCharAhead(1);
+      const next = this.lookAtCharAhead(1);
+      tagName.value += next;
+      tagName.quasis[tagName.quasis.length - 1].value += next;
       this.skip(1);
-
-      tagName.text += nextCh;
-      tagName.rawValue += ch + nextCh;
     } else if (
       isWhitespaceCode(code) ||
       code === CODE.EQUAL ||
@@ -136,8 +105,8 @@ export const TAG_NAME = Parser.createState({
         this.exitState();
       }
     } else {
-      tagName.text += ch;
-      tagName.rawValue += ch;
+      tagName.value += ch;
+      tagName.quasis[tagName.quasis.length - 1].value += ch;
     }
   },
 });

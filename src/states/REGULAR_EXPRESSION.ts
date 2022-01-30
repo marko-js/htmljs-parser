@@ -5,6 +5,7 @@ export const REGULAR_EXPRESSION = Parser.createState({
 
   enter(oldState, regularExpression) {
     regularExpression.value = "/";
+    regularExpression.inCharacterSet = false;
   },
 
   eol() {

@@ -23,12 +23,9 @@ export const CDATA = Parser.createState({
   },
 
   char(ch, code, cdata) {
-    if (code === CODE.CLOSE_SQUARE_BRACKET) {
-      var match = this.lookAheadFor("]>");
-      if (match) {
-        this.exitState("]]>");
-        return;
-      }
+    if (code === CODE.CLOSE_SQUARE_BRACKET && this.lookAheadFor("]>")) {
+      this.exitState("]]>");
+      return;
     }
 
     cdata.value += ch;
