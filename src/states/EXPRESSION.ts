@@ -3,12 +3,12 @@ import { Parser, CODE, STATE, isWhitespaceCode } from "../internal";
 export const EXPRESSION = Parser.createState({
   name: "EXPRESSION",
 
-  // { endAfterGroup }
   enter(oldState, expression) {
     expression.value = "";
     expression.groupStack = [];
-    expression.endAfterGroup = expression.endAfterGroup === true;
-    expression.isStringLiteral = null;
+    expression.allowEscapes = expression.allowEscapes === true;
+    expression.skipOperators = expression.skipOperators === true;
+    expression.terminatedByWhitespace = expression.terminatedByWhitespace === true;
   },
 
   eol(str, expression) {
@@ -28,20 +28,22 @@ export const EXPRESSION = Parser.createState({
     } else {
       let parentState = expression.parentState;
 
-      if (parentState === STATE.ATTRIBUTE && !this.currentAttribute.name) {
-        return this.notifyError(
-          expression.pos,
-          "MALFORMED_OPEN_TAG",
-          'EOF reached while parsing attribute name for the "' +
-            this.currentOpenTag.tagName +
-            '" tag'
-        );
-      } else if (parentState === STATE.ATTRIBUTE) {
+      if (parentState === STATE.ATTRIBUTE) {
+        if (!this.currentAttribute.name) {
+          return this.notifyError(
+            expression.pos,
+            "MALFORMED_OPEN_TAG",
+            'EOF reached while parsing attribute name for the "' +
+              this.currentOpenTag.tagName.value +
+              '" tag'
+          );
+        }
+
         return this.notifyError(
           expression.pos,
           "MALFORMED_OPEN_TAG",
           'EOF reached while parsing attribute value for the "' +
-            this.currentAttribute.name +
+            this.currentAttribute.name.value +
             '" attribute'
         );
       } else if (parentState === STATE.TAG_NAME) {
@@ -69,26 +71,17 @@ export const EXPRESSION = Parser.createState({
   return(childState, childPart, expression) {
     switch (childState) {
       case STATE.STRING: {
-        if (expression.value === "") {
-          expression.isStringLiteral = childPart.isStringLiteral === true;
-        } else {
-          // More than one strings means it is for sure not a string literal...
-          expression.isStringLiteral = false;
-        }
-
         expression.value += childPart.value;
         break;
       }
       case STATE.TEMPLATE_STRING:
       case STATE.REGULAR_EXPRESSION: {
-        expression.isStringLiteral = false;
         expression.value += childPart.value;
         break;
       }
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK: {
-        expression.isStringLiteral = false;
-        expression.value += childPart.rawValue;
+        expression.value += childPart.value;
         break;
       }
     }
@@ -102,24 +95,21 @@ export const EXPRESSION = Parser.createState({
         var operator = !expression.skipOperators && this.checkForOperator();
 
         if (operator) {
-          expression.isStringLiteral = false;
-          expression.hasUnenclosedWhitespace = true;
           expression.value += operator;
-          return;
         } else {
           this.exitState();
-          return;
         }
-      } else if (
-        expression.terminator &&
-          this.checkForTerminator(expression.terminator, ch)
-      ) {
+
+        return;
+      }
+      
+      if (expression.terminator && this.checkForTerminator(expression.terminator, ch)) {
         this.exitState();
         return;
-      } else if (expression.allowEscapes && code === CODE.BACK_SLASH) {
-        // TODO: this is kinda stupid
-        expression.isStringLiteral = false;
-        expression.value += this.src[this.pos+1];
+      }
+      
+      if (expression.allowEscapes && code === CODE.BACK_SLASH) {
+        expression.value += this.lookAtCharAhead(1);
         this.skip(1);
         return;
       }
@@ -133,7 +123,7 @@ export const EXPRESSION = Parser.createState({
     } else if (code === CODE.BACKTICK) {
       return this.enterState(STATE.TEMPLATE_STRING);
     } else if (code === CODE.FORWARD_SLASH) {
-      // Check next character to see if we are in a comment
+      // Check next character to see if we are in a comment or regexp
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.FORWARD_SLASH) {
         this.enterState(STATE.JS_COMMENT_LINE);
@@ -154,12 +144,7 @@ export const EXPRESSION = Parser.createState({
       code === CODE.OPEN_SQUARE_BRACKET ||
       code === CODE.OPEN_CURLY_BRACE
     ) {
-      if (depth === 0 && code === CODE.OPEN_PAREN) {
-        expression.lastLeftParenPos = expression.value.length;
-      }
-
       expression.groupStack.push(code);
-      expression.isStringLiteral = false;
       expression.value += ch;
       return;
     } else if (
@@ -202,9 +187,6 @@ export const EXPRESSION = Parser.createState({
       return;
     }
 
-    // If we got here then we didn't find a string part so we know
-    // the current expression is not a string literal
-    expression.isStringLiteral = false;
     expression.value += ch;
   },
 });

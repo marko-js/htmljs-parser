@@ -10,7 +10,6 @@ export const PLACEHOLDER = Parser.createState({
     placeholder.type = "placeholder";
     placeholder.withinBody = this.withinOpenTag !== true;
     placeholder.withinAttribute = this.currentAttribute != null;
-    placeholder.withinString = placeholder.parentState === STATE.STRING;
     placeholder.withinTemplateString =
       placeholder.parentState === STATE.TEMPLATE_STRING;
     placeholder.withinOpenTag =

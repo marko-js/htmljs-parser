@@ -12,7 +12,6 @@ export const INLINE_SCRIPT = Parser.createState({
 
   exit(inlineScript) {
     var value = inlineScript.value;
-    inlineScript.endPos = this.pos;
 
     if (value[0] === "{" && value[value.length - 1] === "}") {
       inlineScript.value = value.slice(1, -1);
@@ -48,7 +47,11 @@ export const INLINE_SCRIPT = Parser.createState({
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK: {
-        inlineScript.value += childPart.rawValue;
+        inlineScript.value += childPart.value;
+        break;
+      }
+      case STATE.REGULAR_EXPRESSION: {
+        inlineScript.value += childPart.value;
         break;
       }
     }
@@ -71,7 +74,7 @@ export const INLINE_SCRIPT = Parser.createState({
     }
 
     if (code === CODE.FORWARD_SLASH) {
-      // Check next character to see if we are in a comment
+      // Check next character to see if we are in a comment or regexp
       var nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.FORWARD_SLASH) {
         this.enterState(STATE.JS_COMMENT_LINE);
@@ -80,6 +83,11 @@ export const INLINE_SCRIPT = Parser.createState({
       } else if (nextCode === CODE.ASTERISK) {
         this.enterState(STATE.JS_COMMENT_BLOCK);
         this.skip(1);
+        return;
+      } else if (
+        !/[\]})A-Z0-9.<%]/i.test(this.getPreviousNonWhitespaceChar())
+      ) {
+        this.enterState(STATE.REGULAR_EXPRESSION);
         return;
       }
     }

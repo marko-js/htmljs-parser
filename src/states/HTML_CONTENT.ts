@@ -66,15 +66,12 @@ export const HTML_CONTENT = Parser.createState({
         this.enterState(STATE.DECLARATION);
         this.skip(1);
       } else if (nextCode === CODE.FORWARD_SLASH) {
-        this.closeTagPos = this.pos;
-        this.closeTagName = null;
-
-        this.skip(1);
         // something like:
         // </html>
         this.endText();
-
         this.enterState(STATE.CLOSE_TAG);
+        this.skip(1);
+
       } else if (
         nextCode === CODE.CLOSE_ANGLE_BRACKET ||
         nextCode === CODE.OPEN_ANGLE_BRACKET ||

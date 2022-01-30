@@ -1,4 +1,6 @@
-import { Parser, STATE, evaluateStringExpression, CODE, NUMBER_REGEX, isWhitespaceCode } from "../internal";
+import { Parser, STATE, CODE, isWhitespaceCode, cloneValue } from "../internal";
+
+const defaultName = { value: "default" };
 
 // We enter STATE.ATTRIBUTE when we see a non-whitespace
 // character after reading the tag name
@@ -6,13 +8,15 @@ export const ATTRIBUTE = Parser.createState({
   name: "ATTRIBUTE",
 
   enter(oldState, attr) {
+    attr.default = this.currentOpenTag.attributes.length === 0;
+    attr.argument = undefined;
+    attr.value = undefined;
+    attr.method = false;
+    attr.bound = false;
     this.currentAttribute = attr;
   },
 
   exit(attr) {
-    if (this.lookAtCharCodeAhead(0) === CODE.COMMA) {
-      attr.endedWithComma = true;
-    }
     this.currentAttribute = null;
   },
 
@@ -30,9 +34,9 @@ export const ATTRIBUTE = Parser.createState({
         attr.pos,
         "MALFORMED_OPEN_TAG",
         'EOF reached while parsing attribute "' +
-          attr.name +
+          attr.name.value +
           '" for the "' +
-          this.currentOpenTag.tagName +
+          this.currentOpenTag.tagName.value +
           '" tag'
       );
     }
@@ -41,48 +45,47 @@ export const ATTRIBUTE = Parser.createState({
   return(childState, childPart, attr) {
     switch (childState) {
       case STATE.EXPRESSION: {
+        if (childPart.part !== "NAME" && !attr.name && attr.default) {
+          attr.name = defaultName;
+        }
+
         switch (childPart.part) {
           case "NAME": {
-            attr.name = childPart.value;
-            attr.pos = attr.nameStartPos = childPart.pos;
-            attr.endPos = attr.nameEndPos = childPart.endPos;
+            attr.name = cloneValue(childPart);
+            attr.default = false;
             break;
           }
           case "ARGUMENT": {
-            if (attr.argument != null) {
+            if (attr.argument) {
               this.notifyError(
                 childPart.endPos,
                 "ILLEGAL_ATTRIBUTE_ARGUMENT",
-                "An attribute can only have one argument"
+                "An attribute can only have one set of arguments"
               );
               return;
             }
 
-            attr.argument = childPart;
-            this.skip(1); // skip closing paren
+            attr.argument = {
+              value: childPart.value,
+              pos: childPart.pos + 1, // ignore leading (
+              endPos: childPart.endPos
+            };
+            this.skip(1); // ignore trailing )
             break;
           }
           case "BLOCK": {
-            if (attr.argument) {
-              attr.method = true;
-              attr.pos = attr.argument.pos;
-              attr.endPos = childPart.endPos + 1;
-              attr.value = this.data.substring(attr.pos, attr.endPos);
-              attr.argument = undefined;
-              this.exitState("}");
-            } else {
-              attr.name = "{" + childPart.value + "}";
-              attr.pos = childPart.pos - 1;
-              attr.endPos = childPart.endPos + 1;
-              attr.block = true;
-              this.exitState("}");
-            }
+            attr.method = true;
+            attr.value = {
+              value: childPart.value,
+              pos: childPart.pos + 1, // ignore leading {
+              endPos: childPart.endPos
+            };
+            this.skip(1); // ignore trailing }
+            this.exitState();
             break;
           }
           case "VALUE": {
-            const value = childPart.value;
-
-            if (value === "") {
+            if (childPart.value === "") {
               return this.notifyError(
                 childPart.pos,
                 "ILLEGAL_ATTRIBUTE_VALUE",
@@ -90,19 +93,7 @@ export const ATTRIBUTE = Parser.createState({
               );
             }
 
-            if (childPart.hasUnenclosedWhitespace) {
-              this.currentOpenTag.hasUnenclosedWhitespace = true;
-            }
-
-            if (!attr.name) {
-              attr.name = "default";
-              attr.default = true;
-              attr.pos = attr.nameStartPos = attr.nameEndPos = childPart.pos;
-            }
-
-            attr.value = value;
-            attr.valueStartPos = childPart.pos;
-            attr.endPos = attr.valueEndPos = childPart.endPos;
+            attr.value = cloneValue(childPart);
             this.exitState();
             break;
           }
@@ -136,7 +127,6 @@ export const ATTRIBUTE = Parser.createState({
     } else if (code === CODE.OPEN_PAREN) {
       this.enterState(STATE.EXPRESSION, { 
         part: "ARGUMENT",
-        terminatedByWhitespace: false, 
         terminator: ")"
       });
     } else if (code === CODE.OPEN_CURLY_BRACE && (!attr.name || attr.argument)) {
@@ -146,7 +136,6 @@ export const ATTRIBUTE = Parser.createState({
         terminator: "}"
       });
     } else if (!attr.name) {
-      this.rewind(1);
       this.enterState(STATE.EXPRESSION, { 
         part: "NAME",
         terminatedByWhitespace: true, 
@@ -161,6 +150,7 @@ export const ATTRIBUTE = Parser.createState({
         ],
         allowEscapes: true
       });
+      this.rewind(1);
     } else {
       this.exitState();
     }

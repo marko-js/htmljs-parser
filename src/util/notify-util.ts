@@ -81,20 +81,15 @@ export function createNotifiers(parser, listeners) {
         var event = {
           type: "openTagName",
           tagName: tagInfo.tagName,
-          tagNameExpression: tagInfo.tagNameExpression,
-          emptyTagName: tagInfo.emptyTagName,
           pos: tagInfo.pos,
-          endPos: tagInfo.tagNameEndPos,
-          tagNameStartPos: tagInfo.tagNameStartPos,
-          tagNameEndPos: tagInfo.tagNameEndPos,
+          endPos: tagInfo.tagName.endPos,
           concise: tagInfo.concise,
           shorthandId: tagInfo.shorthandId,
           shorthandClassNames: tagInfo.shorthandClassNames,
           setParseOptions(parseOptions) {
-            if (!parseOptions) {
-              return;
+            if (parseOptions) {
+              tagInfo.parseOptions = parseOptions;
             }
-            tagInfo.parseOptions = parseOptions;
           },
         };
 
@@ -116,37 +111,26 @@ export function createNotifiers(parser, listeners) {
         var event = {
           type: "openTag",
           tagName: tagInfo.tagName,
-          tagNameExpression: tagInfo.tagNameExpression,
-          emptyTagName: tagInfo.emptyTagName,
           var: tagInfo.var,
           argument: tagInfo.argument,
           params: tagInfo.params,
           pos: tagInfo.pos,
           endPos: tagInfo.endPos,
-          tagNameEndPos: tagInfo.tagNameEndPos,
+          concise: tagInfo.concise,
           openTagOnly: tagInfo.openTagOnly,
           selfClosed: tagInfo.selfClosed,
-          concise: tagInfo.concise,
           shorthandId: tagInfo.shorthandId,
           shorthandClassNames: tagInfo.shorthandClassNames,
-          attributes: tagInfo.attributes.map((attr) => {
-            var newAttr = {
-              default: attr.default,
-              name: attr.name,
-              value: attr.value,
-              pos: attr.pos,
-              endPos: attr.endPos,
-              nameStartPos: attr.nameStartPos,
-              nameEndPos: attr.nameEndPos,
-              valueStartPos: attr.valueStartPos,
-              valueEndPos: attr.valueEndPos,
-              argument: attr.argument,
-              method: attr.method,
-              bound: attr.bound,
-            };
-
-            return newAttr;
-          }),
+          attributes: tagInfo.attributes.map((attr) => ({
+            default: attr.default,
+            name: attr.name,
+            value: attr.value,
+            pos: attr.pos,
+            endPos: attr.endPos,
+            argument: attr.argument,
+            method: attr.method,
+            bound: attr.bound,
+          })),
           setParseOptions(parseOptions) {
             if (!parseOptions) {
               return;
@@ -169,7 +153,7 @@ export function createNotifiers(parser, listeners) {
       }
     },
 
-    notifyCloseTag(tagName, pos, endPos) {
+    notifyCloseTag(closeTag) {
       if (hasError) {
         return;
       }
@@ -179,9 +163,9 @@ export function createNotifiers(parser, listeners) {
       if (eventFunc) {
         var event = {
           type: "closeTag",
-          tagName: tagName,
-          pos: pos,
-          endPos: endPos,
+          tagName: closeTag.tagName,
+          pos: closeTag.pos,
+          endPos: closeTag.endPos,
         };
 
         eventFunc.call(parser, event, parser);
@@ -242,6 +226,7 @@ export function createNotifiers(parser, listeners) {
           parser,
           {
             type: "comment",
+            kind: comment.kind,
             value: comment.value,
             pos: comment.pos,
             endPos: comment.endPos,
@@ -263,6 +248,7 @@ export function createNotifiers(parser, listeners) {
           parser,
           {
             type: "scriptlet",
+            // TODO: enum
             tag: scriptlet.tag,
             line: scriptlet.line,
             block: scriptlet.block,
@@ -287,12 +273,12 @@ export function createNotifiers(parser, listeners) {
           value: placeholder.value,
           pos: placeholder.pos,
           endPos: placeholder.endPos,
-          escape: placeholder.escape !== false,
-          withinBody: placeholder.withinBody === true,
-          withinAttribute: placeholder.withinAttribute === true,
-          withinString: placeholder.withinString === true,
-          withinOpenTag: placeholder.withinOpenTag === true,
-          withinTagName: placeholder.withinTagName === true,
+          escape: placeholder.escape,
+          // TODO: location enum
+          withinBody: placeholder.withinBody,
+          withinAttribute: placeholder.withinAttribute,
+          withinOpenTag: placeholder.withinOpenTag,
+          withinTagName: placeholder.withinTagName,
         };
 
         eventFunc.call(parser, placeholderEvent, parser);
@@ -314,8 +300,6 @@ export function createNotifiers(parser, listeners) {
           value: string.value,
           pos: string.pos,
           endPos: string.endPos,
-          stringParts: string.stringParts,
-          isStringLiteral: string.isStringLiteral,
         };
 
         eventFunc.call(parser, stringEvent, parser);

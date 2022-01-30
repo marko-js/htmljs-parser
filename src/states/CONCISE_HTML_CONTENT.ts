@@ -1,4 +1,4 @@
-import { Parser, CODE, STATE, isWhitespaceCode } from "../internal";
+import { Parser, CODE, STATE, isWhitespaceCode, getTagName } from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
 export const CONCISE_HTML_CONTENT = Parser.createState({
@@ -22,15 +22,7 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK: {
-        var value = childPart.value;
-
-        value = value.trim();
-
-        this.notifiers.notifyComment({
-          value: value,
-          pos: childPart.pos,
-          endPos: childPart.endPos,
-        });
+        this.notifiers.notifyComment(childPart);
 
         if (childPart.type === "block") {
           // Make sure there is only whitespace on the line
@@ -66,7 +58,9 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
         if (len) {
           let curBlock = this.blockStack[len - 1];
           if (curBlock.indent.length >= this.indent.length) {
-            this.closeTag(curBlock.expectedCloseTagName);
+            this.closeTag({
+              tagName: { value: "" }
+            });
           } else {
             // Indentation is greater than the last tag so we are starting a
             // nested tag and there are no more tags to end
@@ -96,7 +90,7 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
             this.pos,
             "INVALID_BODY",
             'The "' +
-              parent.tagName +
+              parent.tagName.value +
               '" tag does not allow nested body content'
           );
           return;

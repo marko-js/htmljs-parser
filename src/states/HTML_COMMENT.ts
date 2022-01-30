@@ -8,15 +8,16 @@ export const HTML_COMMENT = Parser.createState({
 
   enter(oldState, comment) {
     this.endText();
-    comment.value = "";
+    comment.kind = "html-block";
+    comment.value = "<!--";
   },
 
   exit(comment) {
     this.notifiers.notifyComment(comment);
   },
 
-  eol(newLineChars, comment) {
-    comment.value += newLineChars;
+  eol(str, comment) {
+    comment.value += str;
   },
 
   eof(comment) {
@@ -29,11 +30,14 @@ export const HTML_COMMENT = Parser.createState({
 
   char(ch, code, comment) {
     if (code === CODE.HYPHEN) {
-      var match = this.lookAheadFor("->");
-      if (match) {
-        this.exitState("-->");
-      } else {
-        comment.value += ch;
+      let offset = 1;
+      let next: number;
+      while ((next = this.lookAtCharCodeAhead(offset++)) === CODE.HYPHEN);
+      comment.value += this.substring(this.pos, this.pos + offset);
+      this.skip(offset);
+
+      if (next === CODE.CLOSE_ANGLE_BRACKET) {
+        this.exitState();
       }
     } else {
       comment.value += ch;
