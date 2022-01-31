@@ -1,19 +1,27 @@
-import { Parser, CODE, STATE } from "../internal";
+import { CODE, Part, STATE, StateDefinition } from "../internal";
 
-export const TEMPLATE_STRING = Parser.createState({
+export interface TemplateStringPart extends Part {
+  value: string;
+}
+
+export const TEMPLATE_STRING: StateDefinition<TemplateStringPart> = {
   name: "TEMPLATE_STRING",
 
-  enter(oldState, templateString) {
+  enter(templateString) {
     templateString.value = "`";
   },
 
-  return(childState, childPart, templateString) {
-    switch (childState) {
-      case STATE.PLACEHOLDER: {
-        templateString.value += "${" + childPart.value + "}";
-        break;
-      }
+  return(_, childPart, templateString) {
+    if (!(childPart as STATE.ExpressionPart).value) {
+      this.notifyError(
+        childPart.pos,
+        "PLACEHOLDER_EXPRESSION_REQUIRED",
+        "Invalid placeholder, the expression cannot be missing"
+      );
     }
+
+    templateString.value += `\${${(childPart as STATE.ExpressionPart).value}}`;
+    this.skip(1);
   },
 
   eol(str, templateString) {
@@ -29,24 +37,21 @@ export const TEMPLATE_STRING = Parser.createState({
   },
 
   char(ch, code, templateString) {
-    var nextCh;
     if (
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      this.enterState(STATE.PLACEHOLDER, { escape: false });
       this.skip(1);
+      this.enterState(STATE.EXPRESSION, { terminator: "}" });
     } else {
       templateString.value += ch;
       if (code === CODE.BACK_SLASH) {
         // Handle string escape sequence
-        nextCh = this.lookAtCharAhead(1);
+        templateString.value += this.lookAtCharAhead(1);
         this.skip(1);
-
-        templateString.value += nextCh;
       } else if (code === CODE.BACKTICK) {
         this.exitState("`");
       }
     }
   },
-});
+};

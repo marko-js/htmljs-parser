@@ -1,10 +1,10 @@
-import { Parser, CODE } from "../internal";
+import { CODE, StateDefinition, ValuePart } from "../internal";
 
 // We enter STATE.CDATA after we see "<![CDATA["
-export const CDATA = Parser.createState({
+export const CDATA: StateDefinition<ValuePart> = {
   name: "CDATA",
 
-  enter(oldState, cdata) {
+  enter(cdata) {
     this.endText();
     this.textParseMode = "cdata";
     cdata.value = "";
@@ -30,4 +30,4 @@ export const CDATA = Parser.createState({
 
     cdata.value += ch;
   },
-});
+};

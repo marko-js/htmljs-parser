@@ -1,42 +1,49 @@
 "use strict";
 
 import { Parser, CODE, peek } from "../internal";
-export type StateDefinition = {
+
+export interface Part {
+  pos: number;
+  endPos: number;
+  parentState: StateDefinition;
+}
+
+export interface ValuePart extends Part {
+  value: string;
+}
+
+export interface StateDefinition<P extends Part = Part> {
   name: string;
-  eol?: (this: Parser, str?: string, activePart?: any) => void;
-  eof?: (this: Parser, activePart?: any) => void;
+  eol?: (this: Parser, str: string, activePart: P) => void;
+  eof?: (this: Parser, activePart: P) => void;
   enter?: (
     this: Parser,
-    parentState?: StateDefinition,
-    activePart?: any
-  ) => unknown;
-  exit?: (this: Parser, activePart?: any) => unknown;
+    activePart: P,
+    parentState: StateDefinition | undefined
+  ) => void;
+  exit?: (this: Parser, activePart: P) => void;
   return?: (
     this: Parser,
-    childState?: StateDefinition,
-    childPart?: any,
-    activePart?: any
-  ) => unknown;
-  char?: (this: Parser, char: string, code: number, activePart?: any) => void;
-};
+    childState: StateDefinition,
+    childPart: Part,
+    activePart: P
+  ) => void;
+  char?: (this: Parser, char: string, code: number, activePart: P) => void;
+}
 
 export class BaseParser {
-  public pos: number;
-  public maxPos: number;
-  public data: string;
-  public src: string;
-  public filename: string;
-  public state: StateDefinition;
-  public initialState: StateDefinition;
-  public parts: any[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
-  public activePart: any; // The current part at the top of the part stack
-  public forward: boolean;
+  public pos!: number;
+  public maxPos!: number;
+  public data!: string;
+  public src!: string;
+  public filename!: string;
+  public state!: StateDefinition;
+  public initialState!: StateDefinition;
+  public parts!: Part[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
+  public activePart!: Part; // The current part at the top of the part stack
+  public forward!: boolean;
 
-  static createState(def: StateDefinition) {
-    return def;
-  }
-
-  constructor(options) {
+  constructor() {
     this.reset();
   }
 
@@ -48,24 +55,18 @@ export class BaseParser {
     // readable based on the currently received chunks
     this.maxPos = -1;
 
-    // the current parser state
-    this.state = null;
-
-    // The raw string that we are parsing
-    this.data = this.src = null;
-
-    this.filename = null;
-
     this.parts = [];
-    this.activePart = undefined;
     this.forward = true;
   }
 
-  setInitialState(initialState) {
+  setInitialState(initialState: StateDefinition) {
     this.initialState = initialState;
   }
 
-  enterState(state: StateDefinition, part = {}) {
+  enterState<P extends Part = Part>(
+    state: StateDefinition<P>,
+    part: Partial<P> = {}
+  ) {
     // if (this.state === state) {
     //   // Re-entering the same state can lead to unexpected behavior
     //   // so we should throw error to catch these types of mistakes
@@ -74,33 +75,21 @@ export class BaseParser {
     //   );
     // }
 
-    var parentState = this.state;
-    var activePart = (this.activePart = Object.assign(part, {
-      pos: this.pos,
-      parentState: parentState,
-    }));
-
-    this.state = state;
+    const parentState = this.state;
+    const activePart = (this.activePart = part as unknown as P);
+    this.state = state as StateDefinition;
     this.parts.push(activePart);
-
-    if (state.enter) {
-      state.enter.call(this, parentState, activePart);
-    }
-
+    part.pos = this.pos;
+    part.parentState = parentState;
+    state.enter?.call(this as any, activePart, parentState);
     return this.activePart;
-  }
-
-  enterStateIfNotParent(state: StateDefinition, part = {}) {
-    if (this.activePart.parentState !== state) {
-      return this.enterState(state, part);
-    }
   }
 
   exitState(includedEndChars?: string) {
     if (includedEndChars) {
       for (let i = 0; i < includedEndChars.length; i++) {
-        if (this.src[this.pos+i] !== includedEndChars[i]) {
-          if (this.pos+i >= this.maxPos) {
+        if (this.src[this.pos + i] !== includedEndChars[i]) {
+          if (this.pos + i >= this.maxPos) {
             (this as any as Parser).notifyError(
               this.activePart.pos,
               "UNEXPECTED_EOF",
@@ -108,7 +97,7 @@ export class BaseParser {
             );
           } else {
             throw new Error(
-              "Unexpected end character at position " + (this.pos+i)
+              "Unexpected end character at position " + (this.pos + i)
             );
           }
         }
@@ -116,21 +105,19 @@ export class BaseParser {
       this.skip(includedEndChars.length);
     }
 
-    const childPart = this.parts.pop();
+    const childPart = this.parts.pop()!;
     const childState = this.state;
     const parentState = (this.state = childPart.parentState);
-    const parentPart = (this.activePart = this.parts.length
-      ? peek(this.parts)
-      : undefined);
+    const parentPart = (this.activePart = peek(this.parts)!);
 
     childPart.endPos = this.pos;
 
     if (childState.exit) {
-      childState.exit.call(this, childPart);
+      childState.exit.call(this as any, childPart);
     }
 
     if (parentState.return) {
-      parentState.return.call(this, childState, childPart, parentPart);
+      parentState.return.call(this as any, childState, childPart, parentPart);
     }
 
     this.forward = false;
@@ -141,15 +128,15 @@ export class BaseParser {
       if (ch === terminator) {
         return true;
       } else if (terminator.length > 1) {
-        for (var i = 0; i < terminator.length; i++) {
-          if (this.src[this.pos+i] !== terminator[i]) {
+        for (let i = 0; i < terminator.length; i++) {
+          if (this.src[this.pos + i] !== terminator[i]) {
             return false;
           }
         }
         return true;
       }
     } else {
-      for (var i = 0; i < terminator.length; i++) {
+      for (let i = 0; i < terminator.length; i++) {
         if (this.checkForTerminator(terminator[i], ch)) {
           return true;
         }
@@ -161,20 +148,15 @@ export class BaseParser {
    * Look ahead to see if the given str matches the substring sequence
    * beyond
    */
-  lookAheadFor(str: string, startPos?: number) {
+  lookAheadFor(str: string, startPos = this.pos + 1) {
     // Have we read enough chunks to read the string that we need?
-    if (startPos == null) {
-      startPos = this.pos + 1;
-    }
-    var len = str.length;
-    var endPos = startPos + len;
+    const endPos = startPos + str.length;
 
-    if (endPos > this.maxPos + 1) {
+    if (endPos > this.maxPos + 1 || str !== this.substring(startPos, endPos)) {
       return undefined;
     }
 
-    var found = this.data.substring(startPos, endPos);
-    return found === str ? str : undefined;
+    return str;
   }
 
   /**
@@ -195,7 +177,6 @@ export class BaseParser {
   }
 
   skip(offset: number) {
-    // console.log('-- ' + JSON.stringify(this.data.substring(this.pos, this.pos + offset)) + ' --  ' + 'SKIPPED'.gray);
     this.pos += offset;
   }
 
@@ -242,30 +223,27 @@ export class BaseParser {
       return;
     }
 
-    var pos;
+    let pos: number;
     while ((pos = this.pos) <= this.maxPos) {
-      let ch = data[pos];
-      let code = ch && ch.charCodeAt(0);
-      let state = this.state;
+      const ch = data[pos];
+      const code = ch && ch.charCodeAt(0);
+      const state = this.state;
       let length = 1;
 
       if (code === CODE.NEWLINE) {
-        if (state.eol) {
-          state.eol.call(this, ch, this.activePart);
-        }
+        state.eol?.call(this as any, ch, this.activePart);
       } else if (code === CODE.CARRIAGE_RETURN) {
-        let nextPos = pos + 1;
+        const nextPos = pos + 1;
         if (
           nextPos < data.length &&
           data.charCodeAt(nextPos) === CODE.NEWLINE
         ) {
-          if (state.eol) {
-            state.eol.call(this, "\r\n", this.activePart);
-          }
+          state.eol?.call(this as any, "\r\n", this.activePart);
           length = 2;
         }
       } else if (code) {
         // We assume that every state will have "char" function
+        // TODO: only check during debug.
         if (!state.char) {
           throw new Error(
             `State ${state.name} has no "char" function (${JSON.stringify(
@@ -273,11 +251,9 @@ export class BaseParser {
             )}, ${code})`
           );
         }
-        state.char.call(this, ch, code, this.activePart);
+        state.char.call(this as any, ch, code, this.activePart);
       } else {
-        if (state.eof) {
-          state.eof.call(this, this.activePart);
-        }
+        state.eof?.call(this as any, this.activePart);
       }
 
       // move to next position
@@ -286,6 +262,6 @@ export class BaseParser {
       } else {
         this.forward = true;
       }
-    }    
+    }
   }
 }

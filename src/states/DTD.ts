@@ -1,11 +1,11 @@
-import { Parser, CODE } from "../internal";
+import { CODE, StateDefinition, ValuePart } from "../internal";
 
 // We enter STATE.DTD after we encounter a "<!" while in the STATE.HTML_CONTENT.
 // We leave STATE.DTD if we see a ">".
-export const DTD = Parser.createState({
+export const DTD: StateDefinition<ValuePart> = {
   name: "DTD",
 
-  enter(oldState, documentType) {
+  enter(documentType) {
     this.endText();
     documentType.value = "";
   },
@@ -33,4 +33,4 @@ export const DTD = Parser.createState({
       documentType.value += ch;
     }
   },
-});
+};

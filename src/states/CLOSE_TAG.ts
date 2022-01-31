@@ -1,16 +1,20 @@
-import { Parser, CODE, STATE } from "../internal";
+import { CODE, STATE, Part, StateDefinition, ValuePart } from "../internal";
+
+export interface CloseTagPart extends Part {
+  tagName: ValuePart;
+}
 
 // We enter STATE.CLOSE_TAG after we see "</"
-export const CLOSE_TAG = Parser.createState({
+export const CLOSE_TAG: StateDefinition<CloseTagPart> = {
   name: "CLOSE_TAG",
 
-  enter(oldState, closeTag) {
+  enter(closeTag) {
     const tagNamePos = closeTag.pos + 2;
     closeTag.tagName = {
       value: "",
       pos: tagNamePos,
       endPos: tagNamePos,
-    };
+    } as ValuePart;
   },
 
   eof(closeTag) {
@@ -31,4 +35,4 @@ export const CLOSE_TAG = Parser.createState({
       closeTag.tagName.endPos++;
     }
   },
-});
+};

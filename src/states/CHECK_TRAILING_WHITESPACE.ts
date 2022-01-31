@@ -1,34 +1,41 @@
-import { Parser, isWhitespaceCode } from "../internal";
+import { Parser, isWhitespaceCode, Part, StateDefinition } from "../internal";
 
-export const CHECK_TRAILING_WHITESPACE = Parser.createState({
-  name: "CHECK_TRAILING_WHITESPACE",
+export interface CheckTrailingWhitespacePart extends Part {
+  eof?: boolean;
+  err?: { ch: string };
+  handler(this: Parser, err?: { ch: string }, eof?: boolean): void;
+}
 
-  enter(oldState, { handler }) {
-    if (typeof handler !== "function") {
-      throw new Error("Invalid handler");
-    }
-  },
+export const CHECK_TRAILING_WHITESPACE: StateDefinition<CheckTrailingWhitespacePart> =
+  {
+    name: "CHECK_TRAILING_WHITESPACE",
 
-  exit({ handler, err, eof }) {
-    handler.call(this, err, eof);
-  },
+    enter({ handler }) {
+      if (typeof handler !== "function") {
+        throw new Error("Invalid handler");
+      }
+    },
 
-  eol: function () {
-    this.exitState();
-    this.forward = true;
-  },
+    exit({ handler, err, eof }) {
+      handler.call(this, err, eof);
+    },
 
-  eof: function (part) {
-    part.eof = true;
-    this.exitState();
-  },
-
-  char(ch, code, part) {
-    if (isWhitespaceCode(code)) {
-      // Just whitespace... we are still good
-    } else {
-      part.err = { ch };
+    eol: function () {
       this.exitState();
-    }
-  },
-});
+      this.forward = true;
+    },
+
+    eof: function (part) {
+      part.eof = true;
+      this.exitState();
+    },
+
+    char(ch, code, part) {
+      if (isWhitespaceCode(code)) {
+        // Just whitespace... we are still good
+      } else {
+        part.err = { ch };
+        this.exitState();
+      }
+    },
+  };

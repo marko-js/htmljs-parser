@@ -1,14 +1,15 @@
-import { Parser, CODE, STATE } from "../internal";
+import { CODE, StateDefinition, ValuePart } from "../internal";
 
-export const STRING = Parser.createState({
+export interface StringPart extends ValuePart {
+  quoteChar: string;
+  quoteCharCode: number;
+}
+
+export const STRING: StateDefinition<StringPart> = {
   name: "STRING",
 
-  enter(oldState, string) {
+  enter(string) {
     string.value = string.quoteChar;
-  },
-
-  exit(string) {
-    string.value = this.notifiers.notifyString(string);
   },
 
   eol(str, string) {
@@ -34,4 +35,4 @@ export const STRING = Parser.createState({
       this.exitState(ch);
     }
   },
-});
+};

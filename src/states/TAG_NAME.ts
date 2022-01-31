@@ -1,14 +1,29 @@
-import { Parser, CODE, STATE, isWhitespaceCode, cloneValue } from "../internal";
+import {
+  CODE,
+  STATE,
+  isWhitespaceCode,
+  cloneValue,
+  StateDefinition,
+  ValuePart,
+} from "../internal";
+
+export interface TagNamePart extends ValuePart {
+  shorthandCharCode: number;
+  expressions: ValuePart[];
+  quasis: ValuePart[];
+}
 
 // We enter STATE.TAG_NAME after we encounter a "<"
 // followed by a non-special character
-export const TAG_NAME = Parser.createState({
+export const TAG_NAME: StateDefinition<TagNamePart> = {
   name: "TAG_NAME",
 
-  enter(oldState, tagName) {
+  enter(tagName) {
     tagName.value = "";
     tagName.expressions = [];
-    tagName.quasis = [{ value: "", pos: tagName.pos, endPos: tagName.pos }];
+    tagName.quasis = [
+      { value: "", pos: tagName.pos, endPos: tagName.pos } as ValuePart,
+    ];
   },
 
   exit(tagName) {
@@ -19,34 +34,45 @@ export const TAG_NAME = Parser.createState({
 
   return(childState, childPart, tagName) {
     switch (childState) {
-      case STATE.PLACEHOLDER: {
-        tagName.value += `\${${childPart.value}}`;
-        tagName.expressions.push(cloneValue(childPart));
-        tagName.quasis[tagName.quasis.length - 1].endPos = childPart.pos;
+      case STATE.EXPRESSION: {
+        const exprPart = childPart as STATE.ExpressionPart;
+        if (!exprPart.value) {
+          this.notifyError(
+            exprPart.pos,
+            "PLACEHOLDER_EXPRESSION_REQUIRED",
+            "Invalid placeholder, the expression cannot be missing"
+          );
+        }
+
+        tagName.value += `\${${exprPart.value}}`;
+        tagName.expressions.push(cloneValue(exprPart));
+        tagName.quasis[tagName.quasis.length - 1].endPos = exprPart.pos;
         tagName.quasis.push({
           value: "",
-          pos: childPart.endPos + 1,
-          endPos: childPart.endPos + 1,
-        });
+          pos: exprPart.endPos + 1,
+          endPos: exprPart.endPos + 1,
+        } as ValuePart);
+        this.skip(1);
 
         break;
       }
       case STATE.TAG_NAME: {
-        const tag = this.currentOpenTag;
-        if (childPart.shorthandCharCode === CODE.NUMBER_SIGN) {
+        const namePart = childPart as TagNamePart;
+        const tag = this.currentOpenTag!;
+        if (namePart.shorthandCharCode === CODE.NUMBER_SIGN) {
           if (tag.shorthandId) {
             return this.notifyError(
-              childPart.pos,
+              namePart.pos,
               "INVALID_TAG_SHORTHAND",
               "Multiple shorthand ID parts are not allowed on the same tag"
             );
           }
 
-          tag.shorthandId = cloneValue(childPart);
+          tag.shorthandId = cloneValue(namePart);
         } else if (tag.shorthandClassNames) {
-          tag.shorthandClassNames.push(cloneValue(childPart));
+          tag.shorthandClassNames.push(cloneValue(namePart));
         } else {
-          tag.shorthandClassNames = [cloneValue(childPart)];
+          tag.shorthandClassNames = [cloneValue(namePart)];
         }
         break;
       }
@@ -54,7 +80,7 @@ export const TAG_NAME = Parser.createState({
   },
 
   eol() {
-    if (this.isConcise && !this.currentOpenTag.withinAttrGroup) {
+    if (this.isConcise && !this.withinAttrGroup) {
       this.exitState();
     }
   },
@@ -68,18 +94,8 @@ export const TAG_NAME = Parser.createState({
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      if (tagName.expression) {
-        return this.notifyError(
-          this.pos,
-          "INVALID_DYNAMIC_TAG_NAME",
-          "Only a single interpolated value can be placed into the tag name"
-        );
-      }
-
-      this.enterState(STATE.PLACEHOLDER, {
-        withinTagName: !tagName.shorthandCharCode,
-      });
       this.skip(1);
+      this.enterState(STATE.EXPRESSION, { terminator: "}" });
     } else if (code === CODE.BACK_SLASH) {
       // Handle string escape sequence
       const next = this.lookAtCharAhead(1);
@@ -109,4 +125,4 @@ export const TAG_NAME = Parser.createState({
       tagName.quasis[tagName.quasis.length - 1].value += ch;
     }
   },
-});
+};

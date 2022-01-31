@@ -1,7 +1,14 @@
-import { Parser, CODE, STATE, isWhitespaceCode, getTagName } from "../internal";
+import {
+  Parser,
+  CODE,
+  STATE,
+  isWhitespaceCode,
+  StateDefinition,
+  ValuePart,
+} from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
-export const CONCISE_HTML_CONTENT = Parser.createState({
+export const CONCISE_HTML_CONTENT: StateDefinition = {
   name: "CONCISE_HTML_CONTENT",
 
   eol(newLine) {
@@ -24,7 +31,7 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
       case STATE.JS_COMMENT_BLOCK: {
         this.notifiers.notifyComment(childPart);
 
-        if (childPart.type === "block") {
+        if ((childPart as ValuePart).value[1] === "*") {
           // Make sure there is only whitespace on the line
           // after the ending "*/" sequence
           this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
@@ -53,13 +60,14 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
     if (isWhitespaceCode(code)) {
       this.indent += ch;
     } else {
+      // eslint-disable-next-line no-constant-condition
       while (true) {
-        let len = this.blockStack.length;
+        const len = this.blockStack.length;
         if (len) {
-          let curBlock = this.blockStack[len - 1];
+          const curBlock = this.blockStack[len - 1];
           if (curBlock.indent.length >= this.indent.length) {
             this.closeTag({
-              tagName: { value: "" }
+              tagName: { value: "" },
             });
           } else {
             // Indentation is greater than the last tag so we are starting a
@@ -79,18 +87,18 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
         }
       }
 
-      var parent =
+      const parent =
         this.blockStack.length && this.blockStack[this.blockStack.length - 1];
-      var body;
+      let body: any;
 
       if (parent) {
         body = parent.body;
-        if (parent.openTagOnly) {
+        if (parent.type === "tag" && parent.openTagOnly) {
           this.notifyError(
             this.pos,
             "INVALID_BODY",
             'The "' +
-              parent.tagName.value +
+              parent.tagName!.value +
               '" tag does not allow nested body content'
           );
           return;
@@ -149,7 +157,7 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
         return this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
       } else if (code === CODE.FORWARD_SLASH) {
         // Check next character to see if we are in a comment
-        var nextCode = this.lookAtCharCodeAhead(1);
+        const nextCode = this.lookAtCharCodeAhead(1);
         if (nextCode === CODE.FORWARD_SLASH) {
           this.enterState(STATE.JS_COMMENT_LINE);
           this.skip(1);
@@ -172,4 +180,4 @@ export const CONCISE_HTML_CONTENT = Parser.createState({
       }
     }
   },
-});
+};

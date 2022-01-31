@@ -11,7 +11,7 @@ npm-debug.log
 
 # Build
 dist
-*.actual.*
+*actual*
 *.tsbuildinfo
 
 # Coverage
