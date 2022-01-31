@@ -1,47 +1,77 @@
 {
   "name": "htmljs-parser",
   "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
-  "keywords": [
-    "HTML",
-    "parser",
-    "JavaScript",
-    "expressions",
-    "browser",
-    "server",
-    "nodejs",
-    "template",
-    "compiler"
-  ],
-  "main": "dist/index.js",
-  "scripts": {
-    "test": "npm run mocha",
-    "format": "prettier \"src/**/*.{json,md,js,ts}\" --write",
-    "mocha": "mocha --enable-source-maps -r ts-node/register --ui bdd --reporter spec ./test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/philidem/htmljs-parser.git"
-  },
+  "version": "2.9.2",
   "author": "Phillip Gates-Idem <phillip.idem@gmail.com>",
-  "maintainers": "Phillip Gates-Idem <phillip.idem@gmail.com>",
   "dependencies": {
     "char-props": "^0.1.5",
-    "complain": "^1.0.0",
-    "tslib": "^2.3.0"
+    "complain": "^1.6.0"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.12.5",
-    "chai": "^4.0.0",
-    "colors": "^1.1.2",
-    "mocha": "^4.0.0",
-    "mocha-autotest": "^1.0.3",
-    "prettier": "^2.3.2",
-    "ts-node": "^10.1.0",
-    "typescript": "^4.3.5"
+    "@babel/runtime": "^7.16.7",
+    "@commitlint/cli": "^16.1.0",
+    "@commitlint/config-conventional": "^16.0.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^17.0.13",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1",
+    "chai": "^4.3.6",
+    "eslint": "^8.8.0",
+    "eslint-config-prettier": "^8.3.0",
+    "fixpack": "^4.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.2",
+    "mocha": "^9.2.0",
+    "mocha-autotest": "^1.1.0",
+    "nyc": "^15.1.0",
+    "prettier": "^2.5.1",
+    "semantic-release": "^19.0.2",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.5"
   },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!**/__tests__",
+    "!**/*.tsbuildinfo"
+  ],
+  "homepage": "https://github.com/marko-js/htmljs-parser",
+  "keywords": [
+    "HTML",
+    "JavaScript",
+    "browser",
+    "compiler",
+    "expressions",
+    "nodejs",
+    "parser",
+    "server",
+    "template"
+  ],
   "license": "MIT",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marko-js/htmljs-parser.git"
   },
-  "version": "2.9.2"
+  "scripts": {
+    "ci:test": "nyc npm run mocha -- --forbid-pending --forbid-only",
+    "format": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write && (fixpack || true)",
+    "lint": "tsc -b && npm run lint:eslint && npm run lint:prettier -- -l && fixpack",
+    "lint:eslint": "eslint -f visualstudio .",
+    "lint:prettier": "prettier '**/*{.ts,.js,.json,.md,.yml,rc}'",
+    "mocha": "NODE_ENV=test mocha ./test",
+    "prepare": "husky install",
+    "prepublishOnly": "npm run build",
+    "release": "semantic-release",
+    "report": "open ./coverage/lcov-report/index.html",
+    "test": "npm run mocha -- --watch",
+    "test:inspect": "npm test -- --inspect",
+    "test:update": "npm run mocha -- --update"
+  },
+  "types": "dist/index.d.ts"
 }
