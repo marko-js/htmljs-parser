@@ -1,0 +1,6 @@
+{
+  "extension": ["js", "ts"],
+  "enable-source-maps": true,
+  "watchFiles": ["src/**/*.ts", "src/**/*.htmljs"],
+  "require": ["ts-node/register/transpile-only"]
+}

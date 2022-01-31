@@ -1,5 +1,19 @@
-dist/
-node_modules/
-*.log
+# Editor
+*.sublime*
 .vscode
+
+# OSX
+*.DS_Store
+
+# NPM
+node_modules
+npm-debug.log
+
+# Build
+dist
+*.actual.*
 *.tsbuildinfo
+
+# Coverage
+.nyc_output
+coverage
