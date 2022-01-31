@@ -1,21 +1,24 @@
-import { Parser, CODE, STATE } from "../internal";
+import { CODE, Part, STATE, StateDefinition } from "../internal";
+
+export interface JSCommentLinePart extends Part {
+  value: string;
+}
 
 // We enter STATE.JS_COMMENT_LINE after we encounter a "//" sequence
 // when parsing JavaScript code.
 // We leave STATE.JS_COMMENT_LINE when we see a newline character.
-export const JS_COMMENT_LINE = Parser.createState({
+export const JS_COMMENT_LINE: StateDefinition<JSCommentLinePart> = {
   name: "JS_COMMENT_LINE",
 
-  enter(oldState, comment) {
-    comment.kind = "script-line";
+  enter(comment) {
     comment.value = "//";
   },
 
-  eol(str, comment) {
+  eol() {
     this.exitState();
   },
 
-  eof(comment) {
+  eof() {
     this.exitState();
   },
 
@@ -32,4 +35,4 @@ export const JS_COMMENT_LINE = Parser.createState({
 
     comment.value += ch;
   },
-});
+};

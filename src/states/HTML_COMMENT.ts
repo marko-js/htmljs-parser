@@ -1,14 +1,13 @@
-import { Parser, CODE } from "../internal";
+import { CODE, StateDefinition, ValuePart } from "../internal";
 
 // We enter STATE.HTML_COMMENT after we encounter a "<--"
 // while in the STATE.HTML_CONTENT.
 // We leave STATE.HTML_COMMENT when we see a "-->".
-export const HTML_COMMENT = Parser.createState({
+export const HTML_COMMENT: StateDefinition<ValuePart> = {
   name: "HTML_COMMENT",
 
-  enter(oldState, comment) {
+  enter(comment) {
     this.endText();
-    comment.kind = "html-block";
     comment.value = "<!--";
   },
 
@@ -43,4 +42,4 @@ export const HTML_COMMENT = Parser.createState({
       comment.value += ch;
     }
   },
-});
+};

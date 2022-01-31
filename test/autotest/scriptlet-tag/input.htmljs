@@ -1,6 +1,0 @@
-<div>
-<% console.log('xyz'); %>
-</div>
-<% console.log('<% %> is great!') %>
-<% console.log("<% %> is great!") %>
-<% /* %> */ %>

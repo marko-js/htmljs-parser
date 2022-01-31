@@ -1,11 +1,14 @@
-import { Parser, CODE, STATE } from "../internal";
+import { CODE, StateDefinition, ValuePart } from "../internal";
 
-export const REGULAR_EXPRESSION = Parser.createState({
+export const REGULAR_EXPRESSION: StateDefinition<ValuePart> = {
   name: "REGULAR_EXPRESSION",
 
-  enter(oldState, regularExpression) {
-    regularExpression.value = "/";
-    regularExpression.inCharacterSet = false;
+  enter(regExp) {
+    regExp.value = "/";
+  },
+
+  exit() {
+    this.isWithinRegExpCharset = false;
   },
 
   eol() {
@@ -24,29 +27,24 @@ export const REGULAR_EXPRESSION = Parser.createState({
     );
   },
 
-  char(ch, code, regularExpression) {
-    var nextCh;
-    regularExpression.value += ch;
+  char(ch, code, regExp) {
+    regExp.value += ch;
     if (code === CODE.BACK_SLASH) {
       // Handle escape sequence
-      nextCh = this.lookAtCharAhead(1);
+      regExp.value += this.lookAtCharAhead(1);
       this.skip(1);
-      regularExpression.value += nextCh;
     } else if (
       code === CODE.OPEN_SQUARE_BRACKET &&
-      regularExpression.inCharacterSet
+      this.isWithinRegExpCharset
     ) {
-      regularExpression.inCharacterSet = true;
+      this.isWithinRegExpCharset = true;
     } else if (
       code === CODE.CLOSE_SQUARE_BRACKET &&
-      regularExpression.inCharacterSet
+      this.isWithinRegExpCharset
     ) {
-      regularExpression.inCharacterSet = false;
-    } else if (
-      code === CODE.FORWARD_SLASH &&
-      !regularExpression.inCharacterSet
-    ) {
+      this.isWithinRegExpCharset = false;
+    } else if (code === CODE.FORWARD_SLASH && !this.isWithinRegExpCharset) {
       this.exitState("/");
     }
   },
-});
+};
