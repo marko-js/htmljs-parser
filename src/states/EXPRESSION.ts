@@ -1,20 +1,42 @@
-import { Parser, CODE, STATE, isWhitespaceCode } from "../internal";
+import {
+  CODE,
+  STATE,
+  isWhitespaceCode,
+  StateDefinition,
+  Part,
+  ValuePart,
+} from "../internal";
 
-export const EXPRESSION = Parser.createState({
+export interface ExpressionPart extends Part {
+  value: string;
+  groupStack: number[];
+  terminator?: string | string[];
+  allowEscapes: boolean;
+  skipOperators: boolean;
+  terminatedByEOL: boolean;
+  terminatedByWhitespace: boolean;
+}
+
+export const EXPRESSION: StateDefinition<ExpressionPart> = {
   name: "EXPRESSION",
 
-  enter(oldState, expression) {
+  enter(expression) {
     expression.value = "";
     expression.groupStack = [];
     expression.allowEscapes = expression.allowEscapes === true;
     expression.skipOperators = expression.skipOperators === true;
-    expression.terminatedByWhitespace = expression.terminatedByWhitespace === true;
+    expression.terminatedByEOL = expression.terminatedByEOL === true;
+    expression.terminatedByWhitespace =
+      expression.terminatedByWhitespace === true;
   },
 
   eol(str, expression) {
-    let depth = expression.groupStack.length;
+    const depth = expression.groupStack.length;
 
-    if (depth === 0 && expression.terminatedByWhitespace) {
+    if (
+      depth === 0 &&
+      (expression.terminatedByWhitespace || expression.terminatedByEOL)
+    ) {
       this.exitState();
       return;
     }
@@ -23,18 +45,21 @@ export const EXPRESSION = Parser.createState({
   },
 
   eof(expression) {
-    if (this.isConcise && expression.groupStack.length === 0) {
+    if (
+      expression.groupStack.length === 0 &&
+      (this.isConcise || expression.terminatedByEOL)
+    ) {
       this.exitState();
     } else {
-      let parentState = expression.parentState;
+      const parentState = expression.parentState;
 
       if (parentState === STATE.ATTRIBUTE) {
-        if (!this.currentAttribute.name) {
+        if (!this.currentAttribute!.name) {
           return this.notifyError(
             expression.pos,
             "MALFORMED_OPEN_TAG",
             'EOF reached while parsing attribute name for the "' +
-              this.currentOpenTag.tagName.value +
+              this.currentOpenTag!.tagName!.value +
               '" tag'
           );
         }
@@ -43,7 +68,7 @@ export const EXPRESSION = Parser.createState({
           expression.pos,
           "MALFORMED_OPEN_TAG",
           'EOF reached while parsing attribute value for the "' +
-            this.currentAttribute.name.value +
+            this.currentAttribute!.name.value +
             '" attribute'
         );
       } else if (parentState === STATE.TAG_NAME) {
@@ -70,29 +95,22 @@ export const EXPRESSION = Parser.createState({
 
   return(childState, childPart, expression) {
     switch (childState) {
-      case STATE.STRING: {
-        expression.value += childPart.value;
-        break;
-      }
+      case STATE.STRING:
       case STATE.TEMPLATE_STRING:
-      case STATE.REGULAR_EXPRESSION: {
-        expression.value += childPart.value;
-        break;
-      }
+      case STATE.REGULAR_EXPRESSION:
       case STATE.JS_COMMENT_LINE:
-      case STATE.JS_COMMENT_BLOCK: {
-        expression.value += childPart.value;
+      case STATE.JS_COMMENT_BLOCK:
+        expression.value += (childPart as ValuePart).value;
         break;
-      }
     }
   },
 
   char(ch, code, expression) {
-    let depth = expression.groupStack.length;
+    const depth = expression.groupStack.length;
 
     if (depth === 0) {
       if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
-        var operator = !expression.skipOperators && this.checkForOperator();
+        const operator = !expression.skipOperators && this.checkForOperator();
 
         if (operator) {
           expression.value += operator;
@@ -102,12 +120,15 @@ export const EXPRESSION = Parser.createState({
 
         return;
       }
-      
-      if (expression.terminator && this.checkForTerminator(expression.terminator, ch)) {
+
+      if (
+        expression.terminator &&
+        this.checkForTerminator(expression.terminator, ch)
+      ) {
         this.exitState();
         return;
       }
-      
+
       if (expression.allowEscapes && code === CODE.BACK_SLASH) {
         expression.value += this.lookAtCharAhead(1);
         this.skip(1);
@@ -124,7 +145,7 @@ export const EXPRESSION = Parser.createState({
       return this.enterState(STATE.TEMPLATE_STRING);
     } else if (code === CODE.FORWARD_SLASH) {
       // Check next character to see if we are in a comment or regexp
-      var nextCode = this.lookAtCharCodeAhead(1);
+      const nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.FORWARD_SLASH) {
         this.enterState(STATE.JS_COMMENT_LINE);
         this.skip(1);
@@ -162,7 +183,7 @@ export const EXPRESSION = Parser.createState({
         );
       }
 
-      let matchingGroupCharCode = expression.groupStack.pop();
+      const matchingGroupCharCode = expression.groupStack.pop();
 
       if (
         (code === CODE.CLOSE_PAREN &&
@@ -178,7 +199,7 @@ export const EXPRESSION = Parser.createState({
           'Mismatched group. A "' +
             ch +
             '" character was found when "' +
-            String.fromCharCode(matchingGroupCharCode) +
+            String.fromCharCode(matchingGroupCharCode!) +
             '" was expected.'
         );
       }
@@ -189,4 +210,4 @@ export const EXPRESSION = Parser.createState({
 
     expression.value += ch;
   },
-});
+};

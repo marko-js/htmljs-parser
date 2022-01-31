@@ -2,7 +2,6 @@
 import complain from "complain";
 import charProps from "char-props";
 import {
-  BaseParser,
   createNotifiers,
   MODE,
   BODY_MODE,
@@ -14,40 +13,60 @@ import {
   operators,
   getTagName,
 } from "../internal";
+import { BaseParser } from "./BaseParser";
+
+export interface ParseOptions {
+  state: "html" | "cdata" | "parsed-text" | "static-text";
+  ignoreAttributes: boolean;
+}
 
 export class Parser extends BaseParser {
   public notifiers: ReturnType<typeof createNotifiers>;
   public defaultMode: MODE.HTML | MODE.CONCISE;
-  public userIsOpenTagOnly: (tagName: string) => boolean;
-  public ignorePlaceholders: boolean;
-  public ignoreNonstandardStringPlaceholders: boolean;
-  public currentOpenTag; // Used to reference the current open tag that is being parsed
-  public currentAttribute; // Used to reference the current attribute that is being parsed
-  public text; // Used to buffer text that is found within the body of a tag
-  public withinOpenTag; // Set to true if the parser is within the open tag
-  public withinAttrGroup; // Set to true if the parser is within a concise mode attribute group
-  public blockStack; // Used to keep track of HTML tags and HTML blocks
-  public indent; // Used to build the indent for the current concise line
-  public isConcise; // Set to true if parser is currently in concise mode
-  public isWithinSingleLineHtmlBlock; // Set to true if the current block is for a single line HTML block
-  public htmlBlockDelimiter; // Current delimiter for multiline HTML blocks nested within a concise tag. e.g. "--"
-  public htmlBlockIndent; // Used to hold the indentation for a delimited, multiline HTML block
-  public beginMixedMode; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
-  public endingMixedModeAtEOL; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
-  public placeholderDepth; // Used as an easy way to know if an expression is within a placeholder
-  public textParseMode = "html";
+  public userIsOpenTagOnly?: (tagName: string) => boolean;
+  public currentOpenTag: STATE.OpenTagPart | undefined; // Used to reference the current open tag that is being parsed
+  public currentAttribute: STATE.AttrPart | undefined; // Used to reference the current attribute that is being parsed
+  public withinAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
+  public blockStack!: ((
+    | STATE.OpenTagPart
+    | {
+        type: "html";
+        delimiter?: string;
+        indent: string;
+      }
+  ) & { body?: BODY_MODE; nestedIndent?: string })[]; // Used to keep track of HTML tags and HTML blocks
+  public indent!: string; // Used to build the indent for the current concise line
+  public isConcise!: boolean; // Set to true if parser is currently in concise mode
+  public isWithinSingleLineHtmlBlock!: boolean; // Set to true if the current block is for a single line HTML block
+  public isWithinRegExpCharset!: boolean; // Set to true if the current regexp entered a charset.
+  public htmlBlockDelimiter?: string; // Current delimiter for multiline HTML blocks nested within a concise tag. e.g. "--"
+  public htmlBlockIndent?: string; // Used to hold the indentation for a delimited, multiline HTML block
+  public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
+  public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
+  public text!: string; // Used to buffer text that is found within the body of a tag
+  public textParseMode!: ParseOptions["state"];
 
-  constructor(listeners, options) {
-    super(options);
+  constructor(
+    listeners,
+    options?: {
+      concise?: boolean;
+      isOpenTagOnly?: (tagName: string) => boolean;
+    }
+  ) {
+    super();
     this.reset();
     this.notifiers = createNotifiers(this, listeners);
-    this.defaultMode =
-      options && options.concise === false ? MODE.HTML : MODE.CONCISE;
-    this.userIsOpenTagOnly = options && options.isOpenTagOnly;
-    this.ignorePlaceholders = options && options.ignorePlaceholders;
-    this.ignoreNonstandardStringPlaceholders =
-      options && options.ignoreNonstandardStringPlaceholders;
-    this.textParseMode = "html";
+    this.defaultMode = MODE.CONCISE;
+    this.userIsOpenTagOnly = undefined;
+    this.userIsOpenTagOnly = options?.isOpenTagOnly;
+
+    if (options) {
+      this.userIsOpenTagOnly = options.isOpenTagOnly;
+      if (options.concise === false) {
+        this.defaultMode = MODE.HTML;
+      }
+    }
+
     this.setInitialState(
       this.defaultMode === MODE.CONCISE
         ? STATE.CONCISE_HTML_CONTENT
@@ -63,62 +82,48 @@ export class Parser extends BaseParser {
     );
   }
 
-  reset() {
+  override reset() {
     super.reset();
     this.text = "";
+    this.textParseMode = "html";
     this.currentOpenTag = undefined;
     this.currentAttribute = undefined;
-    this.withinOpenTag = false;
     this.blockStack = [];
     this.indent = "";
     this.isConcise = this.defaultMode === MODE.CONCISE;
+    this.withinAttrGroup = false;
+    this.isWithinRegExpCharset = false;
     this.isWithinSingleLineHtmlBlock = false;
-    this.htmlBlockDelimiter = null;
-    this.htmlBlockIndent = null;
+    this.htmlBlockDelimiter = undefined;
+    this.htmlBlockIndent = undefined;
     this.beginMixedMode = false;
     this.endingMixedModeAtEOL = false;
-    this.placeholderDepth = 0;
   }
 
   outputDeprecationWarning(message: string) {
-    var srcCharProps = charProps(this.src);
-    var line = srcCharProps.lineAt(this.pos);
-    var column = srcCharProps.columnAt(this.pos);
-    var filename = this.filename;
-    var location = (filename || "(unknown file)") + ":" + line + ":" + column;
+    const srcCharProps = charProps(this.src);
+    const line = srcCharProps.lineAt(this.pos);
+    const column = srcCharProps.columnAt(this.pos);
+    const filename = this.filename;
+    const location = (filename || "(unknown file)") + ":" + line + ":" + column;
     complain(message, { location: location });
   }
 
   /**
    * This is called to determine if a tag is an "open only tag". Open only tags such as <img>
    * are immediately closed.
-   * @param  {String}  tagName The name of the tag (e.g. "img")
    */
   isOpenTagOnly(tagName: string) {
-    if (!tagName) {
-      return false;
-    }
-
+    if (!tagName) return false;
     tagName = tagName.toLowerCase();
-
-    var openTagOnly = this.userIsOpenTagOnly && this.userIsOpenTagOnly(tagName);
-    if (openTagOnly == null) {
-      openTagOnly = htmlTags.isOpenTagOnly(tagName);
-    }
-
-    return openTagOnly;
+    return this.userIsOpenTagOnly?.(tagName) ?? htmlTags.isOpenTagOnly(tagName);
   }
 
   /**
    * Clear out any buffered body text and this.notifiers.notify any listeners
    */
-  endText(txt?: string) {
-    if (arguments.length === 0) {
-      txt = this.text;
-    }
-
+  endText(txt: string = this.text) {
     this.notifiers.notifyText(txt, this.textParseMode);
-
     // always clear text buffer...
     this.text = "";
   }
@@ -133,10 +138,10 @@ export class Parser extends BaseParser {
     this.htmlBlockIndent = this.indent;
     this.htmlBlockDelimiter = delimiter;
 
-    var parent = peek(this.blockStack);
+    const parent = peek(this.blockStack);
     this.blockStack.push({
       type: "html",
-      delimiter: delimiter,
+      delimiter,
       indent: this.indent,
     });
 
@@ -172,7 +177,7 @@ export class Parser extends BaseParser {
 
     // Make sure all tags in this HTML block are closed
     for (let i = this.blockStack.length - 1; i >= 0; i--) {
-      var curBlock = this.blockStack[i];
+      const curBlock = this.blockStack[i];
       if (curBlock.type === "html") {
         // Remove the HTML block from the stack since it has ended
         this.blockStack.pop();
@@ -185,15 +190,15 @@ export class Parser extends BaseParser {
         this.notifyError(
           curBlock.pos,
           "MISSING_END_TAG",
-          'Missing ending "' + curBlock.tagName.value + '" tag'
+          'Missing ending "' + curBlock.tagName!.value + '" tag'
         );
         return;
       }
     }
 
     // Resert variables associated with parsing an HTML block
-    this.htmlBlockIndent = null;
-    this.htmlBlockDelimiter = null;
+    this.htmlBlockIndent = undefined;
+    this.htmlBlockDelimiter = undefined;
     this.isWithinSingleLineHtmlBlock = false;
 
     if (this.state !== STATE.CONCISE_HTML_CONTENT) {
@@ -208,7 +213,7 @@ export class Parser extends BaseParser {
     this.endText();
 
     while (this.blockStack.length) {
-      var curBlock = peek(this.blockStack);
+      const curBlock = peek(this.blockStack)!;
       if (curBlock.type === "tag") {
         if (curBlock.concise) {
           this.closeTag({
@@ -223,7 +228,7 @@ export class Parser extends BaseParser {
           this.notifyError(
             curBlock.pos,
             "MISSING_END_TAG",
-            'Missing ending "' + curBlock.tagName.value + '" tag'
+            'Missing ending "' + curBlock.tagName!.value + '" tag'
           );
           return;
         }
@@ -240,17 +245,7 @@ export class Parser extends BaseParser {
     }
   }
 
-  // var this.notifiers.notifyCDATA = notifiers.notifyCDATA;
-  // var this.notifiers.notifyComment = notifiers.notifyComment;
-  // var this.notifiers.notifyOpenTag = notifiers.notifyOpenTag;
-  // var this.notifiers.notifyOpenTagName = notifiers.notifyOpenTagName;
-  // var this.notifiers.notifyCloseTag = notifiers.notifyCloseTag;
-  // var this.notifiers.notifyDocumentType = notifiers.notifyDocumentType;
-  // var this.notifiers.notifyDeclaration = notifiers.notifyDeclaration;
-  // var this.notifiers.notifyPlaceholder = notifiers.notifyPlaceholder;
-  // var this.notifiers.notifyScriptlet = notifiers.notifyScriptlet;
-
-  notifyError(pos, errorCode, message) {
+  notifyError(pos: number, errorCode: string, message: string) {
     this.notifiers.notifyError(pos, errorCode, message);
     this.end();
   }
@@ -259,8 +254,8 @@ export class Parser extends BaseParser {
     if (!closeTag) {
       throw new Error("Illegal state. Invalid close tag");
     }
-    var tagName = closeTag.tagName.value;
-    var lastTag = this.blockStack.pop();
+    const tagName = closeTag.tagName.value;
+    const lastTag = this.blockStack.pop();
 
     if (!lastTag || lastTag.type !== "tag") {
       return this.notifyError(
@@ -271,10 +266,10 @@ export class Parser extends BaseParser {
     }
 
     if (tagName) {
-      var expectedCloseTagName = getTagName(lastTag);
+      const expectedCloseTagName = getTagName(lastTag);
 
       if (tagName !== (expectedCloseTagName || "div")) {
-        var shorthandEndPos = Math.max(
+        const shorthandEndPos = Math.max(
           lastTag.shorthandId ? lastTag.shorthandId.endPos : 0,
           lastTag.shorthandClassNames
             ? lastTag.shorthandClassNames[
@@ -286,7 +281,7 @@ export class Parser extends BaseParser {
         if (
           !shorthandEndPos ||
           // accepts including the tag class/id shorthands as part of the close tag name.
-          tagName !== this.src.slice(lastTag.tagName.pos, shorthandEndPos)
+          tagName !== this.src.slice(lastTag.tagName!.pos, shorthandEndPos)
         ) {
           return this.notifyError(
             closeTag.pos,
@@ -310,31 +305,31 @@ export class Parser extends BaseParser {
 
   // --------------------------
 
-  checkForPlaceholder(ch, code) {
+  checkForPlaceholder(ch: string, code: number) {
     if (code === CODE.DOLLAR) {
-      var nextCode = this.lookAtCharCodeAhead(1);
+      const nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.OPEN_CURLY_BRACE) {
         // The placeholder expression starts after first curly brace so skip
         // past the {
         this.enterState(STATE.PLACEHOLDER, { escape: true });
         this.skip(1);
         return true;
-      } else if (nextCode === CODE.EXCLAMATION) {
-        var afterExclamationCode = this.lookAtCharCodeAhead(2);
-        if (afterExclamationCode === CODE.OPEN_CURLY_BRACE) {
-          // The placeholder expression starts after first curly brace so skip
-          // past the !{
-          this.enterState(STATE.PLACEHOLDER, { escape: false });
-          this.skip(2);
-          return true;
-        }
+      } else if (
+        nextCode === CODE.EXCLAMATION &&
+        this.lookAtCharCodeAhead(2) === CODE.OPEN_CURLY_BRACE
+      ) {
+        // The placeholder expression starts after first curly brace so skip
+        // past the !{
+        this.enterState(STATE.PLACEHOLDER, { escape: false });
+        this.skip(2);
+        return true;
       }
     }
 
     return false;
   }
 
-  checkForEscapedPlaceholder(ch, code) {
+  checkForEscapedPlaceholder(ch: string, code: number) {
     // Look for \${ and \$!{
     if (code === CODE.BACK_SLASH) {
       if (this.lookAtCharCodeAhead(1) === CODE.DOLLAR) {
@@ -351,7 +346,7 @@ export class Parser extends BaseParser {
     return false;
   }
 
-  checkForEscapedEscapedPlaceholder(ch, code) {
+  checkForEscapedEscapedPlaceholder(ch: string, code: number) {
     // Look for \\${ and \\$!{
     if (code === CODE.BACK_SLASH) {
       if (this.lookAtCharCodeAhead(1) === CODE.BACK_SLASH) {
@@ -370,24 +365,26 @@ export class Parser extends BaseParser {
     return false;
   }
 
-  lookPastWhitespaceFor(str, start = 1) {
-    var ahead = start;
+  lookPastWhitespaceFor(str: string, start = 1) {
+    let ahead = start;
     while (isWhitespaceCode(this.lookAtCharCodeAhead(ahead))) ahead++;
     return !!this.lookAheadFor(str, this.pos + ahead);
   }
 
   getPreviousNonWhitespaceChar(start = -1) {
-    var behind = start;
+    let behind = start;
     while (isWhitespaceCode(this.lookAtCharCodeAhead(behind))) behind--;
     return this.lookAtCharAhead(behind);
   }
 
   getNextIndent() {
-    var match = /[^\n]*\n(\s+)/.exec(this.substring(this.pos));
+    const match = /[^\n]*\n(\s+)/.exec(this.substring(this.pos));
     if (match) {
-      var whitespace = match[1].split(/\n/g);
+      const whitespace = match[1].split(/\n/g);
       return whitespace[whitespace.length - 1];
     }
+
+    return "";
   }
 
   onlyWhitespaceRemainsOnLine(offset = 1) {
@@ -395,8 +392,8 @@ export class Parser extends BaseParser {
   }
 
   consumeWhitespace() {
-    var ahead = 1;
-    var whitespace = "";
+    let ahead = 1;
+    let whitespace = "";
     while (isWhitespaceCode(this.lookAtCharCodeAhead(ahead))) {
       whitespace += this.lookAtCharAhead(ahead++);
     }
@@ -405,16 +402,16 @@ export class Parser extends BaseParser {
   }
 
   isBeginningOfLine() {
-    var before = this.substring(0, this.pos);
-    var lines = before.split("\n");
-    var lastLine = lines[lines.length - 1];
+    const before = this.substring(0, this.pos);
+    const lines = before.split("\n");
+    const lastLine = lines[lines.length - 1];
     return /^\s*$/.test(lastLine);
   }
 
   checkForClosingTag() {
     // Look ahead to see if we found the closing tag that will
     // take us out of the EXPRESSION state...
-    var match =
+    const match =
       this.lookAheadFor("/>") ||
       this.lookAheadFor("/" + getTagName(peek(this.blockStack)) + ">");
 
@@ -455,12 +452,12 @@ export class Parser extends BaseParser {
   }
 
   checkForOperator() {
-    var remaining = this.data.substring(this.pos);
-    var matches = operators.patternNext.exec(remaining);
+    const remaining = this.data.substring(this.pos);
+    const matches = operators.patternNext.exec(remaining);
 
     if (matches) {
-      var match = matches[0];
-      var isIgnoredOperator = this.isConcise
+      const match = matches[0];
+      const isIgnoredOperator = this.isConcise
         ? match.includes("[")
         : match.includes(">");
       if (!isIgnoredOperator) {
@@ -468,12 +465,11 @@ export class Parser extends BaseParser {
         return match;
       }
     } else {
-      var previous = this.substring(this.pos - operators.longest, this.pos);
-      var match2 = operators.patternPrev.exec(previous);
-      if (match2) {
+      const previous = this.substring(this.pos - operators.longest, this.pos);
+      const match = operators.patternPrev.exec(previous);
+      if (match) {
         this.rewind(1);
-        var whitespace = this.consumeWhitespace();
-        return whitespace;
+        return this.consumeWhitespace();
       }
     }
 
@@ -481,8 +477,8 @@ export class Parser extends BaseParser {
   }
 
   checkForTypeofOperator() {
-    var remaining = this.data.substring(this.pos);
-    var matches = /^\s+typeof\s+/.exec(remaining);
+    const remaining = this.substring(this.pos);
+    const matches = /^\s+typeof\s+/.exec(remaining);
 
     if (matches) {
       return matches[0];
@@ -492,8 +488,8 @@ export class Parser extends BaseParser {
   }
 
   checkForTypeofOperatorAtStart() {
-    var remaining = this.data.substring(this.pos);
-    var matches = /^typeof\s+/.exec(remaining);
+    const remaining = this.substring(this.pos);
+    const matches = /^typeof\s+/.exec(remaining);
 
     if (matches) {
       return matches[0];
@@ -502,16 +498,17 @@ export class Parser extends BaseParser {
     return false;
   }
 
-  handleDelimitedBlockEOL(newLine) {
+  handleDelimitedBlockEOL(newLine: string) {
     // If we are within a delimited HTML block then we want to check if the next line is the end
     // delimiter. Since we are currently positioned at the start of the new line character our lookahead
     // will need to include the new line character, followed by the expected indentation, followed by
     // the delimiter.
-    let endHtmlBlockLookahead = this.htmlBlockIndent + this.htmlBlockDelimiter;
+    const endHtmlBlockLookahead =
+      this.htmlBlockIndent! + this.htmlBlockDelimiter;
 
     if (this.lookAheadFor(endHtmlBlockLookahead, this.pos + newLine.length)) {
-      this.skip(this.htmlBlockIndent.length);
-      this.skip(this.htmlBlockDelimiter.length);
+      this.skip(this.htmlBlockIndent!.length);
+      this.skip(this.htmlBlockDelimiter!.length);
 
       this.enterState(STATE.CONCISE_HTML_CONTENT);
       this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
@@ -540,13 +537,13 @@ export class Parser extends BaseParser {
       });
       return;
     } else if (
-      this.lookAheadFor(this.htmlBlockIndent, this.pos + newLine.length)
+      this.lookAheadFor(this.htmlBlockIndent!, this.pos + newLine.length)
     ) {
       // We know the next line does not end the multiline HTML block, but we need to check if there
       // is any indentation that we need to skip over as we continue parsing the HTML in this
       // multiline HTML block
 
-      this.skip(this.htmlBlockIndent.length);
+      this.skip(this.htmlBlockIndent!.length);
       // We stay in the same state since we are still parsing a multiline, delimited HTML block
     } else if (this.htmlBlockIndent && !this.onlyWhitespaceRemainsOnLine()) {
       // the next line does not have enough indentation
@@ -569,10 +566,10 @@ export class Parser extends BaseParser {
   }
 
   enterParsedTextContentState() {
-    var last =
+    const last =
       this.blockStack.length && this.blockStack[this.blockStack.length - 1];
 
-    if (!last || !last.tagName.value) {
+    if (!last || last.type === "html" || !last.tagName!.value) {
       throw new Error(
         'The "parsed text content" parser state is only allowed within a tag'
       );
@@ -597,10 +594,10 @@ export class Parser extends BaseParser {
   }
 
   enterStaticTextContentState() {
-    var last =
+    const last =
       this.blockStack.length && this.blockStack[this.blockStack.length - 1];
 
-    if (!last || !last.tagName.value) {
+    if (!last || last.type === "html" || !last.tagName!.value) {
       throw new Error(
         'The "static text content" parser state is only allowed within a tag'
       );
@@ -616,7 +613,7 @@ export class Parser extends BaseParser {
     }
   }
 
-  parse(data, filename) {
+  override parse(data: string, filename: string) {
     super.parse(data, filename);
     this.notifiers.notifyFinish();
   }

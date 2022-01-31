@@ -1,8 +1,14 @@
-import { Parser, CODE, STATE, isWhitespaceCode } from "../internal";
+import {
+  Parser,
+  CODE,
+  STATE,
+  isWhitespaceCode,
+  StateDefinition,
+} from "../internal";
 
 // In STATE.HTML_CONTENT we are looking for tags and placeholders but
 // everything in between is treated as text.
-export const HTML_CONTENT = Parser.createState({
+export const HTML_CONTENT: StateDefinition = {
   name: "HTML_CONTENT",
 
   enter() {
@@ -46,12 +52,9 @@ export const HTML_CONTENT = Parser.createState({
         return;
       }
 
-      var nextCode = this.lookAtCharCodeAhead(1);
+      const nextCode = this.lookAtCharCodeAhead(1);
 
-      if (nextCode === CODE.PERCENT) {
-        this.enterState(STATE.SCRIPTLET);
-        this.skip(1);
-      } else if (this.lookAheadFor("!--")) {
+      if (this.lookAheadFor("!--")) {
         this.enterState(STATE.HTML_COMMENT);
         this.skip(3);
       } else if (nextCode === CODE.EXCLAMATION) {
@@ -71,7 +74,6 @@ export const HTML_CONTENT = Parser.createState({
         this.endText();
         this.enterState(STATE.CLOSE_TAG);
         this.skip(1);
-
       } else if (
         nextCode === CODE.CLOSE_ANGLE_BRACKET ||
         nextCode === CODE.OPEN_ANGLE_BRACKET ||
@@ -86,19 +88,13 @@ export const HTML_CONTENT = Parser.createState({
       } else {
         this.enterState(STATE.OPEN_TAG);
       }
-    } else if (
-      !this.ignorePlaceholders &&
-      this.checkForEscapedEscapedPlaceholder(ch, code)
-    ) {
+    } else if (this.checkForEscapedEscapedPlaceholder(ch, code)) {
       this.text += "\\";
       this.skip(1);
-    } else if (
-      !this.ignorePlaceholders &&
-      this.checkForEscapedPlaceholder(ch, code)
-    ) {
+    } else if (this.checkForEscapedPlaceholder(ch, code)) {
       this.text += "$";
       this.skip(1);
-    } else if (!this.ignorePlaceholders && this.checkForPlaceholder(ch, code)) {
+    } else if (this.checkForPlaceholder(ch, code)) {
       // We went into placeholder state...
       this.endText();
     } else if (
@@ -112,4 +108,4 @@ export const HTML_CONTENT = Parser.createState({
       this.text += ch;
     }
   },
-});
+};

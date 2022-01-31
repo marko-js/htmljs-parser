@@ -1,9 +1,9 @@
-import { Parser, CODE } from "../internal";
+import { CODE, StateDefinition, ValuePart } from "../internal";
 
 // We enter STATE.DECLARATION after we encounter a "<?"
 // while in the STATE.HTML_CONTENT.
 // We leave STATE.DECLARATION if we see a "?>" or ">".
-export const DECLARATION = Parser.createState({
+export const DECLARATION: StateDefinition<ValuePart> = {
   name: "DECLARATION",
 
   eol(str, declaration) {
@@ -18,7 +18,7 @@ export const DECLARATION = Parser.createState({
     );
   },
 
-  enter(oldState, declaration) {
+  enter(declaration) {
     this.endText();
     declaration.value = "";
   },
@@ -38,4 +38,4 @@ export const DECLARATION = Parser.createState({
       declaration.value += ch;
     }
   },
-});
+};
