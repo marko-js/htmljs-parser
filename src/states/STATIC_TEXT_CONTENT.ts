@@ -1,10 +1,10 @@
-import { Parser, CODE, STATE } from "../internal";
+import { Parser, CODE, StateDefinition } from "../internal";
 
 // We enter STATE.STATIC_TEXT_CONTENT when a listener manually chooses
 // to enter this state after seeing an openTag event for a tag
 // whose content should not be parsed at all (except for the purpose
 // of looking for the end tag).
-export const STATIC_TEXT_CONTENT = Parser.createState({
+export const STATIC_TEXT_CONTENT: StateDefinition = {
   name: "STATIC_TEXT_CONTENT",
 
   enter() {
@@ -40,4 +40,4 @@ export const STATIC_TEXT_CONTENT = Parser.createState({
 
     this.text += ch;
   },
-});
+};

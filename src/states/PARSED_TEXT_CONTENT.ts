@@ -1,9 +1,9 @@
-import { Parser, STATE, CODE } from "../internal";
+import { Parser, STATE, CODE, StateDefinition, ValuePart } from "../internal";
 
 // We enter STATE.PARSED_TEXT_CONTENT when we are parsing
 // the body of a tag does not contain HTML tags but may contains
 // placeholders
-export const PARSED_TEXT_CONTENT = Parser.createState({
+export const PARSED_TEXT_CONTENT: StateDefinition = {
   name: "PARSED_TEXT_CONTENT",
 
   enter() {
@@ -13,24 +13,10 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
   return(childState, childPart) {
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
-      case STATE.JS_COMMENT_BLOCK: {
-        this.text += childPart.value;
-
-        if (this.htmlBlockDelimiter && childPart.eol) {
-          this.handleDelimitedBlockEOL(childPart.eol);
-        }
-
+      case STATE.JS_COMMENT_BLOCK:
+      case STATE.TEMPLATE_STRING:
+        this.text += (childPart as ValuePart).value;
         break;
-      }
-      case STATE.TEMPLATE_STRING: {
-        this.text += childPart.value;
-        break;
-      }
-      case STATE.PLACEHOLDER: {
-        // This child has already notified the listener of their presence so there is
-        // nothing to do here
-        break;
-      }
     }
   },
 
@@ -61,10 +47,6 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
         return;
       } else if (this.checkForCDATA()) {
         return;
-      } else if (this.lookAtCharCodeAhead(1) === CODE.PERCENT) {
-        this.enterState(STATE.SCRIPTLET);
-        this.skip(1);
-        return;
       }
     }
 
@@ -86,19 +68,13 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
       return;
     }
 
-    if (
-      !this.ignorePlaceholders &&
-      this.checkForEscapedEscapedPlaceholder(ch, code)
-    ) {
+    if (this.checkForEscapedEscapedPlaceholder(ch, code)) {
       this.skip(1);
-    } else if (
-      !this.ignorePlaceholders &&
-      this.checkForEscapedPlaceholder(ch, code)
-    ) {
+    } else if (this.checkForEscapedPlaceholder(ch, code)) {
       this.text += "$";
       this.skip(1);
       return;
-    } else if (!this.ignorePlaceholders && this.checkForPlaceholder(ch, code)) {
+    } else if (this.checkForPlaceholder(ch, code)) {
       // We went into placeholder state...
       this.endText();
       return;
@@ -106,4 +82,4 @@ export const PARSED_TEXT_CONTENT = Parser.createState({
 
     this.text += ch;
   },
-});
+};

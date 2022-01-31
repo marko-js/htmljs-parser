@@ -1,18 +1,52 @@
-import { Parser, CODE, STATE, isWhitespaceCode, peek, getTagName, cloneValue } from "../internal";
+import type { ParseOptions } from "querystring";
+import {
+  CODE,
+  STATE,
+  isWhitespaceCode,
+  StateDefinition,
+  Part,
+  ValuePart,
+} from "../internal";
 
-export const OPEN_TAG = Parser.createState({
+const enum TAG_STATE {
+  VAR,
+  ARGUMENT,
+  PARAMS,
+}
+
+export interface OpenTagPart extends Part {
+  type: "tag";
+  state: TAG_STATE | undefined;
+  concise: boolean;
+  beginMixedMode?: boolean;
+  selfClosed: boolean;
+  openTagOnly: boolean;
+  shorthandId?: ValuePart;
+  shorthandClassNames?: ValuePart[];
+  tagName?: ValuePart;
+  var?: ValuePart;
+  params?: ValuePart;
+  argument?: ValuePart;
+  attributes: STATE.AttrPart[];
+  indent: string;
+  nestedIndent?: string;
+  parseOptions?: Partial<ParseOptions> & Record<string, unknown>;
+}
+
+export const OPEN_TAG: StateDefinition<OpenTagPart> = {
   name: "OPEN_TAG",
 
-  enter(oldState, tag) {
+  enter(tag) {
     this.endText();
 
     tag.type = "tag";
+    tag.state = undefined;
     tag.tagName = undefined;
     tag.attributes = [];
     tag.argument = undefined;
     tag.params = undefined;
+    tag.var = undefined;
     tag.indent = this.indent;
-    tag.nestedIndent = null; // This will get set when we know what the nested indent is
     tag.concise = this.isConcise;
     tag.beginMixedMode = this.beginMixedMode || this.endingMixedModeAtEOL;
     tag.selfClosed = false;
@@ -20,34 +54,29 @@ export const OPEN_TAG = Parser.createState({
     tag.shorthandId = undefined;
     tag.shorthandClassNames = undefined;
 
-    this.withinOpenTag = true;
     this.beginMixedMode = false;
     this.endingMixedModeAtEOL = false;
     this.currentOpenTag = tag;
     this.blockStack.push(tag);
-
   },
 
   exit(tag) {
-    var tagName = tag.tagName;
-    var attributes = tag.attributes;
-    var parseOptions = tag.parseOptions;
-    var selfClosed = tag.selfClosed
+    const tagName = tag.tagName!;
+    const attributes = tag.attributes;
+    const parseOptions = tag.parseOptions;
+    const selfClosed = tag.selfClosed;
 
-    var ignoreAttributes =
+    const ignoreAttributes =
       parseOptions && parseOptions.ignoreAttributes === true;
 
     if (ignoreAttributes) {
       attributes.length = 0;
     }
 
-    var openTagOnly = (tag.openTagOnly =
-      this.isOpenTagOnly(tagName.value));
+    const openTagOnly = (tag.openTagOnly = this.isOpenTagOnly(tagName.value));
 
-    var origState = this.state;
+    const origState = this.state;
     this.notifiers.notifyOpenTag(tag);
-
-    this.withinOpenTag = false;
 
     if (!this.isConcise && (selfClosed || openTagOnly)) {
       this.closeTag({
@@ -74,87 +103,47 @@ export const OPEN_TAG = Parser.createState({
     this.currentOpenTag = undefined;
   },
 
-  return(childState, childPart) {
+  return(childState, childPart, tag) {
     switch (childState) {
       case STATE.TAG_NAME: {
-        this.currentOpenTag.tagName = childPart;
-
-        if (!this.currentOpenTag.notifiedOpenTagName) {
-          this.currentOpenTag.notifiedOpenTagName = true;
-          this.notifiers.notifyOpenTagName(this.currentOpenTag);
-        }
-
+        tag.tagName = childPart as ValuePart;
+        this.notifiers.notifyOpenTagName(tag);
         break;
       }
       case STATE.ATTRIBUTE: {
-        const attr = childPart;
-        if (this.currentOpenTag.argument && attr.default && attr.method) {
-          attr.pos = this.currentOpenTag.argument.pos;
-          attr.argument = this.currentOpenTag.argument;
-          this.currentOpenTag.argument = undefined;
-        } 
-        this.currentOpenTag.attributes.push(attr);
+        const attr = childPart as STATE.AttrPart;
+        if (tag.argument && attr.default && attr.method) {
+          attr.pos = tag.argument.pos;
+          attr.argument = tag.argument;
+          tag.argument = undefined;
+        }
+        tag.attributes.push(attr);
         break;
       }
       case STATE.JS_COMMENT_BLOCK: {
         /* Ignore comments within an open tag */
         break;
       }
-      case STATE.PLACEHOLDER: {
-        this.enterState(STATE.ATTRIBUTE)
-        this.currentAttribute.value = cloneValue(childPart);
-        this.exitState();
-        this.enterState(STATE.AFTER_PLACEHOLDER_WITHIN_TAG);
-        break;
-      }
       case STATE.EXPRESSION: {
-        switch (childPart.part) {
-          case "NAME": {
-            this.currentOpenTag.tagName = childPart;
-
-            if (!this.currentOpenTag.notifiedOpenTagName) {
-              this.currentOpenTag.notifiedOpenTagName = true;
-              this.notifiers.notifyOpenTagName(this.currentOpenTag);
-            }
-
-            const nextCharCode = this.lookAtCharCodeAhead(1);
-            if (nextCharCode === CODE.PERIOD || nextCharCode === CODE.NUMBER_SIGN) {
-              this.enterState(STATE.EXPRESSION, {
-                part: "NAME",
-                skipOperators: true,
-                terminatedByWhitespace: true,
-                terminator: [
-                  this.isConcise ? ";" : ">",
-                  "/",
-                  "(",
-                  "|",
-                  ".",
-                  "#",
-                  "=",
-                  ":="
-                ]
-              });
-            }
-            break;
-          }
-          case "VARIABLE": {
-            if (!childPart.value) {
+        switch (tag.state) {
+          case TAG_STATE.VAR: {
+            if (!(childPart as STATE.ExpressionPart).value) {
               return this.notifyError(
                 this.pos,
                 "MISSING_TAG_VARIABLE",
                 "A slash was found that was not followed by a variable name or lhs expression"
               );
             }
-            this.currentOpenTag.var = childPart;
+            tag.var = childPart as ValuePart;
             break;
           }
-          case "ARGUMENT": {
-            this.currentOpenTag.argument = childPart;
+          case TAG_STATE.ARGUMENT: {
+            tag.argument = childPart as ValuePart;
             this.skip(1); // skip closing )
             break;
           }
-          case "PARAMETERS": {
-            this.currentOpenTag.params = childPart;
+          case TAG_STATE.PARAMS: {
+            tag.params = childPart as ValuePart;
             this.skip(1); // skip closing |
             break;
           }
@@ -168,15 +157,15 @@ export const OPEN_TAG = Parser.createState({
     if (this.isConcise && !this.withinAttrGroup) {
       // In concise mode we always end the open tag
       this.exitState();
-      this.skip(linebreak.length)
+      this.skip(linebreak.length);
     }
   },
 
-  eof() {
+  eof(tag) {
     if (this.isConcise) {
       if (this.withinAttrGroup) {
         this.notifyError(
-          this.currentOpenTag.pos,
+          tag.pos,
           "MALFORMED_OPEN_TAG",
           'EOF reached while within an attribute group (e.g. "[ ... ]").'
         );
@@ -190,21 +179,21 @@ export const OPEN_TAG = Parser.createState({
       // Otherwise, in non-concise mode we consider this malformed input
       // since the end '>' was not found.
       this.notifyError(
-        this.currentOpenTag.pos,
+        tag.pos,
         "MALFORMED_OPEN_TAG",
         "EOF reached while parsing open tag"
       );
     }
   },
 
-  char(ch, code) {
+  char(_, code, tag) {
     if (this.isConcise) {
       if (code === CODE.SEMICOLON) {
         this.exitState(";");
         this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
           handler(err) {
             if (err) {
-              var code = err.ch.charCodeAt(0);
+              const code = err.ch.charCodeAt(0);
 
               if (code === CODE.FORWARD_SLASH) {
                 if (this.lookAheadFor("/")) {
@@ -240,7 +229,7 @@ export const OPEN_TAG = Parser.createState({
       if (code === CODE.HTML_BLOCK_DELIMITER) {
         if (this.lookAtCharCodeAhead(1) !== CODE.HTML_BLOCK_DELIMITER) {
           this.notifyError(
-            this.currentOpenTag.pos,
+            tag.pos,
             "MALFORMED_OPEN_TAG",
             '"-" not allowed as first character of attribute name'
           );
@@ -260,7 +249,7 @@ export const OPEN_TAG = Parser.createState({
         this.exitState();
 
         this.htmlBlockDelimiter = "";
-        var nextIndent = this.getNextIndent();
+        const nextIndent = this.getNextIndent();
         if (nextIndent > this.indent) {
           this.indent = nextIndent;
         }
@@ -296,9 +285,8 @@ export const OPEN_TAG = Parser.createState({
         this.exitState(">");
         return;
       } else if (code === CODE.FORWARD_SLASH) {
-        let nextCode = this.lookAtCharCodeAhead(1);
-        if (nextCode === CODE.CLOSE_ANGLE_BRACKET) {
-          this.currentOpenTag.selfClosed = true;
+        if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
+          tag.selfClosed = true;
           this.exitState("/>");
           return;
         }
@@ -327,17 +315,17 @@ export const OPEN_TAG = Parser.createState({
       // ignore whitespace within element...
     } else if (code === CODE.COMMA) {
       this.consumeWhitespace();
-    } else if (code === CODE.FORWARD_SLASH && !this.currentOpenTag.attributes.length) {
+    } else if (code === CODE.FORWARD_SLASH && !tag.attributes.length) {
+      tag.state = TAG_STATE.VAR;
       this.enterState(STATE.EXPRESSION, {
-        part: "VARIABLE",
         skipOperators: true,
         terminatedByWhitespace: true,
         terminator: this.isConcise
           ? [";", "(", "|", "=", ":="]
-          : [">", "/>", "(", "|", "=", ":="]
+          : [">", "/>", "(", "|", "=", ":="],
       });
-    } else if (code === CODE.OPEN_PAREN && !this.currentOpenTag.attributes.length) {
-      if (this.currentOpenTag.argument != null) {
+    } else if (code === CODE.OPEN_PAREN && !tag.attributes.length) {
+      if (tag.argument != null) {
         this.notifyError(
           this.pos,
           "ILLEGAL_TAG_ARGUMENT",
@@ -345,25 +333,25 @@ export const OPEN_TAG = Parser.createState({
         );
         return;
       }
+      tag.state = TAG_STATE.ARGUMENT;
       this.enterState(STATE.EXPRESSION, {
-        part: "ARGUMENT",
-        terminator: ")" 
+        terminator: ")",
       });
-    } else if (code === CODE.PIPE && !this.currentOpenTag.attributes.length) {
+    } else if (code === CODE.PIPE && !tag.attributes.length) {
+      tag.state = TAG_STATE.PARAMS;
       this.enterState(STATE.EXPRESSION, {
-        part: "PARAMETERS",
-        terminator: "|" 
+        terminator: "|",
       });
     } else {
       // attribute name is initially the first non-whitespace
       // character that we found
-      if (!this.currentOpenTag.notifiedOpenTagName) {
+      if (!tag.tagName) {
         this.enterState(STATE.TAG_NAME);
         this.rewind(1);
-      } else if (!this.checkForPlaceholder(ch, code)) {
+      } else {
         this.enterState(STATE.ATTRIBUTE);
         this.rewind(1);
       }
     }
   },
-});
+};

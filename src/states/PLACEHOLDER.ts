@@ -1,33 +1,25 @@
-import { Parser, STATE } from "../internal";
+import {
+  cloneValue,
+  Part,
+  STATE,
+  StateDefinition,
+  ValuePart,
+} from "../internal";
 
-export const PLACEHOLDER = Parser.createState({
+export interface PlaceholderPart extends Part {
+  value: ValuePart;
+  escape: boolean;
+}
+
+export const PLACEHOLDER: StateDefinition<PlaceholderPart> = {
   name: "PLACEHOLDER",
 
-  // { escape: boolean, withinTagName? }
-  enter(oldState, placeholder) {
-    placeholder.value = "";
+  enter(placeholder) {
     placeholder.escape = placeholder.escape !== false;
-    placeholder.type = "placeholder";
-    placeholder.withinBody = this.withinOpenTag !== true;
-    placeholder.withinAttribute = this.currentAttribute != null;
-    placeholder.withinTemplateString =
-      placeholder.parentState === STATE.TEMPLATE_STRING;
-    placeholder.withinOpenTag =
-      this.withinOpenTag === true && this.currentAttribute == null;
-    this.placeholderDepth++;
-
-    if (oldState !== STATE.EXPRESSION) {
-      this.enterState(STATE.EXPRESSION, { terminator: "}" });
-    }
+    this.enterState(STATE.EXPRESSION, { terminator: "}" });
   },
 
   exit(placeholder) {
-    this.placeholderDepth--;
-    if (!placeholder.withinTemplateString) {
-      var newExpression = this.notifiers.notifyPlaceholder(placeholder);
-      placeholder.value = newExpression;
-    }
-
     if (!placeholder.value) {
       this.notifyError(
         placeholder.pos,
@@ -35,12 +27,14 @@ export const PLACEHOLDER = Parser.createState({
         "Invalid placeholder, the expression cannot be missing"
       );
     }
+
+    this.notifiers.notifyPlaceholder(placeholder);
   },
 
   return(childState, childPart, placeholder) {
     switch (childState) {
       case STATE.EXPRESSION: {
-        placeholder.value = childPart.value;
+        placeholder.value = cloneValue(childPart as ValuePart);
         this.exitState("}");
         break;
       }
@@ -54,4 +48,4 @@ export const PLACEHOLDER = Parser.createState({
   eof() {
     throw new Error("Illegal state. EOF not expected");
   },
-});
+};
