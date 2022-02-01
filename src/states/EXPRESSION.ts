@@ -95,16 +95,8 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
     }
   },
 
-  return(childState, childPart, expression) {
-    switch (childState) {
-      case STATE.STRING:
-      case STATE.TEMPLATE_STRING:
-      case STATE.REGULAR_EXPRESSION:
-      case STATE.JS_COMMENT_LINE:
-      case STATE.JS_COMMENT_BLOCK:
-        expression.value += (childPart as ValuePart).value;
-        break;
-    }
+  return(_, childPart, expression) {
+    expression.value += (childPart as ValuePart).value;
   },
 
   char(ch, code, expression) {
