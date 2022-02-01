@@ -15,13 +15,13 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK:
       case STATE.TEMPLATE_STRING:
-        this.text += (childPart as ValuePart).value;
+        this.addText((childPart as ValuePart).value);
         break;
     }
   },
 
   eol(newLine) {
-    this.text += newLine;
+    this.addText(newLine);
 
     if (this.isWithinSingleLineHtmlBlock) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single
@@ -71,7 +71,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
     if (this.checkForEscapedEscapedPlaceholder(ch, code)) {
       this.skip(1);
     } else if (this.checkForEscapedPlaceholder(ch, code)) {
-      this.text += "$";
+      this.addText("$");
       this.skip(1);
       return;
     } else if (this.checkForPlaceholder(ch, code)) {
@@ -80,6 +80,6 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
       return;
     }
 
-    this.text += ch;
+    this.addText(ch);
   },
 };

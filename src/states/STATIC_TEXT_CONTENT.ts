@@ -12,7 +12,7 @@ export const STATIC_TEXT_CONTENT: StateDefinition = {
   },
 
   eol(newLine) {
-    this.text += newLine;
+    this.addText(newLine);
 
     if (this.isWithinSingleLineHtmlBlock) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single
@@ -38,6 +38,6 @@ export const STATIC_TEXT_CONTENT: StateDefinition = {
       }
     }
 
-    this.text += ch;
+    this.addText(ch);
   },
 };
