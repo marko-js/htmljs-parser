@@ -220,11 +220,11 @@ export class Parser {
   }
 
   rewind(offset: number) {
-    this.pos -= offset;
+    return (this.pos -= offset);
   }
 
   skip(offset: number) {
-    this.pos += offset;
+    return (this.pos += offset);
   }
 
   end() {
@@ -316,7 +316,7 @@ export class Parser {
         this.notifyError(
           curBlock.pos,
           "MISSING_END_TAG",
-          'Missing ending "' + curBlock.tagName!.value + '" tag'
+          'Missing ending "' + curBlock.tagName.value + '" tag'
         );
         return;
       }
@@ -342,9 +342,7 @@ export class Parser {
       const curBlock = peek(this.blockStack)!;
       if (curBlock.type === "tag") {
         if (curBlock.concise) {
-          this.closeTag({
-            tagName: { value: "" },
-          });
+          this.closeTag();
         } else {
           // We found an unclosed tag on the stack that is not for a concise tag. That means
           // there is a problem with the template because all open tags should have a closing
@@ -354,7 +352,7 @@ export class Parser {
           this.notifyError(
             curBlock.pos,
             "MISSING_END_TAG",
-            'Missing ending "' + curBlock.tagName!.value + '" tag'
+            'Missing ending "' + curBlock.tagName.value + '" tag'
           );
           return;
         }
@@ -376,25 +374,21 @@ export class Parser {
     this.end();
   }
 
-  closeTag(closeTag: any) {
-    if (!closeTag) {
-      throw new Error("Illegal state. Invalid close tag");
-    }
-    const tagName = closeTag.tagName.value;
+  closeTag(pos?: number, endPos?: number, tagName?: ValuePart) {
     const lastTag = this.blockStack.pop();
 
     if (!lastTag || lastTag.type !== "tag") {
       return this.notifyError(
-        closeTag.pos,
+        pos!,
         "EXTRA_CLOSING_TAG",
-        'The closing "' + tagName + '" tag was not expected'
+        'The closing "' + tagName!.value + '" tag was not expected'
       );
     }
 
-    if (tagName) {
+    if (tagName?.value) {
       const expectedCloseTagName = getTagName(lastTag);
 
-      if (tagName !== (expectedCloseTagName || "div")) {
+      if (tagName.value !== (expectedCloseTagName || "div")) {
         const shorthandEndPos = Math.max(
           lastTag.shorthandId ? lastTag.shorthandId.endPos : 0,
           lastTag.shorthandClassNames
@@ -407,13 +401,13 @@ export class Parser {
         if (
           !shorthandEndPos ||
           // accepts including the tag class/id shorthands as part of the close tag name.
-          tagName !== this.data.slice(lastTag.tagName!.pos, shorthandEndPos)
+          tagName.value !== this.substring(lastTag.tagName.pos, shorthandEndPos)
         ) {
           return this.notifyError(
-            closeTag.pos,
+            pos!,
             "MISMATCHED_CLOSING_TAG",
             'The closing "' +
-              tagName +
+              tagName.value +
               '" tag does not match the corresponding opening "' +
               (expectedCloseTagName || "div") +
               '" tag'
@@ -422,7 +416,7 @@ export class Parser {
       }
     }
 
-    this.notifiers.notifyCloseTag(closeTag);
+    this.notifiers.notifyCloseTag(pos, endPos, tagName);
 
     if (lastTag.beginMixedMode) {
       this.endingMixedModeAtEOL = true;
@@ -525,23 +519,18 @@ export class Parser {
       this.lookAheadFor("/" + getTagName(peek(this.blockStack)) + ">");
 
     if (match) {
-      const pos = this.pos;
       if (this.state === STATE.JS_COMMENT_LINE) {
         this.exitState();
       }
 
+      const pos = this.pos;
+      const endPos = this.skip(match.length + 1);
       this.endText();
-      this.skip(match.length + 1);
-      const endPos = this.pos;
-      this.closeTag({
-        pos: pos,
-        endPos: endPos,
-        tagName: {
-          value: match.slice(1, -1),
-          pos: pos + 2,
-          endPos: endPos - 1,
-        },
-      });
+      this.closeTag(pos, endPos, {
+        value: match.slice(1, -1),
+        pos: pos + 2,
+        endPos: endPos - 1,
+      } as ValuePart);
       this.enterState(STATE.HTML_CONTENT);
       this.forward = false;
       return true;
@@ -619,7 +608,7 @@ export class Parser {
     const last =
       this.blockStack.length && this.blockStack[this.blockStack.length - 1];
 
-    if (!last || last.type === "html" || !last.tagName!.value) {
+    if (!last || last.type === "html" || !last.tagName.value) {
       throw new Error(
         'The "parsed text content" parser state is only allowed within a tag'
       );
@@ -647,7 +636,7 @@ export class Parser {
     const last =
       this.blockStack.length && this.blockStack[this.blockStack.length - 1];
 
-    if (!last || last.type === "html" || !last.tagName!.value) {
+    if (!last || last.type === "html" || !last.tagName.value) {
       throw new Error(
         'The "static text content" parser state is only allowed within a tag'
       );
