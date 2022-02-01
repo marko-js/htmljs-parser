@@ -90,11 +90,6 @@ export function createNotifiers(parser: Parser, listeners) {
           concise: tagInfo.concise,
           shorthandId: tagInfo.shorthandId,
           shorthandClassNames: tagInfo.shorthandClassNames,
-          setParseOptions(parseOptions) {
-            if (parseOptions) {
-              tagInfo.parseOptions = parseOptions;
-            }
-          },
         };
 
         eventFunc.call(parser, event, parser);
@@ -136,22 +131,6 @@ export function createNotifiers(parser: Parser, listeners) {
             method: attr.method,
             bound: attr.bound,
           })),
-          setParseOptions(parseOptions) {
-            if (!parseOptions) {
-              return;
-            }
-            const newState = parseOptions.state;
-
-            if (newState) {
-              if (newState === "parsed-text") {
-                parser.enterParsedTextContentState();
-              } else if (newState === "static-text") {
-                parser.enterStaticTextContentState();
-              }
-            }
-
-            tagInfo.parseOptions = parseOptions;
-          },
         };
 
         eventFunc.call(parser, event, parser);
