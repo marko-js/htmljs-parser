@@ -100,7 +100,7 @@ export const HTML_CONTENT: StateDefinition = {
     } else if (
       code === CODE.DOLLAR &&
       isWhitespaceCode(this.lookAtCharCodeAhead(1)) &&
-      this.isBeginningOfLine()
+      /^\s*$/.test(this.substring(0, this.pos).split("\n").pop()!) // beginning of line
     ) {
       this.skip(1);
       this.enterState(STATE.INLINE_SCRIPT);

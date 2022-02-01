@@ -3,10 +3,6 @@
   "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
   "version": "2.11.3",
   "author": "Phillip Gates-Idem <phillip.idem@gmail.com>",
-  "dependencies": {
-    "char-props": "^0.1.5",
-    "complain": "^1.6.0"
-  },
   "devDependencies": {
     "@babel/runtime": "^7.16.7",
     "@commitlint/cli": "^16.1.0",

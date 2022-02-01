@@ -5,6 +5,8 @@ import {
   StateDefinition,
   Part,
   ValuePart,
+  Parser,
+  operators,
 } from "../internal";
 
 export interface ExpressionPart extends Part {
@@ -110,7 +112,7 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
 
     if (depth === 0) {
       if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
-        const operator = !expression.skipOperators && this.checkForOperator();
+        const operator = !expression.skipOperators && checkForOperator(this);
 
         if (operator) {
           expression.value += operator;
@@ -211,3 +213,31 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
     expression.value += ch;
   },
 };
+
+function checkForOperator(parser: Parser) {
+  const remaining = parser.data.substring(parser.pos);
+  const matches = operators.patternNext.exec(remaining);
+
+  if (matches) {
+    const match = matches[0];
+    const isIgnoredOperator = parser.isConcise
+      ? match.includes("[")
+      : match.includes(">");
+    if (!isIgnoredOperator) {
+      parser.skip(match.length - 1);
+      return match;
+    }
+  } else {
+    const previous = parser.substring(
+      parser.pos - operators.longest,
+      parser.pos
+    );
+    const match = operators.patternPrev.exec(previous);
+    if (match) {
+      parser.rewind(1);
+      return parser.consumeWhitespace();
+    }
+  }
+
+  return false;
+}
