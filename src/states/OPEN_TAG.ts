@@ -19,11 +19,11 @@ export interface OpenTagPart extends Part {
   state: TAG_STATE | undefined;
   concise: boolean;
   beginMixedMode?: boolean;
+  tagName: ValuePart;
   selfClosed: boolean;
   openTagOnly: boolean;
   shorthandId?: ValuePart;
   shorthandClassNames?: ValuePart[];
-  tagName?: ValuePart;
   var?: ValuePart;
   params?: ValuePart;
   argument?: ValuePart;
@@ -41,7 +41,6 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
 
     tag.type = "tag";
     tag.state = undefined;
-    tag.tagName = undefined;
     tag.attributes = [];
     tag.argument = undefined;
     tag.params = undefined;
@@ -61,7 +60,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
   },
 
   exit(tag) {
-    const tagName = tag.tagName!;
+    const tagName = tag.tagName;
     const attributes = tag.attributes;
     const parseOptions = tag.parseOptions;
     const selfClosed = tag.selfClosed;
@@ -79,10 +78,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
     this.notifiers.notifyOpenTag(tag);
 
     if (!this.isConcise && (selfClosed || openTagOnly)) {
-      this.closeTag({
-        tagName: { value: "" },
-      });
-
+      this.closeTag();
       this.enterState(STATE.HTML_CONTENT);
     } else if (this.state === origState) {
       // The listener didn't transition the parser to a new state
