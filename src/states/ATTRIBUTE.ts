@@ -58,7 +58,7 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
     if (this.isConcise) {
       this.exitState();
     } else {
-      return this.notifyError(
+      this.notifyError(
         attr.pos,
         "MALFORMED_OPEN_TAG",
         'EOF reached while parsing attribute "' +
