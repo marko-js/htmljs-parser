@@ -1,40 +1,63 @@
 "use strict";
-import complain from "complain";
-import charProps from "char-props";
 import {
   createNotifiers,
-  MODE,
   BODY_MODE,
   CODE,
   STATE,
   peek,
   isWhitespaceCode,
   htmlTags,
-  operators,
   getTagName,
 } from "../internal";
-import { BaseParser } from "./BaseParser";
 
 export interface ParseOptions {
   state: "html" | "cdata" | "parsed-text" | "static-text";
   ignoreAttributes: boolean;
 }
 
-export class Parser extends BaseParser {
+export interface Part {
+  pos: number;
+  endPos: number;
+  parentState: StateDefinition;
+}
+
+export interface ValuePart extends Part {
+  value: string;
+}
+
+export interface StateDefinition<P extends Part = Part> {
+  name: string;
+  eol?: (this: Parser, str: string, activePart: P) => void;
+  eof?: (this: Parser, activePart: P) => void;
+  enter?: (
+    this: Parser,
+    activePart: P,
+    parentState: StateDefinition | undefined
+  ) => void;
+  exit?: (this: Parser, activePart: P) => void;
+  return?: (
+    this: Parser,
+    childState: StateDefinition,
+    childPart: Part,
+    activePart: P
+  ) => void;
+  char?: (this: Parser, char: string, code: number, activePart: P) => void;
+}
+
+export class Parser {
+  public pos!: number;
+  public maxPos!: number;
+  public data!: string;
+  public filename!: string;
+  public state!: StateDefinition;
+  public parts!: Part[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
+  public activePart!: Part; // The current part at the top of the part stack
+  public forward!: boolean;
   public notifiers: ReturnType<typeof createNotifiers>;
-  public defaultMode: MODE.HTML | MODE.CONCISE;
   public userIsOpenTagOnly?: (tagName: string) => boolean;
   public currentOpenTag: STATE.OpenTagPart | undefined; // Used to reference the current open tag that is being parsed
   public currentAttribute: STATE.AttrPart | undefined; // Used to reference the current attribute that is being parsed
   public withinAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
-  public blockStack!: ((
-    | STATE.OpenTagPart
-    | {
-        type: "html";
-        delimiter?: string;
-        indent: string;
-      }
-  ) & { body?: BODY_MODE; nestedIndent?: string })[]; // Used to keep track of HTML tags and HTML blocks
   public indent!: string; // Used to build the indent for the current concise line
   public isConcise!: boolean; // Set to true if parser is currently in concise mode
   public isWithinSingleLineHtmlBlock!: boolean; // Set to true if the current block is for a single line HTML block
@@ -45,6 +68,14 @@ export class Parser extends BaseParser {
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public text!: string; // Used to buffer text that is found within the body of a tag
   public textParseMode!: ParseOptions["state"];
+  public blockStack!: ((
+    | STATE.OpenTagPart
+    | {
+        type: "html";
+        delimiter?: string;
+        indent: string;
+      }
+  ) & { body?: BODY_MODE; nestedIndent?: string })[]; // Used to keep track of HTML tags and HTML blocks
 
   constructor(
     listeners,
@@ -53,44 +84,23 @@ export class Parser extends BaseParser {
       isOpenTagOnly?: (tagName: string) => boolean;
     }
   ) {
-    super();
     this.reset();
     this.notifiers = createNotifiers(this, listeners);
-    this.defaultMode = MODE.CONCISE;
-    this.userIsOpenTagOnly = undefined;
     this.userIsOpenTagOnly = options?.isOpenTagOnly;
-
-    if (options) {
-      this.userIsOpenTagOnly = options.isOpenTagOnly;
-      if (options.concise === false) {
-        this.defaultMode = MODE.HTML;
-      }
-    }
-
-    this.setInitialState(
-      this.defaultMode === MODE.CONCISE
-        ? STATE.CONCISE_HTML_CONTENT
-        : STATE.HTML_CONTENT
-    );
   }
 
-  enterDefaultState() {
-    this.enterState(
-      this.defaultMode === MODE.CONCISE
-        ? STATE.CONCISE_HTML_CONTENT
-        : STATE.HTML_CONTENT
-    );
-  }
-
-  override reset() {
-    super.reset();
+  reset() {
+    this.pos = -1;
+    this.maxPos = -1;
+    this.parts = [];
+    this.forward = true;
     this.text = "";
     this.textParseMode = "html";
     this.currentOpenTag = undefined;
     this.currentAttribute = undefined;
     this.blockStack = [];
     this.indent = "";
-    this.isConcise = this.defaultMode === MODE.CONCISE;
+    this.isConcise = true;
     this.withinAttrGroup = false;
     this.isWithinRegExpCharset = false;
     this.isWithinSingleLineHtmlBlock = false;
@@ -100,13 +110,129 @@ export class Parser extends BaseParser {
     this.endingMixedModeAtEOL = false;
   }
 
-  outputDeprecationWarning(message: string) {
-    const srcCharProps = charProps(this.src);
-    const line = srcCharProps.lineAt(this.pos);
-    const column = srcCharProps.columnAt(this.pos);
-    const filename = this.filename;
-    const location = (filename || "(unknown file)") + ":" + line + ":" + column;
-    complain(message, { location: location });
+  enterState<P extends Part = Part>(
+    state: StateDefinition<P>,
+    part: Partial<P> = {}
+  ) {
+    // if (this.state === state) {
+    //   // Re-entering the same state can lead to unexpected behavior
+    //   // so we should throw error to catch these types of mistakes
+    //   throw new Error(
+    //     "Re-entering the current state is illegal - " + state.name
+    //   );
+    // }
+
+    const parentState = this.state;
+    const activePart = (this.activePart = part as unknown as P);
+    this.state = state as StateDefinition;
+    this.parts.push(activePart);
+    part.pos = this.pos;
+    part.parentState = parentState;
+    state.enter?.call(this, activePart, parentState);
+    return this.activePart;
+  }
+
+  exitState(includedEndChars?: string) {
+    if (includedEndChars) {
+      for (let i = 0; i < includedEndChars.length; i++) {
+        if (this.data[this.pos + i] !== includedEndChars[i]) {
+          if (this.pos + i >= this.maxPos) {
+            (this as Parser).notifyError(
+              this.activePart.pos,
+              "UNEXPECTED_EOF",
+              "EOF reached with current part incomplete"
+            );
+          } else {
+            throw new Error(
+              "Unexpected end character at position " + (this.pos + i)
+            );
+          }
+        }
+      }
+      this.skip(includedEndChars.length);
+    }
+
+    const childPart = this.parts.pop()!;
+    const childState = this.state;
+    const parentState = (this.state = childPart.parentState);
+    const parentPart = (this.activePart = peek(this.parts)!);
+
+    childPart.endPos = this.pos;
+
+    if (childState.exit) {
+      childState.exit.call(this, childPart);
+    }
+
+    if (parentState.return) {
+      parentState.return.call(this, childState, childPart, parentPart);
+    }
+
+    this.forward = false;
+  }
+
+  checkForTerminator(terminator: string | string[], ch: string) {
+    if (typeof terminator === "string") {
+      if (ch === terminator) {
+        return true;
+      } else if (terminator.length > 1) {
+        for (let i = 0; i < terminator.length; i++) {
+          if (this.data[this.pos + i] !== terminator[i]) {
+            return false;
+          }
+        }
+        return true;
+      }
+    } else {
+      for (let i = 0; i < terminator.length; i++) {
+        if (this.checkForTerminator(terminator[i], ch)) {
+          return true;
+        }
+      }
+    }
+  }
+
+  /**
+   * Look ahead to see if the given str matches the substring sequence
+   * beyond
+   */
+  lookAheadFor(str: string, startPos = this.pos + 1) {
+    // Have we read enough chunks to read the string that we need?
+    const endPos = startPos + str.length;
+
+    if (endPos > this.maxPos + 1 || str !== this.substring(startPos, endPos)) {
+      return undefined;
+    }
+
+    return str;
+  }
+
+  /**
+   * Look ahead to a character at a specific offset.
+   * The callback will be invoked with the character
+   * at the given position.
+   */
+  lookAtCharAhead(offset: number, startPos = this.pos) {
+    return this.data.charAt(startPos + offset);
+  }
+
+  lookAtCharCodeAhead(offset: number, startPos = this.pos) {
+    return this.data.charCodeAt(startPos + offset);
+  }
+
+  rewind(offset: number) {
+    this.pos -= offset;
+  }
+
+  skip(offset: number) {
+    this.pos += offset;
+  }
+
+  end() {
+    this.pos = this.maxPos + 1;
+  }
+
+  substring(pos: number, endPos?: number) {
+    return this.data.substring(pos, endPos);
   }
 
   /**
@@ -281,7 +407,7 @@ export class Parser extends BaseParser {
         if (
           !shorthandEndPos ||
           // accepts including the tag class/id shorthands as part of the close tag name.
-          tagName !== this.src.slice(lastTag.tagName!.pos, shorthandEndPos)
+          tagName !== this.data.slice(lastTag.tagName!.pos, shorthandEndPos)
         ) {
           return this.notifyError(
             closeTag.pos,
@@ -377,16 +503,6 @@ export class Parser extends BaseParser {
     return this.lookAtCharAhead(behind);
   }
 
-  getNextIndent() {
-    const match = /[^\n]*\n(\s+)/.exec(this.substring(this.pos));
-    if (match) {
-      const whitespace = match[1].split(/\n/g);
-      return whitespace[whitespace.length - 1];
-    }
-
-    return "";
-  }
-
   onlyWhitespaceRemainsOnLine(offset = 1) {
     return /^\s*\n/.test(this.substring(this.pos + offset));
   }
@@ -399,13 +515,6 @@ export class Parser extends BaseParser {
     }
     this.skip(whitespace.length);
     return whitespace;
-  }
-
-  isBeginningOfLine() {
-    const before = this.substring(0, this.pos);
-    const lines = before.split("\n");
-    const lastLine = lines[lines.length - 1];
-    return /^\s*$/.test(lastLine);
   }
 
   checkForClosingTag() {
@@ -446,53 +555,6 @@ export class Parser extends BaseParser {
       this.enterState(STATE.CDATA);
       this.skip(8);
       return true;
-    }
-
-    return false;
-  }
-
-  checkForOperator() {
-    const remaining = this.data.substring(this.pos);
-    const matches = operators.patternNext.exec(remaining);
-
-    if (matches) {
-      const match = matches[0];
-      const isIgnoredOperator = this.isConcise
-        ? match.includes("[")
-        : match.includes(">");
-      if (!isIgnoredOperator) {
-        this.skip(match.length - 1);
-        return match;
-      }
-    } else {
-      const previous = this.substring(this.pos - operators.longest, this.pos);
-      const match = operators.patternPrev.exec(previous);
-      if (match) {
-        this.rewind(1);
-        return this.consumeWhitespace();
-      }
-    }
-
-    return false;
-  }
-
-  checkForTypeofOperator() {
-    const remaining = this.substring(this.pos);
-    const matches = /^\s+typeof\s+/.exec(remaining);
-
-    if (matches) {
-      return matches[0];
-    }
-
-    return false;
-  }
-
-  checkForTypeofOperatorAtStart() {
-    const remaining = this.substring(this.pos);
-    const matches = /^typeof\s+/.exec(remaining);
-
-    if (matches) {
-      return matches[0];
     }
 
     return false;
@@ -547,21 +609,9 @@ export class Parser extends BaseParser {
       // We stay in the same state since we are still parsing a multiline, delimited HTML block
     } else if (this.htmlBlockIndent && !this.onlyWhitespaceRemainsOnLine()) {
       // the next line does not have enough indentation
-      // so unless it is black (whitespace only),
+      // so unless it is blank (whitespace only),
       // we will end the block
       this.endHtmlBlock();
-    }
-  }
-
-  enterHtmlContentState() {
-    if (this.state !== STATE.HTML_CONTENT) {
-      this.enterState(STATE.HTML_CONTENT);
-    }
-  }
-
-  enterConciseHtmlContentState() {
-    if (this.state !== STATE.CONCISE_HTML_CONTENT) {
-      this.enterState(STATE.CONCISE_HTML_CONTENT);
     }
   }
 
@@ -613,8 +663,66 @@ export class Parser extends BaseParser {
     }
   }
 
-  override parse(data: string, filename: string) {
-    super.parse(data, filename);
+  parse(data: string, filename: string) {
+    // call the constructor function again because we have a contract that
+    // it will fully reset the parser
+    this.reset();
+
+    this.filename = filename;
+    this.data = data;
+    this.maxPos = data.length;
+
+    // Enter initial state
+    this.enterState(STATE.CONCISE_HTML_CONTENT);
+
+    // Move to first position
+    // Skip the byte order mark (BOM) sequence
+    // at the beginning of the file if there is one:
+    // - https://en.wikipedia.org/wiki/Byte_order_mark
+    // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
+    this.pos = data.charCodeAt(0) === 0xfeff ? 1 : 0;
+
+    let pos: number;
+    while ((pos = this.pos) <= this.maxPos) {
+      const ch = data[pos];
+      const code = ch && ch.charCodeAt(0);
+      const state = this.state;
+      let length = 1;
+
+      if (code === CODE.NEWLINE) {
+        state.eol?.call(this, ch, this.activePart);
+      } else if (code === CODE.CARRIAGE_RETURN) {
+        const nextPos = pos + 1;
+        if (
+          nextPos < data.length &&
+          data.charCodeAt(nextPos) === CODE.NEWLINE
+        ) {
+          state.eol?.call(this, "\r\n", this.activePart);
+          length = 2;
+        }
+      } else if (code) {
+        // We assume that every state will have "char" function
+        // TODO: only check during debug.
+        if (!state.char) {
+          throw new Error(
+            `State ${state.name} has no "char" function (${JSON.stringify(
+              ch
+            )}, ${code})`
+          );
+        }
+        state.char.call(this, ch, code, this.activePart);
+      } else {
+        state.eof?.call(this, this.activePart);
+      }
+
+      // move to next position
+      if (this.forward) {
+        this.pos += length;
+      } else {
+        this.forward = true;
+      }
+    }
+
     this.notifiers.notifyFinish();
   }
 }
