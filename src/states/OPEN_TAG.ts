@@ -1,4 +1,3 @@
-import type { ParseOptions } from "querystring";
 import {
   CODE,
   STATE,
@@ -30,7 +29,6 @@ export interface OpenTagPart extends Part {
   attributes: STATE.AttrPart[];
   indent: string;
   nestedIndent?: string;
-  parseOptions?: Partial<ParseOptions> & Record<string, unknown>;
 }
 
 export const OPEN_TAG: StateDefinition<OpenTagPart> = {
@@ -61,19 +59,8 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
 
   exit(tag) {
     const tagName = tag.tagName;
-    const attributes = tag.attributes;
-    const parseOptions = tag.parseOptions;
     const selfClosed = tag.selfClosed;
-
-    const ignoreAttributes =
-      parseOptions && parseOptions.ignoreAttributes === true;
-
-    if (ignoreAttributes) {
-      attributes.length = 0;
-    }
-
     const openTagOnly = (tag.openTagOnly = this.isOpenTagOnly(tagName.value));
-
     const origState = this.state;
     this.notifiers.notifyOpenTag(tag);
 
