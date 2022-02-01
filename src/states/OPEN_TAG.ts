@@ -83,7 +83,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
         tagName: { value: "" },
       });
 
-      this.enterHtmlContentState();
+      this.enterState(STATE.HTML_CONTENT);
     } else if (this.state === origState) {
       // The listener didn't transition the parser to a new state
       // so we use some simple rules to find the appropriate state.
@@ -92,9 +92,9 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       } else if (tagName.value === "style") {
         this.enterCssContentState();
       } else if (this.isConcise) {
-        this.enterConciseHtmlContentState();
+        this.enterState(STATE.CONCISE_HTML_CONTENT);
       } else {
-        this.enterHtmlContentState();
+        this.enterState(STATE.HTML_CONTENT);
       }
     }
 
@@ -249,10 +249,15 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
         this.exitState();
 
         this.htmlBlockDelimiter = "";
-        const nextIndent = this.getNextIndent();
-        if (nextIndent > this.indent) {
-          this.indent = nextIndent;
+        const indentMatch = /[^\n]*\n(\s+)/.exec(this.substring(this.pos));
+        if (indentMatch) {
+          const whitespace = indentMatch[1].split(/\n/g);
+          const nextIndent = whitespace[whitespace.length - 1];
+          if (nextIndent > this.indent) {
+            this.indent = nextIndent;
+          }
         }
+
         this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
         return;
       } else if (code === CODE.OPEN_SQUARE_BRACKET) {
