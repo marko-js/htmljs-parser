@@ -17,7 +17,7 @@ export const HTML_CONTENT: StateDefinition = {
   },
 
   eol(newLine) {
-    this.text += newLine;
+    this.addText(newLine);
 
     if (this.beginMixedMode) {
       this.beginMixedMode = false;
@@ -78,16 +78,16 @@ export const HTML_CONTENT: StateDefinition = {
         // "<>"
         // "<<"
         // "< "
-        // We'll treat this left angle brakect as text
-        this.text += "<";
+        // We'll treat this left angle bracket as text
+        this.addText("<");
       } else {
         this.enterState(STATE.OPEN_TAG);
       }
     } else if (this.checkForEscapedEscapedPlaceholder(ch, code)) {
-      this.text += "\\";
+      this.addText("\\");
       this.skip(1);
     } else if (this.checkForEscapedPlaceholder(ch, code)) {
-      this.text += "$";
+      this.addText("$");
       this.skip(1);
     } else if (this.checkForPlaceholder(ch, code)) {
       // We went into placeholder state...
@@ -100,7 +100,7 @@ export const HTML_CONTENT: StateDefinition = {
       this.skip(1);
       this.enterState(STATE.INLINE_SCRIPT);
     } else {
-      this.text += ch;
+      this.addText(ch);
     }
   },
 };
