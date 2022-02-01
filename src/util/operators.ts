@@ -47,14 +47,9 @@ export const operators = [
 
   // Member
   "[",
-];
+].sort((a, b) => b.length - a.length); // Look for longest operators first
 
-var unary = ["typeof", "new", "void"];
-
-// Look for longest operators first
-operators.sort(function (a, b) {
-  return b.length - a.length;
-});
+const unary = ["typeof", "new", "void"];
 
 export const longest =
   operators.sort((a, b) => b.length - a.length)[0].length + 1;
@@ -67,16 +62,16 @@ export const patternPrev = new RegExp(
     ")(\\s*)$"
 );
 
-function escapeOperator(o) {
-  if (/^[A-Z]+$/i.test(o)) {
-    return "\\b" + escapeNonAlphaNumeric(o) + "\\b";
+function escapeOperator(str: string) {
+  if (/^[A-Z]+$/i.test(str)) {
+    return "\\b" + escapeNonAlphaNumeric(str) + "\\b";
   }
-  if (o === "/") {
+  if (str === "/") {
     return "\\/(?:\\b|\\s)"; //make sure this isn't a comment
   }
-  return escapeNonAlphaNumeric(o);
+  return escapeNonAlphaNumeric(str);
 }
 
-function escapeNonAlphaNumeric(str) {
+function escapeNonAlphaNumeric(str: string) {
   return str.replace(/([^\w\d])/g, "\\$1");
 }
