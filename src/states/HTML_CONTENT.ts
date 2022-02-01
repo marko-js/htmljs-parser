@@ -16,11 +16,6 @@ export const HTML_CONTENT: StateDefinition = {
     this.isConcise = false; // Back into non-concise HTML parsing
   },
 
-  return() {
-    // Our children have already notified the listener of their presence so there is
-    // nothing to do here
-  },
-
   eol(newLine) {
     this.text += newLine;
 
