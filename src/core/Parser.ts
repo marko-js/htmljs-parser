@@ -66,6 +66,7 @@ export class Parser {
   public htmlBlockIndent?: string; // Used to hold the indentation for a delimited, multiline HTML block
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
+  public textPos!: number; // Used to buffer text that is found within the body of a tag
   public text!: string; // Used to buffer text that is found within the body of a tag
   public textParseMode!: ParseOptions["state"];
   public blockStack!: ((
@@ -94,6 +95,7 @@ export class Parser {
     this.maxPos = -1;
     this.parts = [];
     this.forward = true;
+    this.textPos = -1;
     this.text = "";
     this.textParseMode = "html";
     this.currentOpenTag = undefined;
@@ -245,13 +247,30 @@ export class Parser {
     return this.userIsOpenTagOnly?.(tagName) ?? htmlTags.isOpenTagOnly(tagName);
   }
 
+  addText(text: string) {
+    if (this.text) {
+      this.text += text;
+    } else {
+      this.textPos = this.pos;
+      this.text = text;
+    }
+  }
+
   /**
    * Clear out any buffered body text and this.notifiers.notify any listeners
    */
-  endText(txt: string = this.text) {
-    this.notifiers.notifyText(txt, this.textParseMode);
-    // always clear text buffer...
-    this.text = "";
+  endText() {
+    if (this.textPos !== -1) {
+      this.notifiers.notifyText(
+        this.textPos,
+        this.textPos + this.text.length,
+        this.text,
+        this.textParseMode
+      );
+      // always clear text buffer...
+      this.text = "";
+      this.textPos = -1;
+    }
   }
 
   /**

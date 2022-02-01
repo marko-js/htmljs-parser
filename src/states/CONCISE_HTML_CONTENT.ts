@@ -13,7 +13,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
   name: "CONCISE_HTML_CONTENT",
 
   eol(newLine) {
-    this.text += newLine;
+    this.addText(newLine);
     this.indent = "";
   },
 
