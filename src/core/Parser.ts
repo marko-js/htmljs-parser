@@ -10,11 +10,6 @@ import {
   getTagName,
 } from "../internal";
 
-export interface ParseOptions {
-  state: "html" | "cdata" | "parsed-text" | "static-text";
-  ignoreAttributes: boolean;
-}
-
 export interface Part {
   pos: number;
   endPos: number;
@@ -54,7 +49,6 @@ export class Parser {
   public activePart!: Part; // The current part at the top of the part stack
   public forward!: boolean;
   public notifiers: ReturnType<typeof createNotifiers>;
-  public userIsOpenTagOnly?: (tagName: string) => boolean;
   public currentOpenTag: STATE.OpenTagPart | undefined; // Used to reference the current open tag that is being parsed
   public currentAttribute: STATE.AttrPart | undefined; // Used to reference the current attribute that is being parsed
   public withinAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
@@ -68,7 +62,7 @@ export class Parser {
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
   public text!: string; // Used to buffer text that is found within the body of a tag
-  public textParseMode!: ParseOptions["state"];
+  public textParseMode!: "html" | "cdata" | "parsed-text" | "static-text";
   public blockStack!: ((
     | STATE.OpenTagPart
     | {
@@ -78,16 +72,9 @@ export class Parser {
       }
   ) & { body?: BODY_MODE; nestedIndent?: string })[]; // Used to keep track of HTML tags and HTML blocks
 
-  constructor(
-    listeners,
-    options?: {
-      concise?: boolean;
-      isOpenTagOnly?: (tagName: string) => boolean;
-    }
-  ) {
+  constructor(listeners) {
     this.reset();
     this.notifiers = createNotifiers(this, listeners);
-    this.userIsOpenTagOnly = options?.isOpenTagOnly;
   }
 
   reset() {
@@ -242,9 +229,7 @@ export class Parser {
    * are immediately closed.
    */
   isOpenTagOnly(tagName: string) {
-    if (!tagName) return false;
-    tagName = tagName.toLowerCase();
-    return this.userIsOpenTagOnly?.(tagName) ?? htmlTags.isOpenTagOnly(tagName);
+    return tagName ? htmlTags.isOpenTagOnly(tagName.toLowerCase()) : false;
   }
 
   addText(text: string) {
