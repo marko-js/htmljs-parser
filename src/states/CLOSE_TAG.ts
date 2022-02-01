@@ -28,7 +28,7 @@ export const CLOSE_TAG: StateDefinition<CloseTagPart> = {
   char(ch, code, closeTag) {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
       this.exitState(">");
-      this.closeTag(closeTag);
+      this.closeTag(closeTag.pos, closeTag.endPos, closeTag.tagName);
       this.enterState(STATE.HTML_CONTENT);
     } else {
       closeTag.tagName.value += ch;

@@ -5,6 +5,7 @@ import {
   isWhitespaceCode,
   StateDefinition,
   ValuePart,
+  BODY_MODE,
 } from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
@@ -66,9 +67,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         if (len) {
           const curBlock = this.blockStack[len - 1];
           if (curBlock.indent.length >= this.indent.length) {
-            this.closeTag({
-              tagName: { value: "" },
-            });
+            this.closeTag();
           } else {
             // Indentation is greater than the last tag so we are starting a
             // nested tag and there are no more tags to end
@@ -89,7 +88,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
       const parent =
         this.blockStack.length && this.blockStack[this.blockStack.length - 1];
-      let body: any;
+      let body: BODY_MODE | undefined;
 
       if (parent) {
         body = parent.body;
@@ -98,7 +97,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
             this.pos,
             "INVALID_BODY",
             'The "' +
-              parent.tagName!.value +
+              parent.tagName.value +
               '" tag does not allow nested body content'
           );
           return;

@@ -64,7 +64,7 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
         'EOF reached while parsing attribute "' +
           attr.name?.value +
           '" for the "' +
-          this.currentOpenTag!.tagName!.value +
+          this.currentOpenTag!.tagName.value +
           '" tag'
       );
     }

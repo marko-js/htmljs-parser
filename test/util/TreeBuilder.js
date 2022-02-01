@@ -318,7 +318,7 @@ class TreeBuilder {
       },
 
       onCloseTag: (event) => {
-        var tagName = event.tagName.value;
+        var tagName = event.tagName?.value;
 
         var last = this.stack.pop();
 
