@@ -4,7 +4,7 @@ export function createNotifiers(parser: Parser, listeners) {
   let hasError = false;
 
   return {
-    notifyText(value, textParseMode) {
+    notifyText(pos, endPos, value, parseMode) {
       if (hasError) {
         return;
       }
@@ -16,8 +16,10 @@ export function createNotifiers(parser: Parser, listeners) {
           parser,
           {
             type: "text",
-            value: value,
-            parseMode: textParseMode,
+            value,
+            parseMode,
+            pos,
+            endPos,
           },
           parser
         );
