@@ -1,4 +1,4 @@
-import { CODE, StateDefinition, ValuePart } from "../internal";
+import { CODE, Parser, STATE, StateDefinition, ValuePart } from "../internal";
 
 // We enter STATE.CDATA after we see "<![CDATA["
 export const CDATA: StateDefinition<ValuePart> = {
@@ -31,3 +31,13 @@ export const CDATA: StateDefinition<ValuePart> = {
     cdata.value += ch;
   },
 };
+
+export function checkForCDATA(parser: Parser) {
+  if (parser.lookAheadFor("![CDATA[")) {
+    parser.enterState(STATE.CDATA);
+    parser.skip(8);
+    return true;
+  }
+
+  return false;
+}

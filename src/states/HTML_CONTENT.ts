@@ -1,4 +1,5 @@
 import {
+  checkForCDATA,
   checkForEscapedEscapedPlaceholder,
   checkForEscapedPlaceholder,
   checkForPlaceholder,
@@ -48,9 +49,7 @@ export const HTML_CONTENT: StateDefinition = {
 
   char(ch, code) {
     if (code === CODE.OPEN_ANGLE_BRACKET) {
-      if (this.checkForCDATA()) {
-        return;
-      }
+      if (checkForCDATA(this)) return;
 
       const nextCode = this.lookAtCharCodeAhead(1);
 
