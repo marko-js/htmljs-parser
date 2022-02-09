@@ -1,22 +1,24 @@
-import { CODE, StateDefinition, ValuePart } from "../internal";
+import { CODE, StateDefinition } from "../internal";
 
 // We enter STATE.HTML_COMMENT after we encounter a "<--"
 // while in the STATE.HTML_CONTENT.
 // We leave STATE.HTML_COMMENT when we see a "-->".
-export const HTML_COMMENT: StateDefinition<ValuePart> = {
+export const HTML_COMMENT: StateDefinition = {
   name: "HTML_COMMENT",
 
-  enter(comment) {
+  enter() {
     this.endText();
-    comment.value = "<!--";
   },
 
   exit(comment) {
-    this.notifiers.notifyComment(comment);
-  },
-
-  eol(str, comment) {
-    comment.value += str;
+    this.notifiers.notifyComment({
+      pos: comment.pos,
+      endPos: comment.endPos,
+      value: {
+        pos: comment.pos + 4, // strip <!--
+        endPos: comment.endPos - 3, // strip -->
+      },
+    });
   },
 
   eof(comment) {
@@ -27,19 +29,16 @@ export const HTML_COMMENT: StateDefinition<ValuePart> = {
     );
   },
 
-  char(ch, code, comment) {
+  char(_, code) {
     if (code === CODE.HYPHEN) {
       let offset = 1;
       let next: number;
       while ((next = this.lookAtCharCodeAhead(offset++)) === CODE.HYPHEN);
-      comment.value += this.substring(this.pos, this.pos + offset);
       this.skip(offset);
 
       if (next === CODE.CLOSE_ANGLE_BRACKET) {
         this.exitState();
       }
-    } else {
-      comment.value += ch;
     }
   },
 };
