@@ -131,7 +131,6 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
 
     if (code === CODE.SINGLE_QUOTE || code === CODE.DOUBLE_QUOTE) {
       return this.enterState(STATE.STRING, {
-        quoteChar: ch,
         quoteCharCode: code,
       });
     } else if (code === CODE.BACKTICK) {
