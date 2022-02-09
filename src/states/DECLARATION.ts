@@ -12,7 +12,7 @@ export const DECLARATION: StateDefinition<ValuePart> = {
 
   eof(declaration) {
     this.notifyError(
-      declaration.pos,
+      declaration,
       "MALFORMED_DECLARATION",
       "EOF reached while parsing declaration"
     );

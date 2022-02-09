@@ -19,7 +19,7 @@ export const CLOSE_TAG: StateDefinition<CloseTagPart> = {
 
   eof(closeTag) {
     this.notifyError(
-      closeTag.pos,
+      closeTag,
       "MALFORMED_CLOSE_TAG",
       "EOF reached while parsing closing tag"
     );

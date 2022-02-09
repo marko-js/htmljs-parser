@@ -58,7 +58,7 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
       if (parentState === STATE.ATTRIBUTE) {
         if (!this.currentAttribute!.name) {
           return this.notifyError(
-            expression.pos,
+            expression,
             "MALFORMED_OPEN_TAG",
             'EOF reached while parsing attribute name for the "' +
               this.currentOpenTag!.tagName.value +
@@ -67,7 +67,7 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
         }
 
         return this.notifyError(
-          expression.pos,
+          expression,
           "MALFORMED_OPEN_TAG",
           'EOF reached while parsing attribute value for the "' +
             this.currentAttribute!.name.value +
@@ -75,20 +75,20 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
         );
       } else if (parentState === STATE.TAG_NAME) {
         return this.notifyError(
-          expression.pos,
+          expression,
           "MALFORMED_OPEN_TAG",
           "EOF reached while parsing tag name"
         );
       } else if (parentState === STATE.PLACEHOLDER) {
         return this.notifyError(
-          expression.pos,
+          expression,
           "MALFORMED_PLACEHOLDER",
           "EOF reached while parsing placeholder"
         );
       }
 
       return this.notifyError(
-        expression.pos,
+        expression,
         "INVALID_EXPRESSION",
         "EOF reached while parsing expression"
       );
@@ -169,7 +169,7 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
     ) {
       if (depth === 0) {
         return this.notifyError(
-          expression.pos,
+          expression,
           "INVALID_EXPRESSION",
           'Mismatched group. A closing "' +
             ch +
@@ -188,7 +188,7 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
           matchingGroupCharCode !== CODE.OPEN_CURLY_BRACE)
       ) {
         return this.notifyError(
-          expression.pos,
+          expression,
           "INVALID_EXPRESSION",
           'Mismatched group. A "' +
             ch +
