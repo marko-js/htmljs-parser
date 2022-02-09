@@ -16,9 +16,9 @@ export const STRING: StateDefinition<StringPart> = {
     string.value += str;
   },
 
-  eof() {
+  eof(string) {
     this.notifyError(
-      this.pos,
+      string,
       "INVALID_STRING",
       "EOF reached while parsing string expression"
     );

@@ -11,17 +11,17 @@ export const REGULAR_EXPRESSION: StateDefinition<ValuePart> = {
     this.isWithinRegExpCharset = false;
   },
 
-  eol() {
+  eol(newline, regExp) {
     this.notifyError(
-      this.pos,
+      regExp,
       "INVALID_REGULAR_EXPRESSION",
       "EOL reached while parsing regular expression"
     );
   },
 
-  eof() {
+  eof(regExp) {
     this.notifyError(
-      this.pos,
+      regExp,
       "INVALID_REGULAR_EXPRESSION",
       "EOF reached while parsing regular expression"
     );

@@ -129,8 +129,8 @@ export class Parser {
       for (let i = 0; i < includedEndChars.length; i++) {
         if (this.data[this.pos + i] !== includedEndChars[i]) {
           if (this.pos + i >= this.maxPos) {
-            (this as Parser).notifyError(
-              this.activePart.pos,
+            this.notifyError(
+              this.activePart,
               "UNEXPECTED_EOF",
               "EOF reached with current part incomplete"
             );
@@ -324,7 +324,7 @@ export class Parser {
         // The current block is for an HTML tag and it still open. When a tag is tag is closed
         // it is removed from the stack
         this.notifyError(
-          curBlock.pos,
+          curBlock,
           "MISSING_END_TAG",
           'Missing ending "' + curBlock.tagName.value + '" tag'
         );
@@ -360,7 +360,7 @@ export class Parser {
           //
           // NOTE: We have already closed tags that are open tag only or self-closed
           this.notifyError(
-            curBlock.pos,
+            curBlock,
             "MISSING_END_TAG",
             'Missing ending "' + curBlock.tagName.value + '" tag'
           );
@@ -379,8 +379,12 @@ export class Parser {
     }
   }
 
-  notifyError(pos: number, errorCode: string, message: string) {
-    this.notifiers.notifyError(pos, errorCode, message);
+  notifyError(pos: number | Pos, errorCode: string, message: string) {
+    if (typeof pos === "number") {
+      this.notifiers.notifyError(pos, errorCode, message);
+    } else {
+      this.notifiers.notifyError(pos.pos, errorCode, message);
+    }
     this.end();
   }
 
