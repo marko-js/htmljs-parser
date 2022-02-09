@@ -29,10 +29,26 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
+        this.notifiers.notifyComment({
+          pos: childPart.pos,
+          endPos: childPart.endPos,
+          value: {
+            pos: childPart.pos + 2, // strip //
+            endPos: childPart.endPos,
+          },
+        });
+        break;
       case STATE.JS_COMMENT_BLOCK: {
-        this.notifiers.notifyComment(childPart);
+        this.notifiers.notifyComment({
+          pos: childPart.pos,
+          endPos: childPart.endPos,
+          value: {
+            pos: childPart.pos + 2, // strip /*
+            endPos: childPart.endPos - 2, // strip */,
+          },
+        });
 
-        if ((childPart as ValuePart).value[1] === "*") {
+        if (childState === STATE.JS_COMMENT_BLOCK) {
           // Make sure there is only whitespace on the line
           // after the ending "*/" sequence
           this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
