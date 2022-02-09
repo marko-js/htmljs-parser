@@ -1,4 +1,13 @@
-import { CODE, STATE, Part, StateDefinition, ValuePart } from "../internal";
+import {
+  CODE,
+  STATE,
+  Part,
+  StateDefinition,
+  ValuePart,
+  Parser,
+  getTagName,
+  peek,
+} from "../internal";
 
 export interface CloseTagPart extends Part {
   tagName: ValuePart;
@@ -36,3 +45,31 @@ export const CLOSE_TAG: StateDefinition<CloseTagPart> = {
     }
   },
 };
+
+export function checkForClosingTag(parser: Parser) {
+  // Look ahead to see if we found the closing tag that will
+  // take us out of the EXPRESSION state...
+  const match =
+    parser.lookAheadFor("/>") ||
+    parser.lookAheadFor("/" + getTagName(peek(parser.blockStack)) + ">");
+
+  if (match) {
+    if (parser.state === STATE.JS_COMMENT_LINE) {
+      parser.exitState();
+    }
+
+    const pos = parser.pos;
+    const endPos = parser.skip(match.length + 1);
+    parser.endText();
+    parser.closeTag(pos, endPos, {
+      value: match.slice(1, -1),
+      pos: pos + 2,
+      endPos: endPos - 1,
+    } as ValuePart);
+    parser.enterState(STATE.HTML_CONTENT);
+    parser.forward = false;
+    return true;
+  }
+
+  return false;
+}
