@@ -1,14 +1,11 @@
-import { CODE, StateDefinition, ValuePart } from "../internal";
+import { CODE, Parser, Part, StateDefinition } from "../internal";
 
 // We enter STATE.DECLARATION after we encounter a "<?"
 // while in the STATE.HTML_CONTENT.
 // We leave STATE.DECLARATION if we see a "?>" or ">".
-export const DECLARATION: StateDefinition<ValuePart> = {
-  name: "DECLARATION",
 
-  eol(str, declaration) {
-    declaration.value += str;
-  },
+export const DECLARATION: StateDefinition = {
+  name: "DECLARATION",
 
   eof(declaration) {
     this.notifyError(
@@ -18,24 +15,34 @@ export const DECLARATION: StateDefinition<ValuePart> = {
     );
   },
 
-  enter(declaration) {
+  enter() {
     this.endText();
-    declaration.value = "";
   },
 
-  exit(declaration) {
-    this.notifiers.notifyDeclaration(declaration);
-  },
-
-  char(ch, code, declaration) {
+  char(_, code, declaration) {
     if (code === CODE.QUESTION) {
       if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
-        this.exitState("?>");
+        exitDeclaration(this, declaration, 2);
       }
     } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.exitState(">");
-    } else {
-      declaration.value += ch;
+      exitDeclaration(this, declaration, 1);
     }
   },
 };
+
+function exitDeclaration(
+  parser: Parser,
+  declaration: Part,
+  closeOffset: number
+) {
+  parser.skip(closeOffset);
+  parser.exitState();
+  parser.notifiers.notifyDeclaration({
+    pos: declaration.pos,
+    endPos: declaration.endPos,
+    value: {
+      pos: declaration.pos + 2, // strip <?
+      endPos: declaration.endPos - closeOffset, // > or ?>
+    },
+  });
+}
