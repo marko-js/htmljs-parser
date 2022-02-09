@@ -387,50 +387,68 @@ export class Parser {
     this.end();
   }
 
-  closeTag(pos?: number, endPos?: number, tagName?: Pos) {
+  closeTag(closeTag?: Pos) {
     const lastTag = this.blockStack.pop();
 
-    if (!lastTag || lastTag.type !== "tag") {
-      return this.notifyError(
-        pos!,
-        "EXTRA_CLOSING_TAG",
-        'The closing "' + this.read(tagName!) + '" tag was not expected'
-      );
-    }
+    if (closeTag) {
+      const closeTagNameStart = closeTag.pos + 2; // strip </
+      const closeTagNameEnd = closeTag.endPos - 1; // strip >
 
-    if (tagName) {
-      const expectedCloseTagName = this.read(lastTag.tagName);
-      const value = this.read(tagName);
-
-      if (value && value !== (expectedCloseTagName || "div")) {
-        const shorthandEndPos = Math.max(
-          lastTag.shorthandId ? lastTag.shorthandId.endPos : 0,
-          lastTag.shorthandClassNames
-            ? lastTag.shorthandClassNames[
-                lastTag.shorthandClassNames.length - 1
-              ].endPos
-            : 0
+      if (!lastTag || lastTag.type !== "tag") {
+        return this.notifyError(
+          closeTag!,
+          "EXTRA_CLOSING_TAG",
+          'The closing "' +
+            this.read({ pos: closeTagNameStart, endPos: closeTagNameEnd }) +
+            '" tag was not expected'
         );
+      }
 
-        if (
-          !shorthandEndPos ||
-          // accepts including the tag class/id shorthands as part of the close tag name.
-          value !== this.substring(lastTag.tagName.pos, shorthandEndPos)
-        ) {
-          return this.notifyError(
-            pos!,
-            "MISMATCHED_CLOSING_TAG",
-            'The closing "' +
-              value +
-              '" tag does not match the corresponding opening "' +
-              (expectedCloseTagName || "div") +
-              '" tag'
+      if (closeTagNameStart < closeTagNameEnd!) {
+        // TODO: instead of substringing the tagName, we should string compare two ranges in the source text.
+        const expectedCloseTagName = this.read(lastTag.tagName) || "div";
+        const closeTagName = this.substring(closeTagNameStart, closeTagNameEnd);
+
+        if (closeTagName !== expectedCloseTagName) {
+          const shorthandEndPos = Math.max(
+            lastTag.shorthandId ? lastTag.shorthandId.endPos : 0,
+            lastTag.shorthandClassNames
+              ? peek(lastTag.shorthandClassNames).endPos
+              : 0
           );
+
+          if (
+            shorthandEndPos === 0 ||
+            closeTagName !==
+              this.substring(lastTag.tagName.pos, shorthandEndPos)
+          ) {
+            return this.notifyError(
+              closeTag,
+              "MISMATCHED_CLOSING_TAG",
+              'The closing "' +
+                this.read({ pos: closeTagNameStart, endPos: closeTagNameEnd }) +
+                '" tag does not match the corresponding opening "' +
+                expectedCloseTagName +
+                '" tag'
+            );
+          }
         }
       }
-    }
 
-    this.notifiers.notifyCloseTag(pos, endPos, tagName);
+      this.notifiers.notifyCloseTag({
+        pos: closeTag.pos,
+        endPos: closeTag.endPos,
+        value: {
+          pos: closeTagNameStart,
+          endPos: closeTagNameEnd,
+        },
+      });
+    } else {
+      this.notifiers.notifyCloseTag({
+        pos: this.pos,
+        endPos: this.pos,
+      });
+    }
 
     if (lastTag.beginMixedMode) {
       this.endingMixedModeAtEOL = true;
