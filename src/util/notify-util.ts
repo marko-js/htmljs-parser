@@ -221,7 +221,7 @@ export function createNotifiers(parser: Parser, listeners) {
           parser,
           {
             type: "comment",
-            value: comment.value,
+            value: parser.read(comment),
             pos: comment.pos,
             endPos: comment.endPos,
           },
