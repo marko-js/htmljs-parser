@@ -200,7 +200,7 @@ export function createNotifiers(parser: Parser, listeners) {
           parser,
           {
             type: "declaration",
-            value: declaration.value,
+            value: parser.read(declaration.value),
             pos: declaration.pos,
             endPos: declaration.endPos,
           },
