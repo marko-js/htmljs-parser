@@ -1,4 +1,9 @@
 import {
+  checkForEscapedEscapedPlaceholder,
+  checkForEscapedPlaceholder,
+  checkForPlaceholder,
+} from ".";
+import {
   Parser,
   CODE,
   STATE,
@@ -83,13 +88,13 @@ export const HTML_CONTENT: StateDefinition = {
       } else {
         this.enterState(STATE.OPEN_TAG);
       }
-    } else if (this.checkForEscapedEscapedPlaceholder(ch, code)) {
+    } else if (checkForEscapedEscapedPlaceholder(this, code)) {
       this.addText("\\");
       this.skip(1);
-    } else if (this.checkForEscapedPlaceholder(ch, code)) {
+    } else if (checkForEscapedPlaceholder(this, code)) {
       this.addText("$");
       this.skip(1);
-    } else if (this.checkForPlaceholder(ch, code)) {
+    } else if (checkForPlaceholder(this, code)) {
       // We went into placeholder state...
       this.endText();
     } else if (
