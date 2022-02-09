@@ -7,7 +7,6 @@ import {
   peek,
   isWhitespaceCode,
   htmlTags,
-  getTagName,
   Pos,
   ExpressionPos,
   TemplatePos,
@@ -326,7 +325,7 @@ export class Parser {
         this.notifyError(
           curBlock,
           "MISSING_END_TAG",
-          'Missing ending "' + curBlock.tagName.value + '" tag'
+          'Missing ending "' + this.read(curBlock.tagName) + '" tag'
         );
         return;
       }
@@ -362,7 +361,7 @@ export class Parser {
           this.notifyError(
             curBlock,
             "MISSING_END_TAG",
-            'Missing ending "' + curBlock.tagName.value + '" tag'
+            'Missing ending "' + this.read(curBlock.tagName) + '" tag'
           );
           return;
         }
@@ -388,21 +387,22 @@ export class Parser {
     this.end();
   }
 
-  closeTag(pos?: number, endPos?: number, tagName?: ValuePart) {
+  closeTag(pos?: number, endPos?: number, tagName?: Pos) {
     const lastTag = this.blockStack.pop();
 
     if (!lastTag || lastTag.type !== "tag") {
       return this.notifyError(
         pos!,
         "EXTRA_CLOSING_TAG",
-        'The closing "' + tagName!.value + '" tag was not expected'
+        'The closing "' + this.read(tagName!) + '" tag was not expected'
       );
     }
 
-    if (tagName?.value) {
-      const expectedCloseTagName = getTagName(lastTag);
+    if (tagName) {
+      const expectedCloseTagName = this.read(lastTag.tagName);
+      const value = this.read(tagName);
 
-      if (tagName.value !== (expectedCloseTagName || "div")) {
+      if (value && value !== (expectedCloseTagName || "div")) {
         const shorthandEndPos = Math.max(
           lastTag.shorthandId ? lastTag.shorthandId.endPos : 0,
           lastTag.shorthandClassNames
@@ -415,13 +415,13 @@ export class Parser {
         if (
           !shorthandEndPos ||
           // accepts including the tag class/id shorthands as part of the close tag name.
-          tagName.value !== this.substring(lastTag.tagName.pos, shorthandEndPos)
+          value !== this.substring(lastTag.tagName.pos, shorthandEndPos)
         ) {
           return this.notifyError(
             pos!,
             "MISMATCHED_CLOSING_TAG",
             'The closing "' +
-              tagName.value +
+              value +
               '" tag does not match the corresponding opening "' +
               (expectedCloseTagName || "div") +
               '" tag'
@@ -530,7 +530,11 @@ export class Parser {
     const last =
       this.blockStack.length && this.blockStack[this.blockStack.length - 1];
 
-    if (!last || last.type === "html" || !last.tagName.value) {
+    if (
+      !last ||
+      last.type === "html" ||
+      last.tagName.pos === last.tagName.endPos
+    ) {
       throw new Error(
         'The "parsed text content" parser state is only allowed within a tag'
       );
@@ -558,7 +562,11 @@ export class Parser {
     const last =
       this.blockStack.length && this.blockStack[this.blockStack.length - 1];
 
-    if (!last || last.type === "html" || !last.tagName.value) {
+    if (
+      !last ||
+      last.type === "html" ||
+      last.tagName.pos === last.tagName.endPos
+    ) {
       throw new Error(
         'The "static text content" parser state is only allowed within a tag'
       );

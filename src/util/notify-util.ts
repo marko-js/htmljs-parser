@@ -85,12 +85,24 @@ export function createNotifiers(parser: Parser, listeners) {
 
         const event = {
           type: "openTagName",
-          tagName: tagInfo.tagName,
+          tagName: {
+            pos: tagInfo.tagName.pos,
+            endPos: tagInfo.tagName.endPos,
+            value: parser.read(tagInfo.tagName),
+          },
           pos: tagInfo.pos,
           endPos: tagInfo.tagName.endPos,
           concise: tagInfo.concise,
-          shorthandId: tagInfo.shorthandId,
-          shorthandClassNames: tagInfo.shorthandClassNames,
+          shorthandId: tagInfo.shorthandId && {
+            ...tagInfo.shorthandId,
+            value: parser.read(tagInfo.shorthandId).slice(1),
+          },
+          shorthandClassNames:
+            tagInfo.shorthandClassNames &&
+            tagInfo.shorthandClassNames.map((className) => ({
+              ...className,
+              value: parser.read(className).slice(1),
+            })),
         };
 
         eventFunc.call(parser, event, parser);
@@ -102,6 +114,11 @@ export function createNotifiers(parser: Parser, listeners) {
         return;
       }
 
+      // console.log({
+      //   ...tagInfo.tagName,
+      //   all: parser.read(tagInfo.tagName)
+      // })
+
       const eventFunc = listeners.onOpenTag;
 
       if (eventFunc) {
@@ -110,7 +127,11 @@ export function createNotifiers(parser: Parser, listeners) {
 
         const event = {
           type: "openTag",
-          tagName: tagInfo.tagName,
+          tagName: {
+            pos: tagInfo.tagName.pos,
+            endPos: tagInfo.tagName.endPos,
+            value: parser.read(tagInfo.tagName),
+          },
           var: tagInfo.var,
           argument: tagInfo.argument,
           params: tagInfo.params,
@@ -119,8 +140,16 @@ export function createNotifiers(parser: Parser, listeners) {
           concise: tagInfo.concise,
           openTagOnly: tagInfo.openTagOnly,
           selfClosed: tagInfo.selfClosed,
-          shorthandId: tagInfo.shorthandId,
-          shorthandClassNames: tagInfo.shorthandClassNames,
+          shorthandId: tagInfo.shorthandId && {
+            ...tagInfo.shorthandId,
+            value: parser.read(tagInfo.shorthandId).slice(1),
+          },
+          shorthandClassNames:
+            tagInfo.shorthandClassNames &&
+            tagInfo.shorthandClassNames.map((className) => ({
+              ...className,
+              value: parser.read(className).slice(1),
+            })),
           attributes: tagInfo.attributes.map((attr) => ({
             default: attr.default,
             spread: attr.spread,

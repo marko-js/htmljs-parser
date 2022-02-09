@@ -5,7 +5,6 @@ import {
   StateDefinition,
   ValuePart,
   Parser,
-  getTagName,
   peek,
 } from "../internal";
 
@@ -51,7 +50,9 @@ export function checkForClosingTag(parser: Parser) {
   // take us out of the EXPRESSION state...
   const match =
     parser.lookAheadFor("/>") ||
-    parser.lookAheadFor("/" + getTagName(peek(parser.blockStack)) + ">");
+    parser.lookAheadFor(
+      "/" + parser.read((peek(parser.blockStack) as any).tagName) + ">"
+    );
 
   if (match) {
     if (parser.state === STATE.JS_COMMENT_LINE) {
