@@ -92,7 +92,10 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
   },
 
   return(_, childPart, expression) {
-    expression.value += (childPart as ValuePart).value;
+    expression.value +=
+      (childPart as ValuePart).value === undefined
+        ? this.read(childPart)
+        : (childPart as ValuePart).value;
   },
 
   char(ch, code, expression) {

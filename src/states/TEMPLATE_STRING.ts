@@ -1,18 +1,10 @@
-import { CODE, Part, STATE, StateDefinition } from "../internal";
+import { CODE, STATE, StateDefinition } from "../internal";
 
-export interface TemplateStringPart extends Part {
-  value: string;
-}
-
-export const TEMPLATE_STRING: StateDefinition<TemplateStringPart> = {
+export const TEMPLATE_STRING: StateDefinition = {
   name: "TEMPLATE_STRING",
 
-  enter(templateString) {
-    templateString.value = "`";
-  },
-
-  return(_, childPart, templateString) {
-    if (!(childPart as STATE.ExpressionPart).value) {
+  return(_, childPart) {
+    if (childPart.pos === childPart.endPos) {
       this.notifyError(
         childPart,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
@@ -20,12 +12,7 @@ export const TEMPLATE_STRING: StateDefinition<TemplateStringPart> = {
       );
     }
 
-    templateString.value += `\${${(childPart as STATE.ExpressionPart).value}}`;
-    this.skip(1);
-  },
-
-  eol(str, templateString) {
-    templateString.value += str;
+    this.skip(1); // skip closing }
   },
 
   eof(templateString) {
@@ -36,18 +23,18 @@ export const TEMPLATE_STRING: StateDefinition<TemplateStringPart> = {
     );
   },
 
-  char(ch, code, templateString) {
+  char(_, code) {
     if (
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      this.skip(1);
-      this.enterState(STATE.EXPRESSION, { terminator: "}" });
+      this.skip(1); // skip {
+      this.enterState(STATE.EXPRESSION, {
+        skipOperators: true,
+        terminator: "}",
+      });
     } else {
-      templateString.value += ch;
       if (code === CODE.BACK_SLASH) {
-        // Handle string escape sequence
-        templateString.value += this.lookAtCharAhead(1);
         this.skip(1);
       } else if (code === CODE.BACKTICK) {
         this.exitState("`");
