@@ -179,7 +179,7 @@ export function createNotifiers(parser: Parser, listeners) {
           this,
           {
             type: "documentType",
-            value: documentType.value,
+            value: parser.read(documentType.value),
             pos: documentType.pos,
             endPos: documentType.endPos,
           },
