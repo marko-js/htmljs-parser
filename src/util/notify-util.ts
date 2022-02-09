@@ -26,7 +26,8 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyCDATA(value, pos, endPos) {
+    notifyCDATA(cdata) {
+      const value = parser.read(cdata.value);
       if (hasError) {
         return;
       }
@@ -38,9 +39,9 @@ export function createNotifiers(parser: Parser, listeners) {
           parser,
           {
             type: "cdata",
+            pos: cdata.pos,
+            endPos: cdata.endPos,
             value: value,
-            pos: pos,
-            endPos: endPos,
           },
           parser
         );
