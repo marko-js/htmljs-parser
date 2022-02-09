@@ -1,3 +1,4 @@
+import { checkForClosingTag } from ".";
 import { Parser, CODE, StateDefinition } from "../internal";
 
 // We enter STATE.STATIC_TEXT_CONTENT when a listener manually chooses
@@ -32,11 +33,12 @@ export const STATIC_TEXT_CONTENT: StateDefinition = {
 
   char(ch, code) {
     // See if we need to see if we reached the closing tag...
-    if (!this.isConcise && code === CODE.OPEN_ANGLE_BRACKET) {
-      if (this.checkForClosingTag()) {
-        return;
-      }
-    }
+    if (
+      !this.isConcise &&
+      code === CODE.OPEN_ANGLE_BRACKET &&
+      checkForClosingTag(this)
+    )
+      return;
 
     this.addText(ch);
   },
