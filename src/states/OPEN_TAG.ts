@@ -112,7 +112,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
           case TAG_STATE.VAR: {
             if (!(childPart as STATE.ExpressionPart).value) {
               return this.notifyError(
-                this.pos,
+                this,
                 "MISSING_TAG_VARIABLE",
                 "A slash was found that was not followed by a variable name or lhs expression"
               );
@@ -148,7 +148,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
     if (this.isConcise) {
       if (this.withinAttrGroup) {
         this.notifyError(
-          tag.pos,
+          tag,
           "MALFORMED_OPEN_TAG",
           'EOF reached while within an attribute group (e.g. "[ ... ]").'
         );
@@ -162,7 +162,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       // Otherwise, in non-concise mode we consider this malformed input
       // since the end '>' was not found.
       this.notifyError(
-        tag.pos,
+        tag,
         "MALFORMED_OPEN_TAG",
         "EOF reached while parsing open tag"
       );
@@ -212,7 +212,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       if (code === CODE.HTML_BLOCK_DELIMITER) {
         if (this.lookAtCharCodeAhead(1) !== CODE.HTML_BLOCK_DELIMITER) {
           this.notifyError(
-            tag.pos,
+            tag,
             "MALFORMED_OPEN_TAG",
             '"-" not allowed as first character of attribute name'
           );

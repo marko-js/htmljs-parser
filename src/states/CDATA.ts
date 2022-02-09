@@ -16,7 +16,7 @@ export const CDATA: StateDefinition<ValuePart> = {
 
   eof(cdata) {
     this.notifyError(
-      cdata.pos,
+      cdata,
       "MALFORMED_CDATA",
       "EOF reached while parsing CDATA"
     );

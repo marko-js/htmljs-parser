@@ -20,7 +20,7 @@ export const DTD: StateDefinition<ValuePart> = {
 
   eof(documentType) {
     this.notifyError(
-      documentType.pos,
+      documentType,
       "MALFORMED_DOCUMENT_TYPE",
       "EOF reached while parsing document type"
     );

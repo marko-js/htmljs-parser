@@ -59,7 +59,7 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
       this.exitState();
     } else {
       this.notifyError(
-        attr.pos,
+        attr,
         "MALFORMED_OPEN_TAG",
         'EOF reached while parsing attribute "' +
           attr.name?.value +
@@ -84,7 +84,7 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
       case ATTR_STATE.ARGUMENT: {
         if (attr.argument) {
           this.notifyError(
-            exprPart.endPos,
+            exprPart,
             "ILLEGAL_ATTRIBUTE_ARGUMENT",
             "An attribute can only have one set of arguments"
           );
@@ -114,7 +114,7 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
       case ATTR_STATE.VALUE: {
         if (exprPart.value === "") {
           return this.notifyError(
-            exprPart.pos,
+            exprPart,
             "ILLEGAL_ATTRIBUTE_VALUE",
             "Missing value for attribute"
           );
