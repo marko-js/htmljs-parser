@@ -22,7 +22,11 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
       case STATE.JS_COMMENT_LINE:
       case STATE.JS_COMMENT_BLOCK:
       case STATE.TEMPLATE_STRING:
-        this.addText((childPart as ValuePart).value);
+        this.addText(
+          (childPart as ValuePart).value === undefined
+            ? this.read(childPart)
+            : (childPart as ValuePart).value
+        );
         break;
     }
   },
