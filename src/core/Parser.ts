@@ -452,7 +452,13 @@ export class Parser {
   }
 
   onlyWhitespaceRemainsOnLine(offset = 1) {
-    return /^\s*\n/.test(this.substring(this.pos + offset));
+    for (let i = this.pos + offset; i < this.maxPos; i++) {
+      const code = this.data.charCodeAt(i);
+      if (code === CODE.NEWLINE) return true;
+      if (!isWhitespaceCode(code)) break;
+    }
+
+    return false;
   }
 
   consumeWhitespace() {
