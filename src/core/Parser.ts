@@ -188,14 +188,17 @@ export class Parser {
    * beyond
    */
   lookAheadFor(str: string, startPos = this.pos + 1) {
-    // Have we read enough chunks to read the string that we need?
-    const endPos = startPos + str.length;
+    let i = str.length;
+    if (startPos + i <= this.maxPos) {
+      const { data } = this;
+      for (; i--; ) {
+        if (str[i] !== data[startPos + i]) {
+          return undefined;
+        }
+      }
 
-    if (endPos > this.maxPos + 1 || str !== this.substring(startPos, endPos)) {
-      return undefined;
+      return str;
     }
-
-    return str;
   }
 
   /**
