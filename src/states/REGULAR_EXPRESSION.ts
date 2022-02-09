@@ -1,17 +1,13 @@
-import { CODE, StateDefinition, ValuePart } from "../internal";
+import { CODE, StateDefinition } from "../internal";
 
-export const REGULAR_EXPRESSION: StateDefinition<ValuePart> = {
+export const REGULAR_EXPRESSION: StateDefinition = {
   name: "REGULAR_EXPRESSION",
-
-  enter(regExp) {
-    regExp.value = "/";
-  },
 
   exit() {
     this.isWithinRegExpCharset = false;
   },
 
-  eol(newline, regExp) {
+  eol(_, regExp) {
     this.notifyError(
       regExp,
       "INVALID_REGULAR_EXPRESSION",
@@ -27,11 +23,9 @@ export const REGULAR_EXPRESSION: StateDefinition<ValuePart> = {
     );
   },
 
-  char(ch, code, regExp) {
-    regExp.value += ch;
+  char(_, code) {
     if (code === CODE.BACK_SLASH) {
       // Handle escape sequence
-      regExp.value += this.lookAtCharAhead(1);
       this.skip(1);
     } else if (
       code === CODE.OPEN_SQUARE_BRACKET &&
