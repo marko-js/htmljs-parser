@@ -1,4 +1,5 @@
 import { Parser, ValuePart } from "../internal";
+import type { ExpressionPos, Pos } from "./constants";
 
 export function createNotifiers(parser: Parser, listeners) {
   let hasError = false;
@@ -167,11 +168,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyCloseTag(
-      pos: number | undefined,
-      endPos: number | undefined,
-      tagName: ValuePart | undefined
-    ) {
+    notifyCloseTag(closeTag: Pos & { value?: Pos }) {
       if (hasError) {
         return;
       }
@@ -181,15 +178,12 @@ export function createNotifiers(parser: Parser, listeners) {
       if (eventFunc) {
         const event = {
           type: "closeTag",
-          tagName: tagName
-            ? {
-                value: tagName.value,
-                pos: tagName.pos,
-                endPos: tagName.endPos,
-              }
-            : undefined,
-          pos,
-          endPos,
+          tagName: closeTag.value && {
+            ...closeTag.value,
+            value: parser.read(closeTag.value),
+          },
+          pos: closeTag.pos,
+          endPos: closeTag.endPos,
         };
 
         eventFunc.call(parser, event, parser);
