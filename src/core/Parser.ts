@@ -471,34 +471,6 @@ export class Parser {
     return whitespace;
   }
 
-  checkForClosingTag() {
-    // Look ahead to see if we found the closing tag that will
-    // take us out of the EXPRESSION state...
-    const match =
-      this.lookAheadFor("/>") ||
-      this.lookAheadFor("/" + getTagName(peek(this.blockStack)) + ">");
-
-    if (match) {
-      if (this.state === STATE.JS_COMMENT_LINE) {
-        this.exitState();
-      }
-
-      const pos = this.pos;
-      const endPos = this.skip(match.length + 1);
-      this.endText();
-      this.closeTag(pos, endPos, {
-        value: match.slice(1, -1),
-        pos: pos + 2,
-        endPos: endPos - 1,
-      } as ValuePart);
-      this.enterState(STATE.HTML_CONTENT);
-      this.forward = false;
-      return true;
-    }
-
-    return false;
-  }
-
   checkForCDATA() {
     if (this.lookAheadFor("![CDATA[")) {
       this.enterState(STATE.CDATA);

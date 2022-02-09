@@ -1,3 +1,4 @@
+import { checkForClosingTag } from ".";
 import { CODE, Part, STATE, StateDefinition } from "../internal";
 
 export interface JSCommentLinePart extends Part {
@@ -27,9 +28,7 @@ export const JS_COMMENT_LINE: StateDefinition<JSCommentLinePart> = {
       if (!this.isConcise && code === CODE.OPEN_ANGLE_BRACKET) {
         // First, see if we need to see if we reached the closing tag
         // eg: <script>//foo</script>
-        if (this.checkForClosingTag()) {
-          return;
-        }
+        if (checkForClosingTag(this)) return;
       }
     }
 
