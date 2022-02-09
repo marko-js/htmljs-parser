@@ -18,7 +18,7 @@ export interface OpenTagPart extends Part {
   state: TAG_STATE | undefined;
   concise: boolean;
   beginMixedMode?: boolean;
-  tagName: ValuePart;
+  tagName: STATE.TagNamePart;
   selfClosed: boolean;
   openTagOnly: boolean;
   shorthandId?: ValuePart;
@@ -60,7 +60,12 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
   exit(tag) {
     const tagName = tag.tagName;
     const selfClosed = tag.selfClosed;
-    const openTagOnly = (tag.openTagOnly = this.isOpenTagOnly(tagName.value));
+    const literalTagNamePos =
+      tagName.quasis.length === 1 ? tagName.quasis[0] : undefined;
+    const literalTagName = literalTagNamePos && this.read(literalTagNamePos); // TODO: avoid read
+    const openTagOnly = (tag.openTagOnly = literalTagName
+      ? this.isOpenTagOnly(literalTagName)
+      : false);
     const origState = this.state;
     this.notifiers.notifyOpenTag(tag);
 
@@ -70,9 +75,9 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
     } else if (this.state === origState) {
       // The listener didn't transition the parser to a new state
       // so we use some simple rules to find the appropriate state.
-      if (tagName.value === "script") {
+      if (literalTagName === "script") {
         this.enterJsContentState();
-      } else if (tagName.value === "style") {
+      } else if (literalTagName === "style") {
         this.enterCssContentState();
       } else if (this.isConcise) {
         this.enterState(STATE.CONCISE_HTML_CONTENT);
@@ -110,9 +115,9 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       case STATE.EXPRESSION: {
         switch (tag.state) {
           case TAG_STATE.VAR: {
-            if (!(childPart as STATE.ExpressionPart).value) {
+            if (childPart.pos === childPart.endPos) {
               return this.notifyError(
-                this,
+                childPart,
                 "MISSING_TAG_VARIABLE",
                 "A slash was found that was not followed by a variable name or lhs expression"
               );
@@ -305,6 +310,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       this.consumeWhitespace();
     } else if (code === CODE.FORWARD_SLASH && !tag.attributes.length) {
       tag.state = TAG_STATE.VAR;
+      this.skip(1);
       this.enterState(STATE.EXPRESSION, {
         skipOperators: true,
         terminatedByWhitespace: true,
@@ -312,6 +318,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
           ? [";", "(", "|", "=", ":="]
           : [">", "/>", "(", "|", "=", ":="],
       });
+      this.rewind(1);
     } else if (code === CODE.OPEN_PAREN && !tag.attributes.length) {
       if (tag.argument != null) {
         this.notifyError(
@@ -323,23 +330,23 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       }
       tag.state = TAG_STATE.ARGUMENT;
       this.enterState(STATE.EXPRESSION, {
+        skipOperators: true,
         terminator: ")",
       });
     } else if (code === CODE.PIPE && !tag.attributes.length) {
       tag.state = TAG_STATE.PARAMS;
       this.enterState(STATE.EXPRESSION, {
+        skipOperators: true,
         terminator: "|",
       });
     } else {
-      // attribute name is initially the first non-whitespace
-      // character that we found
-      if (!tag.tagName) {
-        this.enterState(STATE.TAG_NAME);
-        this.rewind(1);
-      } else {
+      if (tag.tagName) {
         this.enterState(STATE.ATTRIBUTE);
-        this.rewind(1);
+      } else {
+        this.enterState(STATE.TAG_NAME);
       }
+
+      this.rewind(1);
     }
   },
 };
