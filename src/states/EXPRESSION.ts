@@ -4,7 +4,6 @@ import {
   isWhitespaceCode,
   StateDefinition,
   Part,
-  ValuePart,
   Parser,
   operators,
 } from "../internal";
@@ -33,17 +32,14 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
   },
 
   eol(str, expression) {
-    const depth = expression.groupStack.length;
-
     if (
-      depth === 0 &&
+      expression.groupStack.length === 0 &&
       (expression.terminatedByWhitespace || expression.terminatedByEOL)
     ) {
       this.exitState();
-      return;
+    } else {
+      expression.value += str;
     }
-
-    expression.value += str;
   },
 
   eof(expression) {
@@ -197,9 +193,6 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
             '" was expected.'
         );
       }
-
-      expression.value += ch;
-      return;
     }
 
     expression.value += ch;
