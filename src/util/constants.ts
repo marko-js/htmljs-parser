@@ -1,3 +1,68 @@
+export interface Pos {
+  pos: number;
+  endPos: number;
+}
+
+export interface ErrorPos extends Pos {
+  code: string;
+  message: string;
+}
+
+export interface ExpressionPos extends Pos {
+  value: Pos;
+}
+
+export interface TemplatePos extends Pos {
+  expressions: ExpressionPos[];
+  quasis: Pos[];
+}
+
+export interface PlaceholderPos extends ExpressionPos {
+  escape: boolean;
+}
+
+export interface AttrNamePos extends Pos {
+  default: boolean;
+}
+
+export interface AttrValuePos extends Pos {
+  bound: boolean;
+  method: boolean;
+  value: undefined | Pos;
+  argument: undefined | ExpressionPos;
+}
+
+export interface ScriptletPos extends ExpressionPos {
+  block: boolean;
+}
+
+export interface TagEndPos extends Pos {
+  openTagOnly: boolean;
+  selfClosed: boolean;
+}
+
+export type Notifications =
+  | ["error", ErrorPos]
+  | ["text", Pos]
+  | ["comment", ExpressionPos]
+  | ["cdata", ExpressionPos]
+  | ["declaration", ExpressionPos]
+  | ["doctype", ExpressionPos]
+  | ["placeholder", PlaceholderPos]
+  | ["scriptlet", ScriptletPos]
+  | ["tagStart", Pos]
+  | ["tagName", TemplatePos]
+  | ["tagShorthandId", TemplatePos]
+  | ["tagShorthandClass", TemplatePos]
+  | ["tagVar", ExpressionPos]
+  | ["tagArgs", ExpressionPos]
+  | ["tagParams", ExpressionPos]
+  | ["attrName", AttrNamePos]
+  | ["attrValue", AttrValuePos]
+  | ["spreadAttr", ExpressionPos]
+  | ["tagEnd", TagEndPos]
+  | ["closeTag", ExpressionPos | Pos];
+
 export enum CODE {
   BACK_SLASH = 92,
   FORWARD_SLASH = 47,

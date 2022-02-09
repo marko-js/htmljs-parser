@@ -8,18 +8,17 @@ import {
   isWhitespaceCode,
   htmlTags,
   getTagName,
+  Pos,
+  ExpressionPos,
+  TemplatePos,
 } from "../internal";
 
-export interface Part {
-  pos: number;
-  endPos: number;
+export interface PartMeta {
   parentState: StateDefinition;
 }
-
-export interface ValuePart extends Part {
-  value: string;
-}
-
+export interface Part extends PartMeta, Pos {}
+export interface ExpressionPart extends PartMeta, ExpressionPos {}
+export interface TemplatePart extends PartMeta, TemplatePos {}
 export interface StateDefinition<P extends Part = Part> {
   name: string;
   eol?: (this: Parser, str: string, activePart: P) => void;
