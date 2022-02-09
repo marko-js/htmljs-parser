@@ -76,6 +76,10 @@ export class Parser {
     this.notifiers = createNotifiers(this, listeners);
   }
 
+  read(node: Pos) {
+    return this.substring(node.pos, node.endPos);
+  }
+
   reset() {
     this.pos = -1;
     this.maxPos = -1;
