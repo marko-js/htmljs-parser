@@ -1,17 +1,9 @@
-import { CODE, StateDefinition, ValuePart } from "../internal";
+import { CODE, StateDefinition } from "../internal";
 
 // We enter STATE.JS_COMMENT_BLOCK after we encounter a "/*" sequence
 // We leave STATE.JS_COMMENT_BLOCK when we see a "*/" sequence.
-export const JS_COMMENT_BLOCK: StateDefinition<ValuePart> = {
+export const JS_COMMENT_BLOCK: StateDefinition = {
   name: "JS_COMMENT_BLOCK",
-
-  enter(comment) {
-    comment.value = "/*";
-  },
-
-  eol(str, comment) {
-    comment.value += str;
-  },
 
   eof(comment) {
     this.notifyError(
@@ -21,15 +13,12 @@ export const JS_COMMENT_BLOCK: StateDefinition<ValuePart> = {
     );
   },
 
-  char(ch, code, comment) {
+  char(_, code) {
     if (
       code === CODE.ASTERISK &&
       this.lookAtCharCodeAhead(1) === CODE.FORWARD_SLASH
     ) {
-      comment.value += "*/";
       this.exitState("*/");
-    } else {
-      comment.value += ch;
     }
   },
 };
