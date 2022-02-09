@@ -439,66 +439,6 @@ export class Parser {
 
   // --------------------------
 
-  checkForPlaceholder(ch: string, code: number) {
-    if (code === CODE.DOLLAR) {
-      const nextCode = this.lookAtCharCodeAhead(1);
-      if (nextCode === CODE.OPEN_CURLY_BRACE) {
-        // The placeholder expression starts after first curly brace so skip
-        // past the {
-        this.enterState(STATE.PLACEHOLDER, { escape: true });
-        this.skip(1);
-        return true;
-      } else if (
-        nextCode === CODE.EXCLAMATION &&
-        this.lookAtCharCodeAhead(2) === CODE.OPEN_CURLY_BRACE
-      ) {
-        // The placeholder expression starts after first curly brace so skip
-        // past the !{
-        this.enterState(STATE.PLACEHOLDER, { escape: false });
-        this.skip(2);
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  checkForEscapedPlaceholder(ch: string, code: number) {
-    // Look for \${ and \$!{
-    if (code === CODE.BACK_SLASH) {
-      if (this.lookAtCharCodeAhead(1) === CODE.DOLLAR) {
-        if (this.lookAtCharCodeAhead(2) === CODE.OPEN_CURLY_BRACE) {
-          return true;
-        } else if (this.lookAtCharCodeAhead(2) === CODE.EXCLAMATION) {
-          if (this.lookAtCharCodeAhead(3) === CODE.OPEN_CURLY_BRACE) {
-            return true;
-          }
-        }
-      }
-    }
-
-    return false;
-  }
-
-  checkForEscapedEscapedPlaceholder(ch: string, code: number) {
-    // Look for \\${ and \\$!{
-    if (code === CODE.BACK_SLASH) {
-      if (this.lookAtCharCodeAhead(1) === CODE.BACK_SLASH) {
-        if (this.lookAtCharCodeAhead(2) === CODE.DOLLAR) {
-          if (this.lookAtCharCodeAhead(3) === CODE.OPEN_CURLY_BRACE) {
-            return true;
-          } else if (this.lookAtCharCodeAhead(3) === CODE.EXCLAMATION) {
-            if (this.lookAtCharCodeAhead(4) === CODE.OPEN_CURLY_BRACE) {
-              return true;
-            }
-          }
-        }
-      }
-    }
-
-    return false;
-  }
-
   lookPastWhitespaceFor(str: string, start = 1) {
     let ahead = start;
     while (isWhitespaceCode(this.lookAtCharCodeAhead(ahead))) ahead++;
