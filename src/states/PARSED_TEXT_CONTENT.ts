@@ -1,4 +1,5 @@
 import {
+  checkForCDATA,
   checkForClosingTag,
   checkForEscapedEscapedPlaceholder,
   checkForEscapedPlaceholder,
@@ -49,7 +50,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
     if (!this.isConcise && code === CODE.OPEN_ANGLE_BRACKET) {
       // First, see if we need to see if we reached the closing tag
       // and then check if we encountered CDATA
-      if (checkForClosingTag(this) || this.checkForCDATA()) return;
+      if (checkForClosingTag(this) || checkForCDATA(this)) return;
     }
 
     if (code === CODE.FORWARD_SLASH) {

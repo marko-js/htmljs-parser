@@ -471,16 +471,6 @@ export class Parser {
     return whitespace;
   }
 
-  checkForCDATA() {
-    if (this.lookAheadFor("![CDATA[")) {
-      this.enterState(STATE.CDATA);
-      this.skip(8);
-      return true;
-    }
-
-    return false;
-  }
-
   handleDelimitedBlockEOL(newLine: string) {
     // If we are within a delimited HTML block then we want to check if the next line is the end
     // delimiter. Since we are currently positioned at the start of the new line character our lookahead
