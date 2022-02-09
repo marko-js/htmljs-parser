@@ -113,7 +113,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
             this.pos,
             "INVALID_BODY",
             'The "' +
-              parent.tagName.value +
+              this.read(parent.tagName) +
               '" tag does not allow nested body content'
           );
           return;
