@@ -362,12 +362,10 @@ class TreeBuilder {
           lastEvent.selfClosed ||
           lastEvent.openTagOnly
         ) {
-          expect(startPos == null).to.equal(true);
-          expect(endPos == null).to.equal(true);
+          expect(startPos === endPos).to.equal(true);
         } else if (
           !lastEvent.tagName.shorthandId &&
-          !lastEvent.tagName.shorthandClassNames &&
-          startPos !== undefined
+          !lastEvent.tagName.shorthandClassNames
         ) {
           var actualEndTag = src.substring(startPos, endPos);
 
