@@ -38,7 +38,7 @@ export const TAG_NAME: StateDefinition<TagNamePart> = {
         const exprPart = childPart as STATE.ExpressionPart;
         if (!exprPart.value) {
           this.notifyError(
-            exprPart.pos,
+            exprPart,
             "PLACEHOLDER_EXPRESSION_REQUIRED",
             "Invalid placeholder, the expression cannot be missing"
           );
@@ -62,7 +62,7 @@ export const TAG_NAME: StateDefinition<TagNamePart> = {
         if (namePart.shorthandCharCode === CODE.NUMBER_SIGN) {
           if (tag.shorthandId) {
             return this.notifyError(
-              namePart.pos,
+              namePart,
               "INVALID_TAG_SHORTHAND",
               "Multiple shorthand ID parts are not allowed on the same tag"
             );

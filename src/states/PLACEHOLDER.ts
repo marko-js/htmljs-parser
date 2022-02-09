@@ -22,7 +22,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderPart> = {
   exit(placeholder) {
     if (!placeholder.value) {
       this.notifyError(
-        placeholder.pos,
+        placeholder,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
         "Invalid placeholder, the expression cannot be missing"
       );

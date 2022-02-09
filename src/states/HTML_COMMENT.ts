@@ -21,7 +21,7 @@ export const HTML_COMMENT: StateDefinition<ValuePart> = {
 
   eof(comment) {
     this.notifyError(
-      comment.pos,
+      comment,
       "MALFORMED_COMMENT",
       "EOF reached while parsing comment"
     );
