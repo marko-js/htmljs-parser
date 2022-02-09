@@ -1,17 +1,23 @@
-import { CODE, Parser, STATE, StateDefinition, ValuePart } from "../internal";
+import { CODE, Parser, STATE, StateDefinition } from "../internal";
 
 // We enter STATE.CDATA after we see "<![CDATA["
-export const CDATA: StateDefinition<ValuePart> = {
+export const CDATA: StateDefinition = {
   name: "CDATA",
 
-  enter(cdata) {
+  enter() {
     this.endText();
     this.textParseMode = "cdata";
-    cdata.value = "";
   },
 
   exit(cdata) {
-    this.notifiers.notifyCDATA(cdata.value, cdata.pos, this.pos);
+    this.notifiers.notifyCDATA({
+      pos: cdata.pos,
+      endPos: cdata.endPos,
+      value: {
+        pos: cdata.pos + 9, // strip <![CDATA[
+        endPos: cdata.endPos - 3, // strip ]]>
+      },
+    });
   },
 
   eof(cdata) {
@@ -22,13 +28,11 @@ export const CDATA: StateDefinition<ValuePart> = {
     );
   },
 
-  char(ch, code, cdata) {
+  char(_, code) {
     if (code === CODE.CLOSE_SQUARE_BRACKET && this.lookAheadFor("]>")) {
       this.exitState("]]>");
       return;
     }
-
-    cdata.value += ch;
   },
 };
 
