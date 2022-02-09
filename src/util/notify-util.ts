@@ -245,7 +245,7 @@ export function createNotifiers(parser: Parser, listeners) {
             // TODO: enum
             tag: scriptlet.tag,
             block: scriptlet.block,
-            value: scriptlet.value,
+            value: parser.read(scriptlet.value),
             pos: scriptlet.pos,
             endPos: scriptlet.endPos,
           },
