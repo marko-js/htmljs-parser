@@ -2,15 +2,15 @@ import {
   CODE,
   STATE,
   isWhitespaceCode,
-  cloneValue,
   StateDefinition,
-  ValuePart,
+  TemplatePart,
 } from "../internal";
 
-export interface TagNamePart extends ValuePart {
+export interface TagNamePart extends TemplatePart {
+  curPos: number;
+  nameEndPos: number;
+  hadShorthandId: boolean | undefined;
   shorthandCharCode: number;
-  expressions: ValuePart[];
-  quasis: ValuePart[];
 }
 
 // We enter STATE.TAG_NAME after we encounter a "<"
@@ -19,46 +19,49 @@ export const TAG_NAME: StateDefinition<TagNamePart> = {
   name: "TAG_NAME",
 
   enter(tagName) {
-    tagName.value = "";
+    tagName.curPos = tagName.pos;
     tagName.expressions = [];
-    tagName.quasis = [
-      { value: "", pos: tagName.pos, endPos: tagName.pos } as ValuePart,
-    ];
+    tagName.quasis = [];
   },
 
   exit(tagName) {
-    // even though we parse shorthands here, we don't want to include those in the tagName pos.
-    tagName.quasis[tagName.quasis.length - 1].endPos = tagName.endPos =
-      tagName.pos + tagName.value.length + (tagName.shorthandCharCode ? 1 : 0);
+    tagName.quasis.push({
+      pos: tagName.curPos,
+      endPos: this.pos,
+    });
+
+    if (tagName.nameEndPos !== undefined) {
+      tagName.endPos = tagName.quasis[tagName.quasis.length - 1].endPos =
+        tagName.nameEndPos;
+    }
   },
 
   return(childState, childPart, tagName) {
     switch (childState) {
       case STATE.EXPRESSION: {
-        const exprPart = childPart as STATE.ExpressionPart;
-        if (!exprPart.value) {
+        if (childPart.pos === childPart.endPos) {
           this.notifyError(
-            exprPart,
+            childPart,
             "PLACEHOLDER_EXPRESSION_REQUIRED",
             "Invalid placeholder, the expression cannot be missing"
           );
         }
 
-        tagName.value += `\${${exprPart.value}}`;
-        tagName.expressions.push(cloneValue(exprPart));
-        tagName.quasis[tagName.quasis.length - 1].endPos = exprPart.pos;
-        tagName.quasis.push({
-          value: "",
-          pos: exprPart.endPos + 1,
-          endPos: exprPart.endPos + 1,
-        } as ValuePart);
+        tagName.expressions.push({
+          pos: childPart.pos - 2, // include ${
+          endPos: (tagName.curPos = childPart.endPos + 1), // include }
+          value: {
+            pos: childPart.pos,
+            endPos: childPart.endPos,
+          },
+        });
         this.skip(1);
 
         break;
       }
       case STATE.TAG_NAME: {
-        const namePart = childPart as TagNamePart;
         const tag = this.currentOpenTag!;
+        const namePart = childPart as TagNamePart;
         if (namePart.shorthandCharCode === CODE.NUMBER_SIGN) {
           if (tag.shorthandId) {
             return this.notifyError(
@@ -68,11 +71,11 @@ export const TAG_NAME: StateDefinition<TagNamePart> = {
             );
           }
 
-          tag.shorthandId = cloneValue(namePart);
+          tag.shorthandId = namePart;
         } else if (tag.shorthandClassNames) {
-          tag.shorthandClassNames.push(cloneValue(namePart));
+          tag.shorthandClassNames.push(namePart);
         } else {
-          tag.shorthandClassNames = [cloneValue(namePart)];
+          tag.shorthandClassNames = [namePart];
         }
         break;
       }
@@ -89,18 +92,22 @@ export const TAG_NAME: StateDefinition<TagNamePart> = {
     this.exitState();
   },
 
-  char(ch, code, tagName) {
+  char(_, code, tagName) {
     if (
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      this.skip(1);
+      tagName.quasis.push({
+        pos: tagName.curPos,
+        endPos: this.pos,
+      });
+
+      this.skip(2);
+
       this.enterState(STATE.EXPRESSION, { terminator: "}" });
+      this.rewind(1);
     } else if (code === CODE.BACK_SLASH) {
       // Handle string escape sequence
-      const next = this.lookAtCharAhead(1);
-      tagName.value += next;
-      tagName.quasis[tagName.quasis.length - 1].value += next;
       this.skip(1);
     } else if (
       isWhitespaceCode(code) ||
@@ -115,14 +122,15 @@ export const TAG_NAME: StateDefinition<TagNamePart> = {
     ) {
       this.exitState();
     } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
-      if (!tagName.shorthandCharCode) {
-        this.enterState(STATE.TAG_NAME, { shorthandCharCode: code });
-      } else {
+      if (tagName.shorthandCharCode) {
         this.exitState();
+      } else {
+        if (tagName.nameEndPos === undefined) {
+          tagName.nameEndPos = this.pos;
+        }
+
+        this.enterState(STATE.TAG_NAME, { shorthandCharCode: code });
       }
-    } else {
-      tagName.value += ch;
-      tagName.quasis[tagName.quasis.length - 1].value += ch;
     }
   },
 };
