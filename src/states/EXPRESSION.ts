@@ -57,7 +57,7 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
             expression,
             "MALFORMED_OPEN_TAG",
             'EOF reached while parsing attribute name for the "' +
-              this.currentOpenTag!.tagName.value +
+              this.read(this.currentOpenTag!.tagName) +
               '" tag'
           );
         }

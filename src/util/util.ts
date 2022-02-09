@@ -8,10 +8,6 @@ export function cloneValue<T extends ValuePart>(data: T) {
   } as ValuePart;
 }
 
-export function getTagName(tag: any) {
-  return tag.tagName.pos === undefined ? "" : tag.tagName.value;
-}
-
 export function isWhitespaceCode(code: number) {
   // For all practical purposes, the space character (32) and all the
   // control characters below it are whitespace. We simplify this
