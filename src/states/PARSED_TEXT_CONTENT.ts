@@ -1,3 +1,8 @@
+import {
+  checkForEscapedEscapedPlaceholder,
+  checkForEscapedPlaceholder,
+  checkForPlaceholder,
+} from ".";
 import { Parser, STATE, CODE, StateDefinition, ValuePart } from "../internal";
 
 // We enter STATE.PARSED_TEXT_CONTENT when we are parsing
@@ -68,13 +73,13 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
       return;
     }
 
-    if (this.checkForEscapedEscapedPlaceholder(ch, code)) {
+    if (checkForEscapedEscapedPlaceholder(this, code)) {
       this.skip(1);
-    } else if (this.checkForEscapedPlaceholder(ch, code)) {
+    } else if (checkForEscapedPlaceholder(this, code)) {
       this.addText("$");
       this.skip(1);
       return;
-    } else if (this.checkForPlaceholder(ch, code)) {
+    } else if (checkForPlaceholder(this, code)) {
       // We went into placeholder state...
       this.endText();
       return;
