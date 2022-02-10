@@ -1,15 +1,6 @@
-import {
-  cloneValue,
-  CODE,
-  Parser,
-  Part,
-  STATE,
-  StateDefinition,
-  ValuePart,
-} from "../internal";
+import { CODE, Parser, Part, STATE, StateDefinition } from "../internal";
 
 export interface PlaceholderPart extends Part {
-  value: ValuePart;
   escape: boolean;
 }
 
@@ -18,23 +9,31 @@ export const PLACEHOLDER: StateDefinition<PlaceholderPart> = {
 
   enter(placeholder) {
     placeholder.escape = placeholder.escape !== false;
+    this.skip(placeholder.escape ? 2 : 3); // skip ${ or $!{
     this.enterState(STATE.EXPRESSION, { terminator: "}" });
+    this.rewind(1);
   },
 
   exit(placeholder) {
-    if (!placeholder.value) {
+    this.notifiers.notifyPlaceholder({
+      pos: placeholder.pos,
+      endPos: placeholder.endPos,
+      escape: placeholder.escape,
+      value: {
+        pos: placeholder.pos + (placeholder.escape ? 2 : 3), // ignore ${ or $!{
+        endPos: placeholder.endPos - 1, // ignore }
+      },
+    });
+  },
+
+  return(_, childPart) {
+    if (childPart.pos === childPart.endPos) {
       this.notifyError(
-        placeholder,
+        childPart,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
         "Invalid placeholder, the expression cannot be missing"
       );
     }
-
-    this.notifiers.notifyPlaceholder(placeholder);
-  },
-
-  return(_, childPart, placeholder) {
-    placeholder.value = cloneValue(childPart as ValuePart);
     this.exitState("}");
   },
 };
@@ -46,7 +45,6 @@ export function checkForPlaceholder(parser: Parser, code: number) {
       // The placeholder expression starts after first curly brace so skip
       // past the {
       parser.enterState(STATE.PLACEHOLDER, { escape: true });
-      parser.skip(1);
       return true;
     } else if (
       nextCode === CODE.EXCLAMATION &&
@@ -55,7 +53,6 @@ export function checkForPlaceholder(parser: Parser, code: number) {
       // The placeholder expression starts after first curly brace so skip
       // past the !{
       parser.enterState(STATE.PLACEHOLDER, { escape: false });
-      parser.skip(2);
       return true;
     }
   }
