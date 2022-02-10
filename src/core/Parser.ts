@@ -480,13 +480,11 @@ export class Parser {
   }
 
   consumeWhitespace() {
-    let ahead = 1;
-    let whitespace = "";
-    while (isWhitespaceCode(this.lookAtCharCodeAhead(ahead))) {
-      whitespace += this.lookAtCharAhead(ahead++);
+    if (isWhitespaceCode(this.lookAtCharCodeAhead(0))) {
+      let ahead = 1;
+      while (isWhitespaceCode(this.lookAtCharCodeAhead(ahead))) ahead++;
+      this.skip(ahead);
     }
-    this.skip(whitespace.length);
-    return whitespace;
   }
 
   handleDelimitedBlockEOL(newLine: string) {
