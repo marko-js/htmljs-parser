@@ -286,7 +286,10 @@ export function createNotifiers(parser: Parser, listeners) {
       if (eventFunc) {
         const placeholderEvent = {
           type: "placeholder",
-          value: placeholder.value,
+          value: {
+            ...placeholder.value,
+            value: parser.read(placeholder.value),
+          },
           pos: placeholder.pos,
           endPos: placeholder.endPos,
           escape: placeholder.escape,
