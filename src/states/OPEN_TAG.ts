@@ -307,7 +307,9 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
     if (isWhitespaceCode(code)) {
       // ignore whitespace within element...
     } else if (code === CODE.COMMA) {
+      this.skip(1);
       this.consumeWhitespace();
+      this.rewind(1);
     } else if (code === CODE.FORWARD_SLASH && !tag.attributes.length) {
       tag.state = TAG_STATE.VAR;
       this.skip(1);
