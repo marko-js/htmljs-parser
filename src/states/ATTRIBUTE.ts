@@ -2,7 +2,6 @@ import {
   STATE,
   CODE,
   isWhitespaceCode,
-  cloneValue,
   Part,
   StateDefinition,
   ValuePart,
@@ -71,63 +70,71 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
   },
 
   return(_, childPart, attr) {
-    const exprPart = childPart as ValuePart;
     if (attr.state !== ATTR_STATE.NAME && !attr.name && attr.default) {
       attr.name = defaultName;
     }
     switch (attr.state) {
       case ATTR_STATE.NAME: {
-        attr.name = cloneValue(exprPart);
+        attr.name = {
+          pos: childPart.pos,
+          endPos: childPart.endPos,
+          value: this.read(childPart),
+        };
         attr.default = false;
         break;
       }
       case ATTR_STATE.ARGUMENT: {
         if (attr.argument) {
           this.notifyError(
-            exprPart,
+            childPart,
             "ILLEGAL_ATTRIBUTE_ARGUMENT",
             "An attribute can only have one set of arguments"
           );
           return;
         }
 
+        // TODO: include full attr pos (nest value with pos)
         attr.argument = {
-          value: exprPart.value,
-          pos: exprPart.pos + 1, // ignore leading (
-          endPos: exprPart.endPos,
-        } as ValuePart;
-        this.skip(1); // ignore trailing )
+          value: this.read(childPart),
+          pos: childPart.pos - 1, // include (
+          endPos: this.skip(1), // include )
+        };
         break;
       }
       case ATTR_STATE.BLOCK: {
         attr.method = true;
+        // TODO: include full attr pos (nest value with pos)
         attr.value = {
-          value: exprPart.value,
-          pos: exprPart.pos + 1, // ignore leading {
-          endPos: exprPart.endPos,
+          value: this.read(childPart),
+          pos: childPart.pos - 1, // include {
+          endPos: this.skip(1), // include }
         } as ValuePart;
-        this.skip(1); // ignore trailing }
         this.exitState();
         break;
       }
 
       case ATTR_STATE.VALUE: {
-        if (exprPart.value === "") {
+        if (childPart.pos === childPart.endPos) {
           return this.notifyError(
-            exprPart,
+            childPart,
             "ILLEGAL_ATTRIBUTE_VALUE",
             "Missing value for attribute"
           );
         }
 
-        attr.value = cloneValue(exprPart);
+        // TODO: include full attr pos (nest value with pos)
+        attr.value = {
+          pos: childPart.pos,
+          endPos: childPart.endPos,
+          value: this.read(childPart),
+        };
         this.exitState();
         break;
       }
     }
   },
 
-  char(ch, code, attr) {
+  char(_, code, attr) {
     if (isWhitespaceCode(code)) {
       return;
     } else if (
@@ -137,12 +144,13 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
     ) {
       if (code === CODE.COLON) {
         attr.bound = true;
-        this.skip(1);
+        this.skip(2);
         this.consumeWhitespace();
       } else if (code === CODE.PERIOD) {
         attr.spread = true;
         this.skip(3);
       } else {
+        this.skip(1);
         this.consumeWhitespace();
       }
 
@@ -155,20 +163,26 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
           ",",
         ],
       });
+
+      this.rewind(1);
     } else if (code === CODE.OPEN_PAREN) {
       attr.state = ATTR_STATE.ARGUMENT;
+      this.skip(1);
       this.enterState(STATE.EXPRESSION, {
         terminator: ")",
       });
+      this.rewind(1);
     } else if (
       code === CODE.OPEN_CURLY_BRACE &&
       (!attr.name || attr.argument)
     ) {
       attr.state = ATTR_STATE.BLOCK;
+      this.skip(1);
       this.enterState(STATE.EXPRESSION, {
         terminatedByWhitespace: false,
         terminator: "}",
       });
+      this.rewind(1);
     } else if (!attr.name) {
       attr.state = ATTR_STATE.NAME;
       this.enterState(STATE.EXPRESSION, {

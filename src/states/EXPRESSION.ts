@@ -221,8 +221,9 @@ function checkForOperator(parser: Parser) {
     );
     const match = operators.patternPrev.exec(previous);
     if (match) {
+      parser.consumeWhitespace();
       parser.rewind(1);
-      return parser.consumeWhitespace();
+      return " "; // todo: not needed after expression does not build value strings
     }
   }
 
