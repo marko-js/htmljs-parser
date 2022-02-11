@@ -104,7 +104,7 @@ export class Parser {
   enterState<P extends Part = Part>(
     state: StateDefinition<P>,
     part: Partial<P> = {}
-  ) {
+  ): P {
     // if (this.state === state) {
     //   // Re-entering the same state can lead to unexpected behavior
     //   // so we should throw error to catch these types of mistakes
@@ -120,7 +120,7 @@ export class Parser {
     part.pos = this.pos;
     part.parentState = parentState;
     state.enter?.call(this, activePart, parentState);
-    return this.activePart;
+    return this.activePart as P;
   }
 
   exitState(includedEndChars?: string) {
