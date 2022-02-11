@@ -1,12 +1,4 @@
-import { CODE, ValuePart } from "../internal";
-
-export function cloneValue<T extends ValuePart>(data: T) {
-  return {
-    value: data.value,
-    pos: data.pos,
-    endPos: data.endPos,
-  } as ValuePart;
-}
+import { CODE } from "../internal";
 
 export function isWhitespaceCode(code: number) {
   // For all practical purposes, the space character (32) and all the
