@@ -132,9 +132,18 @@ export function createNotifiers(parser: Parser, listeners) {
             endPos: tagInfo.tagName.endPos,
             value: parser.read(tagInfo.tagName),
           },
-          var: tagInfo.var,
-          argument: tagInfo.argument,
-          params: tagInfo.params,
+          var: tagInfo.var && {
+            ...tagInfo.var,
+            value: parser.read(tagInfo.var.value),
+          },
+          argument: tagInfo.argument && {
+            ...tagInfo.argument,
+            value: parser.read(tagInfo.argument.value),
+          },
+          params: tagInfo.params && {
+            ...tagInfo.params,
+            value: parser.read(tagInfo.params.value),
+          },
           pos: tagInfo.pos,
           endPos: tagInfo.endPos,
           concise: tagInfo.concise,
