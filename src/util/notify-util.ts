@@ -154,7 +154,14 @@ export function createNotifiers(parser: Parser, listeners) {
           attributes: tagInfo.attributes.map((attr) => ({
             default: attr.default,
             spread: attr.spread,
-            name: attr.name,
+            name: attr.default
+              ? { name: "default" }
+              : attr.name
+              ? {
+                  ...attr.name,
+                  value: parser.read(attr.name),
+                }
+              : undefined,
             value: attr.value,
             pos: attr.pos,
             endPos: attr.endPos,
