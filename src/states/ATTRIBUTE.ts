@@ -5,6 +5,7 @@ import {
   Part,
   StateDefinition,
   Pos,
+  ExpressionPos,
 } from "../internal";
 
 const enum ATTR_STATE {
@@ -18,7 +19,7 @@ export interface AttrPart extends Part {
   state: undefined | ATTR_STATE;
   name: undefined | Pos;
   value: undefined | Pos;
-  argument: undefined | Pos;
+  argument: undefined | ExpressionPos;
   default: boolean;
   spread: boolean;
   method: boolean;
@@ -35,7 +36,6 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
     attr.state = undefined;
     attr.name = undefined;
     attr.value = undefined;
-    attr.argument = undefined;
     attr.bound = false;
     attr.method = false;
     attr.spread = false;
@@ -89,9 +89,12 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
 
         // TODO: include full attr pos (nest value with pos)
         attr.argument = {
-          value: this.read(childPart),
           pos: childPart.pos - 1, // include (
           endPos: this.skip(1), // include )
+          value: {
+            pos: childPart.pos,
+            endPos: childPart.endPos,
+          },
         };
         break;
       }
