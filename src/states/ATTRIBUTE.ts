@@ -18,7 +18,8 @@ const enum ATTR_STATE {
 export interface AttrPart extends Part {
   state: undefined | ATTR_STATE;
   name: undefined | Pos;
-  value: undefined | Pos;
+  value: undefined | ExpressionPos;
+  valueStartPos: undefined | number;
   argument: undefined | ExpressionPos;
   default: boolean;
   spread: boolean;
@@ -87,7 +88,6 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
           return;
         }
 
-        // TODO: include full attr pos (nest value with pos)
         attr.argument = {
           pos: childPart.pos - 1, // include (
           endPos: this.skip(1), // include )
@@ -100,12 +100,14 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
       }
       case ATTR_STATE.BLOCK: {
         attr.method = true;
-        // TODO: include full attr pos (nest value with pos)
         attr.value = {
-          value: this.read(childPart),
           pos: childPart.pos - 1, // include {
           endPos: this.skip(1), // include }
-        } as ValuePart;
+          value: {
+            pos: childPart.pos,
+            endPos: childPart.endPos,
+          },
+        };
         this.exitState();
         break;
       }
@@ -119,12 +121,16 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
           );
         }
 
-        // TODO: include full attr pos (nest value with pos)
         attr.value = {
-          pos: childPart.pos,
+          pos: attr.valueStartPos!,
           endPos: childPart.endPos,
-          value: this.read(childPart),
+          value: {
+            pos: childPart.pos,
+            endPos: childPart.endPos,
+          },
         };
+
+        attr.valueStartPos = undefined;
         this.exitState();
         break;
       }
@@ -139,6 +145,8 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
       (code === CODE.COLON && this.lookAtCharCodeAhead(1) === CODE.EQUAL) ||
       (code === CODE.PERIOD && this.lookAheadFor(".."))
     ) {
+      attr.valueStartPos = this.pos;
+
       if (code === CODE.COLON) {
         attr.bound = true;
         this.skip(2);
