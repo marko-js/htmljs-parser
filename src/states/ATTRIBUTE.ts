@@ -4,10 +4,9 @@ import {
   isWhitespaceCode,
   Part,
   StateDefinition,
-  ValuePart,
+  Pos,
 } from "../internal";
 
-const defaultName = { value: "default" } as unknown as ValuePart;
 const enum ATTR_STATE {
   NAME,
   VALUE,
@@ -17,9 +16,9 @@ const enum ATTR_STATE {
 
 export interface AttrPart extends Part {
   state: undefined | ATTR_STATE;
-  name: undefined | ValuePart;
-  value: undefined | ValuePart;
-  argument: undefined | ValuePart;
+  name: undefined | Pos;
+  value: undefined | Pos;
+  argument: undefined | Pos;
   default: boolean;
   spread: boolean;
   method: boolean;
@@ -61,7 +60,7 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
         attr,
         "MALFORMED_OPEN_TAG",
         'EOF reached while parsing attribute "' +
-          attr.name?.value +
+          (attr.name ? this.read(attr.name) : "default") +
           '" for the "' +
           this.read(this.currentOpenTag!.tagName) +
           '" tag'
@@ -70,17 +69,12 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
   },
 
   return(_, childPart, attr) {
-    if (attr.state !== ATTR_STATE.NAME && !attr.name && attr.default) {
-      attr.name = defaultName;
-    }
     switch (attr.state) {
       case ATTR_STATE.NAME: {
         attr.name = {
           pos: childPart.pos,
           endPos: childPart.endPos,
-          value: this.read(childPart),
         };
-        attr.default = false;
         break;
       }
       case ATTR_STATE.ARGUMENT: {
@@ -183,7 +177,8 @@ export const ATTRIBUTE: StateDefinition<AttrPart> = {
         terminator: "}",
       });
       this.rewind(1);
-    } else if (!attr.name) {
+    } else if (attr.state === undefined) {
+      attr.default = false;
       attr.state = ATTR_STATE.NAME;
       this.enterState(STATE.EXPRESSION, {
         terminatedByWhitespace: true,
