@@ -161,7 +161,10 @@ export function createNotifiers(parser: Parser, listeners) {
                   value: parser.read(attr.name),
                 }
               : undefined,
-            value: attr.value,
+            value: attr.value && {
+              ...attr.value,
+              value: parser.read(attr.value.value),
+            },
             pos: attr.pos,
             endPos: attr.endPos,
             argument: attr.argument && {
