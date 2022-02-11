@@ -5,6 +5,7 @@ import {
   StateDefinition,
   Part,
   ValuePart,
+  ExpressionPos,
 } from "../internal";
 
 const enum TAG_STATE {
@@ -25,7 +26,7 @@ export interface OpenTagPart extends Part {
   shorthandClassNames?: ValuePart[];
   var?: ValuePart;
   params?: ValuePart;
-  argument?: ValuePart;
+  argument?: ExpressionPos;
   attributes: STATE.AttrPart[];
   indent: string;
   nestedIndent?: string;
@@ -98,16 +99,6 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
         this.notifiers.notifyOpenTagName(tag);
         break;
       }
-      case STATE.ATTRIBUTE: {
-        const attr = childPart as STATE.AttrPart;
-        if (tag.argument && attr.default && attr.method) {
-          attr.pos = tag.argument.pos;
-          attr.argument = tag.argument;
-          tag.argument = undefined;
-        }
-        tag.attributes.push(attr);
-        break;
-      }
       case STATE.JS_COMMENT_BLOCK: {
         /* Ignore comments within an open tag */
         break;
@@ -126,8 +117,26 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
             break;
           }
           case TAG_STATE.ARGUMENT: {
-            tag.argument = childPart as ValuePart;
             this.skip(1); // skip closing )
+
+            if (this.lookPastWhitespaceFor("{")) {
+              this.consumeWhitespace();
+              const attr = this.enterState(STATE.ATTRIBUTE, {
+                argument: {
+                  pos: childPart.pos - 1, // include (
+                  endPos: this.skip(1), // include )
+                  value: {
+                    pos: childPart.pos,
+                    endPos: childPart.endPos,
+                  },
+                },
+              });
+              attr.pos = attr.argument.pos;
+              tag.attributes.push(attr);
+              this.rewind(1);
+            } else {
+              tag.argument = childPart;
+            }
             break;
           }
           case TAG_STATE.PARAMS: {
@@ -331,10 +340,12 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
         return;
       }
       tag.state = TAG_STATE.ARGUMENT;
+      this.skip(1);
       this.enterState(STATE.EXPRESSION, {
         skipOperators: true,
         terminator: ")",
       });
+      this.rewind(1);
     } else if (code === CODE.PIPE && !tag.attributes.length) {
       tag.state = TAG_STATE.PARAMS;
       this.enterState(STATE.EXPRESSION, {
@@ -343,7 +354,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       });
     } else {
       if (tag.tagName) {
-        this.enterState(STATE.ATTRIBUTE);
+        tag.attributes.push(this.enterState(STATE.ATTRIBUTE));
       } else {
         this.enterState(STATE.TAG_NAME);
       }

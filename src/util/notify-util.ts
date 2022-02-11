@@ -1,5 +1,4 @@
-import { Parser, ValuePart } from "../internal";
-import type { ExpressionPos, Pos } from "./constants";
+import { Parser, Pos } from "../internal";
 
 export function createNotifiers(parser: Parser, listeners) {
   let hasError = false;
@@ -165,7 +164,10 @@ export function createNotifiers(parser: Parser, listeners) {
             value: attr.value,
             pos: attr.pos,
             endPos: attr.endPos,
-            argument: attr.argument,
+            argument: attr.argument && {
+              ...attr.argument,
+              value: parser.read(attr.argument.value),
+            },
             method: attr.method,
             bound: attr.bound,
           })),
