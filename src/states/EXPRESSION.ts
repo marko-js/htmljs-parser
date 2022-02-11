@@ -9,7 +9,6 @@ import {
 } from "../internal";
 
 export interface ExpressionPart extends Part {
-  value: string;
   groupStack: number[];
   terminator?: string | string[];
   allowEscapes: boolean;
@@ -22,7 +21,6 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
   name: "EXPRESSION",
 
   enter(expression) {
-    expression.value = "";
     expression.groupStack = [];
     expression.allowEscapes = expression.allowEscapes === true;
     expression.skipOperators = expression.skipOperators === true;
@@ -37,8 +35,6 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
       (expression.terminatedByWhitespace || expression.terminatedByEOL)
     ) {
       this.exitState();
-    } else {
-      expression.value += str;
     }
   },
 
@@ -96,13 +92,6 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
     }
   },
 
-  return(_, childPart, expression) {
-    expression.value +=
-      (childPart as ValuePart).value === undefined
-        ? this.read(childPart)
-        : (childPart as ValuePart).value;
-  },
-
   char(ch, code, expression) {
     const depth = expression.groupStack.length;
 
@@ -110,9 +99,7 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
       if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
         const operator = !expression.skipOperators && checkForOperator(this);
 
-        if (operator) {
-          expression.value += operator;
-        } else {
+        if (!operator) {
           this.exitState();
         }
 
@@ -128,7 +115,6 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
       }
 
       if (expression.allowEscapes && code === CODE.BACK_SLASH) {
-        expression.value += this.lookAtCharAhead(1);
         this.skip(1);
         return;
       }
@@ -163,7 +149,6 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
       code === CODE.OPEN_CURLY_BRACE
     ) {
       expression.groupStack.push(code);
-      expression.value += ch;
       return;
     } else if (
       code === CODE.CLOSE_PAREN ||
@@ -201,8 +186,6 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
         );
       }
     }
-
-    expression.value += ch;
   },
 };
 
@@ -217,7 +200,7 @@ function checkForOperator(parser: Parser) {
       : match.includes(">");
     if (!isIgnoredOperator) {
       parser.skip(match.length - 1);
-      return match;
+      return true;
     }
   } else {
     const previous = parser.substring(
@@ -228,7 +211,7 @@ function checkForOperator(parser: Parser) {
     if (match) {
       parser.consumeWhitespace();
       parser.rewind(1);
-      return " "; // todo: not needed after expression does not build value strings
+      return true;
     }
   }
 
