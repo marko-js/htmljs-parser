@@ -52,7 +52,12 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
       const parentState = expression.parentState;
 
       if (parentState === STATE.ATTRIBUTE) {
-        if (!this.currentAttribute!.name) {
+        const name = this.currentAttribute!.default
+          ? "default"
+          : this.currentAttribute!.name
+          ? this.read(this.currentAttribute!.name!)
+          : undefined;
+        if (!name) {
           return this.notifyError(
             expression,
             "MALFORMED_OPEN_TAG",
@@ -66,7 +71,7 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
           expression,
           "MALFORMED_OPEN_TAG",
           'EOF reached while parsing attribute value for the "' +
-            this.currentAttribute!.name.value +
+            name +
             '" attribute'
         );
       } else if (parentState === STATE.TAG_NAME) {
