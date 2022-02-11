@@ -4,8 +4,9 @@ import {
   isWhitespaceCode,
   StateDefinition,
   Part,
-  ValuePart,
   ExpressionPos,
+  TemplatePos,
+  TemplatePart,
 } from "../internal";
 
 const enum TAG_STATE {
@@ -19,13 +20,13 @@ export interface OpenTagPart extends Part {
   state: TAG_STATE | undefined;
   concise: boolean;
   beginMixedMode?: boolean;
-  tagName: STATE.TagNamePart;
+  tagName: TemplatePos;
   selfClosed: boolean;
   openTagOnly: boolean;
-  shorthandId?: ValuePart;
-  shorthandClassNames?: ValuePart[];
-  var?: ValuePart;
-  params?: ValuePart;
+  shorthandId?: TemplatePos;
+  shorthandClassNames?: TemplatePos[];
+  var?: ExpressionPos;
+  params?: ExpressionPos;
   argument?: ExpressionPos;
   attributes: STATE.AttrPart[];
   indent: string;
@@ -95,7 +96,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
   return(childState, childPart, tag) {
     switch (childState) {
       case STATE.TAG_NAME: {
-        tag.tagName = childPart as ValuePart;
+        tag.tagName = childPart as TemplatePart;
         this.notifiers.notifyOpenTagName(tag);
         break;
       }
@@ -113,35 +114,47 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
                 "A slash was found that was not followed by a variable name or lhs expression"
               );
             }
-            tag.var = childPart as ValuePart;
+            tag.var = {
+              pos: childPart.pos - 1, // include /,
+              endPos: childPart.endPos,
+              value: {
+                pos: childPart.pos,
+                endPos: childPart.endPos,
+              },
+            };
             break;
           }
           case TAG_STATE.ARGUMENT: {
-            this.skip(1); // skip closing )
+            const argPos = {
+              pos: childPart.pos - 1, // include (
+              endPos: this.skip(1), // include )
+              value: {
+                pos: childPart.pos,
+                endPos: childPart.endPos,
+              },
+            };
 
             if (this.lookPastWhitespaceFor("{")) {
               this.consumeWhitespace();
-              const attr = this.enterState(STATE.ATTRIBUTE, {
-                argument: {
-                  pos: childPart.pos - 1, // include (
-                  endPos: this.skip(1), // include )
-                  value: {
-                    pos: childPart.pos,
-                    endPos: childPart.endPos,
-                  },
-                },
-              });
-              attr.pos = attr.argument.pos;
+              const attr = this.enterState(STATE.ATTRIBUTE);
+              attr.argument = argPos;
+              attr.pos = attr.argument!.pos;
               tag.attributes.push(attr);
               this.rewind(1);
             } else {
-              tag.argument = childPart;
+              tag.argument = argPos;
             }
             break;
           }
           case TAG_STATE.PARAMS: {
-            tag.params = childPart as ValuePart;
-            this.skip(1); // skip closing |
+            tag.params = {
+              pos: childPart.pos - 1, // include leading |
+              endPos: this.skip(1), // include closing |
+              value: {
+                pos: childPart.pos,
+                endPos: childPart.endPos,
+              },
+            };
             break;
           }
         }
@@ -321,7 +334,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       this.rewind(1);
     } else if (code === CODE.FORWARD_SLASH && !tag.attributes.length) {
       tag.state = TAG_STATE.VAR;
-      this.skip(1);
+      this.skip(1); // skip /
       this.enterState(STATE.EXPRESSION, {
         skipOperators: true,
         terminatedByWhitespace: true,
@@ -340,7 +353,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
         return;
       }
       tag.state = TAG_STATE.ARGUMENT;
-      this.skip(1);
+      this.skip(1); // skip (
       this.enterState(STATE.EXPRESSION, {
         skipOperators: true,
         terminator: ")",
@@ -348,10 +361,12 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       this.rewind(1);
     } else if (code === CODE.PIPE && !tag.attributes.length) {
       tag.state = TAG_STATE.PARAMS;
+      this.skip(1); // skip |
       this.enterState(STATE.EXPRESSION, {
         skipOperators: true,
         terminator: "|",
       });
+      this.rewind(1);
     } else {
       if (tag.tagName) {
         tag.attributes.push(this.enterState(STATE.ATTRIBUTE));

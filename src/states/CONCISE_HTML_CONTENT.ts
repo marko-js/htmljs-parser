@@ -4,7 +4,6 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  ValuePart,
   BODY_MODE,
 } from "../internal";
 
