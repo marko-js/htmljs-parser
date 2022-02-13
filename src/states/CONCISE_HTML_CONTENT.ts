@@ -11,8 +11,7 @@ import {
 export const CONCISE_HTML_CONTENT: StateDefinition = {
   name: "CONCISE_HTML_CONTENT",
 
-  eol(newLine) {
-    this.addText(newLine);
+  eol() {
     this.indent = "";
   },
 
@@ -47,24 +46,17 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           },
         });
 
-        if (childState === STATE.JS_COMMENT_BLOCK) {
+        if (
+          childState === STATE.JS_COMMENT_BLOCK &&
+          !this.consumeWhitespaceOnLine()
+        ) {
           // Make sure there is only whitespace on the line
           // after the ending "*/" sequence
-          this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
-            handler(err) {
-              if (err) {
-                // This is a non-whitespace! We don't allow non-whitespace
-                // after matching two or more hyphens. This is user error...
-                this.notifyError(
-                  this.pos,
-                  "INVALID_CHARACTER",
-                  'A non-whitespace of "' +
-                    err.ch +
-                    '" was found after a JavaScript block comment.'
-                );
-              }
-            },
-          });
+          this.notifyError(
+            this.pos,
+            "INVALID_CHARACTER",
+            "In concise mode a javascript comment block can only be followed by whitespace characters and a newline."
+          );
         }
 
         break;
@@ -171,22 +163,21 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         return this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
       } else if (code === CODE.FORWARD_SLASH) {
         // Check next character to see if we are in a comment
-        const nextCode = this.lookAtCharCodeAhead(1);
-        if (nextCode === CODE.FORWARD_SLASH) {
-          this.enterState(STATE.JS_COMMENT_LINE);
-          this.skip(1);
-          return;
-        } else if (nextCode === CODE.ASTERISK) {
-          this.enterState(STATE.JS_COMMENT_BLOCK);
-          this.skip(1);
-          return;
-        } else {
-          this.notifyError(
-            this.pos,
-            "ILLEGAL_LINE_START",
-            'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment'
-          );
-          return;
+        switch (this.lookAtCharCodeAhead(1)) {
+          case CODE.FORWARD_SLASH:
+            this.enterState(STATE.JS_COMMENT_LINE);
+            this.skip(1);
+            break;
+          case CODE.ASTERISK:
+            this.enterState(STATE.JS_COMMENT_BLOCK);
+            this.skip(1);
+            break;
+          default:
+            return this.notifyError(
+              this.pos,
+              "ILLEGAL_LINE_START",
+              'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment'
+            );
         }
       } else {
         this.enterState(STATE.OPEN_TAG);

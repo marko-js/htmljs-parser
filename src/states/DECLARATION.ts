@@ -15,10 +15,6 @@ export const DECLARATION: StateDefinition = {
     );
   },
 
-  enter() {
-    this.endText();
-  },
-
   char(_, code, declaration) {
     if (code === CODE.QUESTION) {
       if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {

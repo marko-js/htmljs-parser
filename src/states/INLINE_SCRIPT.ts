@@ -9,7 +9,6 @@ export const INLINE_SCRIPT: StateDefinition<InlineScriptPart> = {
   name: "INLINE_SCRIPT",
 
   enter(inlineScript) {
-    this.endText();
     inlineScript.block = false;
   },
 

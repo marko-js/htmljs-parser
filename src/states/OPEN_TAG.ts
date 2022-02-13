@@ -37,8 +37,6 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
   name: "OPEN_TAG",
 
   enter(tag) {
-    this.endText();
-
     tag.type = "tag";
     tag.state = undefined;
     tag.attributes = [];
@@ -68,28 +66,21 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
     const openTagOnly = (tag.openTagOnly = literalTagName
       ? this.isOpenTagOnly(literalTagName)
       : false);
-    const origState = this.state;
     this.notifiers.notifyOpenTag(tag);
 
     if (!this.isConcise && (selfClosed || openTagOnly)) {
       this.closeTag();
-      this.enterState(STATE.HTML_CONTENT);
-    } else if (this.state === origState) {
-      // The listener didn't transition the parser to a new state
-      // so we use some simple rules to find the appropriate state.
-      if (literalTagName === "script") {
-        this.enterJsContentState();
-      } else if (literalTagName === "style") {
-        this.enterCssContentState();
-      } else if (this.isConcise) {
-        this.enterState(STATE.CONCISE_HTML_CONTENT);
-      } else {
-        this.enterState(STATE.HTML_CONTENT);
+    } else {
+      switch (literalTagName) {
+        case "script":
+          this.enterJsContentState();
+          break;
+        case "style":
+          this.enterCssContentState();
+          break;
       }
     }
 
-    // We need to record the "expected close tag name" if we transition into
-    // either STATE.STATIC_TEXT_CONTENT or STATE.PARSED_TEXT_CONTENT
     this.currentOpenTag = undefined;
   },
 
@@ -200,39 +191,36 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
     if (this.isConcise) {
       if (code === CODE.SEMICOLON) {
         this.exitState(";");
-        this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
-          handler(err) {
-            if (err) {
-              const code = err.ch.charCodeAt(0);
-
-              if (code === CODE.FORWARD_SLASH) {
-                if (this.lookAheadFor("/")) {
-                  this.enterState(STATE.JS_COMMENT_LINE);
-                  this.skip(2);
-                  return;
-                } else if (this.lookAheadFor("*")) {
-                  this.enterState(STATE.JS_COMMENT_BLOCK);
-                  this.skip(2);
-                  return;
-                }
-              } else if (
-                code === CODE.OPEN_ANGLE_BRACKET &&
-                this.lookAheadFor("!--")
-              ) {
+        if (!this.consumeWhitespaceOnLine(0)) {
+          switch (this.lookAtCharCodeAhead(0)) {
+            case CODE.FORWARD_SLASH:
+              if (this.lookAheadFor("/")) {
+                this.enterState(STATE.JS_COMMENT_LINE);
+                this.skip(2);
+                return;
+              } else if (this.lookAheadFor("*")) {
+                this.enterState(STATE.JS_COMMENT_BLOCK);
+                this.skip(2);
+                return;
+              }
+              break;
+            case CODE.OPEN_ANGLE_BRACKET:
+              if (this.lookAheadFor("!--")) {
                 // html comment
                 this.enterState(STATE.HTML_COMMENT);
                 this.skip(4);
                 return;
               }
+              break;
+          }
 
-              this.notifyError(
-                this.pos,
-                "INVALID_CODE_AFTER_SEMICOLON",
-                "A semicolon indicates the end of a line.  Only comments may follow it."
-              );
-            }
-          },
-        });
+          this.notifyError(
+            this.pos,
+            "INVALID_CODE_AFTER_SEMICOLON",
+            "A semicolon indicates the end of a line. Only comments may follow it."
+          );
+        }
+
         return;
       }
 
