@@ -15,11 +15,14 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition = {
   eof: Parser.prototype.htmlEOF,
 
   char(ch, code) {
+    const startPos = this.pos;
     if (code === CODE.HTML_BLOCK_DELIMITER) {
       this.htmlBlockDelimiter += ch;
-    } else if (!this.onlyWhitespaceRemainsOnLine()) {
+    } else if (!this.consumeWhitespaceOnLine()) {
       this.isWithinSingleLineHtmlBlock = true;
+      this.pos = startPos + 1;
       this.beginHtmlBlock();
+      this.rewind(1);
     }
   },
 };

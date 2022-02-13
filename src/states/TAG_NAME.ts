@@ -4,6 +4,7 @@ import {
   isWhitespaceCode,
   StateDefinition,
   TemplatePart,
+  peek,
 } from "../internal";
 
 export interface TagNamePart extends TemplatePart {
@@ -27,12 +28,11 @@ export const TAG_NAME: StateDefinition<TagNamePart> = {
   exit(tagName) {
     tagName.quasis.push({
       pos: tagName.curPos,
-      endPos: this.pos,
+      endPos: tagName.endPos,
     });
 
     if (tagName.nameEndPos !== undefined) {
-      tagName.endPos = tagName.quasis[tagName.quasis.length - 1].endPos =
-        tagName.nameEndPos;
+      tagName.endPos = peek(tagName.quasis)!.endPos = tagName.nameEndPos;
     }
   },
 

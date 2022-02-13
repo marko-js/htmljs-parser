@@ -11,6 +11,7 @@ import {
   ExpressionPos,
   TemplatePos,
 } from "../internal";
+import type { OpenTagPart } from "../states";
 
 export interface PartMeta {
   parentState: StateDefinition;
@@ -59,7 +60,6 @@ export class Parser {
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
-  public text!: string; // Used to buffer text that is found within the body of a tag
   public textParseMode!: "html" | "cdata" | "parsed-text" | "static-text";
   public blockStack!: ((
     | STATE.OpenTagPart
@@ -85,7 +85,6 @@ export class Parser {
     this.parts = [];
     this.forward = true;
     this.textPos = -1;
-    this.text = "";
     this.textParseMode = "html";
     this.currentOpenTag = undefined;
     this.currentAttribute = undefined;
@@ -237,28 +236,19 @@ export class Parser {
     return tagName ? htmlTags.isOpenTagOnly(tagName.toLowerCase()) : false;
   }
 
-  addText(text: string) {
-    if (this.text) {
-      this.text += text;
-    } else {
-      this.textPos = this.pos;
-      this.text = text;
+  startText(offset = 0) {
+    if (this.textPos === -1) {
+      this.textPos = this.pos + offset;
     }
   }
 
-  /**
-   * Clear out any buffered body text and this.notifiers.notify any listeners
-   */
-  endText() {
+  endText(offset = 0) {
     if (this.textPos !== -1) {
-      this.notifiers.notifyText(
-        this.textPos,
-        this.textPos + this.text.length,
-        this.text,
-        this.textParseMode
-      );
-      // always clear text buffer...
-      this.text = "";
+      const endPos = this.pos + offset;
+      if (this.textPos < endPos) {
+        this.notifiers.notifyText(this.textPos, endPos, this.textParseMode);
+      }
+
       this.textPos = -1;
     }
   }
@@ -270,26 +260,25 @@ export class Parser {
    * tags within a block are properly closed.
    */
   beginHtmlBlock(delimiter?: string) {
+    const parent = peek(this.blockStack);
     this.htmlBlockIndent = this.indent;
     this.htmlBlockDelimiter = delimiter;
-
-    const parent = peek(this.blockStack);
     this.blockStack.push({
       type: "html",
       delimiter,
       indent: this.indent,
     });
 
-    if (parent && parent.body) {
-      if (parent.body === BODY_MODE.PARSED_TEXT) {
+    switch (parent?.body) {
+      case BODY_MODE.PARSED_TEXT:
         this.enterState(STATE.PARSED_TEXT_CONTENT);
-      } else if (parent.body === BODY_MODE.STATIC_TEXT) {
+        break;
+      case BODY_MODE.STATIC_TEXT:
         this.enterState(STATE.STATIC_TEXT_CONTENT);
-      } else {
-        throw new Error("Illegal value for parent.body: " + parent.body);
-      }
-    } else {
-      return this.enterState(STATE.HTML_CONTENT);
+        break;
+      default:
+        this.enterState(STATE.HTML_CONTENT);
+        break;
     }
   }
 
@@ -298,18 +287,6 @@ export class Parser {
    * and we are exiting out of non-concise mode.
    */
   endHtmlBlock() {
-    if (
-      this.text &&
-      (this.isWithinSingleLineHtmlBlock || this.htmlBlockDelimiter)
-    ) {
-      // Remove the new line that was required to end a single line
-      // HTML block or a delimited block
-      this.text = this.text.replace(/(\r\n|\n)$/, "");
-    }
-
-    // End any text
-    this.endText();
-
     // Make sure all tags in this HTML block are closed
     for (let i = this.blockStack.length - 1; i >= 0; i--) {
       const curBlock = this.blockStack[i];
@@ -346,7 +323,6 @@ export class Parser {
    */
   htmlEOF() {
     this.endText();
-
     while (this.blockStack.length) {
       const curBlock = peek(this.blockStack)!;
       if (curBlock.type === "tag") {
@@ -367,7 +343,7 @@ export class Parser {
         }
       } else if (curBlock.type === "html") {
         // We reached the end of file while still within a single line HTML block. That's okay
-        // though since we know the line is completely. We'll continue ending all open concise tags.
+        // though since we know the line is completed. We'll continue ending all open concise tags.
         this.blockStack.pop();
       } else {
         // There is a bug in our this...
@@ -413,7 +389,7 @@ export class Parser {
           const shorthandEndPos = Math.max(
             lastTag.shorthandId ? lastTag.shorthandId.endPos : 0,
             lastTag.shorthandClassNames
-              ? peek(lastTag.shorthandClassNames).endPos
+              ? peek(lastTag.shorthandClassNames)!.endPos
               : 0
           );
 
@@ -469,14 +445,24 @@ export class Parser {
     return this.lookAtCharAhead(behind);
   }
 
-  onlyWhitespaceRemainsOnLine(offset = 1) {
-    for (let i = this.pos + offset; i < this.maxPos; i++) {
+  consumeWhitespaceOnLine(offset = 1) {
+    let i = this.pos + offset;
+    const { maxPos } = this;
+    for (; i < maxPos; i++) {
       const code = this.data.charCodeAt(i);
-      if (code === CODE.NEWLINE) return true;
-      if (!isWhitespaceCode(code)) break;
+      if (isWhitespaceCode(code)) {
+        if (code === CODE.NEWLINE) {
+          this.pos = i - 1;
+          return true;
+        }
+      } else {
+        this.pos = i;
+        return false;
+      }
     }
 
-    return false;
+    this.pos = maxPos;
+    return true;
   }
 
   consumeWhitespace() {
@@ -496,35 +482,18 @@ export class Parser {
       this.htmlBlockIndent! + this.htmlBlockDelimiter;
 
     if (this.lookAheadFor(endHtmlBlockLookahead, this.pos + newLine.length)) {
-      this.skip(this.htmlBlockIndent!.length);
-      this.skip(this.htmlBlockDelimiter!.length);
+      this.endText();
+      this.skip(endHtmlBlockLookahead.length + newLine.length);
 
-      this.enterState(STATE.CONCISE_HTML_CONTENT);
-      this.enterState(STATE.CHECK_TRAILING_WHITESPACE, {
-        handler(err, eof) {
-          if (err) {
-            // This is a non-whitespace! We don't allow non-whitespace
-            // after matching two or more hyphens. This is user error...
-            this.notifyError(
-              this.pos,
-              "INVALID_CHARACTER",
-              'A non-whitespace of "' +
-                err.ch +
-                '" was found on the same line as the ending delimiter ("' +
-                this.htmlBlockDelimiter +
-                '") for a multiline HTML block'
-            );
-            return;
-          }
-
-          this.endHtmlBlock();
-
-          if (eof) {
-            this.htmlEOF();
-          }
-        },
-      });
-      return;
+      if (this.consumeWhitespaceOnLine(0)) {
+        this.endHtmlBlock();
+      } else {
+        this.notifyError(
+          this.pos,
+          "INVALID_CHARACTER",
+          "A concise mode closing block delimiter can only be followed by whitespace."
+        );
+      }
     } else if (
       this.lookAheadFor(this.htmlBlockIndent!, this.pos + newLine.length)
     ) {
@@ -534,7 +503,8 @@ export class Parser {
 
       this.skip(this.htmlBlockIndent!.length);
       // We stay in the same state since we are still parsing a multiline, delimited HTML block
-    } else if (this.htmlBlockIndent && !this.onlyWhitespaceRemainsOnLine()) {
+    } else if (this.htmlBlockIndent && !this.consumeWhitespaceOnLine()) {
+      this.endText();
       // the next line does not have enough indentation
       // so unless it is blank (whitespace only),
       // we will end the block
