@@ -40,19 +40,17 @@ export const PLACEHOLDER: StateDefinition<PlaceholderPart> = {
 
 export function checkForPlaceholder(parser: Parser, code: number) {
   if (code === CODE.DOLLAR) {
-    const nextCode = parser.lookAtCharCodeAhead(1);
+    let nextCode = parser.lookAtCharCodeAhead(1);
+    let escape = true;
+
+    if (nextCode === CODE.EXCLAMATION) {
+      escape = false;
+      nextCode = parser.lookAtCharCodeAhead(2);
+    }
+
     if (nextCode === CODE.OPEN_CURLY_BRACE) {
-      // The placeholder expression starts after first curly brace so skip
-      // past the {
-      parser.enterState(STATE.PLACEHOLDER, { escape: true });
-      return true;
-    } else if (
-      nextCode === CODE.EXCLAMATION &&
-      parser.lookAtCharCodeAhead(2) === CODE.OPEN_CURLY_BRACE
-    ) {
-      // The placeholder expression starts after first curly brace so skip
-      // past the !{
-      parser.enterState(STATE.PLACEHOLDER, { escape: false });
+      parser.endText();
+      parser.enterState(STATE.PLACEHOLDER, { escape });
       return true;
     }
   }

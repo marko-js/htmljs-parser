@@ -5,10 +5,6 @@ import { CODE, StateDefinition } from "../internal";
 export const DTD: StateDefinition = {
   name: "DTD",
 
-  enter() {
-    this.endText();
-  },
-
   exit(documentType) {
     this.notifiers.notifyDocumentType({
       pos: documentType.pos,

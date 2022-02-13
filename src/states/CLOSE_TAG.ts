@@ -28,7 +28,6 @@ export const CLOSE_TAG: StateDefinition<CloseTagPart> = {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
       this.exitState(">");
       this.closeTag(closeTag);
-      this.enterState(STATE.HTML_CONTENT);
     }
   },
 };
@@ -48,11 +47,8 @@ export function checkForClosingTag(parser: Parser) {
       parser.exitState();
     }
 
-    const pos = parser.pos;
-    const endPos = parser.skip(match.length + 1);
     parser.endText();
-    parser.closeTag({ pos, endPos });
-    parser.enterState(STATE.HTML_CONTENT);
+    parser.closeTag({ pos: parser.pos, endPos: parser.skip(match.length + 1) });
     parser.forward = false;
     return true;
   }
