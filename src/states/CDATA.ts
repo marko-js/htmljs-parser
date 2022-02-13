@@ -5,7 +5,6 @@ export const CDATA: StateDefinition = {
   name: "CDATA",
 
   enter() {
-    this.endText();
     this.textParseMode = "cdata";
   },
 
@@ -38,6 +37,7 @@ export const CDATA: StateDefinition = {
 
 export function checkForCDATA(parser: Parser) {
   if (parser.lookAheadFor("![CDATA[")) {
+    parser.endText();
     parser.enterState(STATE.CDATA);
     parser.skip(8);
     return true;

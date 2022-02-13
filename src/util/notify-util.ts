@@ -4,19 +4,19 @@ export function createNotifiers(parser: Parser, listeners) {
   let hasError = false;
 
   return {
-    notifyText(pos, endPos, value, parseMode) {
+    notifyText(pos, endPos, parseMode) {
       if (hasError) {
         return;
       }
 
       const eventFunc = listeners.onText;
 
-      if (eventFunc && value.length > 0) {
+      if (eventFunc) {
         eventFunc.call(
           parser,
           {
             type: "text",
-            value,
+            value: parser.read({ pos, endPos }),
             parseMode,
             pos,
             endPos,

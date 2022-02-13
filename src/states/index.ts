@@ -1,7 +1,6 @@
 export * from "./ATTRIBUTE";
 export * from "./BEGIN_DELIMITED_HTML_BLOCK";
 export * from "./CDATA";
-export * from "./CHECK_TRAILING_WHITESPACE";
 export * from "./CLOSE_TAG";
 export * from "./CONCISE_HTML_CONTENT";
 export * from "./DECLARATION";
