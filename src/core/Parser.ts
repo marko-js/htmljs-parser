@@ -445,32 +445,63 @@ export class Parser {
     return this.lookAtCharAhead(behind);
   }
 
-  consumeWhitespaceOnLine(offset = 1) {
-    let i = this.pos + offset;
-    const { maxPos } = this;
-    for (; i < maxPos; i++) {
-      const code = this.data.charCodeAt(i);
+  onlyWhitespaceRemainsOnLine(start = 1) {
+    const maxOffset = this.maxPos - this.pos;
+    let ahead = start;
+
+    while (ahead < maxOffset) {
+      const code = this.lookAtCharCodeAhead(ahead);
       if (isWhitespaceCode(code)) {
-        if (code === CODE.NEWLINE) {
-          this.pos = i - 1;
-          return true;
+        switch (code) {
+          case CODE.CARRIAGE_RETURN:
+          case CODE.NEWLINE:
+            return true;
         }
       } else {
-        this.pos = i;
         return false;
       }
+
+      ahead++;
     }
 
-    this.pos = maxPos;
+    return true;
+  }
+
+  consumeWhitespaceOnLine(start = 1) {
+    const maxOffset = this.maxPos - this.pos;
+    let ahead = start;
+
+    while (ahead < maxOffset) {
+      const code = this.lookAtCharCodeAhead(ahead);
+      if (isWhitespaceCode(code)) {
+        switch (code) {
+          case CODE.CARRIAGE_RETURN:
+          case CODE.NEWLINE:
+            this.skip(ahead);
+            return true;
+        }
+      } else {
+        this.skip(ahead);
+        return false;
+      }
+
+      ahead++;
+    }
+
+    this.end();
     return true;
   }
 
   consumeWhitespace() {
-    if (isWhitespaceCode(this.lookAtCharCodeAhead(0))) {
-      let ahead = 1;
-      while (isWhitespaceCode(this.lookAtCharCodeAhead(ahead))) ahead++;
-      this.skip(ahead);
+    const maxOffset = this.maxPos - this.pos;
+    let ahead = 0;
+    while (
+      ahead < maxOffset &&
+      isWhitespaceCode(this.lookAtCharCodeAhead(ahead))
+    ) {
+      ahead++;
     }
+    this.skip(ahead);
   }
 
   handleDelimitedBlockEOL(newLine: string) {
@@ -501,14 +532,17 @@ export class Parser {
       // is any indentation that we need to skip over as we continue parsing the HTML in this
       // multiline HTML block
 
+      this.startText();
       this.skip(this.htmlBlockIndent!.length);
       // We stay in the same state since we are still parsing a multiline, delimited HTML block
-    } else if (this.htmlBlockIndent && !this.consumeWhitespaceOnLine()) {
+    } else if (this.htmlBlockIndent && !this.onlyWhitespaceRemainsOnLine()) {
       this.endText();
       // the next line does not have enough indentation
       // so unless it is blank (whitespace only),
       // we will end the block
       this.endHtmlBlock();
+    } else {
+      this.startText();
     }
   }
 
