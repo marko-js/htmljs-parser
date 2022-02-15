@@ -30,6 +30,8 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
       this.endHtmlBlock();
     } else if (this.htmlBlockDelimiter) {
       this.handleDelimitedBlockEOL(newLine);
+    } else {
+      this.startText();
     }
   },
 
@@ -38,13 +40,8 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
   char(_, code) {
     switch (code) {
       case CODE.OPEN_ANGLE_BRACKET:
-        if (
-          this.isConcise ||
-          !(checkForClosingTag(this) || checkForCDATA(this))
-        ) {
-          this.startText();
-        } else {
-          this.endText();
+        if (!this.isConcise) {
+          checkForClosingTag(this) || checkForCDATA(this);
         }
         break;
       case CODE.FORWARD_SLASH:

@@ -50,6 +50,7 @@ export function checkForClosingTag(parser: Parser) {
     parser.endText();
     parser.closeTag({ pos: parser.pos, endPos: parser.skip(match.length + 1) });
     parser.forward = false;
+    parser.startText();
     return true;
   }
 
