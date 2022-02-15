@@ -4,7 +4,7 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  BODY_MODE,
+  peek,
 } from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
@@ -12,6 +12,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
   name: "CONCISE_HTML_CONTENT",
 
   eol() {
+    this.startText();
     this.indent = "";
   },
 
@@ -93,19 +94,25 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         }
       }
 
-      const parent =
-        this.blockStack.length && this.blockStack[this.blockStack.length - 1];
-      let body: BODY_MODE | undefined;
+      const parent = peek(this.blockStack);
 
       if (parent) {
-        body = parent.body;
         if (parent.type === "tag" && parent.openTagOnly) {
           this.notifyError(
             this.pos,
             "INVALID_BODY",
-            'The "' +
-              this.read(parent.tagName) +
-              '" tag does not allow nested body content'
+            `The "${this.read(
+              parent.tagName
+            )}" tag does not allow nested body content`
+          );
+          return;
+        }
+
+        if (parent.body && code !== CODE.HTML_BLOCK_DELIMITER) {
+          this.notifyError(
+            this.pos,
+            "ILLEGAL_LINE_START",
+            'A line within a tag that only allows text content must begin with a "-" character'
           );
           return;
         }
@@ -122,67 +129,57 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         } else {
           parent.nestedIndent = this.indent;
         }
+
       }
 
-      if (body && code !== CODE.HTML_BLOCK_DELIMITER) {
-        this.notifyError(
-          this.pos,
-          "ILLEGAL_LINE_START",
-          'A line within a tag that only allows text content must begin with a "-" character'
-        );
-        return;
-      }
-
-      if (code === CODE.OPEN_ANGLE_BRACKET) {
-        this.beginMixedMode = true;
-        this.rewind(1);
-        this.beginHtmlBlock();
-        return;
-      }
-
-      if (
-        code === CODE.DOLLAR &&
-        isWhitespaceCode(this.lookAtCharCodeAhead(1))
-      ) {
-        this.skip(1);
-        this.enterState(STATE.INLINE_SCRIPT);
-        return;
-      }
-
-      if (code === CODE.HTML_BLOCK_DELIMITER) {
-        if (this.lookAtCharCodeAhead(1) !== CODE.HTML_BLOCK_DELIMITER) {
-          this.notifyError(
-            this.pos,
-            "ILLEGAL_LINE_START",
-            'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43'
-          );
+      switch (code) {
+        case CODE.OPEN_ANGLE_BRACKET:
+          this.beginMixedMode = true;
+          this.rewind(1);
+          this.beginHtmlBlock();
           return;
-        }
-
-        this.htmlBlockDelimiter = ch;
-        return this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
-      } else if (code === CODE.FORWARD_SLASH) {
-        // Check next character to see if we are in a comment
-        switch (this.lookAtCharCodeAhead(1)) {
-          case CODE.FORWARD_SLASH:
-            this.enterState(STATE.JS_COMMENT_LINE);
+        case CODE.DOLLAR:
+          if (isWhitespaceCode(this.lookAtCharCodeAhead(1))) {
             this.skip(1);
-            break;
-          case CODE.ASTERISK:
-            this.enterState(STATE.JS_COMMENT_BLOCK);
-            this.skip(1);
-            break;
-          default:
-            return this.notifyError(
+            this.enterState(STATE.INLINE_SCRIPT);
+            return;
+          }
+          break;
+        case CODE.HTML_BLOCK_DELIMITER:
+          if (this.lookAtCharCodeAhead(1) === CODE.HTML_BLOCK_DELIMITER) {
+            this.htmlBlockDelimiter = ch;
+            this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
+          } else {
+            this.notifyError(
               this.pos,
               "ILLEGAL_LINE_START",
-              'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment'
+              'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43'
             );
-        }
-      } else {
-        this.enterState(STATE.OPEN_TAG);
-        this.rewind(1); // START_TAG_NAME expects to start at the first character
+          }
+          return;
+        case CODE.FORWARD_SLASH:
+          // Check next character to see if we are in a comment
+          switch (this.lookAtCharCodeAhead(1)) {
+            case CODE.FORWARD_SLASH:
+              this.enterState(STATE.JS_COMMENT_LINE);
+              this.skip(1);
+              return;
+            case CODE.ASTERISK:
+              this.enterState(STATE.JS_COMMENT_BLOCK);
+              this.skip(1);
+              return;
+            default:
+              this.notifyError(
+                this.pos,
+                "ILLEGAL_LINE_START",
+                'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment'
+              );
+              return;
+          }
       }
+
+      this.enterState(STATE.OPEN_TAG);
+      this.rewind(1); // START_TAG_NAME expects to start at the first character
     }
   },
 };

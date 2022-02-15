@@ -30,6 +30,8 @@ export const STATIC_TEXT_CONTENT: StateDefinition = {
       this.endHtmlBlock();
     } else if (this.htmlBlockDelimiter) {
       this.handleDelimitedBlockEOL(newLine);
+    } else {
+      this.startText();
     }
   },
 
