@@ -55,6 +55,7 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
     this.endingMixedModeAtEOL = false;
     this.currentOpenTag = tag;
     this.blockStack.push(tag);
+    this.endText();
   },
 
   exit(tag) {
@@ -72,11 +73,10 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
       this.closeTag();
     } else {
       switch (literalTagName) {
-        case "script":
-          this.enterJsContentState();
-          break;
         case "style":
-          this.enterCssContentState();
+        case "script":
+        case "textarea":
+          this.enterParsedTextContentState();
           break;
       }
     }

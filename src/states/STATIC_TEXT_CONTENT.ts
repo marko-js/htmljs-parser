@@ -1,5 +1,5 @@
 import { checkForClosingTag } from ".";
-import { Parser, CODE, StateDefinition } from "../internal";
+import { Parser, CODE, StateDefinition, isWhitespaceCode } from "../internal";
 
 // We enter STATE.STATIC_TEXT_CONTENT when a listener manually chooses
 // to enter this state after seeing an openTag event for a tag
@@ -10,7 +10,6 @@ export const STATIC_TEXT_CONTENT: StateDefinition = {
 
   enter() {
     this.textParseMode = "static-text";
-    this.startText();
   },
 
   exit() {
@@ -30,8 +29,6 @@ export const STATIC_TEXT_CONTENT: StateDefinition = {
       this.endHtmlBlock();
     } else if (this.htmlBlockDelimiter) {
       this.handleDelimitedBlockEOL(newLine);
-    } else {
-      this.startText();
     }
   },
 
@@ -39,8 +36,11 @@ export const STATIC_TEXT_CONTENT: StateDefinition = {
 
   char(_, code) {
     // See if we need to see if we reached the closing tag.
-    if (!this.isConcise && code === CODE.OPEN_ANGLE_BRACKET) {
-      checkForClosingTag(this);
+    if (
+      this.isConcise ||
+      !(code === CODE.OPEN_ANGLE_BRACKET && checkForClosingTag(this))
+    ) {
+      this.startText();
     }
   },
 };
