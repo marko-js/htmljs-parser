@@ -323,6 +323,7 @@ export class Parser {
    */
   htmlEOF() {
     this.endText();
+
     while (this.blockStack.length) {
       const curBlock = peek(this.blockStack)!;
       if (curBlock.type === "tag") {
@@ -426,7 +427,7 @@ export class Parser {
       });
     }
 
-    if (lastTag.beginMixedMode) {
+    if ((lastTag as OpenTagPart).beginMixedMode) {
       this.endingMixedModeAtEOL = true;
     }
   }
@@ -513,7 +514,8 @@ export class Parser {
       this.htmlBlockIndent! + this.htmlBlockDelimiter;
 
     if (this.lookAheadFor(endHtmlBlockLookahead, this.pos + newLine.length)) {
-      this.endText();
+      this.startText(); // we want to at least include the newline as text.
+      this.endText(newLine.length);
       this.skip(endHtmlBlockLookahead.length + newLine.length);
 
       if (this.consumeWhitespaceOnLine(0)) {
@@ -568,14 +570,6 @@ export class Parser {
     } else {
       this.enterState(STATE.PARSED_TEXT_CONTENT);
     }
-  }
-
-  enterJsContentState() {
-    this.enterParsedTextContentState();
-  }
-
-  enterCssContentState() {
-    this.enterParsedTextContentState();
   }
 
   enterStaticTextContentState() {
