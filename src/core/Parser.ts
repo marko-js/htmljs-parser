@@ -434,10 +434,10 @@ export class Parser {
     return !!this.lookAheadFor(str, this.pos + ahead);
   }
 
-  getPreviousNonWhitespaceChar(start = -1) {
+  getPreviousNonWhitespaceCharCode(start = -1) {
     let behind = start;
     while (isWhitespaceCode(this.lookAtCharCodeAhead(behind))) behind--;
-    return this.lookAtCharAhead(behind);
+    return this.lookAtCharCodeAhead(behind);
   }
 
   onlyWhitespaceRemainsOnLine(start = 1) {

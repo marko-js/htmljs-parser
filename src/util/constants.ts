@@ -64,6 +64,12 @@ export type Notifications =
   | ["closeTag", ExpressionPos | Pos];
 
 export enum CODE {
+  NUMBER_0 = 48,
+  NUMBER_9 = 57,
+  UPPER_A = 65,
+  UPPER_Z = 90,
+  LOWER_A = 97,
+  LOWER_Z = 122,
   BACK_SLASH = 92,
   FORWARD_SLASH = 47,
   OPEN_ANGLE_BRACKET = 60,
