@@ -121,27 +121,24 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
     }
 
     if (code === CODE.SINGLE_QUOTE || code === CODE.DOUBLE_QUOTE) {
-      return this.enterState(STATE.STRING, {
+      this.enterState(STATE.STRING, {
         quoteCharCode: code,
       });
     } else if (code === CODE.BACKTICK) {
-      return this.enterState(STATE.TEMPLATE_STRING);
+      this.enterState(STATE.TEMPLATE_STRING);
     } else if (code === CODE.FORWARD_SLASH) {
       // Check next character to see if we are in a comment or regexp
       const nextCode = this.lookAtCharCodeAhead(1);
       if (nextCode === CODE.FORWARD_SLASH) {
         this.enterState(STATE.JS_COMMENT_LINE);
         this.skip(1);
-        return;
       } else if (nextCode === CODE.ASTERISK) {
         this.enterState(STATE.JS_COMMENT_BLOCK);
         this.skip(1);
-        return;
       } else if (
         !/[\]})A-Z0-9.<%]/i.test(this.getPreviousNonWhitespaceChar())
       ) {
         this.enterState(STATE.REGULAR_EXPRESSION);
-        return;
       }
     } else if (
       code === CODE.OPEN_PAREN ||
@@ -149,7 +146,6 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
       code === CODE.OPEN_CURLY_BRACE
     ) {
       expression.groupStack.push(code);
-      return;
     } else if (
       code === CODE.CLOSE_PAREN ||
       code === CODE.CLOSE_SQUARE_BRACKET ||
