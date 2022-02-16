@@ -16,6 +16,10 @@ export interface CloseTagPart extends Part {
 export const CLOSE_TAG: StateDefinition<CloseTagPart> = {
   name: "CLOSE_TAG",
 
+  enter() {
+    this.endText();
+  },
+
   eof(closeTag) {
     this.notifyError(
       closeTag,
@@ -50,7 +54,6 @@ export function checkForClosingTag(parser: Parser) {
     parser.endText();
     parser.closeTag({ pos: parser.pos, endPos: parser.skip(match.length + 1) });
     parser.forward = false;
-    parser.startText();
     return true;
   }
 

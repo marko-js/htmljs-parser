@@ -7,6 +7,10 @@ import { CODE, Parser, Part, StateDefinition } from "../internal";
 export const DECLARATION: StateDefinition = {
   name: "DECLARATION",
 
+  enter() {
+    this.endText();
+  },
+
   eof(declaration) {
     this.notifyError(
       declaration,
