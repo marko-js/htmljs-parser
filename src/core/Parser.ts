@@ -269,17 +269,11 @@ export class Parser {
       indent: this.indent,
     });
 
-    switch (parent?.body) {
-      case BODY_MODE.PARSED_TEXT:
-        this.enterState(STATE.PARSED_TEXT_CONTENT);
-        break;
-      case BODY_MODE.STATIC_TEXT:
-        this.enterState(STATE.STATIC_TEXT_CONTENT);
-        break;
-      default:
-        this.enterState(STATE.HTML_CONTENT);
-        break;
-    }
+    this.enterState(
+      parent?.body === BODY_MODE.PARSED_TEXT
+        ? STATE.PARSED_TEXT_CONTENT
+        : STATE.HTML_CONTENT
+    );
   }
 
   /**
@@ -569,30 +563,6 @@ export class Parser {
       this.enterState(STATE.CONCISE_HTML_CONTENT);
     } else {
       this.enterState(STATE.PARSED_TEXT_CONTENT);
-    }
-  }
-
-  enterStaticTextContentState() {
-    const last =
-      this.blockStack.length && this.blockStack[this.blockStack.length - 1];
-
-    if (
-      !last ||
-      last.type === "html" ||
-      last.tagName.pos === last.tagName.endPos
-    ) {
-      throw new Error(
-        'The "static text content" parser state is only allowed within a tag'
-      );
-    }
-
-    if (this.isConcise) {
-      // We will transition into the STATE.STATIC_TEXT_CONTENT state
-      // for each of the nested HTML blocks
-      last.body = BODY_MODE.STATIC_TEXT;
-      this.enterState(STATE.CONCISE_HTML_CONTENT);
-    } else {
-      this.enterState(STATE.STATIC_TEXT_CONTENT);
     }
   }
 
