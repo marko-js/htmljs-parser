@@ -1,21 +1,19 @@
 <foo a=("\${test") b=("\\${test}") c=("\$!{test") d=("\\$!{test}")>
     text:"\n\n"
 </foo>
-text:"\n"
 <a>
-    text:"\n    ${test\n"
+    text:"\n    "
+    text:"${test\n"
 </a>
-text:"\n"
 <b>
     text:"\n    \\"
     ${"$escapeXml(test)"}
     text:"\n"
 </b>
-text:"\n"
 <c>
-    text:"\n    $!{test\n"
+    text:"\n    "
+    text:"$!{test\n"
 </c>
-text:"\n"
 <d>
     text:"\n    \\"
     $!{"$noEscapeXml(test)"}
