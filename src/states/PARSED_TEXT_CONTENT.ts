@@ -1,10 +1,4 @@
-import {
-  checkForCDATA,
-  checkForClosingTag,
-  checkForEscapedEscapedPlaceholder,
-  checkForEscapedPlaceholder,
-  checkForPlaceholder,
-} from ".";
+import { checkForCDATA, checkForClosingTag, checkForPlaceholder } from ".";
 import { Parser, STATE, CODE, StateDefinition } from "../internal";
 
 // We enter STATE.PARSED_TEXT_CONTENT when we are parsing
@@ -62,17 +56,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
         this.enterState(STATE.TEMPLATE_STRING);
         break;
       default:
-        if (
-          checkForEscapedEscapedPlaceholder(this, code) ||
-          checkForEscapedPlaceholder(this, code)
-        ) {
-          this.endText(-1);
-          this.skip(1);
-          this.startText();
-        } else if (!checkForPlaceholder(this, code)) {
-          this.startText();
-        }
-
+        if (!checkForPlaceholder(this, code)) this.startText();
         break;
     }
   },

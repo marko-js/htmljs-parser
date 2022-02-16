@@ -1,9 +1,4 @@
-import {
-  checkForCDATA,
-  checkForEscapedEscapedPlaceholder,
-  checkForEscapedPlaceholder,
-  checkForPlaceholder,
-} from ".";
+import { checkForCDATA, checkForPlaceholder } from ".";
 import {
   Parser,
   CODE,
@@ -21,18 +16,15 @@ export const HTML_CONTENT: StateDefinition = {
     this.textParseMode = "html";
     this.isConcise = false; // Back into non-concise HTML parsing
   },
-  exit() {
-    this.endText();
-  },
 
   eol(newLine) {
     if (this.beginMixedMode) {
       this.beginMixedMode = false;
-      this.endText();
+      this.endText(newLine.length);
       this.endHtmlBlock();
     } else if (this.endingMixedModeAtEOL) {
-      this.endText();
       this.endingMixedModeAtEOL = false;
+      this.endText();
       this.endHtmlBlock();
     } else if (this.isWithinSingleLineHtmlBlock) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single
@@ -60,26 +52,22 @@ export const HTML_CONTENT: StateDefinition = {
       const nextCode = this.lookAtCharCodeAhead(1);
 
       if (this.lookAheadFor("!--")) {
-        this.endText();
         this.enterState(STATE.HTML_COMMENT);
         this.skip(3);
       } else if (nextCode === CODE.EXCLAMATION) {
         // something like:
         // <!DOCTYPE html>
         // NOTE: We already checked for CDATA earlier and <!--
-        this.endText();
         this.enterState(STATE.DTD);
         this.skip(1);
       } else if (nextCode === CODE.QUESTION) {
         // something like:
         // <?xml version="1.0"?>
-        this.endText();
         this.enterState(STATE.DECLARATION);
         this.skip(1);
       } else if (nextCode === CODE.FORWARD_SLASH) {
         // something like:
         // </html>
-        this.endText();
         this.enterState(STATE.CLOSE_TAG);
         this.skip(1);
       } else if (
@@ -94,16 +82,8 @@ export const HTML_CONTENT: StateDefinition = {
         // We'll treat this left angle bracket as text
         this.startText();
       } else {
-        this.endText();
         this.enterState(STATE.OPEN_TAG);
       }
-    } else if (
-      checkForEscapedEscapedPlaceholder(this, code) ||
-      checkForEscapedPlaceholder(this, code)
-    ) {
-      this.endText();
-      this.skip(1); // TODO: skip based on escaped helper return value.
-      this.startText();
     } else if (
       code === CODE.DOLLAR &&
       isWhitespaceCode(this.lookAtCharCodeAhead(1)) &&

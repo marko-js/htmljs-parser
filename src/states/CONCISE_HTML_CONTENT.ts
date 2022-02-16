@@ -12,7 +12,6 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
   name: "CONCISE_HTML_CONTENT",
 
   eol() {
-    this.startText();
     this.indent = "";
   },
 
@@ -49,7 +48,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
         if (
           childState === STATE.JS_COMMENT_BLOCK &&
-          !this.consumeWhitespaceOnLine()
+          !this.consumeWhitespaceOnLine(0)
         ) {
           // Make sure there is only whitespace on the line
           // after the ending "*/" sequence
@@ -129,7 +128,6 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         } else {
           parent.nestedIndent = this.indent;
         }
-
       }
 
       switch (code) {
