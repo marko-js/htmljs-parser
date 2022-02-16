@@ -14,7 +14,6 @@ export * from "./JS_COMMENT_LINE";
 export * from "./PARSED_TEXT_CONTENT";
 export * from "./PLACEHOLDER";
 export * from "./REGULAR_EXPRESSION";
-export * from "./STATIC_TEXT_CONTENT";
 export * from "./STRING";
 export * from "./TAG_NAME";
 export * from "./TEMPLATE_STRING";
