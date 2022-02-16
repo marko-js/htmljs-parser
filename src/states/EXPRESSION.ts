@@ -29,7 +29,7 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
       expression.terminatedByWhitespace === true;
   },
 
-  eol(str, expression) {
+  eol(_, expression) {
     if (
       expression.groupStack.length === 0 &&
       (expression.terminatedByWhitespace || expression.terminatedByEOL)
@@ -120,66 +120,76 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
       }
     }
 
-    if (code === CODE.SINGLE_QUOTE || code === CODE.DOUBLE_QUOTE) {
-      this.enterState(STATE.STRING, {
-        quoteCharCode: code,
-      });
-    } else if (code === CODE.BACKTICK) {
-      this.enterState(STATE.TEMPLATE_STRING);
-    } else if (code === CODE.FORWARD_SLASH) {
-      // Check next character to see if we are in a comment or regexp
-      const nextCode = this.lookAtCharCodeAhead(1);
-      if (nextCode === CODE.FORWARD_SLASH) {
-        this.enterState(STATE.JS_COMMENT_LINE);
-        this.skip(1);
-      } else if (nextCode === CODE.ASTERISK) {
-        this.enterState(STATE.JS_COMMENT_BLOCK);
-        this.skip(1);
-      } else if (
-        !/[\]})A-Z0-9.<%]/i.test(this.getPreviousNonWhitespaceChar())
-      ) {
-        this.enterState(STATE.REGULAR_EXPRESSION);
-      }
-    } else if (
-      code === CODE.OPEN_PAREN ||
-      code === CODE.OPEN_SQUARE_BRACKET ||
-      code === CODE.OPEN_CURLY_BRACE
-    ) {
-      expression.groupStack.push(code);
-    } else if (
-      code === CODE.CLOSE_PAREN ||
-      code === CODE.CLOSE_SQUARE_BRACKET ||
-      code === CODE.CLOSE_CURLY_BRACE
-    ) {
-      if (depth === 0) {
-        return this.notifyError(
-          expression,
-          "INVALID_EXPRESSION",
-          'Mismatched group. A closing "' +
-            ch +
-            '" character was found but it is not matched with a corresponding opening character.'
-        );
-      }
+    switch (code) {
+      case CODE.SINGLE_QUOTE:
+      case CODE.DOUBLE_QUOTE:
+        this.enterState(STATE.STRING, {
+          quoteCharCode: code,
+        });
+        break;
+      case CODE.BACKTICK:
+        this.enterState(STATE.TEMPLATE_STRING);
+        break;
+      case CODE.FORWARD_SLASH:
+        // Check next character to see if we are in a comment or regexp
+        switch (this.lookAtCharCodeAhead(1)) {
+          case CODE.FORWARD_SLASH:
+            this.enterState(STATE.JS_COMMENT_LINE);
+            this.skip(1);
+            break;
+          case CODE.ASTERISK:
+            this.enterState(STATE.JS_COMMENT_BLOCK);
+            this.skip(1);
+            break;
+          default: {
+            if (
+              !canCharCodeBeFollowedByDivision(
+                this.getPreviousNonWhitespaceCharCode()
+              )
+            ) {
+              this.enterState(STATE.REGULAR_EXPRESSION);
+            }
+            break;
+          }
+        }
+        break;
+      case CODE.OPEN_PAREN:
+        expression.groupStack.push(CODE.CLOSE_PAREN);
+        break;
+      case CODE.OPEN_SQUARE_BRACKET:
+        expression.groupStack.push(CODE.CLOSE_SQUARE_BRACKET);
+        break;
+      case CODE.OPEN_CURLY_BRACE:
+        expression.groupStack.push(CODE.CLOSE_CURLY_BRACE);
+        break;
 
-      const matchingGroupCharCode = expression.groupStack.pop();
+      case CODE.CLOSE_PAREN:
+      case CODE.CLOSE_SQUARE_BRACKET:
+      case CODE.CLOSE_CURLY_BRACE: {
+        if (depth === 0) {
+          return this.notifyError(
+            expression,
+            "INVALID_EXPRESSION",
+            'Mismatched group. A closing "' +
+              ch +
+              '" character was found but it is not matched with a corresponding opening character.'
+          );
+        }
 
-      if (
-        (code === CODE.CLOSE_PAREN &&
-          matchingGroupCharCode !== CODE.OPEN_PAREN) ||
-        (code === CODE.CLOSE_SQUARE_BRACKET &&
-          matchingGroupCharCode !== CODE.OPEN_SQUARE_BRACKET) ||
-        (code === CODE.CLOSE_CURLY_BRACE &&
-          matchingGroupCharCode !== CODE.OPEN_CURLY_BRACE)
-      ) {
-        return this.notifyError(
-          expression,
-          "INVALID_EXPRESSION",
-          'Mismatched group. A "' +
-            ch +
-            '" character was found when "' +
-            String.fromCharCode(matchingGroupCharCode!) +
-            '" was expected.'
-        );
+        const expectedCode = expression.groupStack.pop()!;
+        if (expectedCode !== code) {
+          return this.notifyError(
+            expression,
+            "INVALID_EXPRESSION",
+            'Mismatched group. A "' +
+              ch +
+              '" character was found when "' +
+              String.fromCharCode(expectedCode) +
+              '" was expected.'
+          );
+        }
+
+        break;
       }
     }
   },
@@ -212,4 +222,18 @@ function checkForOperator(parser: Parser) {
   }
 
   return false;
+}
+
+function canCharCodeBeFollowedByDivision(code: number) {
+  return (
+    (code >= CODE.NUMBER_0 && code <= CODE.NUMBER_9) ||
+    (code >= CODE.UPPER_A && code <= CODE.UPPER_Z) ||
+    (code >= CODE.LOWER_A && code <= CODE.LOWER_Z) ||
+    code === CODE.PERCENT ||
+    code === CODE.CLOSE_PAREN ||
+    code === CODE.PERIOD ||
+    code === CODE.OPEN_ANGLE_BRACKET ||
+    code === CODE.CLOSE_SQUARE_BRACKET ||
+    code === CODE.CLOSE_CURLY_BRACE
+  );
 }
