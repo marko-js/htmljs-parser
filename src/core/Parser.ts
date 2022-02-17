@@ -209,6 +209,14 @@ export class Parser {
     return true;
   }
 
+  matchAnyAtPos(a: Pos, list: (Pos | string)[]) {
+    for (const item of list) {
+      if (this.matchAtPos(a, item)) return true;
+    }
+
+    return false;
+  }
+
   /**
    * Look ahead to see if the given str matches the substring sequence
    * beyond
@@ -250,14 +258,6 @@ export class Parser {
 
   end() {
     this.pos = this.maxPos + 1;
-  }
-
-  /**
-   * This is called to determine if a tag is an "open only tag". Open only tags such as <img>
-   * are immediately closed.
-   */
-  isOpenTagOnly(tagName: string) {
-    return tagName ? htmlTags.isOpenTagOnly(tagName.toLowerCase()) : false;
   }
 
   startText(offset = 0) {
