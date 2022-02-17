@@ -1,74 +1,68 @@
-import { reverse } from "./util";
+export const conciseOperatorPattern = buildOperatorPattern(true);
+export const htmlOperatorPattern = buildOperatorPattern(false);
 
-export const operators = [
-  //Multiplicative Operators
-  "*",
-  "/",
-  "%",
+function buildOperatorPattern(isConcise: boolean) {
+  const unary = ["typeof", "new", "void"];
+  const operators = [
+    //Multiplicative Operators
+    "*",
+    "/",
+    "%",
 
-  //Additive Operators
-  "+",
-  "-",
+    //Additive Operators
+    "+",
+    "-",
 
-  //Bitwise Shift Operators
-  "<<",
-  ">>",
-  ">>>",
+    //Bitwise Shift Operators
+    "<<",
+    ">>",
+    ">>>",
 
-  //Relational Operators
-  "<",
-  "<=",
-  ">",
-  ">=",
+    //Relational Operators
+    "<",
+    "<=",
+    ">=",
 
-  // Readable Operators
-  // NOTE: These become reserved words and cannot be used as attribute names
-  "instanceof",
-  "in",
-  // 'from', -- as in <import x from './file'/>
-  // 'typeof', -- would need to look behind, not ahead
+    // Readable Operators
+    // NOTE: These become reserved words and cannot be used as attribute names
+    "instanceof",
+    "in",
 
-  // Equality Operators
-  "==",
-  "!=",
-  "===",
-  "!==",
+    // Equality Operators
+    "==",
+    "!=",
+    "===",
+    "!==",
 
-  // Binary Bitwise Operators
-  "&",
-  "^",
-  "|",
+    // Binary Bitwise Operators
+    "&",
+    "^",
+    "|",
 
-  // Binary Logical Operators
-  "&&",
-  "||",
+    // Binary Logical Operators
+    "&&",
+    "||",
 
-  // Ternary Operator
-  "?",
-  ":",
+    // Ternary Operator
+    "?",
+    ":",
 
-  // Member
-  "[",
-].sort((a, b) => b.length - a.length); // Look for longest operators first
+    // Special
+    // In concise mode we can support >, and in html mode we can support [
+    isConcise ? ">" : "[",
+  ];
+  const lookAheadPattern = `\\s*(${operators
+    .sort(byLength)
+    .map(escapeOperator)
+    .join("|")})\\s*(?!-)`;
+  const lookBehindPattern = `(?<=[^-+](?:${operators
+    .concat(unary)
+    .sort(byLength)
+    .map(escapeOperator)
+    .join("|")}))`;
 
-const unary = ["typeof", "new", "void"];
-
-export const longest =
-  operators.sort((a, b) => b.length - a.length)[0].length + 1;
-export const patternNext = new RegExp(
-  "\\s*(" + operators.map(escapeOperator).join("|") + ")\\s*(?!-)",
-  "y"
-);
-export const patternPrev = new RegExp(
-  "(?:" +
-    operators
-      .concat(unary)
-      .sort((a, b) => a.length - b.length)
-      .map((s) => escapeOperator(reverse(s)))
-      .join("|") +
-    ")[^-+]",
-  "y"
-);
+  return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "y");
+}
 
 function escapeOperator(str: string) {
   if (/^[A-Z]+$/i.test(str)) {
@@ -82,4 +76,8 @@ function escapeOperator(str: string) {
 
 function escapeNonAlphaNumeric(str: string) {
   return str.replace(/([^\w\d])/g, "\\$1");
+}
+
+function byLength(a: string, b: string) {
+  return b.length - a.length;
 }
