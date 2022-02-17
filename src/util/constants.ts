@@ -100,6 +100,7 @@ export enum CODE {
   NEWLINE = 10,
   CARRIAGE_RETURN = 13,
   SPACE = 32,
+  TAB = 9,
 }
 
 export enum MODE {
