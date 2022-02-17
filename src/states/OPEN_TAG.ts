@@ -247,13 +247,30 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
         this.exitState();
 
         this.htmlBlockDelimiter = "";
-        const indentMatch = /[^\n]*\n(\s+)/.exec(this.substring(this.pos));
-        if (indentMatch) {
-          const whitespace = indentMatch[1].split(/\n/g);
-          const nextIndent = whitespace[whitespace.length - 1];
-          if (nextIndent > this.indent) {
-            this.indent = nextIndent;
+
+        const maxPos = this.maxPos;
+        let curPos = this.pos + 1;
+        // Skip until the next newline.
+        while (
+          curPos < maxPos &&
+          this.data.charCodeAt(++curPos) !== CODE.NEWLINE
+        );
+        // Skip the newline itself.
+        const indentStart = ++curPos;
+
+        // Count how many spaces/tabs we have after the newline.
+        while (curPos < maxPos) {
+          const nextCode = this.data.charCodeAt(curPos);
+          if (nextCode === CODE.SPACE || nextCode === CODE.TAB) {
+            curPos++;
+          } else {
+            break;
           }
+        }
+
+        const indentSize = curPos - indentStart;
+        if (indentSize > this.indent.length) {
+          this.indent = this.data.slice(indentStart, curPos);
         }
 
         this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
