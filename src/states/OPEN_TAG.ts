@@ -32,6 +32,23 @@ export interface OpenTagPart extends Part {
   indent: string;
   nestedIndent?: string;
 }
+const PARSED_TEXT_TAGS = ["script", "style", "textarea"];
+const ONLY_OPEN_TAGS = [
+  "base",
+  "br",
+  "col",
+  "hr",
+  "embed",
+  "img",
+  "input",
+  "keygen",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+];
 
 export const OPEN_TAG: StateDefinition<OpenTagPart> = {
   name: "OPEN_TAG",
@@ -61,24 +78,19 @@ export const OPEN_TAG: StateDefinition<OpenTagPart> = {
   exit(tag) {
     const tagName = tag.tagName;
     const selfClosed = tag.selfClosed;
-    const literalTagNamePos =
-      tagName.quasis.length === 1 ? tagName.quasis[0] : undefined;
-    const literalTagName = literalTagNamePos && this.read(literalTagNamePos); // TODO: avoid read
-    const openTagOnly = (tag.openTagOnly = literalTagName
-      ? this.isOpenTagOnly(literalTagName)
-      : false);
+    const literalTagNamePos = tagName.quasis.length === 1 && tagName.quasis[0];
+    const openTagOnly = (tag.openTagOnly =
+      literalTagNamePos &&
+      this.matchAnyAtPos(literalTagNamePos, ONLY_OPEN_TAGS));
     this.notifiers.notifyOpenTag(tag);
 
     if (!this.isConcise && (selfClosed || openTagOnly)) {
       this.closeTag();
-    } else {
-      switch (literalTagName) {
-        case "style":
-        case "script":
-        case "textarea":
-          this.enterParsedTextContentState();
-          break;
-      }
+    } else if (
+      literalTagNamePos &&
+      this.matchAnyAtPos(literalTagNamePos, PARSED_TEXT_TAGS)
+    ) {
+      this.enterParsedTextContentState();
     }
 
     this.currentOpenTag = undefined;
