@@ -5,7 +5,6 @@ import {
   StateDefinition,
   Part,
   Parser,
-  operators,
 } from "../internal";
 
 export interface ExpressionPart extends Part {
@@ -16,6 +15,9 @@ export interface ExpressionPart extends Part {
   terminatedByEOL: boolean;
   terminatedByWhitespace: boolean;
 }
+
+const conciseOperatorPattern = buildOperatorPattern(true);
+const htmlOperatorPattern = buildOperatorPattern(false);
 
 export const EXPRESSION: StateDefinition<ExpressionPart> = {
   name: "EXPRESSION",
@@ -97,10 +99,28 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
 
     if (depth === 0) {
       if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
-        const operator = !expression.skipOperators && checkForOperator(this);
-
-        if (!operator) {
+        if (expression.skipOperators) {
           this.exitState();
+        } else {
+          const pattern = this.isConcise
+            ? conciseOperatorPattern
+            : htmlOperatorPattern;
+          pattern.lastIndex = this.pos;
+          const matches = pattern.exec(this.data);
+
+          if (matches) {
+            const [match] = matches;
+            if (match.length === 0) {
+              // We matched a look behind.
+              this.consumeWhitespace();
+              this.rewind(1);
+            } else {
+              // We matched a look ahead.
+              this.skip(match.length - 1);
+            }
+          } else {
+            this.exitState();
+          }
         }
 
         return;
@@ -196,29 +216,90 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
 };
 
 function checkForOperator(parser: Parser) {
-  operators.patternNext.lastIndex = parser.pos;
-  const matches = operators.patternNext.exec(parser.data);
+  const pattern = parser.isConcise
+    ? conciseOperatorPattern
+    : htmlOperatorPattern;
+  pattern.lastIndex = parser.pos;
+  const matches = pattern.exec(parser.data);
 
   if (matches) {
     const [match] = matches;
-    const isIgnoredOperator = parser.isConcise
-      ? match.includes("[")
-      : match.includes(">");
-    if (!isIgnoredOperator) {
-      parser.skip(match.length - 1);
-      return true;
-    }
-  } else {
-    operators.patternPrev.lastIndex = parser.data.length - parser.pos;
-    const match = operators.patternPrev.exec(parser.dataReversed);
-    if (match) {
+    if (match.length === 0) {
+      // We matched a look behind.
       parser.consumeWhitespace();
       parser.rewind(1);
-      return true;
+    } else {
+      // We matched a look ahead.
+      parser.skip(match.length - 1);
     }
+
+    return true;
   }
 
   return false;
+}
+
+function buildOperatorPattern(isConcise: boolean) {
+  const unary = ["typeof", "new", "void"];
+  const operators = [
+    //Multiplicative Operators
+    "*",
+    "/",
+    "%",
+
+    //Additive Operators
+    "+",
+    "-",
+
+    //Bitwise Shift Operators
+    "<<",
+    ">>",
+    ">>>",
+
+    //Relational Operators
+    "<",
+    "<=",
+    ">=",
+
+    // Readable Operators
+    // NOTE: These become reserved words and cannot be used as attribute names
+    "instanceof",
+    "in",
+
+    // Equality Operators
+    "==",
+    "!=",
+    "===",
+    "!==",
+
+    // Binary Bitwise Operators
+    "&",
+    "^",
+    "|",
+
+    // Binary Logical Operators
+    "&&",
+    "||",
+
+    // Ternary Operator
+    "?",
+    ":",
+
+    // Special
+    // In concise mode we can support >, and in html mode we can support [
+    isConcise ? ">" : "[",
+  ];
+  const lookAheadPattern = `\\s*(${operators
+    .sort(byLength)
+    .map(escapeOperator)
+    .join("|")})\\s*(?!-)`;
+  const lookBehindPattern = `(?<=[^-+](?:${operators
+    .concat(unary)
+    .sort(byLength)
+    .map(escapeOperator)
+    .join("|")}))`;
+
+  return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "y");
 }
 
 function canCharCodeBeFollowedByDivision(code: number) {
@@ -233,4 +314,22 @@ function canCharCodeBeFollowedByDivision(code: number) {
     code === CODE.CLOSE_SQUARE_BRACKET ||
     code === CODE.CLOSE_CURLY_BRACE
   );
+}
+
+function escapeOperator(str: string) {
+  if (/^[A-Z]+$/i.test(str)) {
+    return "\\b" + escapeNonAlphaNumeric(str) + "\\b";
+  }
+  if (str === "/") {
+    return "\\/(?:\\b|\\s)"; //make sure this isn't a comment
+  }
+  return escapeNonAlphaNumeric(str);
+}
+
+function escapeNonAlphaNumeric(str: string) {
+  return str.replace(/([^\w\d])/g, "\\$1");
+}
+
+function byLength(a: string, b: string) {
+  return b.length - a.length;
 }
