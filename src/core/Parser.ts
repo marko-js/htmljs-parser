@@ -76,7 +76,7 @@ export class Parser {
   }
 
   read(node: Pos) {
-    return this.substring(node.pos, node.endPos);
+    return this.data.slice(node.pos, node.endPos);
   }
 
   reset() {
@@ -250,10 +250,6 @@ export class Parser {
 
   end() {
     this.pos = this.maxPos + 1;
-  }
-
-  substring(pos: number, endPos?: number) {
-    return this.data.substring(pos, endPos);
   }
 
   /**
