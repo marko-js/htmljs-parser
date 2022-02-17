@@ -51,9 +51,13 @@ function evaluateStringExpression(expression, pos, notifyError) {
     try {
         return JSON.parse(expression);
     } catch(e) {
-        notifyError(pos,
-            'INVALID_STRING',
-            'Invalid string (' + expression + '): ' + e);
+        if (notifyError == null) {
+            return expression.substring(1,expression.length -1);
+        } else {
+            notifyError(pos,
+                'INVALID_STRING',
+                'Invalid string (' + expression + '): ' + e);
+        }   
     }
 }
 
@@ -126,6 +130,7 @@ class Parser extends BaseParser {
         var ignorePlaceholders = options && options.ignorePlaceholders;
         var ignoreNonstandardStringPlaceholders = options && options.ignoreNonstandardStringPlaceholders;
         var legacyCompatibility = options.legacyCompatibility === true;
+        var ignoreJSONParseError = options.ignoreJSONParseError === true;
 
         var currentOpenTag; // Used to reference the current open tag that is being parsed
         var currentAttribute; // Used to reference the current attribute that is being parsed
@@ -2145,7 +2150,7 @@ class Parser extends BaseParser {
                 // If the expression evaluates to a literal value then add the
                 // `literalValue` property to the attribute
                 if (expression.isStringLiteral) {
-                    currentAttribute.literalValue = evaluateStringExpression(value, expression.pos, notifyError);
+                    currentAttribute.literalValue = evaluateStringExpression(value, expression.pos, ignoreJSONParseError ? null : notifyError);
                 } else if (value === 'true') {
                     currentAttribute.literalValue = true;
                 } else if (value === 'false') {
