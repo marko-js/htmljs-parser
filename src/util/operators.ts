@@ -1,3 +1,5 @@
+import { reverse } from "./util";
+
 export const operators = [
   //Multiplicative Operators
   "*",
@@ -54,12 +56,18 @@ const unary = ["typeof", "new", "void"];
 export const longest =
   operators.sort((a, b) => b.length - a.length)[0].length + 1;
 export const patternNext = new RegExp(
-  "^\\s*(" + operators.map(escapeOperator).join("|") + ")\\s*(?!-)"
+  "\\s*(" + operators.map(escapeOperator).join("|") + ")\\s*(?!-)",
+  "y"
 );
 export const patternPrev = new RegExp(
-  "[^-+](?:" +
-    operators.concat(unary).map(escapeOperator).join("|") +
-    ")(\\s*)$"
+  "(?:" +
+    operators
+      .concat(unary)
+      .sort((a, b) => a.length - b.length)
+      .map((s) => escapeOperator(reverse(s)))
+      .join("|") +
+    ")[^-+]",
+  "y"
 );
 
 function escapeOperator(str: string) {

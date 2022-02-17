@@ -10,6 +10,7 @@ import {
   Pos,
   ExpressionPos,
   TemplatePos,
+  reverse,
 } from "../internal";
 import type { OpenTagPart } from "../states";
 
@@ -42,6 +43,7 @@ export class Parser {
   public pos!: number;
   public maxPos!: number;
   public data!: string;
+  public dataReversed!: string;
   public filename!: string;
   public state!: StateDefinition;
   public parts!: Part[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
@@ -574,6 +576,7 @@ export class Parser {
     this.filename = filename;
     this.data = data;
     this.maxPos = data.length;
+    this.dataReversed = reverse(data);
 
     // Enter initial state
     this.enterState(STATE.CONCISE_HTML_CONTENT);
