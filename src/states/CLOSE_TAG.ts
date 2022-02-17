@@ -1,3 +1,4 @@
+import type { OpenTagPart } from ".";
 import {
   CODE,
   STATE,
@@ -39,12 +40,25 @@ export const CLOSE_TAG: StateDefinition<CloseTagPart> = {
 export function checkForClosingTag(parser: Parser) {
   // Look ahead to see if we found the closing tag that will
   // take us out of the EXPRESSION state...
-  // TODO: instead of substringing the tagName, we should string compare two ranges in the source text.
-  const match =
-    parser.lookAheadFor("/>") ||
-    parser.lookAheadFor(
-      "/" + parser.read((peek(parser.blockStack) as any).tagName) + ">"
-    );
+  const curPos = parser.pos + 1;
+  let match = !!parser.lookAheadFor("/>");
+  let skip = 3; // skip the </>
+
+  if (!match) {
+    const tagName = (peek(parser.blockStack) as OpenTagPart).tagName;
+    const tagNameLen = tagName.endPos - tagName.pos;
+    if (tagNameLen) {
+      skip += tagNameLen; // skip <TAG_NAME/>
+      match =
+        (parser.lookAheadFor("/", curPos) &&
+          parser.lookAheadFor(">", 1 + curPos + tagNameLen) &&
+          parser.matchAtPos(tagName, {
+            pos: 1 + curPos,
+            endPos: 1 + curPos + tagNameLen,
+          })) ||
+        false;
+    }
+  }
 
   if (match) {
     if (parser.state === STATE.JS_COMMENT_LINE) {
@@ -52,7 +66,7 @@ export function checkForClosingTag(parser: Parser) {
     }
 
     parser.endText();
-    parser.closeTag({ pos: parser.pos, endPos: parser.skip(match.length + 1) });
+    parser.closeTag({ pos: parser.pos, endPos: parser.skip(skip) });
     parser.forward = false;
     return true;
   }
