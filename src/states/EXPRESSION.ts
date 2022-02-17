@@ -196,11 +196,11 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
 };
 
 function checkForOperator(parser: Parser) {
-  const remaining = parser.data.substring(parser.pos);
-  const matches = operators.patternNext.exec(remaining);
+  operators.patternNext.lastIndex = parser.pos;
+  const matches = operators.patternNext.exec(parser.data);
 
   if (matches) {
-    const match = matches[0];
+    const [match] = matches;
     const isIgnoredOperator = parser.isConcise
       ? match.includes("[")
       : match.includes(">");
@@ -209,11 +209,8 @@ function checkForOperator(parser: Parser) {
       return true;
     }
   } else {
-    const previous = parser.substring(
-      parser.pos - operators.longest,
-      parser.pos
-    );
-    const match = operators.patternPrev.exec(previous);
+    operators.patternPrev.lastIndex = parser.data.length - parser.pos;
+    const match = operators.patternPrev.exec(parser.dataReversed);
     if (match) {
       parser.consumeWhitespace();
       parser.rewind(1);
