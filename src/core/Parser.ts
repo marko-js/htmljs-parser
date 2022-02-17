@@ -182,6 +182,34 @@ export class Parser {
   }
 
   /**
+   * Compare a position in the source to either another position, or a string.
+   */
+  matchAtPos(a: Pos, b: Pos | string) {
+    const aPos = a.pos;
+    const aLen = a.endPos - aPos;
+    let bPos = 0;
+    let bLen = 0;
+    let bSource = this.data;
+
+    if (typeof b === "string") {
+      bLen = b.length;
+      bSource = b;
+    } else {
+      bPos = b.pos;
+      bLen = b.endPos - bPos;
+    }
+
+    if (aLen !== bLen) return false;
+    for (let i = 0; i < aLen; i++) {
+      if (this.data.charAt(aPos + i) !== bSource.charAt(bPos + i)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * Look ahead to see if the given str matches the substring sequence
    * beyond
    */
@@ -376,11 +404,19 @@ export class Parser {
       }
 
       if (closeTagNameStart < closeTagNameEnd!) {
-        // TODO: instead of substringing the tagName, we should string compare two ranges in the source text.
-        const expectedCloseTagName = this.read(lastTag.tagName) || "div";
-        const closeTagName = this.substring(closeTagNameStart, closeTagNameEnd);
+        const closeTagNamePos = {
+          pos: closeTagNameStart,
+          endPos: closeTagNameEnd,
+        };
 
-        if (closeTagName !== expectedCloseTagName) {
+        if (
+          !this.matchAtPos(
+            closeTagNamePos,
+            lastTag.tagName.endPos > lastTag.tagName.pos
+              ? lastTag.tagName
+              : "div"
+          )
+        ) {
           const shorthandEndPos = Math.max(
             lastTag.shorthandId ? lastTag.shorthandId.endPos : 0,
             lastTag.shorthandClassNames
@@ -390,16 +426,18 @@ export class Parser {
 
           if (
             shorthandEndPos === 0 ||
-            closeTagName !==
-              this.substring(lastTag.tagName.pos, shorthandEndPos)
+            !this.matchAtPos(closeTagNamePos, {
+              pos: lastTag.tagName.pos,
+              endPos: shorthandEndPos,
+            })
           ) {
             return this.notifyError(
               closeTag,
               "MISMATCHED_CLOSING_TAG",
               'The closing "' +
-                this.read({ pos: closeTagNameStart, endPos: closeTagNameEnd }) +
+                this.read(closeTagNamePos) +
                 '" tag does not match the corresponding opening "' +
-                expectedCloseTagName +
+                (this.read(lastTag.tagName) || "div") +
                 '" tag'
             );
           }
