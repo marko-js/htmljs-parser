@@ -19,7 +19,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition = {
     if (code === CODE.HTML_BLOCK_DELIMITER) {
       this.htmlBlockDelimiter += ch;
     } else if (!this.consumeWhitespaceOnLine()) {
-      this.isWithinSingleLineHtmlBlock = true;
+      this.isInSingleLineHtmlBlock = true;
       this.pos = startPos + 1;
       this.beginHtmlBlock();
       this.rewind(1);
