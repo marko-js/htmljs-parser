@@ -60,7 +60,7 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
         break;
       }
       case STATE.TAG_NAME: {
-        const tag = this.currentOpenTag!;
+        const tag = this.activeTag!;
         const namePart = childPart as TagNameRange;
         if (namePart.shorthandCharCode === CODE.NUMBER_SIGN) {
           if (tag.shorthandId) {
@@ -83,7 +83,7 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
   },
 
   eol() {
-    if (this.isConcise && !this.withinAttrGroup) {
+    if (this.isConcise && !this.isInAttrGroup) {
       this.exitState();
     }
   },

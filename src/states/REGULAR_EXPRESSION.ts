@@ -1,10 +1,12 @@
-import { CODE, StateDefinition } from "../internal";
+import { CODE, Range, StateDefinition } from "../internal";
 
-export const REGULAR_EXPRESSION: StateDefinition = {
+export interface RegExpRange extends Range {
+  isInCharSet: boolean;
+}
+export const REGULAR_EXPRESSION: StateDefinition<RegExpRange> = {
   name: "REGULAR_EXPRESSION",
-
-  exit() {
-    this.isWithinRegExpCharset = false;
+  enter(regExp) {
+    regExp.isInCharSet = false;
   },
 
   eol(_, regExp) {
@@ -23,21 +25,15 @@ export const REGULAR_EXPRESSION: StateDefinition = {
     );
   },
 
-  char(_, code) {
+  char(_, code, regExp) {
     if (code === CODE.BACK_SLASH) {
       // Handle escape sequence
       this.skip(1);
-    } else if (
-      code === CODE.OPEN_SQUARE_BRACKET &&
-      this.isWithinRegExpCharset
-    ) {
-      this.isWithinRegExpCharset = true;
-    } else if (
-      code === CODE.CLOSE_SQUARE_BRACKET &&
-      this.isWithinRegExpCharset
-    ) {
-      this.isWithinRegExpCharset = false;
-    } else if (code === CODE.FORWARD_SLASH && !this.isWithinRegExpCharset) {
+    } else if (code === CODE.OPEN_SQUARE_BRACKET && regExp.isInCharSet) {
+      regExp.isInCharSet = true;
+    } else if (code === CODE.CLOSE_SQUARE_BRACKET && regExp.isInCharSet) {
+      regExp.isInCharSet = false;
+    } else if (code === CODE.FORWARD_SLASH && !regExp.isInCharSet) {
       this.exitState("/");
     }
   },
