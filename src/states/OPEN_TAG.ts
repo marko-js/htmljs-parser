@@ -3,10 +3,9 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  Part,
-  ExpressionPos,
-  TemplatePos,
-  TemplatePart,
+  ExpressionRange,
+  TemplateRange,
+  Range,
 } from "../internal";
 
 const enum TAG_STATE {
@@ -15,20 +14,20 @@ const enum TAG_STATE {
   PARAMS,
 }
 
-export interface OpenTagPart extends Part {
+export interface OpenTagRange extends Range {
   type: "tag";
   state: TAG_STATE | undefined;
   concise: boolean;
   beginMixedMode?: boolean;
-  tagName: TemplatePos;
+  tagName: TemplateRange;
   selfClosed: boolean;
   openTagOnly: boolean;
-  shorthandId?: TemplatePos;
-  shorthandClassNames?: TemplatePos[];
-  var?: ExpressionPos;
-  params?: ExpressionPos;
-  argument?: ExpressionPos;
-  attributes: STATE.AttrPart[];
+  shorthandId?: TemplateRange;
+  shorthandClassNames?: TemplateRange[];
+  var?: ExpressionRange;
+  params?: ExpressionRange;
+  argument?: ExpressionRange;
+  attributes: STATE.AttrRange[];
   indent: string;
   nestedIndent?: string;
 }
@@ -50,7 +49,7 @@ const ONLY_OPEN_TAGS = [
   "wbr",
 ];
 
-export const OPEN_TAG: StateDefinition<OpenTagPart> = {
+export const OPEN_TAG: StateDefinition<OpenTagRange> = {
   name: "OPEN_TAG",
 
   enter(tag) {

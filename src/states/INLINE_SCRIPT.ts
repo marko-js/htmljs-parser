@@ -1,11 +1,6 @@
-import { CODE, Part, STATE, StateDefinition } from "../internal";
+import { CODE, ScriptletRange, STATE, StateDefinition } from "../internal";
 
-export interface InlineScriptPart extends Part {
-  value: Part;
-  block: boolean;
-}
-
-export const INLINE_SCRIPT: StateDefinition<InlineScriptPart> = {
+export const INLINE_SCRIPT: StateDefinition<ScriptletRange> = {
   name: "INLINE_SCRIPT",
 
   enter(inlineScript) {

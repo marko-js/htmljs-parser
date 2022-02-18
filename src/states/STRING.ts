@@ -1,10 +1,10 @@
-import { CODE, Part, StateDefinition } from "../internal";
+import { CODE, Range, StateDefinition } from "../internal";
 
-export interface StringPart extends Part {
+export interface StringRange extends Range {
   quoteCharCode: number;
 }
 
-export const STRING: StateDefinition<StringPart> = {
+export const STRING: StateDefinition<StringRange> = {
   name: "STRING",
 
   eof(string) {
