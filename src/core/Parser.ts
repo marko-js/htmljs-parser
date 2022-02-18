@@ -1,4 +1,3 @@
-"use strict";
 import {
   createNotifiers,
   BODY_MODE,
@@ -8,7 +7,6 @@ import {
   isWhitespaceCode,
   Range,
 } from "../internal";
-import type { OpenTagRange } from "../states";
 
 export interface StateDefinition<P extends Range = Range> {
   name: string;
@@ -430,7 +428,7 @@ export class Parser {
       });
     }
 
-    if ((lastTag as OpenTagRange).beginMixedMode) {
+    if ((lastTag as STATE.OpenTagRange).beginMixedMode) {
       this.endingMixedModeAtEOL = true;
     }
   }
