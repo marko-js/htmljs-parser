@@ -3,11 +3,11 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  TemplatePart,
   peek,
+  TemplateRange,
 } from "../internal";
 
-export interface TagNamePart extends TemplatePart {
+export interface TagNameRange extends TemplateRange {
   curPos: number;
   nameEndPos: number;
   hadShorthandId: boolean | undefined;
@@ -16,7 +16,7 @@ export interface TagNamePart extends TemplatePart {
 
 // We enter STATE.TAG_NAME after we encounter a "<"
 // followed by a non-special character
-export const TAG_NAME: StateDefinition<TagNamePart> = {
+export const TAG_NAME: StateDefinition<TagNameRange> = {
   name: "TAG_NAME",
 
   enter(tagName) {
@@ -61,7 +61,7 @@ export const TAG_NAME: StateDefinition<TagNamePart> = {
       }
       case STATE.TAG_NAME: {
         const tag = this.currentOpenTag!;
-        const namePart = childPart as TagNamePart;
+        const namePart = childPart as TagNameRange;
         if (namePart.shorthandCharCode === CODE.NUMBER_SIGN) {
           if (tag.shorthandId) {
             return this.notifyError(

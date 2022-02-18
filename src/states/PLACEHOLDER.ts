@@ -1,10 +1,12 @@
-import { CODE, Parser, Part, STATE, StateDefinition } from "../internal";
+import {
+  CODE,
+  Parser,
+  STATE,
+  StateDefinition,
+  PlaceholderRange,
+} from "../internal";
 
-export interface PlaceholderPart extends Part {
-  escape: boolean;
-}
-
-export const PLACEHOLDER: StateDefinition<PlaceholderPart> = {
+export const PLACEHOLDER: StateDefinition<PlaceholderRange> = {
   name: "PLACEHOLDER",
 
   enter(placeholder) {

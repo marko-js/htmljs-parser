@@ -3,11 +3,11 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  Part,
   Parser,
+  Range,
 } from "../internal";
 
-export interface ExpressionPart extends Part {
+export interface ExpressionRange extends Range {
   groupStack: number[];
   terminator?: string | string[];
   allowEscapes: boolean;
@@ -19,7 +19,7 @@ export interface ExpressionPart extends Part {
 const conciseOperatorPattern = buildOperatorPattern(true);
 const htmlOperatorPattern = buildOperatorPattern(false);
 
-export const EXPRESSION: StateDefinition<ExpressionPart> = {
+export const EXPRESSION: StateDefinition<ExpressionRange> = {
   name: "EXPRESSION",
 
   enter(expression) {
@@ -47,7 +47,8 @@ export const EXPRESSION: StateDefinition<ExpressionPart> = {
     ) {
       this.exitState();
     } else {
-      const parentState = expression.parentState;
+      // TODO: refactor to avoid using parentState
+      const parentState = this.stateStack[this.stateStack.length - 2];
 
       if (parentState === STATE.ATTRIBUTE) {
         const attr = this.currentAttribute!;

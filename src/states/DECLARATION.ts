@@ -1,4 +1,4 @@
-import { CODE, Parser, Part, StateDefinition } from "../internal";
+import { CODE, Parser, StateDefinition, Range } from "../internal";
 
 // We enter STATE.DECLARATION after we encounter a "<?"
 // while in the STATE.HTML_CONTENT.
@@ -32,7 +32,7 @@ export const DECLARATION: StateDefinition = {
 
 function exitDeclaration(
   parser: Parser,
-  declaration: Part,
+  declaration: Range,
   closeOffset: number
 ) {
   parser.skip(closeOffset);

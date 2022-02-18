@@ -1,20 +1,12 @@
-import type { OpenTagPart } from ".";
-import {
-  CODE,
-  STATE,
-  Part,
-  StateDefinition,
-  Parser,
-  peek,
-  Pos,
-} from "../internal";
+import type { OpenTagRange } from ".";
+import { CODE, STATE, StateDefinition, Parser, peek, Range } from "../internal";
 
-export interface CloseTagPart extends Part {
-  tagName: Pos;
+export interface CloseTagRange extends Range {
+  tagName: Range;
 }
 
 // We enter STATE.CLOSE_TAG after we see "</"
-export const CLOSE_TAG: StateDefinition<CloseTagPart> = {
+export const CLOSE_TAG: StateDefinition<CloseTagRange> = {
   name: "CLOSE_TAG",
 
   enter() {
@@ -45,7 +37,7 @@ export function checkForClosingTag(parser: Parser) {
   let skip = 3; // skip the </>
 
   if (!match) {
-    const tagName = (peek(parser.blockStack) as OpenTagPart).tagName;
+    const tagName = (peek(parser.blockStack) as OpenTagRange).tagName;
     const tagNameLen = tagName.endPos - tagName.pos;
     if (tagNameLen) {
       skip += tagNameLen; // skip <TAG_NAME/>
@@ -61,7 +53,7 @@ export function checkForClosingTag(parser: Parser) {
   }
 
   if (match) {
-    if (parser.state === STATE.JS_COMMENT_LINE) {
+    if (parser.activeState === STATE.JS_COMMENT_LINE) {
       parser.exitState();
     }
 
