@@ -6,36 +6,23 @@ import {
   STATE,
   peek,
   isWhitespaceCode,
-  htmlTags,
-  Pos,
-  ExpressionPos,
-  TemplatePos,
+  Range,
 } from "../internal";
-import type { OpenTagPart } from "../states";
+import type { OpenTagRange } from "../states";
 
-export interface PartMeta {
-  parentState: StateDefinition;
-}
-export interface Part extends PartMeta, Pos {}
-export interface ExpressionPart extends PartMeta, ExpressionPos {}
-export interface TemplatePart extends PartMeta, TemplatePos {}
-export interface StateDefinition<P extends Part = Part> {
+export interface StateDefinition<P extends Range = Range> {
   name: string;
-  eol?: (this: Parser, str: string, activePart: P) => void;
-  eof?: (this: Parser, activePart: P) => void;
-  enter?: (
-    this: Parser,
-    activePart: P,
-    parentState: StateDefinition | undefined
-  ) => void;
-  exit?: (this: Parser, activePart: P) => void;
+  eol?: (this: Parser, str: string, activeRange: P) => void;
+  eof?: (this: Parser, activeRange: P) => void;
+  enter?: (this: Parser, activeRange: P) => void;
+  exit?: (this: Parser, activeRange: P) => void;
   return?: (
     this: Parser,
     childState: StateDefinition,
-    childPart: Part,
-    activePart: P
+    childPart: Range,
+    activeRange: P
   ) => void;
-  char?: (this: Parser, char: string, code: number, activePart: P) => void;
+  char?: (this: Parser, char: string, code: number, activeRange: P) => void;
 }
 
 export class Parser {
@@ -43,13 +30,14 @@ export class Parser {
   public maxPos!: number;
   public data!: string;
   public filename!: string;
-  public state!: StateDefinition;
-  public parts!: Part[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
-  public activePart!: Part; // The current part at the top of the part stack
+  public activeState!: StateDefinition;
+  public stateStack!: StateDefinition[]; // Used to keep track of nested states.
+  public activeRange!: Range; // The current pos object at the top of the stack
+  public rangeStack!: Range[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
   public forward!: boolean;
   public notifiers: ReturnType<typeof createNotifiers>;
-  public currentOpenTag: STATE.OpenTagPart | undefined; // Used to reference the current open tag that is being parsed
-  public currentAttribute: STATE.AttrPart | undefined; // Used to reference the current attribute that is being parsed
+  public currentOpenTag: STATE.OpenTagRange | undefined; // Used to reference the current open tag that is being parsed
+  public currentAttribute: STATE.AttrRange | undefined; // Used to reference the current attribute that is being parsed
   public withinAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
   public indent!: string; // Used to build the indent for the current concise line
   public isConcise!: boolean; // Set to true if parser is currently in concise mode
@@ -60,9 +48,9 @@ export class Parser {
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
-  public textParseMode!: "html" | "cdata" | "parsed-text" | "static-text";
+  public textParseMode!: "html" | "cdata" | "parsed-text";
   public blockStack!: ((
-    | STATE.OpenTagPart
+    | STATE.OpenTagRange
     | {
         type: "html";
         delimiter?: string;
@@ -75,14 +63,15 @@ export class Parser {
     this.notifiers = createNotifiers(this, listeners);
   }
 
-  read(node: Pos) {
+  read(node: Range) {
     return this.data.slice(node.pos, node.endPos);
   }
 
   reset() {
     this.pos = -1;
     this.maxPos = -1;
-    this.parts = [];
+    this.rangeStack = [];
+    this.stateStack = [];
     this.forward = true;
     this.textPos = -1;
     this.textParseMode = "html";
@@ -100,26 +89,15 @@ export class Parser {
     this.endingMixedModeAtEOL = false;
   }
 
-  enterState<P extends Part = Part>(
+  enterState<P extends Range = Range>(
     state: StateDefinition<P>,
-    part: Partial<P> = {}
+    range: Partial<P> = {}
   ): P {
-    // if (this.state === state) {
-    //   // Re-entering the same state can lead to unexpected behavior
-    //   // so we should throw error to catch these types of mistakes
-    //   throw new Error(
-    //     "Re-entering the current state is illegal - " + state.name
-    //   );
-    // }
-
-    const parentState = this.state;
-    const activePart = (this.activePart = part as unknown as P);
-    this.state = state as StateDefinition;
-    this.parts.push(activePart);
-    part.pos = this.pos;
-    part.parentState = parentState;
-    state.enter?.call(this, activePart, parentState);
-    return this.activePart as P;
+    range.pos = this.pos;
+    this.stateStack.push((this.activeState = state as StateDefinition));
+    this.rangeStack.push((this.activeRange = range as unknown as P));
+    state.enter?.call(this, range as unknown as P);
+    return this.activeRange as P;
   }
 
   exitState(includedEndChars?: string) {
@@ -128,7 +106,7 @@ export class Parser {
         if (this.data[this.pos + i] !== includedEndChars[i]) {
           if (this.pos + i >= this.maxPos) {
             this.notifyError(
-              this.activePart,
+              this.activeRange,
               "UNEXPECTED_EOF",
               "EOF reached with current part incomplete"
             );
@@ -142,21 +120,18 @@ export class Parser {
       this.skip(includedEndChars.length);
     }
 
-    const childPart = this.parts.pop()!;
-    const childState = this.state;
-    const parentState = (this.state = childPart.parentState);
-    const parentPart = (this.activePart = peek(this.parts)!);
-
+    const childPart = this.rangeStack.pop()!;
+    const childState = this.stateStack.pop()!;
+    this.activeState = peek(this.stateStack)!;
+    this.activeRange = peek(this.rangeStack)!;
     childPart.endPos = this.pos;
-
-    if (childState.exit) {
-      childState.exit.call(this, childPart);
-    }
-
-    if (parentState.return) {
-      parentState.return.call(this, childState, childPart, parentPart);
-    }
-
+    childState.exit?.call(this, childPart);
+    this.activeState.return?.call(
+      this,
+      childState,
+      childPart,
+      this.activeRange
+    );
     this.forward = false;
   }
 
@@ -184,7 +159,7 @@ export class Parser {
   /**
    * Compare a position in the source to either another position, or a string.
    */
-  matchAtPos(a: Pos, b: Pos | string) {
+  matchAtPos(a: Range, b: Range | string) {
     const aPos = a.pos;
     const aLen = a.endPos - aPos;
     let bPos = 0;
@@ -209,7 +184,7 @@ export class Parser {
     return true;
   }
 
-  matchAnyAtPos(a: Pos, list: (Pos | string)[]) {
+  matchAnyAtPos(a: Range, list: (Range | string)[]) {
     for (const item of list) {
       if (this.matchAtPos(a, item)) return true;
     }
@@ -331,7 +306,7 @@ export class Parser {
     this.htmlBlockDelimiter = undefined;
     this.isWithinSingleLineHtmlBlock = false;
 
-    if (this.state !== STATE.CONCISE_HTML_CONTENT) {
+    if (this.activeState !== STATE.CONCISE_HTML_CONTENT) {
       this.enterState(STATE.CONCISE_HTML_CONTENT);
     }
   }
@@ -373,7 +348,7 @@ export class Parser {
     }
   }
 
-  notifyError(pos: number | Pos, errorCode: string, message: string) {
+  notifyError(pos: number | Range, errorCode: string, message: string) {
     if (typeof pos === "number") {
       this.notifiers.notifyError(pos, errorCode, message);
     } else {
@@ -382,7 +357,7 @@ export class Parser {
     this.end();
   }
 
-  closeTag(closeTag?: Pos) {
+  closeTag(closeTag?: Range) {
     const lastTag = this.blockStack.pop();
 
     if (closeTag) {
@@ -455,7 +430,7 @@ export class Parser {
       });
     }
 
-    if ((lastTag as OpenTagPart).beginMixedMode) {
+    if ((lastTag as OpenTagRange).beginMixedMode) {
       this.endingMixedModeAtEOL = true;
     }
   }
@@ -623,18 +598,18 @@ export class Parser {
     while ((pos = this.pos) <= this.maxPos) {
       const ch = data[pos];
       const code = ch && ch.charCodeAt(0);
-      const state = this.state;
+      const state = this.activeState;
       let length = 1;
 
       if (code === CODE.NEWLINE) {
-        state.eol?.call(this, ch, this.activePart);
+        state.eol?.call(this, ch, this.activeRange);
       } else if (code === CODE.CARRIAGE_RETURN) {
         const nextPos = pos + 1;
         if (
           nextPos < data.length &&
           data.charCodeAt(nextPos) === CODE.NEWLINE
         ) {
-          state.eol?.call(this, "\r\n", this.activePart);
+          state.eol?.call(this, "\r\n", this.activeRange);
           length = 2;
         }
       } else if (code) {
@@ -647,9 +622,9 @@ export class Parser {
             )}, ${code})`
           );
         }
-        state.char.call(this, ch, code, this.activePart);
+        state.char.call(this, ch, code, this.activeRange);
       } else {
-        state.eof?.call(this, this.activePart);
+        state.eof?.call(this, this.activeRange);
       }
 
       // move to next position

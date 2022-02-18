@@ -1,67 +1,67 @@
-export interface Pos {
+export interface Range {
   pos: number;
   endPos: number;
 }
 
-export interface ErrorPos extends Pos {
+export interface ErrorRange extends Range {
   code: string;
   message: string;
 }
 
-export interface ExpressionPos extends Pos {
-  value: Pos;
+export interface ExpressionRange extends Range {
+  value: Range;
 }
 
-export interface TemplatePos extends Pos {
-  expressions: ExpressionPos[];
-  quasis: Pos[];
+export interface TemplateRange extends Range {
+  expressions: ExpressionRange[];
+  quasis: Range[];
 }
 
-export interface PlaceholderPos extends ExpressionPos {
+export interface PlaceholderRange extends ExpressionRange {
   escape: boolean;
 }
 
-export interface AttrNamePos extends Pos {
+export interface AttrNameRange extends Range {
   default: boolean;
 }
 
-export interface AttrValuePos extends Pos {
+export interface AttrValueRange extends Range {
   bound: boolean;
   method: boolean;
-  value: undefined | Pos;
-  argument: undefined | ExpressionPos;
+  value: undefined | Range;
+  argument: undefined | ExpressionRange;
 }
 
-export interface ScriptletPos extends ExpressionPos {
+export interface ScriptletRange extends ExpressionRange {
   block: boolean;
 }
 
-export interface TagEndPos extends Pos {
+export interface TagEndRange extends Range {
   openTagOnly: boolean;
   selfClosed: boolean;
 }
 
 export type Notifications =
-  | ["error", ErrorPos]
-  | ["text", Pos]
-  | ["comment", ExpressionPos]
-  | ["cdata", ExpressionPos]
-  | ["declaration", ExpressionPos]
-  | ["doctype", ExpressionPos]
-  | ["placeholder", PlaceholderPos]
-  | ["scriptlet", ScriptletPos]
-  | ["tagStart", Pos]
-  | ["tagName", TemplatePos]
-  | ["tagShorthandId", TemplatePos]
-  | ["tagShorthandClass", TemplatePos]
-  | ["tagVar", ExpressionPos]
-  | ["tagArgs", ExpressionPos]
-  | ["tagParams", ExpressionPos]
-  | ["attrName", AttrNamePos]
-  | ["attrValue", AttrValuePos]
-  | ["spreadAttr", ExpressionPos]
-  | ["tagEnd", TagEndPos]
-  | ["closeTag", ExpressionPos | Pos];
+  | ["error", ErrorRange]
+  | ["text", Range]
+  | ["comment", ExpressionRange]
+  | ["cdata", ExpressionRange]
+  | ["declaration", ExpressionRange]
+  | ["doctype", ExpressionRange]
+  | ["placeholder", PlaceholderRange]
+  | ["scriptlet", ScriptletRange]
+  | ["tagStart", Range]
+  | ["tagName", TemplateRange]
+  | ["tagShorthandId", TemplateRange]
+  | ["tagShorthandClass", TemplateRange]
+  | ["tagVar", ExpressionRange]
+  | ["tagArgs", ExpressionRange]
+  | ["tagParams", ExpressionRange]
+  | ["attrName", AttrNameRange]
+  | ["attrValue", AttrValueRange]
+  | ["spreadAttr", ExpressionRange]
+  | ["tagEnd", TagEndRange]
+  | ["closeTag", ExpressionRange | Range];
 
 export enum CODE {
   NUMBER_0 = 48,

@@ -2,10 +2,9 @@ import {
   STATE,
   CODE,
   isWhitespaceCode,
-  Part,
   StateDefinition,
-  Pos,
-  ExpressionPos,
+  Range,
+  ExpressionRange,
 } from "../internal";
 
 const enum ATTR_STATE {
@@ -15,12 +14,12 @@ const enum ATTR_STATE {
   BLOCK,
 }
 
-export interface AttrPart extends Part {
+export interface AttrRange extends Range {
   state: undefined | ATTR_STATE;
-  name: undefined | Pos;
-  value: undefined | ExpressionPos;
+  name: undefined | Range;
+  value: undefined | ExpressionRange;
   valueStartPos: undefined | number;
-  argument: undefined | ExpressionPos;
+  argument: undefined | ExpressionRange;
   default: boolean;
   spread: boolean;
   method: boolean;
@@ -29,7 +28,7 @@ export interface AttrPart extends Part {
 
 // We enter STATE.ATTRIBUTE when we see a non-whitespace
 // character after reading the tag name
-export const ATTRIBUTE: StateDefinition<AttrPart> = {
+export const ATTRIBUTE: StateDefinition<AttrRange> = {
   name: "ATTRIBUTE",
 
   enter(attr) {
