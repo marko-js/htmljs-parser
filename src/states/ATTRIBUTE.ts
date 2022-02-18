@@ -32,18 +32,18 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
   name: "ATTRIBUTE",
 
   enter(attr) {
-    this.currentAttribute = attr;
+    this.activeAttr = attr;
     attr.state = undefined;
     attr.name = undefined;
     attr.value = undefined;
     attr.bound = false;
     attr.method = false;
     attr.spread = false;
-    attr.default = this.currentOpenTag!.attributes.length === 0;
+    attr.default = this.activeTag!.attributes.length === 0;
   },
 
   exit() {
-    this.currentAttribute = undefined;
+    this.activeAttr = undefined;
   },
 
   eol() {
@@ -62,7 +62,7 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
         'EOF reached while parsing attribute "' +
           (attr.name ? this.read(attr.name) : "default") +
           '" for the "' +
-          this.read(this.currentOpenTag!.tagName) +
+          this.read(this.activeTag!.tagName) +
           '" tag'
       );
     }

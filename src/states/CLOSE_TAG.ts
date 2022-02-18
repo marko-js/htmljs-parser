@@ -1,4 +1,4 @@
-import { CODE, STATE, StateDefinition, Parser, peek, Range } from "../internal";
+import { CODE, STATE, StateDefinition, Parser, Range } from "../internal";
 
 export interface CloseTagRange extends Range {
   tagName: Range;
@@ -36,7 +36,7 @@ export function checkForClosingTag(parser: Parser) {
   let skip = 3; // skip the </>
 
   if (!match) {
-    const tagName = (peek(parser.blockStack) as STATE.OpenTagRange).tagName;
+    const { tagName } = parser.activeTag!;
     const tagNameLen = tagName.endPos - tagName.pos;
     if (tagNameLen) {
       skip += tagNameLen; // skip <TAG_NAME/>

@@ -93,21 +93,21 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         }
       }
 
-      const parent = peek(this.blockStack);
+      const parentBlock = peek(this.blockStack);
 
-      if (parent) {
-        if (parent.type === "tag" && parent.openTagOnly) {
+      if (parentBlock) {
+        if (parentBlock.type === "tag" && parentBlock.openTagOnly) {
           this.notifyError(
             this.pos,
             "INVALID_BODY",
             `The "${this.read(
-              parent.tagName
+              parentBlock.tagName
             )}" tag does not allow nested body content`
           );
           return;
         }
 
-        if (parent.body && code !== CODE.HTML_BLOCK_DELIMITER) {
+        if (parentBlock.body && code !== CODE.HTML_BLOCK_DELIMITER) {
           this.notifyError(
             this.pos,
             "ILLEGAL_LINE_START",
@@ -116,8 +116,8 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           return;
         }
 
-        if (parent.nestedIndent) {
-          if (parent.nestedIndent.length !== this.indent.length) {
+        if (parentBlock.nestedIndent) {
+          if (parentBlock.nestedIndent.length !== this.indent.length) {
             this.notifyError(
               this.pos,
               "BAD_INDENTATION",
@@ -126,7 +126,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
             return;
           }
         } else {
-          parent.nestedIndent = this.indent;
+          parentBlock.nestedIndent = this.indent;
         }
       }
 
