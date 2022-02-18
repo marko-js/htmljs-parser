@@ -3,7 +3,6 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  Parser,
   Range,
 } from "../internal";
 

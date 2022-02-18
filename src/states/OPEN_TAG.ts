@@ -98,7 +98,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
   return(childState, childPart, tag) {
     switch (childState) {
       case STATE.TAG_NAME: {
-        tag.tagName = childPart as TemplatePart;
+        tag.tagName = childPart as STATE.TagNameRange;
         this.notifiers.notifyOpenTagName(tag);
         break;
       }
