@@ -216,30 +216,6 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
   },
 };
 
-function checkForOperator(parser: Parser) {
-  const pattern = parser.isConcise
-    ? conciseOperatorPattern
-    : htmlOperatorPattern;
-  pattern.lastIndex = parser.pos;
-  const matches = pattern.exec(parser.data);
-
-  if (matches) {
-    const [match] = matches;
-    if (match.length === 0) {
-      // We matched a look behind.
-      parser.consumeWhitespace();
-      parser.rewind(1);
-    } else {
-      // We matched a look ahead.
-      parser.skip(match.length - 1);
-    }
-
-    return true;
-  }
-
-  return false;
-}
-
 function buildOperatorPattern(isConcise: boolean) {
   const unary = ["typeof", "new", "void"];
   const operators = [
