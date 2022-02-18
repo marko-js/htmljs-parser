@@ -58,7 +58,7 @@ export class Parser {
       }
   ) & { body?: BODY_MODE; nestedIndent?: string })[]; // Used to keep track of HTML tags and HTML blocks
 
-  constructor(listeners) {
+  constructor(listeners: any) {
     this.reset();
     this.notifiers = createNotifiers(this, listeners);
   }
