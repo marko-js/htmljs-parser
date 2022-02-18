@@ -50,13 +50,13 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
       const parentState = this.stateStack[this.stateStack.length - 2];
 
       if (parentState === STATE.ATTRIBUTE) {
-        const attr = this.currentAttribute!;
+        const attr = this.activeAttr!;
         if (!attr.default && !attr.spread && !attr.name) {
           return this.notifyError(
             expression,
             "MALFORMED_OPEN_TAG",
             'EOF reached while parsing attribute name for the "' +
-              this.read(this.currentOpenTag!.tagName) +
+              this.read(this.activeTag!.tagName) +
               '" tag'
           );
         }

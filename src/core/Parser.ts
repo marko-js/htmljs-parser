@@ -34,13 +34,12 @@ export class Parser {
   public rangeStack!: Range[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
   public forward!: boolean;
   public notifiers: ReturnType<typeof createNotifiers>;
-  public currentOpenTag: STATE.OpenTagRange | undefined; // Used to reference the current open tag that is being parsed
-  public currentAttribute: STATE.AttrRange | undefined; // Used to reference the current attribute that is being parsed
-  public withinAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
+  public activeTag: STATE.OpenTagRange | undefined; // Used to reference the closest open tag
+  public activeAttr: STATE.AttrRange | undefined; // Used to reference the current attribute that is being parsed
+  public isInAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
+  public isInSingleLineHtmlBlock!: boolean; // Set to true if the current block is for a single line HTML block
   public indent!: string; // Used to build the indent for the current concise line
   public isConcise!: boolean; // Set to true if parser is currently in concise mode
-  public isWithinSingleLineHtmlBlock!: boolean; // Set to true if the current block is for a single line HTML block
-  public isWithinRegExpCharset!: boolean; // Set to true if the current regexp entered a charset.
   public htmlBlockDelimiter?: string; // Current delimiter for multiline HTML blocks nested within a concise tag. e.g. "--"
   public htmlBlockIndent?: string; // Used to hold the indentation for a delimited, multiline HTML block
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
@@ -73,14 +72,13 @@ export class Parser {
     this.forward = true;
     this.textPos = -1;
     this.textParseMode = "html";
-    this.currentOpenTag = undefined;
-    this.currentAttribute = undefined;
+    this.activeTag = undefined;
+    this.activeAttr = undefined;
     this.blockStack = [];
     this.indent = "";
     this.isConcise = true;
-    this.withinAttrGroup = false;
-    this.isWithinRegExpCharset = false;
-    this.isWithinSingleLineHtmlBlock = false;
+    this.isInAttrGroup = false;
+    this.isInSingleLineHtmlBlock = false;
     this.htmlBlockDelimiter = undefined;
     this.htmlBlockIndent = undefined;
     this.beginMixedMode = false;
@@ -257,7 +255,6 @@ export class Parser {
    * tags within a block are properly closed.
    */
   beginHtmlBlock(delimiter?: string) {
-    const parent = peek(this.blockStack);
     this.htmlBlockIndent = this.indent;
     this.htmlBlockDelimiter = delimiter;
     this.blockStack.push({
@@ -267,7 +264,7 @@ export class Parser {
     });
 
     this.enterState(
-      parent?.body === BODY_MODE.PARSED_TEXT
+      this.activeTag?.body === BODY_MODE.PARSED_TEXT
         ? STATE.PARSED_TEXT_CONTENT
         : STATE.HTML_CONTENT
     );
@@ -279,9 +276,9 @@ export class Parser {
    */
   endHtmlBlock() {
     // Make sure all tags in this HTML block are closed
-    for (let i = this.blockStack.length - 1; i >= 0; i--) {
-      const curBlock = this.blockStack[i];
-      if (curBlock.type === "html") {
+    for (let i = this.blockStack.length; i--; ) {
+      const block = this.blockStack[i];
+      if (block.type === "html") {
         // Remove the HTML block from the stack since it has ended
         this.blockStack.pop();
         // We have reached the point where the HTML block started
@@ -291,9 +288,9 @@ export class Parser {
         // The current block is for an HTML tag and it still open. When a tag is tag is closed
         // it is removed from the stack
         this.notifyError(
-          curBlock,
+          block,
           "MISSING_END_TAG",
-          'Missing ending "' + this.read(curBlock.tagName) + '" tag'
+          'Missing ending "' + this.read(block.tagName) + '" tag'
         );
         return;
       }
@@ -302,7 +299,7 @@ export class Parser {
     // Resert variables associated with parsing an HTML block
     this.htmlBlockIndent = undefined;
     this.htmlBlockDelimiter = undefined;
-    this.isWithinSingleLineHtmlBlock = false;
+    this.isInSingleLineHtmlBlock = false;
 
     if (this.activeState !== STATE.CONCISE_HTML_CONTENT) {
       this.enterState(STATE.CONCISE_HTML_CONTENT);
@@ -356,13 +353,13 @@ export class Parser {
   }
 
   closeTag(closeTag?: Range) {
-    const lastTag = this.blockStack.pop();
+    const lastBlock = this.blockStack.pop();
 
     if (closeTag) {
       const closeTagNameStart = closeTag.pos + 2; // strip </
       const closeTagNameEnd = closeTag.endPos - 1; // strip >
 
-      if (!lastTag || lastTag.type !== "tag") {
+      if (!lastBlock || lastBlock.type !== "tag") {
         return this.notifyError(
           closeTag!,
           "EXTRA_CLOSING_TAG",
@@ -381,22 +378,22 @@ export class Parser {
         if (
           !this.matchAtPos(
             closeTagNamePos,
-            lastTag.tagName.endPos > lastTag.tagName.pos
-              ? lastTag.tagName
+            lastBlock.tagName.endPos > lastBlock.tagName.pos
+              ? lastBlock.tagName
               : "div"
           )
         ) {
           const shorthandEndPos = Math.max(
-            lastTag.shorthandId ? lastTag.shorthandId.endPos : 0,
-            lastTag.shorthandClassNames
-              ? peek(lastTag.shorthandClassNames)!.endPos
+            lastBlock.shorthandId ? lastBlock.shorthandId.endPos : 0,
+            lastBlock.shorthandClassNames
+              ? peek(lastBlock.shorthandClassNames)!.endPos
               : 0
           );
 
           if (
             shorthandEndPos === 0 ||
             !this.matchAtPos(closeTagNamePos, {
-              pos: lastTag.tagName.pos,
+              pos: lastBlock.tagName.pos,
               endPos: shorthandEndPos,
             })
           ) {
@@ -406,7 +403,7 @@ export class Parser {
               'The closing "' +
                 this.read(closeTagNamePos) +
                 '" tag does not match the corresponding opening "' +
-                (this.read(lastTag.tagName) || "div") +
+                (this.read(lastBlock.tagName) || "div") +
                 '" tag'
             );
           }
@@ -428,8 +425,22 @@ export class Parser {
       });
     }
 
-    if ((lastTag as STATE.OpenTagRange).beginMixedMode) {
-      this.endingMixedModeAtEOL = true;
+    if (lastBlock?.type === "tag") {
+      if (lastBlock.beginMixedMode) {
+        this.endingMixedModeAtEOL = true;
+      }
+
+      for (let i = this.blockStack.length; i--; ) {
+        const block = this.blockStack[i];
+        if (block.type === "tag") {
+          this.activeTag = block;
+          break;
+        }
+      }
+
+      if (this.activeTag === lastBlock) {
+        this.activeTag = undefined;
+      }
     }
   }
 
@@ -550,13 +561,12 @@ export class Parser {
   }
 
   enterParsedTextContentState() {
-    const last =
-      this.blockStack.length && this.blockStack[this.blockStack.length - 1];
+    const lastBlock = peek(this.blockStack);
 
     if (
-      !last ||
-      last.type === "html" ||
-      last.tagName.pos === last.tagName.endPos
+      !lastBlock ||
+      lastBlock.type === "html" ||
+      lastBlock.tagName.pos === lastBlock.tagName.endPos
     ) {
       throw new Error(
         'The "parsed text content" parser state is only allowed within a tag'
@@ -566,7 +576,7 @@ export class Parser {
     if (this.isConcise) {
       // We will transition into the STATE.PARSED_TEXT_CONTENT state
       // for each of the nested HTML blocks
-      last.body = BODY_MODE.PARSED_TEXT;
+      lastBlock.body = BODY_MODE.PARSED_TEXT;
       this.enterState(STATE.CONCISE_HTML_CONTENT);
     } else {
       this.enterState(STATE.PARSED_TEXT_CONTENT);

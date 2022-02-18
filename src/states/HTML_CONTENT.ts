@@ -26,7 +26,7 @@ export const HTML_CONTENT: StateDefinition = {
       this.endingMixedModeAtEOL = false;
       this.endText();
       this.endHtmlBlock();
-    } else if (this.isWithinSingleLineHtmlBlock) {
+    } else if (this.isInSingleLineHtmlBlock) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single
       // line HTML block then we should return back to the state to parse concise HTML.
       // A single line HTML block can be at the end of the tag or on its own line:
