@@ -1,4 +1,4 @@
-import { Parser, Pos } from "../internal";
+import { Parser, Range } from "../internal";
 
 export function createNotifiers(parser: Parser, listeners) {
   let hasError = false;
@@ -189,7 +189,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyCloseTag(closeTag: Pos & { value?: Pos }) {
+    notifyCloseTag(closeTag: Range & { value?: Range }) {
       if (hasError) {
         return;
       }
