@@ -1,10 +1,10 @@
-import { Parser, Range } from "../internal";
+import type { Parser, Range } from "../internal";
 
-export function createNotifiers(parser: Parser, listeners) {
+export function createNotifiers(parser: Parser, listeners: any) {
   let hasError = false;
 
   return {
-    notifyText(pos, endPos, parseMode) {
+    notifyText(pos: number, endPos: number, parseMode: string) {
       if (hasError) {
         return;
       }
@@ -26,7 +26,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyCDATA(cdata) {
+    notifyCDATA(cdata: any) {
       const value = parser.read(cdata.value);
       if (hasError) {
         return;
@@ -48,7 +48,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyError(pos, errorCode, message) {
+    notifyError(pos: number, errorCode: string, message: string) {
       if (hasError) {
         return;
       }
@@ -72,7 +72,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyOpenTagName(tagInfo) {
+    notifyOpenTagName(tagInfo: any) {
       if (hasError) {
         return;
       }
@@ -99,7 +99,7 @@ export function createNotifiers(parser: Parser, listeners) {
           },
           shorthandClassNames:
             tagInfo.shorthandClassNames &&
-            tagInfo.shorthandClassNames.map((className) => ({
+            tagInfo.shorthandClassNames.map((className: any) => ({
               ...className,
               value: parser.read(className).slice(1),
             })),
@@ -109,7 +109,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyOpenTag(tagInfo) {
+    notifyOpenTag(tagInfo: any) {
       if (hasError) {
         return;
       }
@@ -155,11 +155,11 @@ export function createNotifiers(parser: Parser, listeners) {
           },
           shorthandClassNames:
             tagInfo.shorthandClassNames &&
-            tagInfo.shorthandClassNames.map((className) => ({
+            tagInfo.shorthandClassNames.map((className: any) => ({
               ...className,
               value: parser.read(className).slice(1),
             })),
-          attributes: tagInfo.attributes.map((attr) => ({
+          attributes: tagInfo.attributes.map((attr: any) => ({
             default: attr.default,
             spread: attr.spread,
             name: attr.default
@@ -211,7 +211,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyDocumentType(documentType) {
+    notifyDocumentType(documentType: any) {
       if (hasError) {
         return;
       }
@@ -232,7 +232,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyDeclaration(declaration) {
+    notifyDeclaration(declaration: any) {
       if (hasError) {
         return;
       }
@@ -253,7 +253,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyComment(comment) {
+    notifyComment(comment: any) {
       if (hasError) {
         return;
       }
@@ -274,7 +274,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyScriptlet(scriptlet) {
+    notifyScriptlet(scriptlet: any) {
       if (hasError) {
         return;
       }
@@ -298,7 +298,7 @@ export function createNotifiers(parser: Parser, listeners) {
       }
     },
 
-    notifyPlaceholder(placeholder) {
+    notifyPlaceholder(placeholder: any) {
       if (hasError) {
         return;
       }
