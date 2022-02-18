@@ -77,7 +77,7 @@ export function checkForPlaceholder(parser: Parser, code: number) {
         }
       }
 
-      parser.enterState(STATE.PLACEHOLDER, { escape });
+      parser.enterState(PLACEHOLDER, { escape });
       return true;
     }
   }
