@@ -27,7 +27,7 @@ export const CDATA: StateDefinition = {
     );
   },
 
-  char(_, code) {
+  char(code) {
     if (code === CODE.CLOSE_SQUARE_BRACKET && this.lookAheadFor("]>")) {
       this.exitState("]]>");
       return;

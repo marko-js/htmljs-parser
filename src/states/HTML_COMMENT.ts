@@ -29,7 +29,7 @@ export const HTML_COMMENT: StateDefinition = {
     );
   },
 
-  char(_, code) {
+  char(code) {
     if (code === CODE.HYPHEN) {
       let offset = 1;
       let next: number;

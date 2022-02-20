@@ -28,7 +28,7 @@ export const DTD: StateDefinition = {
     );
   },
 
-  char(_, code) {
+  char(code) {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
       this.exitState(">");
     }

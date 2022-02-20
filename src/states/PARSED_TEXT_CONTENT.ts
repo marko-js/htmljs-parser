@@ -11,7 +11,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
     this.textParseMode = "parsed-text";
   },
 
-  eol(newLine) {
+  eol(len) {
     if (this.isInSingleLineHtmlBlock) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single
       // line HTML block then we should return back to the state to parse concise HTML.
@@ -23,7 +23,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
       this.endText();
       this.endHtmlBlock();
     } else if (this.htmlBlockDelimiter) {
-      this.handleDelimitedBlockEOL(newLine);
+      this.handleDelimitedBlockEOL(len);
     } else {
       this.startText();
     }
@@ -31,7 +31,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
 
   eof: Parser.prototype.htmlEOF,
 
-  char(_, code) {
+  char(code) {
     switch (code) {
       case CODE.OPEN_ANGLE_BRACKET:
         if (!this.isConcise) {

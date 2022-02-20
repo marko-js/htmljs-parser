@@ -10,7 +10,7 @@ import {
 
 export interface StateDefinition<P extends Range = Range> {
   name: string;
-  eol?: (this: Parser, str: string, activeRange: P) => void;
+  eol?: (this: Parser, length: number, activeRange: P) => void;
   eof?: (this: Parser, activeRange: P) => void;
   enter?: (this: Parser, activeRange: P) => void;
   exit?: (this: Parser, activeRange: P) => void;
@@ -20,7 +20,7 @@ export interface StateDefinition<P extends Range = Range> {
     childPart: Range,
     activeRange: P
   ) => void;
-  char?: (this: Parser, char: string, code: number, activeRange: P) => void;
+  char: (this: Parser, code: number, activeRange: P) => void;
 }
 
 export class Parser {
@@ -131,9 +131,9 @@ export class Parser {
     this.forward = false;
   }
 
-  checkForTerminator(terminator: string | string[], ch: string) {
+  checkForTerminator(terminator: string | string[]) {
     if (typeof terminator === "string") {
-      if (ch === terminator) {
+      if (this.data[this.pos] === terminator) {
         return true;
       } else if (terminator.length > 1) {
         for (let i = 0; i < terminator.length; i++) {
@@ -145,7 +145,7 @@ export class Parser {
       }
     } else {
       for (let i = 0; i < terminator.length; i++) {
-        if (this.checkForTerminator(terminator[i], ch)) {
+        if (this.checkForTerminator(terminator[i])) {
           return true;
         }
       }
@@ -517,7 +517,7 @@ export class Parser {
     this.skip(ahead);
   }
 
-  handleDelimitedBlockEOL(newLine: string) {
+  handleDelimitedBlockEOL(newLineLength: number) {
     // If we are within a delimited HTML block then we want to check if the next line is the end
     // delimiter. Since we are currently positioned at the start of the new line character our lookahead
     // will need to include the new line character, followed by the expected indentation, followed by
@@ -525,10 +525,10 @@ export class Parser {
     const endHtmlBlockLookahead =
       this.htmlBlockIndent! + this.htmlBlockDelimiter;
 
-    if (this.lookAheadFor(endHtmlBlockLookahead, this.pos + newLine.length)) {
+    if (this.lookAheadFor(endHtmlBlockLookahead, this.pos + newLineLength)) {
       this.startText(); // we want to at least include the newline as text.
-      this.endText(newLine.length);
-      this.skip(endHtmlBlockLookahead.length + newLine.length);
+      this.endText(newLineLength);
+      this.skip(endHtmlBlockLookahead.length + newLineLength);
 
       if (this.consumeWhitespaceOnLine(0)) {
         this.endHtmlBlock();
@@ -540,7 +540,7 @@ export class Parser {
         );
       }
     } else if (
-      this.lookAheadFor(this.htmlBlockIndent!, this.pos + newLine.length)
+      this.lookAheadFor(this.htmlBlockIndent!, this.pos + newLineLength)
     ) {
       // We know the next line does not end the multiline HTML block, but we need to check if there
       // is any indentation that we need to skip over as we continue parsing the HTML in this
@@ -607,37 +607,27 @@ export class Parser {
       const ch = data[pos];
       const code = ch && ch.charCodeAt(0);
       const state = this.activeState;
-      let length = 1;
 
       if (code === CODE.NEWLINE) {
-        state.eol?.call(this, ch, this.activeRange);
+        state.eol?.call(this, 1, this.activeRange);
       } else if (code === CODE.CARRIAGE_RETURN) {
         const nextPos = pos + 1;
         if (
           nextPos < data.length &&
           data.charCodeAt(nextPos) === CODE.NEWLINE
         ) {
-          state.eol?.call(this, "\r\n", this.activeRange);
-          length = 2;
+          state.eol?.call(this, 2, this.activeRange);
+          this.pos++;
         }
       } else if (code) {
-        // We assume that every state will have "char" function
-        // TODO: only check during debug.
-        if (!state.char) {
-          throw new Error(
-            `State ${state.name} has no "char" function (${JSON.stringify(
-              ch
-            )}, ${code})`
-          );
-        }
-        state.char.call(this, ch, code, this.activeRange);
+        state.char.call(this, code, this.activeRange);
       } else {
         state.eof?.call(this, this.activeRange);
       }
 
       // move to next position
       if (this.forward) {
-        this.pos += length;
+        this.pos++;
       } else {
         this.forward = true;
       }

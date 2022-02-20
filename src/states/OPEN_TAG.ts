@@ -191,11 +191,11 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
     }
   },
 
-  eol(linebreak) {
+  eol(len) {
     if (this.isConcise && !this.isInAttrGroup) {
       // In concise mode we always end the open tag
       this.exitState();
-      this.skip(linebreak.length);
+      this.skip(len);
     }
   },
 
@@ -224,7 +224,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
     }
   },
 
-  char(_, code, tag) {
+  char(code, tag) {
     if (this.isConcise) {
       if (code === CODE.SEMICOLON) {
         this.exitState(";");

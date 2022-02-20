@@ -136,7 +136,7 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
     }
   },
 
-  char(_, code, attr) {
+  char(code, attr) {
     if (isWhitespaceCode(code)) {
       return;
     } else if (
