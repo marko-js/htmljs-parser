@@ -10,11 +10,11 @@ export const CDATA: StateDefinition = {
 
   exit(cdata) {
     this.notifiers.notifyCDATA({
-      pos: cdata.pos,
-      endPos: cdata.endPos,
+      start: cdata.start,
+      end: cdata.end,
       value: {
-        pos: cdata.pos + 9, // strip <![CDATA[
-        endPos: cdata.endPos - 3, // strip ]]>
+        start: cdata.start + 9, // strip <![CDATA[
+        end: cdata.end - 3, // strip ]]>
       },
     });
   },

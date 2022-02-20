@@ -37,15 +37,15 @@ export function checkForClosingTag(parser: Parser) {
 
   if (!match) {
     const { tagName } = parser.activeTag!;
-    const tagNameLen = tagName.endPos - tagName.pos;
+    const tagNameLen = tagName.end - tagName.start;
     if (tagNameLen) {
       skip += tagNameLen; // skip <TAG_NAME/>
       match =
         (parser.lookAheadFor("/", curPos) &&
           parser.lookAheadFor(">", 1 + curPos + tagNameLen) &&
           parser.matchAtPos(tagName, {
-            pos: 1 + curPos,
-            endPos: 1 + curPos + tagNameLen,
+            start: 1 + curPos,
+            end: 1 + curPos + tagNameLen,
           })) ||
         false;
     }
@@ -57,7 +57,7 @@ export function checkForClosingTag(parser: Parser) {
     }
 
     parser.endText();
-    parser.closeTag({ pos: parser.pos, endPos: parser.skip(skip) });
+    parser.closeTag({ start: parser.pos, end: parser.skip(skip) });
     parser.forward = false;
     return true;
   }

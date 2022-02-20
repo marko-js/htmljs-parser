@@ -38,11 +38,11 @@ function exitDeclaration(
   parser.skip(closeOffset);
   parser.exitState();
   parser.notifiers.notifyDeclaration({
-    pos: declaration.pos,
-    endPos: declaration.endPos,
+    start: declaration.start,
+    end: declaration.end,
     value: {
-      pos: declaration.pos + 2, // strip <?
-      endPos: declaration.endPos - closeOffset, // > or ?>
+      start: declaration.start + 2, // strip <?
+      end: declaration.end - closeOffset, // > or ?>
     },
   });
 }
