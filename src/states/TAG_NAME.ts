@@ -20,15 +20,15 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
   enter(tagName) {
     tagName.last = false;
     tagName.expressions = [];
-    tagName.quasis = [{ pos: tagName.pos, endPos: tagName.endPos }];
+    tagName.quasis = [{ start: tagName.start, end: tagName.end }];
   },
 
   exit(tagName) {
-    peek(tagName.quasis)!.endPos = tagName.endPos;
+    peek(tagName.quasis)!.end = tagName.end;
   },
 
   return(_, childPart, tagName) {
-    if (childPart.pos === childPart.endPos) {
+    if (childPart.start === childPart.end) {
       this.notifyError(
         childPart,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
@@ -36,19 +36,19 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
       );
     }
 
-    const interpolationStart = childPart.pos - 2; // include ${
+    const interpolationStart = childPart.start - 2; // include ${
     const interpolationEnd = this.skip(1); // include }
     const nextQuasiStart = interpolationEnd + 1;
-    peek(tagName.quasis)!.endPos = interpolationStart - 1;
+    peek(tagName.quasis)!.end = interpolationStart - 1;
     tagName.expressions.push({
-      pos: interpolationStart,
-      endPos: interpolationEnd,
+      start: interpolationStart,
+      end: interpolationEnd,
       value: {
-        pos: childPart.pos,
-        endPos: childPart.endPos,
+        start: childPart.start,
+        end: childPart.end,
       },
     });
-    tagName.quasis.push({ pos: nextQuasiStart, endPos: nextQuasiStart });
+    tagName.quasis.push({ start: nextQuasiStart, end: nextQuasiStart });
   },
 
   eol() {

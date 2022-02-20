@@ -61,7 +61,7 @@ export class Parser {
   }
 
   read(node: Range) {
-    return this.data.slice(node.pos, node.endPos);
+    return this.data.slice(node.start, node.end);
   }
 
   reset() {
@@ -89,7 +89,7 @@ export class Parser {
     state: StateDefinition<P>,
     range: Partial<P> = {}
   ): P {
-    range.pos = this.pos;
+    range.start = this.pos;
     this.stateStack.push((this.activeState = state as StateDefinition));
     this.rangeStack.push((this.activeRange = range as unknown as P));
     state.enter?.call(this, range as unknown as P);
@@ -120,7 +120,7 @@ export class Parser {
     const childState = this.stateStack.pop()!;
     this.activeState = peek(this.stateStack)!;
     this.activeRange = peek(this.rangeStack)!;
-    childPart.endPos = this.pos;
+    childPart.end = this.pos;
     childState.exit?.call(this, childPart);
     this.activeState.return?.call(
       this,
@@ -156,8 +156,8 @@ export class Parser {
    * Compare a position in the source to either another position, or a string.
    */
   matchAtPos(a: Range, b: Range | string) {
-    const aPos = a.pos;
-    const aLen = a.endPos - aPos;
+    const aPos = a.start;
+    const aLen = a.end - aPos;
     let bPos = 0;
     let bLen = 0;
     let bSource = this.data;
@@ -166,8 +166,8 @@ export class Parser {
       bLen = b.length;
       bSource = b;
     } else {
-      bPos = b.pos;
-      bLen = b.endPos - bPos;
+      bPos = b.start;
+      bLen = b.end - bPos;
     }
 
     if (aLen !== bLen) return false;
@@ -347,7 +347,7 @@ export class Parser {
     if (typeof pos === "number") {
       this.notifiers.notifyError(pos, errorCode, message);
     } else {
-      this.notifiers.notifyError(pos.pos, errorCode, message);
+      this.notifiers.notifyError(pos.start, errorCode, message);
     }
     this.end();
   }
@@ -356,45 +356,45 @@ export class Parser {
     const lastBlock = this.blockStack.pop();
 
     if (closeTag) {
-      const closeTagNameStart = closeTag.pos + 2; // strip </
-      const closeTagNameEnd = closeTag.endPos - 1; // strip >
+      const closeTagNameStart = closeTag.start + 2; // strip </
+      const closeTagNameEnd = closeTag.end - 1; // strip >
 
       if (!lastBlock || lastBlock.type !== "tag") {
         return this.notifyError(
           closeTag!,
           "EXTRA_CLOSING_TAG",
           'The closing "' +
-            this.read({ pos: closeTagNameStart, endPos: closeTagNameEnd }) +
+            this.read({ start: closeTagNameStart, end: closeTagNameEnd }) +
             '" tag was not expected'
         );
       }
 
       if (closeTagNameStart < closeTagNameEnd!) {
         const closeTagNamePos = {
-          pos: closeTagNameStart,
-          endPos: closeTagNameEnd,
+          start: closeTagNameStart,
+          end: closeTagNameEnd,
         };
 
         if (
           !this.matchAtPos(
             closeTagNamePos,
-            lastBlock.tagName.endPos > lastBlock.tagName.pos
+            lastBlock.tagName.end > lastBlock.tagName.start
               ? lastBlock.tagName
               : "div"
           )
         ) {
           const shorthandEndPos = Math.max(
-            lastBlock.shorthandId ? lastBlock.shorthandId.endPos : 0,
+            lastBlock.shorthandId ? lastBlock.shorthandId.end : 0,
             lastBlock.shorthandClassNames
-              ? peek(lastBlock.shorthandClassNames)!.endPos
+              ? peek(lastBlock.shorthandClassNames)!.end
               : 0
           );
 
           if (
             shorthandEndPos === 0 ||
             !this.matchAtPos(closeTagNamePos, {
-              pos: lastBlock.tagName.pos,
-              endPos: shorthandEndPos,
+              start: lastBlock.tagName.start,
+              end: shorthandEndPos,
             })
           ) {
             return this.notifyError(
@@ -411,17 +411,17 @@ export class Parser {
       }
 
       this.notifiers.notifyCloseTag({
-        pos: closeTag.pos,
-        endPos: closeTag.endPos,
+        start: closeTag.start,
+        end: closeTag.end,
         value: {
-          pos: closeTagNameStart,
-          endPos: closeTagNameEnd,
+          start: closeTagNameStart,
+          end: closeTagNameEnd,
         },
       });
     } else {
       this.notifiers.notifyCloseTag({
-        pos: this.pos,
-        endPos: this.pos,
+        start: this.pos,
+        end: this.pos,
       });
     }
 
@@ -566,7 +566,7 @@ export class Parser {
     if (
       !lastBlock ||
       lastBlock.type === "html" ||
-      lastBlock.tagName.pos === lastBlock.tagName.endPos
+      lastBlock.tagName.start === lastBlock.tagName.end
     ) {
       throw new Error(
         'The "parsed text content" parser state is only allowed within a tag'

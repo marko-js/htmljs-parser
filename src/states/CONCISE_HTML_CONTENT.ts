@@ -28,21 +28,21 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
         this.notifiers.notifyComment({
-          pos: childPart.pos,
-          endPos: childPart.endPos,
+          start: childPart.start,
+          end: childPart.end,
           value: {
-            pos: childPart.pos + 2, // strip //
-            endPos: childPart.endPos,
+            start: childPart.start + 2, // strip //
+            end: childPart.end,
           },
         });
         break;
       case STATE.JS_COMMENT_BLOCK: {
         this.notifiers.notifyComment({
-          pos: childPart.pos,
-          endPos: childPart.endPos,
+          start: childPart.start,
+          end: childPart.end,
           value: {
-            pos: childPart.pos + 2, // strip /*
-            endPos: childPart.endPos - 2, // strip */,
+            start: childPart.start + 2, // strip /*
+            end: childPart.end - 2, // strip */,
           },
         });
 
