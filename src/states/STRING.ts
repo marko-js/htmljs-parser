@@ -15,12 +15,16 @@ export const STRING: StateDefinition<StringRange> = {
     );
   },
 
-  char(ch, code, string) {
-    if (code === CODE.BACK_SLASH) {
-      // Handle string escape sequence
-      this.skip(1);
-    } else if (code === string.quoteCharCode) {
-      this.exitState(ch);
+  char(code, string) {
+    switch (code) {
+      case CODE.BACK_SLASH:
+        // Handle string escape sequence
+        this.skip(1);
+        break;
+      case string.quoteCharCode:
+        this.skip(1);
+        this.exitState();
+        break;
     }
   },
 };
