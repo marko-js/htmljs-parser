@@ -20,7 +20,7 @@ export const CLOSE_TAG: StateDefinition<CloseTagRange> = {
     );
   },
 
-  char(_, code, closeTag) {
+  char(code, closeTag) {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
       this.exitState(">");
       this.closeTag(closeTag);

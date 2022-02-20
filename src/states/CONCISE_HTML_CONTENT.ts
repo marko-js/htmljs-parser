@@ -64,9 +64,9 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
     }
   },
 
-  char(ch, code) {
+  char(code) {
     if (isWhitespaceCode(code)) {
-      this.indent += ch;
+      this.indent += " "; // TODO: can just be a length?
     } else {
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -145,7 +145,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           break;
         case CODE.HTML_BLOCK_DELIMITER:
           if (this.lookAtCharCodeAhead(1) === CODE.HTML_BLOCK_DELIMITER) {
-            this.htmlBlockDelimiter = ch;
+            this.htmlBlockDelimiter = "-";
             this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
           } else {
             this.notifyError(
