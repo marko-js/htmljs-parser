@@ -4,7 +4,7 @@ export const TEMPLATE_STRING: StateDefinition = {
   name: "TEMPLATE_STRING",
 
   return(_, childPart) {
-    if (childPart.pos === childPart.endPos) {
+    if (childPart.start === childPart.end) {
       this.notifyError(
         childPart,
         "PLACEHOLDER_EXPRESSION_REQUIRED",

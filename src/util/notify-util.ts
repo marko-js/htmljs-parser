@@ -16,7 +16,7 @@ export function createNotifiers(parser: Parser, listeners: any) {
           parser,
           {
             type: "text",
-            value: parser.read({ pos, endPos }),
+            value: parser.read({ start: pos, end: endPos }),
             parseMode,
             pos,
             endPos,
@@ -39,8 +39,8 @@ export function createNotifiers(parser: Parser, listeners: any) {
           parser,
           {
             type: "cdata",
-            pos: cdata.pos,
-            endPos: cdata.endPos,
+            pos: cdata.start,
+            endPos: cdata.end,
             value: value,
           },
           parser
@@ -86,21 +86,23 @@ export function createNotifiers(parser: Parser, listeners: any) {
         const event = {
           type: "openTagName",
           tagName: {
-            pos: tagInfo.tagName.pos,
-            endPos: tagInfo.tagName.endPos,
+            pos: tagInfo.tagName.start,
+            endPos: tagInfo.tagName.end,
             value: parser.read(tagInfo.tagName),
           },
-          pos: tagInfo.pos,
-          endPos: tagInfo.tagName.endPos,
+          pos: tagInfo.start,
+          endPos: tagInfo.tagName.end,
           concise: tagInfo.concise,
           shorthandId: tagInfo.shorthandId && {
-            ...tagInfo.shorthandId,
+            pos: tagInfo.shorthandId.start,
+            endPos: tagInfo.shorthandId.start,
             value: parser.read(tagInfo.shorthandId).slice(1),
           },
           shorthandClassNames:
             tagInfo.shorthandClassNames &&
             tagInfo.shorthandClassNames.map((className: any) => ({
-              ...className,
+              pos: className.start,
+              endPos: className.end,
               value: parser.read(className).slice(1),
             })),
         };
@@ -114,11 +116,6 @@ export function createNotifiers(parser: Parser, listeners: any) {
         return;
       }
 
-      // console.log({
-      //   ...tagInfo.tagName,
-      //   all: parser.read(tagInfo.tagName)
-      // })
-
       const eventFunc = listeners.onOpenTag;
 
       if (eventFunc) {
@@ -128,35 +125,40 @@ export function createNotifiers(parser: Parser, listeners: any) {
         const event = {
           type: "openTag",
           tagName: {
-            pos: tagInfo.tagName.pos,
-            endPos: tagInfo.tagName.endPos,
+            pos: tagInfo.tagName.start,
+            endPos: tagInfo.tagName.end,
             value: parser.read(tagInfo.tagName),
           },
           var: tagInfo.var && {
-            ...tagInfo.var,
+            pos: tagInfo.var.start,
+            endPos: tagInfo.var.end,
             value: parser.read(tagInfo.var.value),
           },
           argument: tagInfo.argument && {
-            ...tagInfo.argument,
+            pos: tagInfo.argument.start,
+            endPos: tagInfo.argument.end,
             value: parser.read(tagInfo.argument.value),
           },
           params: tagInfo.params && {
-            ...tagInfo.params,
+            pos: tagInfo.params.start,
+            endPos: tagInfo.params.end,
             value: parser.read(tagInfo.params.value),
           },
-          pos: tagInfo.pos,
-          endPos: tagInfo.endPos,
+          pos: tagInfo.start,
+          endPos: tagInfo.end,
           concise: tagInfo.concise,
           openTagOnly: tagInfo.openTagOnly,
           selfClosed: tagInfo.selfClosed,
           shorthandId: tagInfo.shorthandId && {
-            ...tagInfo.shorthandId,
+            pos: tagInfo.shorthandId.start,
+            endPos: tagInfo.shorthandId.end,
             value: parser.read(tagInfo.shorthandId).slice(1),
           },
           shorthandClassNames:
             tagInfo.shorthandClassNames &&
             tagInfo.shorthandClassNames.map((className: any) => ({
-              ...className,
+              pos: className.start,
+              endPos: className.end,
               value: parser.read(className).slice(1),
             })),
           attributes: tagInfo.attributes.map((attr: any) => ({
@@ -166,18 +168,21 @@ export function createNotifiers(parser: Parser, listeners: any) {
               ? { name: "default" }
               : attr.name
               ? {
-                  ...attr.name,
+                  pos: attr.name.start,
+                  endPos: attr.name.end,
                   value: parser.read(attr.name),
                 }
               : undefined,
             value: attr.value && {
-              ...attr.value,
+              pos: attr.value.start,
+              endPos: attr.value.end,
               value: parser.read(attr.value.value),
             },
-            pos: attr.pos,
-            endPos: attr.endPos,
+            pos: attr.start,
+            endPos: attr.end,
             argument: attr.argument && {
-              ...attr.argument,
+              pos: attr.argument.start,
+              endPos: attr.argument.end,
               value: parser.read(attr.argument.value),
             },
             method: attr.method,
@@ -200,11 +205,12 @@ export function createNotifiers(parser: Parser, listeners: any) {
         const event = {
           type: "closeTag",
           tagName: closeTag.value && {
-            ...closeTag.value,
+            pos: closeTag.start,
+            endPos: closeTag.end,
             value: parser.read(closeTag.value),
           },
-          pos: closeTag.pos,
-          endPos: closeTag.endPos,
+          pos: closeTag.start,
+          endPos: closeTag.end,
         };
 
         eventFunc.call(parser, event, parser);
@@ -224,8 +230,8 @@ export function createNotifiers(parser: Parser, listeners: any) {
           {
             type: "documentType",
             value: parser.read(documentType.value),
-            pos: documentType.pos,
-            endPos: documentType.endPos,
+            pos: documentType.start,
+            endPos: documentType.end,
           },
           parser
         );
@@ -245,8 +251,8 @@ export function createNotifiers(parser: Parser, listeners: any) {
           {
             type: "declaration",
             value: parser.read(declaration.value),
-            pos: declaration.pos,
-            endPos: declaration.endPos,
+            pos: declaration.start,
+            endPos: declaration.end,
           },
           parser
         );
@@ -266,8 +272,8 @@ export function createNotifiers(parser: Parser, listeners: any) {
           {
             type: "comment",
             value: parser.read(comment),
-            pos: comment.pos,
-            endPos: comment.endPos,
+            pos: comment.start,
+            endPos: comment.end,
           },
           parser
         );
@@ -290,8 +296,8 @@ export function createNotifiers(parser: Parser, listeners: any) {
             tag: scriptlet.tag,
             block: scriptlet.block,
             value: parser.read(scriptlet.value),
-            pos: scriptlet.pos,
-            endPos: scriptlet.endPos,
+            pos: scriptlet.start,
+            endPos: scriptlet.end,
           },
           parser
         );
@@ -308,11 +314,12 @@ export function createNotifiers(parser: Parser, listeners: any) {
         const placeholderEvent = {
           type: "placeholder",
           value: {
-            ...placeholder.value,
+            pos: placeholder.start,
+            endPos: placeholder.end,
             value: parser.read(placeholder.value),
           },
-          pos: placeholder.pos,
-          endPos: placeholder.endPos,
+          pos: placeholder.start,
+          endPos: placeholder.end,
           escape: placeholder.escape,
         };
 

@@ -9,12 +9,12 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletRange> = {
 
   exit(inlineScript) {
     this.notifiers.notifyScriptlet({
-      pos: inlineScript.pos,
-      endPos: inlineScript.endPos,
+      start: inlineScript.start,
+      end: inlineScript.end,
       block: inlineScript.block,
       value: {
-        pos: inlineScript.value.pos,
-        endPos: inlineScript.value.endPos,
+        start: inlineScript.value.start,
+        end: inlineScript.value.end,
       },
     });
   },
