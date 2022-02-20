@@ -98,8 +98,34 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
   return(childState, childPart, tag) {
     switch (childState) {
       case STATE.TAG_NAME: {
-        tag.tagName = childPart as STATE.TagNameRange;
-        this.notifiers.notifyOpenTagName(tag);
+        const namePart = childPart as STATE.TagNameRange;
+        switch (namePart.shorthandCode) {
+          case CODE.NUMBER_SIGN:
+            if (tag.shorthandId) {
+              return this.notifyError(
+                namePart,
+                "INVALID_TAG_SHORTHAND",
+                "Multiple shorthand ID parts are not allowed on the same tag"
+              );
+            }
+
+            tag.shorthandId = namePart;
+            break;
+          case CODE.PERIOD:
+            if (tag.shorthandClassNames) {
+              tag.shorthandClassNames.push(namePart);
+            } else {
+              tag.shorthandClassNames = [namePart];
+            }
+            break;
+          default:
+            tag.tagName = namePart;
+            break;
+        }
+
+        if (namePart.last) {
+          this.notifiers.notifyOpenTagName(tag);
+        }
         break;
       }
       case STATE.JS_COMMENT_BLOCK: {
