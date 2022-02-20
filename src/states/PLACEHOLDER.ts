@@ -39,6 +39,8 @@ export const PLACEHOLDER: StateDefinition<PlaceholderRange> = {
     }
     this.exitState("}");
   },
+
+  char() {},
 };
 
 export function checkForPlaceholder(parser: Parser, code: number) {

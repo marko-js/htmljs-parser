@@ -13,7 +13,7 @@ export const JS_COMMENT_BLOCK: StateDefinition = {
     );
   },
 
-  char(_, code) {
+  char(code) {
     if (
       code === CODE.ASTERISK &&
       this.lookAtCharCodeAhead(1) === CODE.FORWARD_SLASH

@@ -23,7 +23,7 @@ export const TEMPLATE_STRING: StateDefinition = {
     );
   },
 
-  char(_, code) {
+  char(code) {
     if (
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE

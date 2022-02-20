@@ -17,10 +17,10 @@ export const HTML_CONTENT: StateDefinition = {
     this.isConcise = false; // Back into non-concise HTML parsing
   },
 
-  eol(newLine) {
+  eol(len) {
     if (this.beginMixedMode) {
       this.beginMixedMode = false;
-      this.endText(newLine.length);
+      this.endText(len);
       this.endHtmlBlock();
     } else if (this.endingMixedModeAtEOL) {
       this.endingMixedModeAtEOL = false;
@@ -37,7 +37,7 @@ export const HTML_CONTENT: StateDefinition = {
       this.endText();
       this.endHtmlBlock();
     } else if (this.htmlBlockDelimiter) {
-      this.handleDelimitedBlockEOL(newLine);
+      this.handleDelimitedBlockEOL(len);
     } else {
       this.startText();
     }
@@ -45,7 +45,7 @@ export const HTML_CONTENT: StateDefinition = {
 
   eof: Parser.prototype.htmlEOF,
 
-  char(_, code) {
+  char(code) {
     if (code === CODE.OPEN_ANGLE_BRACKET) {
       if (checkForCDATA(this)) return;
 

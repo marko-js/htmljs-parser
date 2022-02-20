@@ -94,7 +94,7 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
     }
   },
 
-  char(ch, code, expression) {
+  char(code, expression) {
     const depth = expression.groupStack.length;
 
     if (depth === 0) {
@@ -128,7 +128,7 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
 
       if (
         expression.terminator &&
-        this.checkForTerminator(expression.terminator, ch)
+        this.checkForTerminator(expression.terminator)
       ) {
         this.exitState();
         return;
@@ -191,7 +191,7 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
             expression,
             "INVALID_EXPRESSION",
             'Mismatched group. A closing "' +
-              ch +
+              String.fromCharCode(code) +
               '" character was found but it is not matched with a corresponding opening character.'
           );
         }
@@ -202,7 +202,7 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
             expression,
             "INVALID_EXPRESSION",
             'Mismatched group. A "' +
-              ch +
+              String.fromCharCode(code) +
               '" character was found when "' +
               String.fromCharCode(expectedCode) +
               '" was expected.'

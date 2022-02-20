@@ -59,7 +59,7 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
     this.exitState();
   },
 
-  char(_, code, tagName) {
+  char(code, tagName) {
     if (
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE

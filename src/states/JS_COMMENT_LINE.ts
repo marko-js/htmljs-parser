@@ -15,7 +15,7 @@ export const JS_COMMENT_LINE: StateDefinition = {
     this.exitState();
   },
 
-  char(_, code) {
+  char(code) {
     if (
       !this.isConcise &&
       code === CODE.OPEN_ANGLE_BRACKET &&

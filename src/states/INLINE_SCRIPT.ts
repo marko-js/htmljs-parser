@@ -25,7 +25,7 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletRange> = {
     this.exitState();
   },
 
-  char(_, code, inlineScript) {
+  char(code, inlineScript) {
     if (code === CODE.OPEN_CURLY_BRACE) {
       inlineScript.block = true;
       this.skip(1);

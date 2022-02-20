@@ -25,7 +25,7 @@ export const REGULAR_EXPRESSION: StateDefinition<RegExpRange> = {
     );
   },
 
-  char(_, code, regExp) {
+  char(code, regExp) {
     if (code === CODE.BACK_SLASH) {
       // Handle escape sequence
       this.skip(1);
