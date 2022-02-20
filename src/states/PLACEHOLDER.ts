@@ -19,18 +19,18 @@ export const PLACEHOLDER: StateDefinition<PlaceholderRange> = {
 
   exit(placeholder) {
     this.notifiers.notifyPlaceholder({
-      pos: placeholder.pos,
-      endPos: placeholder.endPos,
+      start: placeholder.start,
+      end: placeholder.end,
       escape: placeholder.escape,
       value: {
-        pos: placeholder.pos + (placeholder.escape ? 2 : 3), // ignore ${ or $!{
-        endPos: placeholder.endPos - 1, // ignore }
+        start: placeholder.start + (placeholder.escape ? 2 : 3), // ignore ${ or $!{
+        end: placeholder.end - 1, // ignore }
       },
     });
   },
 
   return(_, childPart) {
-    if (childPart.pos === childPart.endPos) {
+    if (childPart.start === childPart.end) {
       this.notifyError(
         childPart,
         "PLACEHOLDER_EXPRESSION_REQUIRED",

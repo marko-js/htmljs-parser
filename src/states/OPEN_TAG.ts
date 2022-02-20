@@ -135,7 +135,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
       case STATE.EXPRESSION: {
         switch (tag.state) {
           case TAG_STATE.VAR: {
-            if (childPart.pos === childPart.endPos) {
+            if (childPart.start === childPart.end) {
               return this.notifyError(
                 childPart,
                 "MISSING_TAG_VARIABLE",
@@ -143,22 +143,22 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
               );
             }
             tag.var = {
-              pos: childPart.pos - 1, // include /,
-              endPos: childPart.endPos,
+              start: childPart.start - 1, // include /,
+              end: childPart.end,
               value: {
-                pos: childPart.pos,
-                endPos: childPart.endPos,
+                start: childPart.start,
+                end: childPart.end,
               },
             };
             break;
           }
           case TAG_STATE.ARGUMENT: {
             const argPos = {
-              pos: childPart.pos - 1, // include (
-              endPos: this.skip(1), // include )
+              start: childPart.start - 1, // include (
+              end: this.skip(1), // include )
               value: {
-                pos: childPart.pos,
-                endPos: childPart.endPos,
+                start: childPart.start,
+                end: childPart.end,
               },
             };
 
@@ -166,7 +166,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
               this.consumeWhitespace();
               const attr = this.enterState(STATE.ATTRIBUTE);
               attr.argument = argPos;
-              attr.pos = attr.argument!.pos;
+              attr.start = attr.argument!.start;
               tag.attributes.push(attr);
               this.rewind(1);
             } else {
@@ -176,11 +176,11 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
           }
           case TAG_STATE.PARAMS: {
             tag.params = {
-              pos: childPart.pos - 1, // include leading |
-              endPos: this.skip(1), // include closing |
+              start: childPart.start - 1, // include leading |
+              end: this.skip(1), // include closing |
               value: {
-                pos: childPart.pos,
-                endPos: childPart.endPos,
+                start: childPart.start,
+                end: childPart.end,
               },
             };
             break;

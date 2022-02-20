@@ -18,7 +18,7 @@ export interface AttrRange extends Range {
   state: undefined | ATTR_STATE;
   name: undefined | Range;
   value: undefined | ExpressionRange;
-  valueStartPos: undefined | number;
+  valueStart: undefined | number;
   argument: undefined | ExpressionRange;
   default: boolean;
   spread: boolean;
@@ -72,8 +72,8 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
     switch (attr.state) {
       case ATTR_STATE.NAME: {
         attr.name = {
-          pos: childPart.pos,
-          endPos: childPart.endPos,
+          start: childPart.start,
+          end: childPart.end,
         };
         break;
       }
@@ -88,11 +88,11 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
         }
 
         attr.argument = {
-          pos: childPart.pos - 1, // include (
-          endPos: this.skip(1), // include )
+          start: childPart.start - 1, // include (
+          end: this.skip(1), // include )
           value: {
-            pos: childPart.pos,
-            endPos: childPart.endPos,
+            start: childPart.start,
+            end: childPart.end,
           },
         };
         break;
@@ -100,11 +100,11 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
       case ATTR_STATE.BLOCK: {
         attr.method = true;
         attr.value = {
-          pos: childPart.pos - 1, // include {
-          endPos: this.skip(1), // include }
+          start: childPart.start - 1, // include {
+          end: this.skip(1), // include }
           value: {
-            pos: childPart.pos,
-            endPos: childPart.endPos,
+            start: childPart.start,
+            end: childPart.end,
           },
         };
         this.exitState();
@@ -112,7 +112,7 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
       }
 
       case ATTR_STATE.VALUE: {
-        if (childPart.pos === childPart.endPos) {
+        if (childPart.start === childPart.end) {
           return this.notifyError(
             childPart,
             "ILLEGAL_ATTRIBUTE_VALUE",
@@ -121,15 +121,15 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
         }
 
         attr.value = {
-          pos: attr.valueStartPos!,
-          endPos: childPart.endPos,
+          start: attr.valueStart!,
+          end: childPart.end,
           value: {
-            pos: childPart.pos,
-            endPos: childPart.endPos,
+            start: childPart.start,
+            end: childPart.end,
           },
         };
 
-        attr.valueStartPos = undefined;
+        attr.valueStart = undefined;
         this.exitState();
         break;
       }
@@ -144,7 +144,7 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
       (code === CODE.COLON && this.lookAtCharCodeAhead(1) === CODE.EQUAL) ||
       (code === CODE.PERIOD && this.lookAheadFor(".."))
     ) {
-      attr.valueStartPos = this.pos;
+      attr.valueStart = this.pos;
 
       if (code === CODE.COLON) {
         attr.bound = true;

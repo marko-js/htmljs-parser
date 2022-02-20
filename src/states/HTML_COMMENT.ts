@@ -12,11 +12,11 @@ export const HTML_COMMENT: StateDefinition = {
 
   exit(comment) {
     this.notifiers.notifyComment({
-      pos: comment.pos,
-      endPos: comment.endPos,
+      start: comment.start,
+      end: comment.end,
       value: {
-        pos: comment.pos + 4, // strip <!--
-        endPos: comment.endPos - 3, // strip -->
+        start: comment.start + 4, // strip <!--
+        end: comment.end - 3, // strip -->
       },
     });
   },

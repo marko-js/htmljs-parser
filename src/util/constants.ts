@@ -1,6 +1,6 @@
 export interface Range {
-  pos: number;
-  endPos: number;
+  start: number;
+  end: number;
 }
 
 export interface ErrorRange extends Range {

@@ -11,11 +11,11 @@ export const DTD: StateDefinition = {
 
   exit(documentType) {
     this.notifiers.notifyDocumentType({
-      pos: documentType.pos,
-      endPos: documentType.endPos,
+      start: documentType.start,
+      end: documentType.end,
       value: {
-        pos: documentType.pos + 2, // strip <!
-        endPos: documentType.endPos - 1, // strip >
+        start: documentType.start + 2, // strip <!
+        end: documentType.end - 1, // strip >
       },
     });
   },
