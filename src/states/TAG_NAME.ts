@@ -8,10 +8,8 @@ import {
 } from "../internal";
 
 export interface TagNameRange extends TemplateRange {
-  curPos: number;
-  nameEndPos: number;
-  hadShorthandId: boolean | undefined;
-  shorthandCharCode: number;
+  shorthandCode?: CODE.NUMBER_SIGN | CODE.PERIOD;
+  last: boolean;
 }
 
 // We enter STATE.TAG_NAME after we encounter a "<"
@@ -20,72 +18,41 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
   name: "TAG_NAME",
 
   enter(tagName) {
-    tagName.curPos = tagName.pos;
+    tagName.last = false;
     tagName.expressions = [];
-    tagName.quasis = [];
+    tagName.quasis = [{ pos: tagName.pos, endPos: tagName.endPos }];
   },
 
   exit(tagName) {
-    tagName.quasis.push({
-      pos: tagName.curPos,
-      endPos: tagName.endPos,
-    });
-
-    if (tagName.nameEndPos !== undefined) {
-      tagName.endPos = peek(tagName.quasis)!.endPos = tagName.nameEndPos;
-    }
+    peek(tagName.quasis)!.endPos = tagName.endPos;
   },
 
-  return(childState, childPart, tagName) {
-    switch (childState) {
-      case STATE.EXPRESSION: {
-        if (childPart.pos === childPart.endPos) {
-          this.notifyError(
-            childPart,
-            "PLACEHOLDER_EXPRESSION_REQUIRED",
-            "Invalid placeholder, the expression cannot be missing"
-          );
-        }
-
-        tagName.expressions.push({
-          pos: childPart.pos - 2, // include ${
-          endPos: (tagName.curPos = childPart.endPos + 1), // include }
-          value: {
-            pos: childPart.pos,
-            endPos: childPart.endPos,
-          },
-        });
-        this.skip(1);
-
-        break;
-      }
-      case STATE.TAG_NAME: {
-        const tag = this.activeTag!;
-        const namePart = childPart as TagNameRange;
-        if (namePart.shorthandCharCode === CODE.NUMBER_SIGN) {
-          if (tag.shorthandId) {
-            return this.notifyError(
-              namePart,
-              "INVALID_TAG_SHORTHAND",
-              "Multiple shorthand ID parts are not allowed on the same tag"
-            );
-          }
-
-          tag.shorthandId = namePart;
-        } else if (tag.shorthandClassNames) {
-          tag.shorthandClassNames.push(namePart);
-        } else {
-          tag.shorthandClassNames = [namePart];
-        }
-        break;
-      }
+  return(_, childPart, tagName) {
+    if (childPart.pos === childPart.endPos) {
+      this.notifyError(
+        childPart,
+        "PLACEHOLDER_EXPRESSION_REQUIRED",
+        "Invalid placeholder, the expression cannot be missing"
+      );
     }
+
+    const interpolationStart = childPart.pos - 2; // include ${
+    const interpolationEnd = this.skip(1); // include }
+    const nextQuasiStart = interpolationEnd + 1;
+    peek(tagName.quasis)!.endPos = interpolationStart - 1;
+    tagName.expressions.push({
+      pos: interpolationStart,
+      endPos: interpolationEnd,
+      value: {
+        pos: childPart.pos,
+        endPos: childPart.endPos,
+      },
+    });
+    tagName.quasis.push({ pos: nextQuasiStart, endPos: nextQuasiStart });
   },
 
   eol() {
-    if (this.isConcise) {
-      this.exitState();
-    }
+    if (this.isConcise) this.exitState(); // TODO: is concise guard needed?
   },
 
   eof() {
@@ -97,13 +64,7 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      tagName.quasis.push({
-        pos: tagName.curPos,
-        endPos: this.pos,
-      });
-
       this.skip(2);
-
       this.enterState(STATE.EXPRESSION, { terminator: "}" });
       this.rewind(1);
     } else if (code === CODE.BACK_SLASH) {
@@ -120,17 +81,12 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
         ? code === CODE.SEMICOLON
         : code === CODE.CLOSE_ANGLE_BRACKET)
     ) {
+      tagName.last = true;
       this.exitState();
     } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
-      if (tagName.shorthandCharCode) {
-        this.exitState();
-      } else {
-        if (tagName.nameEndPos === undefined) {
-          tagName.nameEndPos = this.pos;
-        }
-
-        this.enterState(STATE.TAG_NAME, { shorthandCharCode: code });
-      }
+      this.exitState();
+      this.enterState(TAG_NAME, { shorthandCode: code }); // Shorthands reuse the TAG_NAME state
+      this.skip(1);
     }
   },
 };

@@ -63,7 +63,7 @@ export type Notifications =
   | ["tagEnd", TagEndRange]
   | ["closeTag", ExpressionRange | Range];
 
-export enum CODE {
+export const enum CODE {
   NUMBER_0 = 48,
   NUMBER_9 = 57,
   UPPER_A = 65,
@@ -88,7 +88,7 @@ export enum CODE {
   CLOSE_CURLY_BRACE = 125,
   ASTERISK = 42,
   HYPHEN = 45,
-  HTML_BLOCK_DELIMITER = CODE.HYPHEN,
+  HTML_BLOCK_DELIMITER = 45,
   DOLLAR = 36,
   PERCENT = 37,
   PERIOD = 46,
@@ -103,11 +103,11 @@ export enum CODE {
   TAB = 9,
 }
 
-export enum MODE {
+export const enum MODE {
   HTML = 1,
   CONCISE = 2,
 }
 
-export enum BODY_MODE {
+export const enum BODY_MODE {
   PARSED_TEXT = 1, // Body of a tag is treated as text, but placeholders will be parsed
 }
