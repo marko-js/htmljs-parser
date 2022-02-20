@@ -83,7 +83,7 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
   },
 
   eol() {
-    if (this.isConcise && !this.isInAttrGroup) {
+    if (this.isConcise) {
       this.exitState();
     }
   },
