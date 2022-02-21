@@ -600,25 +600,20 @@ export class Parser {
     // - https://en.wikipedia.org/wiki/Byte_order_mark
     // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
     this.pos = data.charCodeAt(0) === 0xfeff ? 1 : 0;
-    const maxPos = (this.maxPos = data.length);
+    this.maxPos = data.length;
+    while (this.pos < this.maxPos) {
+      const code = data.charCodeAt(this.pos);
 
-    while (this.pos <= maxPos) {
-      if (this.pos === maxPos) {
-        this.activeState.eof?.call(this, this.activeRange);
+      if (code === CODE.NEWLINE) {
+        this.activeState.eol?.call(this, 1, this.activeRange);
+      } else if (
+        code === CODE.CARRIAGE_RETURN &&
+        data.charCodeAt(this.pos + 1) === CODE.NEWLINE
+      ) {
+        this.activeState.eol?.call(this, 2, this.activeRange);
+        this.pos++;
       } else {
-        const code = data.charCodeAt(this.pos);
-
-        if (code === CODE.NEWLINE) {
-          this.activeState.eol?.call(this, 1, this.activeRange);
-        } else if (
-          code === CODE.CARRIAGE_RETURN &&
-          data.charCodeAt(this.pos + 1) === CODE.NEWLINE
-        ) {
-          this.activeState.eol?.call(this, 2, this.activeRange);
-          this.pos++;
-        } else {
-          this.activeState.char.call(this, code, this.activeRange);
-        }
+        this.activeState.char.call(this, code, this.activeRange);
       }
 
       if (this.forward) {
@@ -628,7 +623,11 @@ export class Parser {
       }
     }
 
-    this.pos = maxPos;
+    do {
+      this.forward = true;
+      this.activeState.eof?.call(this, this.activeRange);
+    } while (!this.forward);
+
     this.notifiers.notifyFinish();
   }
 }
