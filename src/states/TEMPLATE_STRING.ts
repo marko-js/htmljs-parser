@@ -35,9 +35,10 @@ export const TEMPLATE_STRING: StateDefinition = {
       });
     } else {
       if (code === CODE.BACK_SLASH) {
-        this.skip(1);
+        this.skip(1); // skip \
       } else if (code === CODE.BACKTICK) {
-        this.exitState("`");
+        this.skip(1); // skip `
+        this.exitState();
       }
     }
   },

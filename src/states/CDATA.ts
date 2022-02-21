@@ -29,7 +29,8 @@ export const CDATA: StateDefinition = {
 
   char(code) {
     if (code === CODE.CLOSE_SQUARE_BRACKET && this.lookAheadFor("]>")) {
-      this.exitState("]]>");
+      this.skip(3); // skip ]]>
+      this.exitState();
       return;
     }
   },
@@ -39,7 +40,7 @@ export function checkForCDATA(parser: Parser) {
   if (parser.lookAheadFor("![CDATA[")) {
     parser.endText();
     parser.enterState(CDATA);
-    parser.skip(8);
+    parser.skip(8); // skip ![CDATA[
     return true;
   }
 

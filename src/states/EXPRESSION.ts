@@ -9,7 +9,6 @@ import {
 export interface ExpressionRange extends Range {
   groupStack: number[];
   terminator?: string | string[];
-  allowEscapes: boolean;
   skipOperators: boolean;
   terminatedByEOL: boolean;
   terminatedByWhitespace: boolean;
@@ -23,7 +22,6 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
 
   enter(expression) {
     expression.groupStack = [];
-    expression.allowEscapes = expression.allowEscapes === true;
     expression.skipOperators = expression.skipOperators === true;
     expression.terminatedByEOL = expression.terminatedByEOL === true;
     expression.terminatedByWhitespace =
@@ -131,11 +129,6 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
         this.checkForTerminator(expression.terminator)
       ) {
         this.exitState();
-        return;
-      }
-
-      if (expression.allowEscapes && code === CODE.BACK_SLASH) {
-        this.skip(1);
         return;
       }
     }
