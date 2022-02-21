@@ -64,12 +64,12 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      this.skip(2);
+      this.skip(2); // skip ${
       this.enterState(STATE.EXPRESSION, { terminator: "}" });
       this.rewind(1);
     } else if (code === CODE.BACK_SLASH) {
       // Handle string escape sequence
-      this.skip(1);
+      this.skip(1); // skip \
     } else if (
       isWhitespaceCode(code) ||
       code === CODE.EQUAL ||
@@ -86,7 +86,7 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
     } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
       this.exitState();
       this.enterState(TAG_NAME, { shorthandCode: code }); // Shorthands reuse the TAG_NAME state
-      this.skip(1);
+      this.skip(1); // skip . or #
     }
   },
 };

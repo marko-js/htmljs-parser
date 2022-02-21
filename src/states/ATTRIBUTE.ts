@@ -148,13 +148,13 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
 
       if (code === CODE.COLON) {
         attr.bound = true;
-        this.skip(2);
+        this.skip(2); // skip :=
         this.consumeWhitespace();
       } else if (code === CODE.PERIOD) {
         attr.spread = true;
-        this.skip(3);
+        this.skip(3); // skip ...
       } else {
-        this.skip(1);
+        this.skip(1); // skip =
         this.consumeWhitespace();
       }
 
@@ -171,7 +171,7 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
       this.rewind(1);
     } else if (code === CODE.OPEN_PAREN) {
       attr.state = ATTR_STATE.ARGUMENT;
-      this.skip(1);
+      this.skip(1); // skip (
       this.enterState(STATE.EXPRESSION, {
         terminator: ")",
       });
@@ -181,7 +181,7 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
       (!attr.name || attr.argument)
     ) {
       attr.state = ATTR_STATE.BLOCK;
-      this.skip(1);
+      this.skip(1); // skip {
       this.enterState(STATE.EXPRESSION, {
         terminatedByWhitespace: false,
         terminator: "}",
@@ -201,7 +201,6 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
           ",",
           "(",
         ],
-        allowEscapes: true,
       });
       this.rewind(1);
     } else {
