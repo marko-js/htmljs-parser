@@ -191,11 +191,10 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
     }
   },
 
-  eol(len) {
+  eol() {
     if (this.isConcise && !this.isInAttrGroup) {
       // In concise mode we always end the open tag
       this.exitState();
-      this.skip(len);
     }
   },
 
@@ -227,25 +226,27 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
   char(code, tag) {
     if (this.isConcise) {
       if (code === CODE.SEMICOLON) {
-        this.exitState(";");
+        this.skip(1); // skip ;
+        this.exitState();
         if (!this.consumeWhitespaceOnLine(0)) {
           switch (this.lookAtCharCodeAhead(0)) {
             case CODE.FORWARD_SLASH:
-              if (this.lookAheadFor("/")) {
-                this.enterState(STATE.JS_COMMENT_LINE);
-                this.skip(2);
-                return;
-              } else if (this.lookAheadFor("*")) {
-                this.enterState(STATE.JS_COMMENT_BLOCK);
-                this.skip(2);
-                return;
+              switch (this.lookAtCharCodeAhead(1)) {
+                case CODE.FORWARD_SLASH:
+                  this.enterState(STATE.JS_COMMENT_LINE);
+                  this.skip(2); // skip //
+                  return;
+                case CODE.ASTERISK:
+                  this.enterState(STATE.JS_COMMENT_BLOCK);
+                  this.skip(2); // skip /*
+                  return;
               }
               break;
             case CODE.OPEN_ANGLE_BRACKET:
               if (this.lookAheadFor("!--")) {
                 // html comment
                 this.enterState(STATE.HTML_COMMENT);
-                this.skip(4);
+                this.skip(4); // <!--
                 return;
               }
               break;
@@ -337,17 +338,18 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
         this.isInAttrGroup = false;
         return;
       }
-    } else {
-      if (code === CODE.CLOSE_ANGLE_BRACKET) {
-        this.exitState(">");
-        return;
-      } else if (code === CODE.FORWARD_SLASH) {
-        if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
-          tag.selfClosed = true;
-          this.exitState("/>");
-          return;
-        }
-      }
+    } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
+      this.skip(1); // skip >
+      this.exitState();
+      return;
+    } else if (
+      code === CODE.FORWARD_SLASH &&
+      this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET
+    ) {
+      tag.selfClosed = true;
+      this.skip(2); // skip />
+      this.exitState();
+      return;
     }
 
     if (code === CODE.OPEN_ANGLE_BRACKET) {
@@ -364,14 +366,14 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
     ) {
       // Skip over code inside a JavaScript block comment
       this.enterState(STATE.JS_COMMENT_BLOCK);
-      this.skip(1);
+      this.skip(1); // skip *
       return;
     }
 
     if (isWhitespaceCode(code)) {
       // ignore whitespace within element...
     } else if (code === CODE.COMMA) {
-      this.skip(1);
+      this.skip(1); // skip ,
       this.consumeWhitespace();
       this.rewind(1);
     } else if (code === CODE.FORWARD_SLASH && !tag.attributes.length) {

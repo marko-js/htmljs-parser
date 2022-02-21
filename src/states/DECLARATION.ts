@@ -22,10 +22,10 @@ export const DECLARATION: StateDefinition = {
   char(code, declaration) {
     if (code === CODE.QUESTION) {
       if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
-        exitDeclaration(this, declaration, 2);
+        exitDeclaration(this, declaration, 2); // will skip ?>
       }
     } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      exitDeclaration(this, declaration, 1);
+      exitDeclaration(this, declaration, 1); // will skip >
     }
   },
 };

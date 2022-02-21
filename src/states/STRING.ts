@@ -19,10 +19,10 @@ export const STRING: StateDefinition<StringRange> = {
     switch (code) {
       case CODE.BACK_SLASH:
         // Handle string escape sequence
-        this.skip(1);
+        this.skip(1); // skip \
         break;
       case string.quoteCharCode:
-        this.skip(1);
+        this.skip(1); // skip ' or "
         this.exitState();
         break;
     }

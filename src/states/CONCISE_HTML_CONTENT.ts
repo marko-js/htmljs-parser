@@ -138,7 +138,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           return;
         case CODE.DOLLAR:
           if (isWhitespaceCode(this.lookAtCharCodeAhead(1))) {
-            this.skip(1);
+            this.skip(1); // skip space after $
             this.enterState(STATE.INLINE_SCRIPT);
             return;
           }
@@ -160,11 +160,11 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           switch (this.lookAtCharCodeAhead(1)) {
             case CODE.FORWARD_SLASH:
               this.enterState(STATE.JS_COMMENT_LINE);
-              this.skip(1);
+              this.skip(1); // skip /
               return;
             case CODE.ASTERISK:
               this.enterState(STATE.JS_COMMENT_BLOCK);
-              this.skip(1);
+              this.skip(1); // skip *
               return;
             default:
               this.notifyError(

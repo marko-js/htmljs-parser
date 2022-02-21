@@ -96,30 +96,12 @@ export class Parser {
     return this.activeRange as P;
   }
 
-  exitState(includedEndChars?: string) {
-    if (includedEndChars) {
-      for (let i = 0; i < includedEndChars.length; i++) {
-        if (this.data[this.pos + i] !== includedEndChars[i]) {
-          if (this.pos + i >= this.maxPos) {
-            this.notifyError(
-              this.activeRange,
-              "UNEXPECTED_EOF",
-              "EOF reached with current part incomplete"
-            );
-          } else {
-            throw new Error(
-              "Unexpected end character at position " + (this.pos + i)
-            );
-          }
-        }
-      }
-      this.skip(includedEndChars.length);
-    }
-
+  exitState() {
     const childPart = this.rangeStack.pop()!;
     const childState = this.stateStack.pop()!;
-    this.activeState = peek(this.stateStack)!;
-    this.activeRange = peek(this.rangeStack)!;
+    const last = this.rangeStack.length - 1;
+    this.activeState = this.stateStack[last];
+    this.activeRange = this.rangeStack[last];
     childPart.end = this.pos;
     childState.exit?.call(this, childPart);
     this.activeState.return?.call(

@@ -43,11 +43,11 @@ export const PARSED_TEXT_CONTENT: StateDefinition = {
         switch (this.lookAtCharCodeAhead(1)) {
           case CODE.ASTERISK:
             this.enterState(STATE.JS_COMMENT_BLOCK);
-            this.skip(1);
+            this.skip(1); // skip /
             break;
           case CODE.FORWARD_SLASH:
             this.enterState(STATE.JS_COMMENT_LINE);
-            this.skip(1);
+            this.skip(1); // skip *
             break;
         }
         break;
