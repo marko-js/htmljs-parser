@@ -37,7 +37,8 @@ export const PLACEHOLDER: StateDefinition<PlaceholderRange> = {
         "Invalid placeholder, the expression cannot be missing"
       );
     }
-    this.exitState("}");
+    this.skip(1); // skip }
+    this.exitState();
   },
 
   char() {},

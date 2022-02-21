@@ -28,13 +28,14 @@ export const REGULAR_EXPRESSION: StateDefinition<RegExpRange> = {
   char(code, regExp) {
     if (code === CODE.BACK_SLASH) {
       // Handle escape sequence
-      this.skip(1);
+      this.skip(1); // skip \
     } else if (code === CODE.OPEN_SQUARE_BRACKET && regExp.isInCharSet) {
       regExp.isInCharSet = true;
     } else if (code === CODE.CLOSE_SQUARE_BRACKET && regExp.isInCharSet) {
       regExp.isInCharSet = false;
     } else if (code === CODE.FORWARD_SLASH && !regExp.isInCharSet) {
-      this.exitState("/");
+      this.skip(1); // skip /
+      this.exitState();
     }
   },
 };

@@ -51,25 +51,30 @@ export const HTML_CONTENT: StateDefinition = {
 
       const nextCode = this.lookAtCharCodeAhead(1);
 
-      if (this.lookAheadFor("!--")) {
-        this.enterState(STATE.HTML_COMMENT);
-        this.skip(3);
-      } else if (nextCode === CODE.EXCLAMATION) {
-        // something like:
-        // <!DOCTYPE html>
-        // NOTE: We already checked for CDATA earlier and <!--
-        this.enterState(STATE.DTD);
-        this.skip(1);
+      if (nextCode === CODE.EXCLAMATION) {
+        if (
+          this.lookAtCharCodeAhead(2) === CODE.HYPHEN &&
+          this.lookAtCharCodeAhead(3) === CODE.HYPHEN
+        ) {
+          this.enterState(STATE.HTML_COMMENT);
+          this.skip(3); // skip !--
+        } else {
+          // something like:
+          // <!DOCTYPE html>
+          // NOTE: We already checked for CDATA earlier and <!--
+          this.enterState(STATE.DTD);
+          this.skip(1); // skip !
+        }
       } else if (nextCode === CODE.QUESTION) {
         // something like:
         // <?xml version="1.0"?>
         this.enterState(STATE.DECLARATION);
-        this.skip(1);
+        this.skip(1); // skip ?
       } else if (nextCode === CODE.FORWARD_SLASH) {
         // something like:
         // </html>
         this.enterState(STATE.CLOSE_TAG);
-        this.skip(1);
+        this.skip(1); // skip /
       } else if (
         nextCode === CODE.CLOSE_ANGLE_BRACKET ||
         nextCode === CODE.OPEN_ANGLE_BRACKET ||
@@ -90,8 +95,8 @@ export const HTML_CONTENT: StateDefinition = {
       isBeginningOfLine(this)
     ) {
       this.endText();
-      this.skip(1);
       this.enterState(STATE.INLINE_SCRIPT);
+      this.skip(1); // skip space
     } else if (!checkForPlaceholder(this, code)) {
       this.startText();
     }
