@@ -5,6 +5,7 @@ import {
   StateDefinition,
   Range,
   ExpressionRange,
+  AttrNameRange,
 } from "../internal";
 
 const enum ATTR_STATE {
@@ -16,13 +17,11 @@ const enum ATTR_STATE {
 
 export interface AttrRange extends Range {
   state: undefined | ATTR_STATE;
-  name: undefined | Range;
-  value: undefined | ExpressionRange;
-  valueStart: undefined | number;
+  name: undefined | AttrNameRange;
+  valueStart: number;
   argument: undefined | ExpressionRange;
   default: boolean;
   spread: boolean;
-  method: boolean;
   bound: boolean;
 }
 
@@ -35,11 +34,11 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
     this.activeAttr = attr;
     attr.state = undefined;
     attr.name = undefined;
-    attr.value = undefined;
+    attr.valueStart = -1;
     attr.bound = false;
-    attr.method = false;
+    attr.argument = undefined;
     attr.spread = false;
-    attr.default = this.activeTag!.attributes.length === 0;
+    attr.default = !this.activeTag!.hasAttrs;
   },
 
   exit() {
@@ -71,10 +70,14 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
   return(_, childPart, attr) {
     switch (attr.state) {
       case ATTR_STATE.NAME: {
-        attr.name = {
-          start: childPart.start,
-          end: childPart.end,
-        };
+        this.notify(
+          "attrName",
+          (attr.name = {
+            start: childPart.start,
+            end: childPart.end,
+            default: false,
+          })
+        );
         break;
       }
       case ATTR_STATE.ARGUMENT: {
@@ -95,18 +98,26 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
             end: childPart.end,
           },
         };
+
+        if (this.lookPastWhitespaceFor("{")) {
+          this.consumeWhitespace();
+          this.rewind(1);
+        } else {
+          this.notify("attrArgs", attr.argument);
+        }
+
         break;
       }
       case ATTR_STATE.BLOCK: {
-        attr.method = true;
-        attr.value = {
+        this.notify("attrMethod", {
           start: childPart.start - 1, // include {
           end: this.skip(1), // include }
-          value: {
+          params: attr.argument,
+          body: {
             start: childPart.start,
             end: childPart.end,
           },
-        };
+        });
         this.exitState();
         break;
       }
@@ -120,16 +131,27 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
           );
         }
 
-        attr.value = {
-          start: attr.valueStart!,
-          end: childPart.end,
-          value: {
-            start: childPart.start,
+        if (attr.spread) {
+          this.notify("spreadAttr", {
+            start: attr.valueStart!,
             end: childPart.end,
-          },
-        };
+            value: {
+              start: childPart.start,
+              end: childPart.end,
+            },
+          });
+        } else {
+          this.notify("attrValue", {
+            start: attr.valueStart!,
+            end: childPart.end,
+            bound: attr.bound,
+            value: {
+              start: childPart.start,
+              end: childPart.end,
+            },
+          });
+        }
 
-        attr.valueStart = undefined;
         this.exitState();
         break;
       }
@@ -145,6 +167,17 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
       (code === CODE.PERIOD && this.lookAheadFor(".."))
     ) {
       attr.valueStart = this.pos;
+
+      if (!attr.name && attr.default) {
+        this.notify(
+          "attrName",
+          (attr.name = {
+            start: attr.start,
+            end: attr.start,
+            default: true,
+          })
+        );
+      }
 
       if (code === CODE.COLON) {
         attr.bound = true;
@@ -170,16 +203,35 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
 
       this.rewind(1);
     } else if (code === CODE.OPEN_PAREN) {
+      if (!attr.name && attr.default) {
+        this.notify(
+          "attrName",
+          (attr.name = {
+            start: attr.start,
+            end: attr.start,
+            default: true,
+          })
+        );
+      }
+
       attr.state = ATTR_STATE.ARGUMENT;
       this.skip(1); // skip (
       this.enterState(STATE.EXPRESSION, {
         terminator: ")",
       });
       this.rewind(1);
-    } else if (
-      code === CODE.OPEN_CURLY_BRACE &&
-      (!attr.name || attr.argument)
-    ) {
+    } else if (code === CODE.OPEN_CURLY_BRACE && attr.argument) {
+      if (!attr.name && attr.default) {
+        this.notify(
+          "attrName",
+          (attr.name = {
+            start: attr.start,
+            end: attr.start,
+            default: true,
+          })
+        );
+      }
+
       attr.state = ATTR_STATE.BLOCK;
       this.skip(1); // skip {
       this.enterState(STATE.EXPRESSION, {

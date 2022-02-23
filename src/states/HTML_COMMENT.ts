@@ -11,7 +11,7 @@ export const HTML_COMMENT: StateDefinition = {
   },
 
   exit(comment) {
-    this.notifiers.notifyComment({
+    this.notify("comment", {
       start: comment.start,
       end: comment.end,
       value: {

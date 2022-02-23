@@ -8,7 +8,7 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletRange> = {
   },
 
   exit(inlineScript) {
-    this.notifiers.notifyScriptlet({
+    this.notify("scriptlet", {
       start: inlineScript.start,
       end: inlineScript.end,
       block: inlineScript.block,

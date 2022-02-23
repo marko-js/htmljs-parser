@@ -1,5 +1,5 @@
 import { Parser } from "./internal";
 
-export function createParser(listeners: any) {
-  return new Parser(listeners);
+export function createParser(text: string, filename: string) {
+  return new Parser(text, filename);
 }

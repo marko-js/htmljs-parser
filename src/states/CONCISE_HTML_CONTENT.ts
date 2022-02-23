@@ -1,3 +1,4 @@
+import type { OpenTagRange } from ".";
 import {
   Parser,
   CODE,
@@ -27,7 +28,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
-        this.notifiers.notifyComment({
+        this.notify("comment", {
           start: childPart.start,
           end: childPart.end,
           value: {
@@ -37,7 +38,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         });
         break;
       case STATE.JS_COMMENT_BLOCK: {
-        this.notifiers.notifyComment({
+        this.notify("comment", {
           start: childPart.start,
           end: childPart.end,
           value: {
@@ -68,13 +69,21 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
     if (isWhitespaceCode(code)) {
       this.indent += " "; // TODO: can just be a length?
     } else {
+      const curIndent = this.indent.length;
+
       // eslint-disable-next-line no-constant-condition
       while (true) {
         const len = this.blockStack.length;
         if (len) {
-          const curBlock = this.blockStack[len - 1];
-          if (curBlock.indent.length >= this.indent.length) {
-            this.closeTag();
+          if (
+            (this.blockStack[len - 1] as OpenTagRange).indent.length >=
+            curIndent
+          ) {
+            this.closeTag({
+              start: this.pos - curIndent,
+              end: this.pos - curIndent,
+              value: undefined,
+            });
           } else {
             // Indentation is greater than the last tag so we are starting a
             // nested tag and there are no more tags to end
