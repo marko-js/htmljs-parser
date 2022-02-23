@@ -10,7 +10,7 @@ export const DTD: StateDefinition = {
   },
 
   exit(documentType) {
-    this.notifiers.notifyDocumentType({
+    this.notify("doctype", {
       start: documentType.start,
       end: documentType.end,
       value: {

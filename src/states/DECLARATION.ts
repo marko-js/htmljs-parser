@@ -37,7 +37,7 @@ function exitDeclaration(
 ) {
   parser.skip(closeOffset);
   parser.exitState();
-  parser.notifiers.notifyDeclaration({
+  parser.notify("declaration", {
     start: declaration.start,
     end: declaration.end,
     value: {

@@ -18,7 +18,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderRange> = {
   },
 
   exit(placeholder) {
-    this.notifiers.notifyPlaceholder({
+    this.notify("placeholder", {
       start: placeholder.start,
       end: placeholder.end,
       escape: placeholder.escape,
