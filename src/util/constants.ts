@@ -25,11 +25,14 @@ export interface AttrNameRange extends Range {
   default: boolean;
 }
 
+export interface AttrMethodRange extends Range {
+  body: undefined | Range;
+  params: undefined | ExpressionRange;
+}
+
 export interface AttrValueRange extends Range {
   bound: boolean;
-  method: boolean;
   value: undefined | Range;
-  argument: undefined | ExpressionRange;
 }
 
 export interface ScriptletRange extends ExpressionRange {
@@ -39,6 +42,10 @@ export interface ScriptletRange extends ExpressionRange {
 export interface TagEndRange extends Range {
   openTagOnly: boolean;
   selfClosed: boolean;
+}
+
+export interface CloseTagRange extends Range {
+  value: Range | undefined;
 }
 
 export type Notifications =
@@ -58,10 +65,12 @@ export type Notifications =
   | ["tagArgs", ExpressionRange]
   | ["tagParams", ExpressionRange]
   | ["attrName", AttrNameRange]
+  | ["attrArgs", ExpressionRange]
   | ["attrValue", AttrValueRange]
+  | ["attrMethod", AttrMethodRange]
   | ["spreadAttr", ExpressionRange]
   | ["tagEnd", TagEndRange]
-  | ["closeTag", ExpressionRange | Range];
+  | ["closeTag", CloseTagRange];
 
 export const enum CODE {
   NUMBER_0 = 48,

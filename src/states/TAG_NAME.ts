@@ -9,8 +9,24 @@ import {
 
 export interface TagNameRange extends TemplateRange {
   shorthandCode?: CODE.NUMBER_SIGN | CODE.PERIOD;
-  last: boolean;
 }
+
+const ONLY_OPEN_TAGS = [
+  "base",
+  "br",
+  "col",
+  "hr",
+  "embed",
+  "img",
+  "input",
+  "keygen",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+];
 
 // We enter STATE.TAG_NAME after we encounter a "<"
 // followed by a non-special character
@@ -18,13 +34,44 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
   name: "TAG_NAME",
 
   enter(tagName) {
-    tagName.last = false;
     tagName.expressions = [];
     tagName.quasis = [{ start: tagName.start, end: tagName.end }];
   },
 
   exit(tagName) {
     peek(tagName.quasis)!.end = tagName.end;
+
+    const data = {
+      start: tagName.start,
+      end: tagName.end,
+      quasis: tagName.quasis,
+      expressions: tagName.expressions,
+    };
+
+    switch (tagName.shorthandCode) {
+      case CODE.NUMBER_SIGN:
+        if (this.activeTag!.hasShorthandId) {
+          return this.notifyError(
+            tagName,
+            "INVALID_TAG_SHORTHAND",
+            "Multiple shorthand ID parts are not allowed on the same tag"
+          );
+        }
+
+        this.activeTag!.hasShorthandId = true;
+        this.notify("tagShorthandId", data);
+        break;
+      case CODE.PERIOD:
+        this.notify("tagShorthandClass", data);
+        break;
+      default:
+        this.activeTag!.tagName = data;
+        this.activeTag!.openTagOnly =
+          tagName.expressions.length === 0 &&
+          this.matchAnyAtPos(tagName, ONLY_OPEN_TAGS);
+        this.notify("tagName", data);
+        break;
+    }
   },
 
   return(_, childPart, tagName) {
@@ -59,7 +106,7 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
     this.exitState();
   },
 
-  char(code, tagName) {
+  char(code) {
     if (
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
@@ -67,9 +114,6 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
       this.skip(2); // skip ${
       this.enterState(STATE.EXPRESSION, { terminator: "}" });
       this.rewind(1);
-    } else if (code === CODE.BACK_SLASH) {
-      // Handle string escape sequence
-      this.skip(1); // skip \
     } else if (
       isWhitespaceCode(code) ||
       code === CODE.EQUAL ||
@@ -81,7 +125,7 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
         ? code === CODE.SEMICOLON
         : code === CODE.CLOSE_ANGLE_BRACKET)
     ) {
-      tagName.last = true;
+      this.activeTag!.shorthandEnd = this.pos;
       this.exitState();
     } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
       this.exitState();
