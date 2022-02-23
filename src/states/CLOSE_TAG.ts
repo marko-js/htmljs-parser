@@ -9,7 +9,7 @@ export const CLOSE_TAG: StateDefinition = {
   },
 
   eof(closeTag) {
-    this.notifyError(
+    this.emitError(
       closeTag,
       "MALFORMED_CLOSE_TAG",
       "EOF reached while parsing closing tag"
@@ -71,7 +71,7 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
   const closeTagNameEnd = closeTag.end - 1; // strip >
 
   if (!lastBlock || lastBlock.type !== "tag") {
-    return parser.notifyError(
+    return parser.emitError(
       closeTag!,
       "EXTRA_CLOSING_TAG",
       'The closing "' +
@@ -101,7 +101,7 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
           end: lastBlock.shorthandEnd,
         })
       ) {
-        return parser.notifyError(
+        return parser.emitError(
           closeTag,
           "MISMATCHED_CLOSING_TAG",
           'The closing "' +
@@ -114,9 +114,5 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
     }
   }
 
-  parser.closeTag({
-    start: closeTag.start,
-    end: closeTag.end,
-    value: closeTagNamePos,
-  });
+  parser.closeTag(closeTag.start, closeTag.end, closeTagNamePos);
 }

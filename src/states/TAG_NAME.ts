@@ -5,9 +5,10 @@ import {
   StateDefinition,
   peek,
   TemplateRange,
+  Events,
 } from "../internal";
 
-export interface TagNameRange extends TemplateRange {
+export interface TagNameMeta extends TemplateRange {
   shorthandCode?: CODE.NUMBER_SIGN | CODE.PERIOD;
 }
 
@@ -30,7 +31,7 @@ const ONLY_OPEN_TAGS = [
 
 // We enter STATE.TAG_NAME after we encounter a "<"
 // followed by a non-special character
-export const TAG_NAME: StateDefinition<TagNameRange> = {
+export const TAG_NAME: StateDefinition<TagNameMeta> = {
   name: "TAG_NAME",
 
   enter(tagName) {
@@ -39,19 +40,13 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
   },
 
   exit(tagName) {
-    peek(tagName.quasis)!.end = tagName.end;
-
-    const data = {
-      start: tagName.start,
-      end: tagName.end,
-      quasis: tagName.quasis,
-      expressions: tagName.expressions,
-    };
+    const { start, end, quasis, expressions } = tagName;
+    peek(quasis)!.end = end;
 
     switch (tagName.shorthandCode) {
       case CODE.NUMBER_SIGN:
         if (this.activeTag!.hasShorthandId) {
-          return this.notifyError(
+          return this.emitError(
             tagName,
             "INVALID_TAG_SHORTHAND",
             "Multiple shorthand ID parts are not allowed on the same tag"
@@ -59,24 +54,42 @@ export const TAG_NAME: StateDefinition<TagNameRange> = {
         }
 
         this.activeTag!.hasShorthandId = true;
-        this.notify("tagShorthandId", data);
+        this.emit({
+          type: Events.Types.TagShorthandId,
+          start,
+          end,
+          quasis,
+          expressions,
+        });
         break;
       case CODE.PERIOD:
-        this.notify("tagShorthandClass", data);
+        this.emit({
+          type: Events.Types.TagShorthandClass,
+          start,
+          end,
+          quasis,
+          expressions,
+        });
         break;
       default:
-        this.activeTag!.tagName = data;
+        this.activeTag!.tagName = tagName;
         this.activeTag!.openTagOnly =
           tagName.expressions.length === 0 &&
           this.matchAnyAtPos(tagName, ONLY_OPEN_TAGS);
-        this.notify("tagName", data);
+        this.emit({
+          type: Events.Types.TagName,
+          start,
+          end,
+          quasis,
+          expressions,
+        });
         break;
     }
   },
 
   return(_, childPart, tagName) {
     if (childPart.start === childPart.end) {
-      this.notifyError(
+      this.emitError(
         childPart,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
         "Invalid placeholder, the expression cannot be missing"

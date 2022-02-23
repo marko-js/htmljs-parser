@@ -6,7 +6,7 @@ export const JS_COMMENT_BLOCK: StateDefinition = {
   name: "JS_COMMENT_BLOCK",
 
   eof(comment) {
-    this.notifyError(
+    this.emitError(
       comment,
       "MALFORMED_COMMENT",
       "EOF reached while parsing multi-line JavaScript comment"

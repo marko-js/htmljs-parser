@@ -1,4 +1,4 @@
-import { CODE, Parser, StateDefinition } from "../internal";
+import { CODE, Events, Parser, StateDefinition } from "../internal";
 
 // We enter STATE.CDATA after we see "<![CDATA["
 export const CDATA: StateDefinition = {
@@ -9,7 +9,8 @@ export const CDATA: StateDefinition = {
   },
 
   exit(cdata) {
-    this.notify("cdata", {
+    this.emit({
+      type: Events.Types.CDATA,
       start: cdata.start,
       end: cdata.end,
       value: {
@@ -20,11 +21,7 @@ export const CDATA: StateDefinition = {
   },
 
   eof(cdata) {
-    this.notifyError(
-      cdata,
-      "MALFORMED_CDATA",
-      "EOF reached while parsing CDATA"
-    );
+    this.emitError(cdata, "MALFORMED_CDATA", "EOF reached while parsing CDATA");
   },
 
   char(code) {
