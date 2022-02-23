@@ -1,16 +1,16 @@
 import { CODE, Range, StateDefinition } from "../internal";
 
-export interface RegExpRange extends Range {
+interface RegExpMeta extends Range {
   isInCharSet: boolean;
 }
-export const REGULAR_EXPRESSION: StateDefinition<RegExpRange> = {
+export const REGULAR_EXPRESSION: StateDefinition<RegExpMeta> = {
   name: "REGULAR_EXPRESSION",
   enter(regExp) {
     regExp.isInCharSet = false;
   },
 
   eol(_, regExp) {
-    this.notifyError(
+    this.emitError(
       regExp,
       "INVALID_REGULAR_EXPRESSION",
       "EOL reached while parsing regular expression"
@@ -18,7 +18,7 @@ export const REGULAR_EXPRESSION: StateDefinition<RegExpRange> = {
   },
 
   eof(regExp) {
-    this.notifyError(
+    this.emitError(
       regExp,
       "INVALID_REGULAR_EXPRESSION",
       "EOF reached while parsing regular expression"

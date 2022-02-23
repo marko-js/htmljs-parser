@@ -1,16 +1,7 @@
 import fs from "fs";
 import TreeBuilder from "./TreeBuilder";
 import { createParser } from "../../src";
-import {
-  AttrMethodRange,
-  ErrorRange,
-  ExpressionRange,
-  PlaceholderRange,
-  Range,
-  ScriptletRange,
-  TemplateRange,
-} from "../../src/internal";
-import { OpenTagRange } from "../../src/states";
+import { Events, ExpressionRange, Range } from "../../src/internal";
 
 export default function runTest() {
   return function ({ test, resolve, snapshot }) {
@@ -34,80 +25,85 @@ function parse(text, inputPath) {
   const parser = createParser(text, inputPath);
   const builder = new TreeBuilder(text);
   let isConcise = true;
-  let curTagName: TemplateRange;
-  let curShorthandId: TemplateRange;
-  let curShorthandClassNames: TemplateRange[];
-  let curTagVar: ExpressionRange;
-  let curTagArgs: ExpressionRange;
-  let curTagParams: ExpressionRange;
-  let curAttrs: (
-    | Partial<{ name: AttrNamePos } & AttrValuePos>
-    | ExpressionRange
-  )[];
+  let curTagName: Events.TagName;
+  let curShorthandId: Events.TagShorthandId;
+  let curShorthandClassNames: Events.TagShorthandClass[];
+  let curTagVar: Events.TagVar;
+  let curTagArgs: Events.TagArgs;
+  let curTagParams: Events.TagParams;
+  let curAttr: {
+    name?: Events.AttrName;
+    value?: Range;
+    argument?: ExpressionRange;
+    method?: boolean;
+    spread?: boolean;
+    bound?: boolean;
+  };
+  let curAttrs: typeof curAttr[];
 
-  for (const [type, data] of parser) {
-    switch (type) {
-      case "error":
+  for (const data of parser) {
+    switch (data.type) {
+      case Events.Types.Error:
         builder.listeners.onError({
-          type,
-          message: (data as ErrorRange).message,
-          code: (data as ErrorRange).code,
+          type: "error",
+          message: data.message,
+          code: data.code,
           ...rangeToPos(data),
         });
         break;
-      case "text":
+      case Events.Types.Text:
         builder.listeners.onText({
-          type,
+          type: "text",
           ...rangeToPos(data),
           value: parser.read(data),
         });
         break;
-      case "cdata":
+      case Events.Types.CDATA:
         builder.listeners.onCDATA({
-          type,
+          type: "cdata",
           ...rangeToPos(data),
-          value: parser.read((data as ExpressionRange).value),
+          value: parser.read(data.value),
         });
         break;
-      case "doctype":
+      case Events.Types.DocType:
         builder.listeners.onDocumentType({
           type: "documentType",
           ...rangeToPos(data),
-          value: parser.read((data as ExpressionRange).value),
+          value: parser.read(data.value),
         });
         break;
 
-      case "declaration":
+      case Events.Types.Declaration:
         builder.listeners.onDeclaration({
-          type,
+          type: "declaration",
           ...rangeToPos(data),
-          value: parser.read((data as ExpressionRange).value),
+          value: parser.read(data.value),
         });
         break;
-      case "comment":
+      case Events.Types.Comment:
         builder.listeners.onComment({
-          type,
+          type: "comment",
           ...rangeToPos(data),
           value: parser.read(data),
         });
         break;
-      case "placeholder":
+      case Events.Types.Placeholder:
         builder.listeners.onPlaceholder({
-          type,
-          escape: (data as PlaceholderRange).escape,
+          type: "placeholder",
+          escape: data.escape,
           ...rangeToPos(data),
           value: {
-            ...rangeToPos((data as PlaceholderRange).value),
-            value: parser.read((data as PlaceholderRange).value),
+            ...rangeToPos(data.value),
+            value: parser.read(data.value),
           },
         });
         break;
-      case "tagStart": {
+      case Events.Types.OpenTagStart: {
         isConcise = data.start === data.end;
         break;
       }
-      case "tagName": {
-        curTagName = data as TemplateRange;
+      case Events.Types.TagName: {
+        curTagName = data;
         builder.listeners.onOpenTagName({
           type: "openTagName",
           tagName: {
@@ -138,44 +134,48 @@ function parse(text, inputPath) {
         });
         break;
       }
-      case "tagShorthandId":
-        curShorthandId = data as TemplateRange;
+      case Events.Types.TagShorthandId:
+        curShorthandId = data;
         break;
-      case "tagShorthandClass":
+      case Events.Types.TagShorthandClass:
         curShorthandClassNames ??= [];
-        curShorthandClassNames.push(data as TemplateRange);
+        curShorthandClassNames.push(data);
         break;
-      case "tagVar":
-        curTagVar = data as ExpressionRange;
+      case Events.Types.TagVar:
+        curTagVar = data;
         break;
-      case "tagArgs":
-        curTagArgs = data as ExpressionRange;
+      case Events.Types.TagArgs:
+        curTagArgs = data;
         break;
-      case "tagParams":
-        curTagParams = data as ExpressionRange;
+      case Events.Types.TagParams:
+        curTagParams = data;
         break;
-      case "attrName":
+      case Events.Types.AttrName:
         curAttrs ??= [];
-        curAttrs.push({ name: data as AttrNamePos });
+        curAttrs.push((curAttr = { name: data }));
         break;
-      case "attrArgs":
-        Object.assign(curAttrs[curAttrs.length - 1], { argument: data });
+      case Events.Types.AttrArgs:
+        curAttr.argument = data;
         break;
-      case "attrValue":
-        Object.assign(curAttrs[curAttrs.length - 1], data);
+      case Events.Types.AttrValue:
+        curAttr.value = data.value;
+        curAttr.bound = data.bound;
         break;
-      case "attrMethod":
-        Object.assign(curAttrs[curAttrs.length - 1], {
-          method: true,
-          value: (data as AttrMethodRange).body,
-          argument: (data as AttrMethodRange).params,
+      case Events.Types.AttrMethod:
+        curAttr.method = true;
+        curAttr.argument = data.params;
+        curAttr.value = data.body.value;
+        break;
+      case Events.Types.AttrSpread:
+        curAttr = undefined;
+        curAttrs ??= [];
+        curAttrs.push({
+          value: data.value,
+          spread: true,
         });
         break;
-      case "spreadAttr":
-        curAttrs ??= [];
-        curAttrs.push(data);
-        break;
-      case "tagEnd":
+      case Events.Types.OpenTagEnd:
+        curAttr = undefined;
         builder.listeners.onOpenTag({
           type: "openTag",
           tagName: {
@@ -205,25 +205,23 @@ function parse(text, inputPath) {
           pos: curTagName.start - (isConcise ? 0 : 1),
           endPos: data.end,
           tagNameEndPos: curTagName.end,
-          selfClosed: (data as OpenTagRange).selfClosed,
-          openTagOnly: (data as OpenTagRange).openTagOnly,
-          attributes: (
-            (curAttrs || []) as ({ name: AttrNamePos } & AttrValuePos)[]
-          ).map((attr) => ({
+          selfClosed: data.selfClosed,
+          openTagOnly: data.openTagOnly,
+          attributes: (curAttrs || []).map((attr) => ({
             default: attr.name?.default,
             name: attr.name && {
               ...rangeToPos(attr.name),
               value: parser.read(attr.name),
             },
-            pos: attr.start,
-            endPos: attr.end,
+            pos: attr.name?.start ?? attr.value?.start,
+            endPos: attr.value?.end ?? attr.name?.end,
             value: attr.value && {
               ...rangeToPos(attr.value),
               value: parser.read(attr.value),
             },
             bound: attr.bound,
             method: attr.method,
-            spread: attr.name === undefined,
+            spread: attr.spread,
             argument: attr.argument && {
               ...attr.argument,
               value: parser.read(attr.argument.value),
@@ -250,22 +248,22 @@ function parse(text, inputPath) {
         curTagParams = undefined;
         curAttrs = undefined;
         break;
-      case "closeTag":
+      case Events.Types.CloseTag:
         builder.listeners.onCloseTag({
-          type,
+          type: "closeTag",
           ...rangeToPos(data),
-          tagName: (data as ExpressionRange).value && {
-            ...rangeToPos((data as ExpressionRange).value),
-            value: parser.read((data as ExpressionRange).value),
+          tagName: data.value && {
+            ...rangeToPos(data.value),
+            value: parser.read(data.value),
           },
         });
         break;
-      case "scriptlet":
+      case Events.Types.Scriptlet:
         builder.listeners.onScriptlet({
-          type,
-          block: (data as ScriptletRange).block,
+          type: "scriptlet",
+          block: data.block,
           ...rangeToPos(data),
-          value: parser.read((data as ExpressionRange).value),
+          value: parser.read(data.value),
         });
         break;
     }

@@ -5,7 +5,7 @@ export const TEMPLATE_STRING: StateDefinition = {
 
   return(_, childPart) {
     if (childPart.start === childPart.end) {
-      this.notifyError(
+      this.emitError(
         childPart,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
         "Invalid placeholder, the expression cannot be missing"
@@ -16,7 +16,7 @@ export const TEMPLATE_STRING: StateDefinition = {
   },
 
   eof(templateString) {
-    this.notifyError(
+    this.emitError(
       templateString,
       "INVALID_TEMPLATE_STRING",
       "EOF reached while parsing template string expression"

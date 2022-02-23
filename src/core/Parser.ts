@@ -5,10 +5,9 @@ import {
   peek,
   isWhitespaceCode,
   Range,
-  Notifications,
-  CloseTagRange,
+  Events,
 } from "../internal";
-import type { OpenTagRange } from "../states";
+import type { OpenTagMeta } from "../states";
 
 export interface StateDefinition<P extends Range = Range> {
   name: string;
@@ -35,8 +34,8 @@ export class Parser {
   public activeRange!: Range; // The current pos object at the top of the stack
   public rangeStack!: Range[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
   public forward!: boolean;
-  public activeTag: STATE.OpenTagRange | undefined; // Used to reference the closest open tag
-  public activeAttr: STATE.AttrRange | undefined; // Used to reference the current attribute that is being parsed
+  public activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
+  public activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
   public isInAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
   public isInSingleLineHtmlBlock!: boolean; // Set to true if the current block is for a single line HTML block
   public indent!: string; // Used to build the indent for the current concise line
@@ -47,12 +46,12 @@ export class Parser {
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
   public textParseMode!: "html" | "cdata" | "parsed-text";
-  public value: Notifications | undefined;
-  public notifications!: Notifications[];
-  public notificationIndex!: number;
+  public value: Events.Any | undefined;
+  public events!: Events.Any[];
+  public eventIndex!: number;
   public done!: boolean;
   public blockStack!: ((
-    | STATE.OpenTagRange
+    | STATE.OpenTagMeta
     | {
         type: "html";
         delimiter?: string;
@@ -76,8 +75,8 @@ export class Parser {
     this.blockStack = [];
     this.rangeStack = [];
     this.stateStack = [];
-    this.notifications = [];
-    this.notificationIndex = 0;
+    this.events = [];
+    this.eventIndex = 0;
     this.forward = true;
     this.isConcise = true;
     this.isInAttrGroup = false;
@@ -99,19 +98,16 @@ export class Parser {
     return this.data.slice(node.start, node.end);
   }
 
-  notify<T extends Notifications[0]>(
-    type: T,
-    data: Extract<Notifications, [T, any]>[1]
-  ) {
+  emit(event: Events.Any) {
     if (this.pos <= this.maxPos) {
-      this.notifications.push([type, data]);
+      this.events.push(event);
     }
   }
 
-  hasNotification() {
-    const { notifications } = this;
-    if (this.notificationIndex !== notifications.length) {
-      this.value = notifications[this.notificationIndex++];
+  hasEvent() {
+    const { events } = this;
+    if (this.eventIndex !== events.length) {
+      this.value = events[this.eventIndex++];
       return true;
     }
 
@@ -248,7 +244,11 @@ export class Parser {
     if (start !== -1) {
       const end = this.pos + offset;
       if (start < end) {
-        this.notify("text", { start, end });
+        this.emit({
+          type: Events.Types.Text,
+          start,
+          end,
+        });
       }
 
       this.textPos = -1;
@@ -294,7 +294,7 @@ export class Parser {
       } else {
         // The current block is for an HTML tag and it still open. When a tag is tag is closed
         // it is removed from the stack
-        this.notifyError(
+        this.emitError(
           block,
           "MISSING_END_TAG",
           'Missing ending "' + this.read(block.tagName) + '" tag'
@@ -323,18 +323,14 @@ export class Parser {
       const curBlock = peek(this.blockStack)!;
       if (curBlock.type === "tag") {
         if (curBlock.concise) {
-          this.closeTag({
-            start: this.pos,
-            end: this.pos,
-            value: undefined,
-          });
+          this.closeTag(this.pos, this.pos, undefined);
         } else {
           // We found an unclosed tag on the stack that is not for a concise tag. That means
           // there is a problem with the template because all open tags should have a closing
           // tag
           //
           // NOTE: We have already closed tags that are open tag only or self-closed
-          return this.notifyError(
+          return this.emitError(
             curBlock,
             "MISSING_END_TAG",
             'Missing ending "' + this.read(curBlock.tagName) + '" tag'
@@ -353,7 +349,7 @@ export class Parser {
     }
   }
 
-  notifyError(range: number | Range, code: string, message: string) {
+  emitError(range: number | Range, code: string, message: string) {
     let start, end;
 
     if (typeof range === "number") {
@@ -363,7 +359,8 @@ export class Parser {
       end = range.end;
     }
 
-    this.notify("error", {
+    this.emit({
+      type: Events.Types.Error,
       start,
       end,
       code,
@@ -373,8 +370,8 @@ export class Parser {
     this.end();
   }
 
-  closeTag(closeTag: CloseTagRange) {
-    const lastTag = this.blockStack.pop() as OpenTagRange;
+  closeTag(start: number, end: number, value: Range | undefined) {
+    const lastTag = this.blockStack.pop() as OpenTagMeta;
 
     if (lastTag.beginMixedMode) {
       this.endingMixedModeAtEOL = true;
@@ -392,7 +389,12 @@ export class Parser {
       this.activeTag = undefined;
     }
 
-    this.notify("closeTag", closeTag);
+    this.emit({
+      type: Events.Types.CloseTag,
+      start,
+      end,
+      value,
+    });
   }
 
   // --------------------------
@@ -484,7 +486,7 @@ export class Parser {
       if (this.consumeWhitespaceOnLine(0)) {
         this.endHtmlBlock();
       } else {
-        this.notifyError(
+        this.emitError(
           this.pos,
           "INVALID_CHARACTER",
           "A concise mode closing block delimiter can only be followed by whitespace."
@@ -535,7 +537,7 @@ export class Parser {
   }
 
   next(): Parser {
-    if (this.hasNotification()) return this;
+    if (this.hasEvent()) return this;
 
     let { pos } = this;
     const { maxPos, data } = this;
@@ -567,7 +569,7 @@ export class Parser {
         this.forward = true;
       }
 
-      if (this.hasNotification()) return this;
+      if (this.hasEvent()) return this;
     } while ((pos = this.pos) < maxPos);
 
     do {
