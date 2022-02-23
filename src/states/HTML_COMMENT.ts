@@ -1,4 +1,4 @@
-import { CODE, StateDefinition } from "../internal";
+import { CODE, Events, StateDefinition } from "../internal";
 
 // We enter STATE.HTML_COMMENT after we encounter a "<--"
 // while in the STATE.HTML_CONTENT.
@@ -11,7 +11,8 @@ export const HTML_COMMENT: StateDefinition = {
   },
 
   exit(comment) {
-    this.notify("comment", {
+    this.emit({
+      type: Events.Types.Comment,
       start: comment.start,
       end: comment.end,
       value: {
@@ -22,7 +23,7 @@ export const HTML_COMMENT: StateDefinition = {
   },
 
   eof(comment) {
-    this.notifyError(
+    this.emitError(
       comment,
       "MALFORMED_COMMENT",
       "EOF reached while parsing comment"

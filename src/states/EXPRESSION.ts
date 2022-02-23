@@ -6,7 +6,7 @@ import {
   Range,
 } from "../internal";
 
-export interface ExpressionRange extends Range {
+interface ExpressionMeta extends Range {
   groupStack: number[];
   terminator?: string | string[];
   skipOperators: boolean;
@@ -17,7 +17,7 @@ export interface ExpressionRange extends Range {
 const conciseOperatorPattern = buildOperatorPattern(true);
 const htmlOperatorPattern = buildOperatorPattern(false);
 
-export const EXPRESSION: StateDefinition<ExpressionRange> = {
+export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   name: "EXPRESSION",
 
   enter(expression) {
@@ -50,7 +50,7 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
       if (parentState === STATE.ATTRIBUTE) {
         const attr = this.activeAttr!;
         if (!attr.default && !attr.spread && !attr.name) {
-          return this.notifyError(
+          return this.emitError(
             expression,
             "MALFORMED_OPEN_TAG",
             'EOF reached while parsing attribute name for the "' +
@@ -59,7 +59,7 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
           );
         }
 
-        return this.notifyError(
+        return this.emitError(
           expression,
           "MALFORMED_OPEN_TAG",
           `EOF reached while parsing attribute value for the ${
@@ -71,20 +71,20 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
           } attribute`
         );
       } else if (parentState === STATE.TAG_NAME) {
-        return this.notifyError(
+        return this.emitError(
           expression,
           "MALFORMED_OPEN_TAG",
           "EOF reached while parsing tag name"
         );
       } else if (parentState === STATE.PLACEHOLDER) {
-        return this.notifyError(
+        return this.emitError(
           expression,
           "MALFORMED_PLACEHOLDER",
           "EOF reached while parsing placeholder"
         );
       }
 
-      return this.notifyError(
+      return this.emitError(
         expression,
         "INVALID_EXPRESSION",
         "EOF reached while parsing expression"
@@ -180,7 +180,7 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
       case CODE.CLOSE_SQUARE_BRACKET:
       case CODE.CLOSE_CURLY_BRACE: {
         if (depth === 0) {
-          return this.notifyError(
+          return this.emitError(
             expression,
             "INVALID_EXPRESSION",
             'Mismatched group. A closing "' +
@@ -191,7 +191,7 @@ export const EXPRESSION: StateDefinition<ExpressionRange> = {
 
         const expectedCode = expression.groupStack.pop()!;
         if (expectedCode !== code) {
-          return this.notifyError(
+          return this.emitError(
             expression,
             "INVALID_EXPRESSION",
             'Mismatched group. A "' +

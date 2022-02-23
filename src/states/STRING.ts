@@ -1,14 +1,14 @@
 import { CODE, Range, StateDefinition } from "../internal";
 
-export interface StringRange extends Range {
+interface StringMeta extends Range {
   quoteCharCode: number;
 }
 
-export const STRING: StateDefinition<StringRange> = {
+export const STRING: StateDefinition<StringMeta> = {
   name: "STRING",
 
   eof(string) {
-    this.notifyError(
+    this.emitError(
       string,
       "INVALID_STRING",
       "EOF reached while parsing string expression"

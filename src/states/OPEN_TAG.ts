@@ -6,6 +6,7 @@ import {
   TemplateRange,
   Range,
   BODY_MODE,
+  Events,
 } from "../internal";
 
 const enum TAG_STATE {
@@ -14,7 +15,7 @@ const enum TAG_STATE {
   PARAMS,
 }
 
-export interface OpenTagRange extends Range {
+export interface OpenTagMeta extends Range {
   type: "tag";
   body: BODY_MODE;
   state: TAG_STATE | undefined;
@@ -32,7 +33,7 @@ export interface OpenTagRange extends Range {
 }
 const PARSED_TEXT_TAGS = ["script", "style", "textarea"];
 
-export const OPEN_TAG: StateDefinition<OpenTagRange> = {
+export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   name: "OPEN_TAG",
 
   enter(tag) {
@@ -52,7 +53,8 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
     this.blockStack.push(tag);
     this.endText();
 
-    this.notify("tagStart", {
+    this.emit({
+      type: Events.Types.OpenTagStart,
       start: tag.start,
       end: tag.start + (this.isConcise ? 0 : 1),
     });
@@ -61,7 +63,8 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
   exit(tag) {
     const { tagName, selfClosed, openTagOnly } = tag;
 
-    this.notify("tagEnd", {
+    this.emit({
+      type: Events.Types.OpenTagEnd,
       start: this.pos - (this.isConcise ? 0 : selfClosed ? 2 : 1),
       end: this.pos,
       selfClosed,
@@ -69,11 +72,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
     });
 
     if (!this.isConcise && (selfClosed || openTagOnly)) {
-      this.closeTag({
-        start: this.pos,
-        end: this.pos,
-        value: undefined,
-      });
+      this.closeTag(this.pos, this.pos, undefined);
     } else if (
       tagName.expressions.length === 0 &&
       this.matchAnyAtPos(tagName, PARSED_TEXT_TAGS)
@@ -92,14 +91,15 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
         switch (tag.state) {
           case TAG_STATE.VAR: {
             if (childPart.start === childPart.end) {
-              return this.notifyError(
+              return this.emitError(
                 childPart,
                 "MISSING_TAG_VARIABLE",
                 "A slash was found that was not followed by a variable name or lhs expression"
               );
             }
 
-            this.notify("tagVar", {
+            this.emit({
+              type: Events.Types.TagVar,
               start: childPart.start - 1, // include /,
               end: childPart.end,
               value: {
@@ -110,30 +110,34 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
             break;
           }
           case TAG_STATE.ARGUMENT: {
-            const argPos = {
-              start: childPart.start - 1, // include (
-              end: this.skip(1), // include )
-              value: {
-                start: childPart.start,
-                end: childPart.end,
-              },
+            const start = childPart.start - 1; // include (
+            const end = this.skip(1); // include )
+            const value = {
+              start: childPart.start,
+              end: childPart.end,
             };
 
             if (this.lookPastWhitespaceFor("{")) {
               this.consumeWhitespace();
               const attr = this.enterState(STATE.ATTRIBUTE);
-              attr.argument = argPos;
-              attr.start = attr.argument!.start;
+              attr.start = start;
+              attr.args = { start, end, value };
               tag.hasAttrs = true;
               this.rewind(1);
             } else {
               tag.hasArgs = true;
-              this.notify("tagArgs", argPos);
+              this.emit({
+                type: Events.Types.TagArgs,
+                start,
+                end,
+                value,
+              });
             }
             break;
           }
           case TAG_STATE.PARAMS: {
-            this.notify("tagParams", {
+            this.emit({
+              type: Events.Types.TagParams,
               start: childPart.start - 1, // include leading |
               end: this.skip(1), // include closing |
               value: {
@@ -159,7 +163,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
   eof(tag) {
     if (this.isConcise) {
       if (this.isInAttrGroup) {
-        this.notifyError(
+        this.emitError(
           tag,
           "MALFORMED_OPEN_TAG",
           'EOF reached while within an attribute group (e.g. "[ ... ]").'
@@ -173,7 +177,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
     } else {
       // Otherwise, in non-concise mode we consider this malformed input
       // since the end '>' was not found.
-      this.notifyError(
+      this.emitError(
         tag,
         "MALFORMED_OPEN_TAG",
         "EOF reached while parsing open tag"
@@ -210,7 +214,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
               break;
           }
 
-          this.notifyError(
+          this.emitError(
             this.pos,
             "INVALID_CODE_AFTER_SEMICOLON",
             "A semicolon indicates the end of a line. Only comments may follow it."
@@ -222,7 +226,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
 
       if (code === CODE.HTML_BLOCK_DELIMITER) {
         if (this.lookAtCharCodeAhead(1) !== CODE.HTML_BLOCK_DELIMITER) {
-          this.notifyError(
+          this.emitError(
             tag,
             "MALFORMED_OPEN_TAG",
             '"-" not allowed as first character of attribute name'
@@ -231,7 +235,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
         }
 
         if (this.isInAttrGroup) {
-          this.notifyError(
+          this.emitError(
             this.pos,
             "MALFORMED_OPEN_TAG",
             "Attribute group was not properly ended"
@@ -273,7 +277,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
         return;
       } else if (code === CODE.OPEN_SQUARE_BRACKET) {
         if (this.isInAttrGroup) {
-          this.notifyError(
+          this.emitError(
             this.pos,
             "MALFORMED_OPEN_TAG",
             'Unexpected "[" character within open tag.'
@@ -285,7 +289,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
         return;
       } else if (code === CODE.CLOSE_SQUARE_BRACKET) {
         if (!this.isInAttrGroup) {
-          this.notifyError(
+          this.emitError(
             this.pos,
             "MALFORMED_OPEN_TAG",
             'Unexpected "]" character within open tag.'
@@ -311,7 +315,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
     }
 
     if (code === CODE.OPEN_ANGLE_BRACKET) {
-      return this.notifyError(
+      return this.emitError(
         this.pos,
         "ILLEGAL_ATTRIBUTE_NAME",
         'Invalid attribute name. Attribute name cannot begin with the "<" character.'
@@ -347,7 +351,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
       this.rewind(1);
     } else if (code === CODE.OPEN_PAREN && !tag.hasAttrs) {
       if (tag.hasArgs) {
-        this.notifyError(
+        this.emitError(
           this.pos,
           "ILLEGAL_TAG_ARGUMENT",
           "A tag can only have one argument"

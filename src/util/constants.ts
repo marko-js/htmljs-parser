@@ -1,77 +1,3 @@
-export interface Range {
-  start: number;
-  end: number;
-}
-
-export interface ErrorRange extends Range {
-  code: string;
-  message: string;
-}
-
-export interface ExpressionRange extends Range {
-  value: Range;
-}
-
-export interface TemplateRange extends Range {
-  expressions: ExpressionRange[];
-  quasis: Range[];
-}
-
-export interface PlaceholderRange extends ExpressionRange {
-  escape: boolean;
-}
-
-export interface AttrNameRange extends Range {
-  default: boolean;
-}
-
-export interface AttrMethodRange extends Range {
-  body: undefined | Range;
-  params: undefined | ExpressionRange;
-}
-
-export interface AttrValueRange extends Range {
-  bound: boolean;
-  value: undefined | Range;
-}
-
-export interface ScriptletRange extends ExpressionRange {
-  block: boolean;
-}
-
-export interface TagEndRange extends Range {
-  openTagOnly: boolean;
-  selfClosed: boolean;
-}
-
-export interface CloseTagRange extends Range {
-  value: Range | undefined;
-}
-
-export type Notifications =
-  | ["error", ErrorRange]
-  | ["text", Range]
-  | ["comment", ExpressionRange]
-  | ["cdata", ExpressionRange]
-  | ["declaration", ExpressionRange]
-  | ["doctype", ExpressionRange]
-  | ["placeholder", PlaceholderRange]
-  | ["scriptlet", ScriptletRange]
-  | ["tagStart", Range]
-  | ["tagName", TemplateRange]
-  | ["tagShorthandId", TemplateRange]
-  | ["tagShorthandClass", TemplateRange]
-  | ["tagVar", ExpressionRange]
-  | ["tagArgs", ExpressionRange]
-  | ["tagParams", ExpressionRange]
-  | ["attrName", AttrNameRange]
-  | ["attrArgs", ExpressionRange]
-  | ["attrValue", AttrValueRange]
-  | ["attrMethod", AttrMethodRange]
-  | ["spreadAttr", ExpressionRange]
-  | ["tagEnd", TagEndRange]
-  | ["closeTag", CloseTagRange];
-
 export const enum CODE {
   NUMBER_0 = 48,
   NUMBER_9 = 57,
@@ -119,4 +45,168 @@ export const enum MODE {
 
 export const enum BODY_MODE {
   PARSED_TEXT = 1, // Body of a tag is treated as text, but placeholders will be parsed
+}
+
+export interface Range {
+  start: number;
+  end: number;
+}
+
+export interface ExpressionRange extends Range {
+  value: Range;
+}
+
+export interface TemplateRange extends Range {
+  expressions: ExpressionRange[];
+  quasis: Range[];
+}
+
+export namespace Events {
+  export const enum Types {
+    Error,
+    Text,
+    Comment,
+    CDATA,
+    Declaration,
+    DocType,
+    Scriptlet,
+    Placeholder,
+    OpenTagStart,
+    TagName,
+    TagShorthandId,
+    TagShorthandClass,
+    TagVar,
+    TagArgs,
+    TagParams,
+    AttrName,
+    AttrArgs,
+    AttrValue,
+    AttrMethod,
+    AttrSpread,
+    OpenTagEnd,
+    CloseTag,
+  }
+
+  export type Any =
+    | Error
+    | Text
+    | Comment
+    | CDATA
+    | Declaration
+    | DocType
+    | Placeholder
+    | Scriptlet
+    | OpenTagStart
+    | TagName
+    | TagShorthandId
+    | TagShorthandClass
+    | TagVar
+    | TagArgs
+    | TagParams
+    | AttrName
+    | AttrArgs
+    | AttrValue
+    | AttrMethod
+    | AttrSpread
+    | OpenTagEnd
+    | CloseTag;
+
+  export interface Error extends Range {
+    type: Types.Error;
+    code: string;
+    message: string;
+  }
+
+  export interface Text extends Range {
+    type: Types.Text;
+  }
+
+  export interface Comment extends ExpressionRange {
+    type: Types.Comment;
+  }
+
+  export interface CDATA extends ExpressionRange {
+    type: Types.CDATA;
+  }
+
+  export interface Declaration extends ExpressionRange {
+    type: Types.Declaration;
+  }
+
+  export interface DocType extends ExpressionRange {
+    type: Types.DocType;
+  }
+
+  export interface Scriptlet extends ExpressionRange {
+    type: Types.Scriptlet;
+    block: boolean;
+  }
+
+  export interface Placeholder extends ExpressionRange {
+    type: Types.Placeholder;
+    escape: boolean;
+  }
+
+  export interface OpenTagStart extends Range {
+    type: Types.OpenTagStart;
+  }
+
+  export interface TagName extends TemplateRange {
+    type: Types.TagName;
+  }
+
+  export interface TagShorthandId extends TemplateRange {
+    type: Types.TagShorthandId;
+  }
+
+  export interface TagShorthandClass extends TemplateRange {
+    type: Types.TagShorthandClass;
+  }
+
+  export interface TagVar extends ExpressionRange {
+    type: Types.TagVar;
+  }
+
+  export interface TagArgs extends ExpressionRange {
+    type: Types.TagArgs;
+  }
+
+  export interface TagParams extends ExpressionRange {
+    type: Types.TagParams;
+  }
+
+  export interface AttrName extends Range {
+    type: Types.AttrName;
+    default: boolean;
+  }
+
+  export interface AttrArgs extends ExpressionRange {
+    type: Types.AttrArgs;
+  }
+
+  export interface AttrValue extends ExpressionRange {
+    type: Types.AttrValue;
+    bound: boolean;
+  }
+
+  export interface AttrMethod extends Range {
+    type: Types.AttrMethod;
+    body: ExpressionRange;
+    params: ExpressionRange;
+  }
+
+  export interface AttrSpread extends ExpressionRange {
+    type: Types.AttrSpread;
+  }
+
+  export interface OpenTagEnd extends Range {
+    type: Types.OpenTagEnd;
+    openTagOnly: boolean;
+    selfClosed: boolean;
+  }
+
+  export interface CloseTag extends Range {
+    type: Types.CloseTag;
+    value: Range | undefined;
+  }
 }
