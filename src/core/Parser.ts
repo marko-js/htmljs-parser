@@ -1,12 +1,14 @@
 import {
-  createNotifiers,
   BODY_MODE,
   CODE,
   STATE,
   peek,
   isWhitespaceCode,
   Range,
+  Notifications,
+  CloseTagRange,
 } from "../internal";
+import type { OpenTagRange } from "../states";
 
 export interface StateDefinition<P extends Range = Range> {
   name: string;
@@ -33,7 +35,6 @@ export class Parser {
   public activeRange!: Range; // The current pos object at the top of the stack
   public rangeStack!: Range[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
   public forward!: boolean;
-  public notifiers: ReturnType<typeof createNotifiers>;
   public activeTag: STATE.OpenTagRange | undefined; // Used to reference the closest open tag
   public activeAttr: STATE.AttrRange | undefined; // Used to reference the current attribute that is being parsed
   public isInAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
@@ -46,6 +47,10 @@ export class Parser {
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
   public textParseMode!: "html" | "cdata" | "parsed-text";
+  public value: Notifications | undefined;
+  public notifications!: Notifications[];
+  public notificationIndex!: number;
+  public done!: boolean;
   public blockStack!: ((
     | STATE.OpenTagRange
     | {
@@ -55,34 +60,62 @@ export class Parser {
       }
   ) & { body?: BODY_MODE; nestedIndent?: string })[]; // Used to keep track of HTML tags and HTML blocks
 
-  constructor(listeners: any) {
-    this.reset();
-    this.notifiers = createNotifiers(this, listeners);
+  constructor(data: string, filename: string) {
+    this.filename = filename;
+    this.data = data;
+
+    // Move to first position
+    // Skip the byte order mark (BOM) sequence
+    // at the beginning of the file if there is one:
+    // - https://en.wikipedia.org/wiki/Byte_order_mark
+    // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
+    this.pos = data.charCodeAt(0) === 0xfeff ? 1 : 0;
+    this.maxPos = data.length;
+    this.textPos = -1;
+    this.indent = "";
+    this.blockStack = [];
+    this.rangeStack = [];
+    this.stateStack = [];
+    this.notifications = [];
+    this.notificationIndex = 0;
+    this.forward = true;
+    this.isConcise = true;
+    this.isInAttrGroup = false;
+    this.value = undefined;
+    this.activeTag = undefined;
+    this.activeAttr = undefined;
+    this.beginMixedMode = false;
+    this.textParseMode = "html";
+    this.htmlBlockIndent = undefined;
+    this.endingMixedModeAtEOL = false;
+    this.htmlBlockDelimiter = undefined;
+    this.isInSingleLineHtmlBlock = false;
+
+    // Enter initial state
+    this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
   read(node: Range) {
     return this.data.slice(node.start, node.end);
   }
 
-  reset() {
-    this.pos = -1;
-    this.maxPos = -1;
-    this.rangeStack = [];
-    this.stateStack = [];
-    this.forward = true;
-    this.textPos = -1;
-    this.textParseMode = "html";
-    this.activeTag = undefined;
-    this.activeAttr = undefined;
-    this.blockStack = [];
-    this.indent = "";
-    this.isConcise = true;
-    this.isInAttrGroup = false;
-    this.isInSingleLineHtmlBlock = false;
-    this.htmlBlockDelimiter = undefined;
-    this.htmlBlockIndent = undefined;
-    this.beginMixedMode = false;
-    this.endingMixedModeAtEOL = false;
+  notify<T extends Notifications[0]>(
+    type: T,
+    data: Extract<Notifications, [T, any]>[1]
+  ) {
+    if (this.pos <= this.maxPos) {
+      this.notifications.push([type, data]);
+    }
+  }
+
+  hasNotification() {
+    const { notifications } = this;
+    if (this.notificationIndex !== notifications.length) {
+      this.value = notifications[this.notificationIndex++];
+      return true;
+    }
+
+    return false;
   }
 
   enterState<P extends Range = Range>(
@@ -188,15 +221,6 @@ export class Parser {
     }
   }
 
-  /**
-   * Look ahead to a character at a specific offset.
-   * The callback will be invoked with the character
-   * at the given position.
-   */
-  lookAtCharAhead(offset: number, startPos = this.pos) {
-    return this.data.charAt(startPos + offset);
-  }
-
   lookAtCharCodeAhead(offset: number, startPos = this.pos) {
     return this.data.charCodeAt(startPos + offset);
   }
@@ -220,10 +244,11 @@ export class Parser {
   }
 
   endText(offset = 0) {
-    if (this.textPos !== -1) {
-      const endPos = this.pos + offset;
-      if (this.textPos < endPos) {
-        this.notifiers.notifyText(this.textPos, endPos, this.textParseMode);
+    const start = this.textPos;
+    if (start !== -1) {
+      const end = this.pos + offset;
+      if (start < end) {
+        this.notify("text", { start, end });
       }
 
       this.textPos = -1;
@@ -298,19 +323,22 @@ export class Parser {
       const curBlock = peek(this.blockStack)!;
       if (curBlock.type === "tag") {
         if (curBlock.concise) {
-          this.closeTag();
+          this.closeTag({
+            start: this.pos,
+            end: this.pos,
+            value: undefined,
+          });
         } else {
           // We found an unclosed tag on the stack that is not for a concise tag. That means
           // there is a problem with the template because all open tags should have a closing
           // tag
           //
           // NOTE: We have already closed tags that are open tag only or self-closed
-          this.notifyError(
+          return this.notifyError(
             curBlock,
             "MISSING_END_TAG",
             'Missing ending "' + this.read(curBlock.tagName) + '" tag'
           );
-          return;
         }
       } else if (curBlock.type === "html") {
         // We reached the end of file while still within a single line HTML block. That's okay
@@ -325,105 +353,46 @@ export class Parser {
     }
   }
 
-  notifyError(pos: number | Range, errorCode: string, message: string) {
-    if (typeof pos === "number") {
-      this.notifiers.notifyError(pos, errorCode, message);
+  notifyError(range: number | Range, code: string, message: string) {
+    let start, end;
+
+    if (typeof range === "number") {
+      start = end = range;
     } else {
-      this.notifiers.notifyError(pos.start, errorCode, message);
+      start = range.start;
+      end = range.end;
     }
+
+    this.notify("error", {
+      start,
+      end,
+      code,
+      message,
+    });
+
     this.end();
   }
 
-  closeTag(closeTag?: Range) {
-    const lastBlock = this.blockStack.pop();
+  closeTag(closeTag: CloseTagRange) {
+    const lastTag = this.blockStack.pop() as OpenTagRange;
 
-    if (closeTag) {
-      const closeTagNameStart = closeTag.start + 2; // strip </
-      const closeTagNameEnd = closeTag.end - 1; // strip >
-
-      if (!lastBlock || lastBlock.type !== "tag") {
-        return this.notifyError(
-          closeTag!,
-          "EXTRA_CLOSING_TAG",
-          'The closing "' +
-            this.read({ start: closeTagNameStart, end: closeTagNameEnd }) +
-            '" tag was not expected'
-        );
-      }
-
-      if (closeTagNameStart < closeTagNameEnd!) {
-        const closeTagNamePos = {
-          start: closeTagNameStart,
-          end: closeTagNameEnd,
-        };
-
-        if (
-          !this.matchAtPos(
-            closeTagNamePos,
-            lastBlock.tagName.end > lastBlock.tagName.start
-              ? lastBlock.tagName
-              : "div"
-          )
-        ) {
-          const shorthandEndPos = Math.max(
-            lastBlock.shorthandId ? lastBlock.shorthandId.end : 0,
-            lastBlock.shorthandClassNames
-              ? peek(lastBlock.shorthandClassNames)!.end
-              : 0
-          );
-
-          if (
-            shorthandEndPos === 0 ||
-            !this.matchAtPos(closeTagNamePos, {
-              start: lastBlock.tagName.start,
-              end: shorthandEndPos,
-            })
-          ) {
-            return this.notifyError(
-              closeTag,
-              "MISMATCHED_CLOSING_TAG",
-              'The closing "' +
-                this.read(closeTagNamePos) +
-                '" tag does not match the corresponding opening "' +
-                (this.read(lastBlock.tagName) || "div") +
-                '" tag'
-            );
-          }
-        }
-      }
-
-      this.notifiers.notifyCloseTag({
-        start: closeTag.start,
-        end: closeTag.end,
-        value: {
-          start: closeTagNameStart,
-          end: closeTagNameEnd,
-        },
-      });
-    } else {
-      this.notifiers.notifyCloseTag({
-        start: this.pos,
-        end: this.pos,
-      });
+    if (lastTag.beginMixedMode) {
+      this.endingMixedModeAtEOL = true;
     }
 
-    if (lastBlock?.type === "tag") {
-      if (lastBlock.beginMixedMode) {
-        this.endingMixedModeAtEOL = true;
-      }
-
-      for (let i = this.blockStack.length; i--; ) {
-        const block = this.blockStack[i];
-        if (block.type === "tag") {
-          this.activeTag = block;
-          break;
-        }
-      }
-
-      if (this.activeTag === lastBlock) {
-        this.activeTag = undefined;
+    for (let i = this.blockStack.length; i--; ) {
+      const block = this.blockStack[i];
+      if (block.type === "tag") {
+        this.activeTag = block;
+        break;
       }
     }
+
+    if (this.activeTag === lastTag) {
+      this.activeTag = undefined;
+    }
+
+    this.notify("closeTag", closeTag);
   }
 
   // --------------------------
@@ -565,32 +534,26 @@ export class Parser {
     }
   }
 
-  parse(data: string, filename: string) {
-    // call the constructor function again because we have a contract that
-    // it will fully reset the parser
-    this.reset();
+  next(): Parser {
+    if (this.hasNotification()) return this;
 
-    this.filename = filename;
-    this.data = data;
+    let { pos } = this;
+    const { maxPos, data } = this;
 
-    // Enter initial state
-    this.enterState(STATE.CONCISE_HTML_CONTENT);
+    if (pos >= maxPos) {
+      this.value = undefined;
+      this.done = true;
+      return this;
+    }
 
-    // Move to first position
-    // Skip the byte order mark (BOM) sequence
-    // at the beginning of the file if there is one:
-    // - https://en.wikipedia.org/wiki/Byte_order_mark
-    // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
-    this.pos = data.charCodeAt(0) === 0xfeff ? 1 : 0;
-    this.maxPos = data.length;
-    while (this.pos < this.maxPos) {
-      const code = data.charCodeAt(this.pos);
+    do {
+      const code = data.charCodeAt(pos);
 
       if (code === CODE.NEWLINE) {
         this.activeState.eol?.call(this, 1, this.activeRange);
       } else if (
         code === CODE.CARRIAGE_RETURN &&
-        data.charCodeAt(this.pos + 1) === CODE.NEWLINE
+        data.charCodeAt(pos + 1) === CODE.NEWLINE
       ) {
         this.activeState.eol?.call(this, 2, this.activeRange);
         this.pos++;
@@ -603,13 +566,19 @@ export class Parser {
       } else {
         this.forward = true;
       }
-    }
+
+      if (this.hasNotification()) return this;
+    } while ((pos = this.pos) < maxPos);
 
     do {
       this.forward = true;
       this.activeState.eof?.call(this, this.activeRange);
     } while (!this.forward);
 
-    this.notifiers.notifyFinish();
+    return this.next();
+  }
+
+  [Symbol.iterator]() {
+    return this;
   }
 }

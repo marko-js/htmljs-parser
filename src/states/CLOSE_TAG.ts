@@ -1,11 +1,7 @@
-import { CODE, STATE, StateDefinition, Parser, Range } from "../internal";
-
-export interface CloseTagRange extends Range {
-  tagName: Range;
-}
+import { CODE, STATE, StateDefinition, Parser, peek, Range } from "../internal";
 
 // We enter STATE.CLOSE_TAG after we see "</"
-export const CLOSE_TAG: StateDefinition<CloseTagRange> = {
+export const CLOSE_TAG: StateDefinition = {
   name: "CLOSE_TAG",
 
   enter() {
@@ -24,7 +20,7 @@ export const CLOSE_TAG: StateDefinition<CloseTagRange> = {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
       this.skip(1); // skip >
       this.exitState();
-      this.closeTag(closeTag);
+      ensureExpectedCloseTag(this, closeTag);
     }
   },
 };
@@ -58,10 +54,69 @@ export function checkForClosingTag(parser: Parser) {
     }
 
     parser.endText();
-    parser.closeTag({ start: parser.pos, end: parser.skip(skip) });
+    ensureExpectedCloseTag(parser, {
+      start: parser.pos,
+      end: parser.skip(skip),
+    });
     parser.forward = false;
     return true;
   }
 
   return false;
+}
+
+function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
+  const lastBlock = peek(parser.blockStack);
+  const closeTagNameStart = closeTag.start + 2; // strip </
+  const closeTagNameEnd = closeTag.end - 1; // strip >
+
+  if (!lastBlock || lastBlock.type !== "tag") {
+    return parser.notifyError(
+      closeTag!,
+      "EXTRA_CLOSING_TAG",
+      'The closing "' +
+        parser.read({ start: closeTagNameStart, end: closeTagNameEnd }) +
+        '" tag was not expected'
+    );
+  }
+
+  const closeTagNamePos = {
+    start: closeTagNameStart,
+    end: closeTagNameEnd,
+  };
+
+  if (closeTagNameStart < closeTagNameEnd!) {
+    if (
+      !parser.matchAtPos(
+        closeTagNamePos,
+        lastBlock.tagName.end > lastBlock.tagName.start
+          ? lastBlock.tagName
+          : "div"
+      )
+    ) {
+      if (
+        lastBlock.shorthandEnd === undefined ||
+        !parser.matchAtPos(closeTagNamePos, {
+          start: lastBlock.tagName.start,
+          end: lastBlock.shorthandEnd,
+        })
+      ) {
+        return parser.notifyError(
+          closeTag,
+          "MISMATCHED_CLOSING_TAG",
+          'The closing "' +
+            parser.read(closeTagNamePos) +
+            '" tag does not match the corresponding opening "' +
+            (parser.read(lastBlock.tagName) || "div") +
+            '" tag'
+        );
+      }
+    }
+  }
+
+  parser.closeTag({
+    start: closeTag.start,
+    end: closeTag.end,
+    value: closeTagNamePos,
+  });
 }

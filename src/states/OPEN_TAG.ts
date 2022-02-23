@@ -3,7 +3,6 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  ExpressionRange,
   TemplateRange,
   Range,
   BODY_MODE,
@@ -22,34 +21,16 @@ export interface OpenTagRange extends Range {
   concise: boolean;
   beginMixedMode?: boolean;
   tagName: TemplateRange;
+  shorthandEnd: number;
+  hasArgs: boolean;
+  hasAttrs: boolean;
+  hasShorthandId: boolean;
   selfClosed: boolean;
   openTagOnly: boolean;
-  shorthandId?: TemplateRange;
-  shorthandClassNames?: TemplateRange[];
-  var?: ExpressionRange;
-  params?: ExpressionRange;
-  argument?: ExpressionRange;
-  attributes: STATE.AttrRange[];
   indent: string;
   nestedIndent?: string;
 }
 const PARSED_TEXT_TAGS = ["script", "style", "textarea"];
-const ONLY_OPEN_TAGS = [
-  "base",
-  "br",
-  "col",
-  "hr",
-  "embed",
-  "img",
-  "input",
-  "keygen",
-  "link",
-  "meta",
-  "param",
-  "source",
-  "track",
-  "wbr",
-];
 
 export const OPEN_TAG: StateDefinition<OpenTagRange> = {
   name: "OPEN_TAG",
@@ -57,39 +38,45 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
   enter(tag) {
     tag.type = "tag";
     tag.state = undefined;
-    tag.attributes = [];
-    tag.argument = undefined;
-    tag.params = undefined;
-    tag.var = undefined;
+    tag.hasAttrs = false;
+    tag.selfClosed = false;
+    tag.openTagOnly = false;
+    tag.hasShorthandId = false;
     tag.indent = this.indent;
     tag.concise = this.isConcise;
     tag.beginMixedMode = this.beginMixedMode || this.endingMixedModeAtEOL;
-    tag.selfClosed = false;
-    tag.openTagOnly = false;
-    tag.shorthandId = undefined;
-    tag.shorthandClassNames = undefined;
 
+    this.activeTag = tag;
     this.beginMixedMode = false;
     this.endingMixedModeAtEOL = false;
-    this.activeTag = tag;
     this.blockStack.push(tag);
     this.endText();
+
+    this.notify("tagStart", {
+      start: tag.start,
+      end: tag.start + (this.isConcise ? 0 : 1),
+    });
   },
 
   exit(tag) {
-    const tagName = tag.tagName;
-    const selfClosed = tag.selfClosed;
-    const literalTagNamePos = tagName.quasis.length === 1 && tagName.quasis[0];
-    const openTagOnly = (tag.openTagOnly =
-      literalTagNamePos &&
-      this.matchAnyAtPos(literalTagNamePos, ONLY_OPEN_TAGS));
-    this.notifiers.notifyOpenTag(tag);
+    const { tagName, selfClosed, openTagOnly } = tag;
+
+    this.notify("tagEnd", {
+      start: this.pos - (this.isConcise ? 0 : selfClosed ? 2 : 1),
+      end: this.pos,
+      selfClosed,
+      openTagOnly,
+    });
 
     if (!this.isConcise && (selfClosed || openTagOnly)) {
-      this.closeTag();
+      this.closeTag({
+        start: this.pos,
+        end: this.pos,
+        value: undefined,
+      });
     } else if (
-      literalTagNamePos &&
-      this.matchAnyAtPos(literalTagNamePos, PARSED_TEXT_TAGS)
+      tagName.expressions.length === 0 &&
+      this.matchAnyAtPos(tagName, PARSED_TEXT_TAGS)
     ) {
       this.enterParsedTextContentState();
     }
@@ -97,37 +84,6 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
 
   return(childState, childPart, tag) {
     switch (childState) {
-      case STATE.TAG_NAME: {
-        const namePart = childPart as STATE.TagNameRange;
-        switch (namePart.shorthandCode) {
-          case CODE.NUMBER_SIGN:
-            if (tag.shorthandId) {
-              return this.notifyError(
-                namePart,
-                "INVALID_TAG_SHORTHAND",
-                "Multiple shorthand ID parts are not allowed on the same tag"
-              );
-            }
-
-            tag.shorthandId = namePart;
-            break;
-          case CODE.PERIOD:
-            if (tag.shorthandClassNames) {
-              tag.shorthandClassNames.push(namePart);
-            } else {
-              tag.shorthandClassNames = [namePart];
-            }
-            break;
-          default:
-            tag.tagName = namePart;
-            break;
-        }
-
-        if (namePart.last) {
-          this.notifiers.notifyOpenTagName(tag);
-        }
-        break;
-      }
       case STATE.JS_COMMENT_BLOCK: {
         /* Ignore comments within an open tag */
         break;
@@ -142,14 +98,15 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
                 "A slash was found that was not followed by a variable name or lhs expression"
               );
             }
-            tag.var = {
+
+            this.notify("tagVar", {
               start: childPart.start - 1, // include /,
               end: childPart.end,
               value: {
                 start: childPart.start,
                 end: childPart.end,
               },
-            };
+            });
             break;
           }
           case TAG_STATE.ARGUMENT: {
@@ -167,22 +124,23 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
               const attr = this.enterState(STATE.ATTRIBUTE);
               attr.argument = argPos;
               attr.start = attr.argument!.start;
-              tag.attributes.push(attr);
+              tag.hasAttrs = true;
               this.rewind(1);
             } else {
-              tag.argument = argPos;
+              tag.hasArgs = true;
+              this.notify("tagArgs", argPos);
             }
             break;
           }
           case TAG_STATE.PARAMS: {
-            tag.params = {
+            this.notify("tagParams", {
               start: childPart.start - 1, // include leading |
               end: this.skip(1), // include closing |
               value: {
                 start: childPart.start,
                 end: childPart.end,
               },
-            };
+            });
             break;
           }
         }
@@ -376,7 +334,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
       this.skip(1); // skip ,
       this.consumeWhitespace();
       this.rewind(1);
-    } else if (code === CODE.FORWARD_SLASH && !tag.attributes.length) {
+    } else if (code === CODE.FORWARD_SLASH && !tag.hasAttrs) {
       tag.state = TAG_STATE.VAR;
       this.skip(1); // skip /
       this.enterState(STATE.EXPRESSION, {
@@ -387,8 +345,8 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
           : [">", "/>", "(", "|", "=", ":="],
       });
       this.rewind(1);
-    } else if (code === CODE.OPEN_PAREN && !tag.attributes.length) {
-      if (tag.argument != null) {
+    } else if (code === CODE.OPEN_PAREN && !tag.hasAttrs) {
+      if (tag.hasArgs) {
         this.notifyError(
           this.pos,
           "ILLEGAL_TAG_ARGUMENT",
@@ -403,7 +361,7 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
         terminator: ")",
       });
       this.rewind(1);
-    } else if (code === CODE.PIPE && !tag.attributes.length) {
+    } else if (code === CODE.PIPE && !tag.hasAttrs) {
       tag.state = TAG_STATE.PARAMS;
       this.skip(1); // skip |
       this.enterState(STATE.EXPRESSION, {
@@ -413,7 +371,8 @@ export const OPEN_TAG: StateDefinition<OpenTagRange> = {
       this.rewind(1);
     } else {
       if (tag.tagName) {
-        tag.attributes.push(this.enterState(STATE.ATTRIBUTE));
+        this.enterState(STATE.ATTRIBUTE);
+        tag.hasAttrs = true;
       } else {
         this.enterState(STATE.TAG_NAME);
       }

@@ -9,7 +9,7 @@ export const CDATA: StateDefinition = {
   },
 
   exit(cdata) {
-    this.notifiers.notifyCDATA({
+    this.notify("cdata", {
       start: cdata.start,
       end: cdata.end,
       value: {
