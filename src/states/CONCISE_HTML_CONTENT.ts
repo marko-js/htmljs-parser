@@ -1,4 +1,4 @@
-import type { OpenTagRange } from ".";
+import type { OpenTagMeta } from ".";
 import {
   Parser,
   CODE,
@@ -6,6 +6,7 @@ import {
   isWhitespaceCode,
   StateDefinition,
   peek,
+  Events,
 } from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
@@ -28,7 +29,8 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
-        this.notify("comment", {
+        this.emit({
+          type: Events.Types.Comment,
           start: childPart.start,
           end: childPart.end,
           value: {
@@ -38,7 +40,8 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         });
         break;
       case STATE.JS_COMMENT_BLOCK: {
-        this.notify("comment", {
+        this.emit({
+          type: Events.Types.Comment,
           start: childPart.start,
           end: childPart.end,
           value: {
@@ -53,7 +56,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         ) {
           // Make sure there is only whitespace on the line
           // after the ending "*/" sequence
-          this.notifyError(
+          this.emitError(
             this.pos,
             "INVALID_CHARACTER",
             "In concise mode a javascript comment block can only be followed by whitespace characters and a newline."
@@ -76,14 +79,10 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         const len = this.blockStack.length;
         if (len) {
           if (
-            (this.blockStack[len - 1] as OpenTagRange).indent.length >=
-            curIndent
+            (this.blockStack[len - 1] as OpenTagMeta).indent.length >= curIndent
           ) {
-            this.closeTag({
-              start: this.pos - curIndent,
-              end: this.pos - curIndent,
-              value: undefined,
-            });
+            const pos = this.pos - curIndent;
+            this.closeTag(pos, pos, undefined);
           } else {
             // Indentation is greater than the last tag so we are starting a
             // nested tag and there are no more tags to end
@@ -91,7 +90,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           }
         } else {
           if (this.indent) {
-            this.notifyError(
+            this.emitError(
               this.pos,
               "BAD_INDENTATION",
               "Line has extra indentation at the beginning"
@@ -106,7 +105,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
       if (parentBlock) {
         if (parentBlock.type === "tag" && parentBlock.openTagOnly) {
-          this.notifyError(
+          this.emitError(
             this.pos,
             "INVALID_BODY",
             `The "${this.read(
@@ -117,7 +116,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         }
 
         if (parentBlock.body && code !== CODE.HTML_BLOCK_DELIMITER) {
-          this.notifyError(
+          this.emitError(
             this.pos,
             "ILLEGAL_LINE_START",
             'A line within a tag that only allows text content must begin with a "-" character'
@@ -127,7 +126,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
         if (parentBlock.nestedIndent) {
           if (parentBlock.nestedIndent.length !== this.indent.length) {
-            this.notifyError(
+            this.emitError(
               this.pos,
               "BAD_INDENTATION",
               "Line indentation does match indentation of previous line"
@@ -157,7 +156,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
             this.htmlBlockDelimiter = "-";
             this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
           } else {
-            this.notifyError(
+            this.emitError(
               this.pos,
               "ILLEGAL_LINE_START",
               'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43'
@@ -176,7 +175,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
               this.skip(1); // skip *
               return;
             default:
-              this.notifyError(
+              this.emitError(
                 this.pos,
                 "ILLEGAL_LINE_START",
                 'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment'

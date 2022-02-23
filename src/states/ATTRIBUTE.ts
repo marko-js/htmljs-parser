@@ -4,8 +4,9 @@ import {
   isWhitespaceCode,
   StateDefinition,
   Range,
+  Events,
   ExpressionRange,
-  AttrNameRange,
+  Parser,
 } from "../internal";
 
 const enum ATTR_STATE {
@@ -15,11 +16,11 @@ const enum ATTR_STATE {
   BLOCK,
 }
 
-export interface AttrRange extends Range {
+export interface AttrMeta extends Range {
   state: undefined | ATTR_STATE;
-  name: undefined | AttrNameRange;
+  name: undefined | Events.AttrName;
   valueStart: number;
-  argument: undefined | ExpressionRange;
+  args: boolean | Events.AttrMethod["params"];
   default: boolean;
   spread: boolean;
   bound: boolean;
@@ -27,7 +28,7 @@ export interface AttrRange extends Range {
 
 // We enter STATE.ATTRIBUTE when we see a non-whitespace
 // character after reading the tag name
-export const ATTRIBUTE: StateDefinition<AttrRange> = {
+export const ATTRIBUTE: StateDefinition<AttrMeta> = {
   name: "ATTRIBUTE",
 
   enter(attr) {
@@ -35,8 +36,8 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
     attr.state = undefined;
     attr.name = undefined;
     attr.valueStart = -1;
+    attr.args = false;
     attr.bound = false;
-    attr.argument = undefined;
     attr.spread = false;
     attr.default = !this.activeTag!.hasAttrs;
   },
@@ -55,7 +56,7 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
     if (this.isConcise) {
       this.exitState();
     } else {
-      this.notifyError(
+      this.emitError(
         attr,
         "MALFORMED_OPEN_TAG",
         'EOF reached while parsing attribute "' +
@@ -70,9 +71,9 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
   return(_, childPart, attr) {
     switch (attr.state) {
       case ATTR_STATE.NAME: {
-        this.notify(
-          "attrName",
+        this.emit(
           (attr.name = {
+            type: Events.Types.AttrName,
             start: childPart.start,
             end: childPart.end,
             default: false,
@@ -81,8 +82,8 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
         break;
       }
       case ATTR_STATE.ARGUMENT: {
-        if (attr.argument) {
-          this.notifyError(
+        if (attr.args) {
+          this.emitError(
             childPart,
             "ILLEGAL_ATTRIBUTE_ARGUMENT",
             "An attribute can only have one set of arguments"
@@ -90,32 +91,49 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
           return;
         }
 
-        attr.argument = {
-          start: childPart.start - 1, // include (
-          end: this.skip(1), // include )
-          value: {
-            start: childPart.start,
-            end: childPart.end,
-          },
+        const start = childPart.start - 1; // include (
+        const end = this.skip(1); // include )
+        const value = {
+          start: childPart.start,
+          end: childPart.end,
         };
 
         if (this.lookPastWhitespaceFor("{")) {
+          attr.args = {
+            start,
+            end,
+            value,
+          };
           this.consumeWhitespace();
           this.rewind(1);
         } else {
-          this.notify("attrArgs", attr.argument);
+          attr.args = true;
+          this.emit({
+            type: Events.Types.AttrArgs,
+            start,
+            end,
+            value,
+          });
         }
 
         break;
       }
       case ATTR_STATE.BLOCK: {
-        this.notify("attrMethod", {
-          start: childPart.start - 1, // include {
-          end: this.skip(1), // include }
-          params: attr.argument,
+        const params = attr.args as ExpressionRange;
+        const start = params.start;
+        const end = this.skip(1); // include }
+        this.emit({
+          type: Events.Types.AttrMethod,
+          start,
+          end,
+          params,
           body: {
-            start: childPart.start,
-            end: childPart.end,
+            start: childPart.start - 1, // include {
+            end,
+            value: {
+              start: childPart.start,
+              end: childPart.end,
+            },
           },
         });
         this.exitState();
@@ -124,7 +142,7 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
 
       case ATTR_STATE.VALUE: {
         if (childPart.start === childPart.end) {
-          return this.notifyError(
+          return this.emitError(
             childPart,
             "ILLEGAL_ATTRIBUTE_VALUE",
             "Missing value for attribute"
@@ -132,7 +150,8 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
         }
 
         if (attr.spread) {
-          this.notify("spreadAttr", {
+          this.emit({
+            type: Events.Types.AttrSpread,
             start: attr.valueStart!,
             end: childPart.end,
             value: {
@@ -141,7 +160,8 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
             },
           });
         } else {
-          this.notify("attrValue", {
+          this.emit({
+            type: Events.Types.AttrValue,
             start: attr.valueStart!,
             end: childPart.end,
             bound: attr.bound,
@@ -167,17 +187,7 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
       (code === CODE.PERIOD && this.lookAheadFor(".."))
     ) {
       attr.valueStart = this.pos;
-
-      if (!attr.name && attr.default) {
-        this.notify(
-          "attrName",
-          (attr.name = {
-            start: attr.start,
-            end: attr.start,
-            default: true,
-          })
-        );
-      }
+      ensureAttrName(this, attr);
 
       if (code === CODE.COLON) {
         attr.bound = true;
@@ -203,35 +213,15 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
 
       this.rewind(1);
     } else if (code === CODE.OPEN_PAREN) {
-      if (!attr.name && attr.default) {
-        this.notify(
-          "attrName",
-          (attr.name = {
-            start: attr.start,
-            end: attr.start,
-            default: true,
-          })
-        );
-      }
-
+      ensureAttrName(this, attr);
       attr.state = ATTR_STATE.ARGUMENT;
       this.skip(1); // skip (
       this.enterState(STATE.EXPRESSION, {
         terminator: ")",
       });
       this.rewind(1);
-    } else if (code === CODE.OPEN_CURLY_BRACE && attr.argument) {
-      if (!attr.name && attr.default) {
-        this.notify(
-          "attrName",
-          (attr.name = {
-            start: attr.start,
-            end: attr.start,
-            default: true,
-          })
-        );
-      }
-
+    } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
+      ensureAttrName(this, attr);
       attr.state = ATTR_STATE.BLOCK;
       this.skip(1); // skip {
       this.enterState(STATE.EXPRESSION, {
@@ -260,3 +250,16 @@ export const ATTRIBUTE: StateDefinition<AttrRange> = {
     }
   },
 };
+
+function ensureAttrName(parser: Parser, attr: AttrMeta) {
+  if (!attr.name && attr.default) {
+    parser.emit(
+      (attr.name = {
+        type: Events.Types.AttrName,
+        start: attr.start,
+        end: attr.start,
+        default: true,
+      })
+    );
+  }
+}

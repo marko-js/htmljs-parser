@@ -3,10 +3,14 @@ import {
   Parser,
   STATE,
   StateDefinition,
-  PlaceholderRange,
+  Range,
+  Events,
 } from "../internal";
 
-export const PLACEHOLDER: StateDefinition<PlaceholderRange> = {
+interface PlaceholderMeta extends Range {
+  escape: boolean;
+}
+export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
   name: "PLACEHOLDER",
 
   enter(placeholder) {
@@ -18,7 +22,8 @@ export const PLACEHOLDER: StateDefinition<PlaceholderRange> = {
   },
 
   exit(placeholder) {
-    this.notify("placeholder", {
+    this.emit({
+      type: Events.Types.Placeholder,
       start: placeholder.start,
       end: placeholder.end,
       escape: placeholder.escape,
@@ -31,7 +36,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderRange> = {
 
   return(_, childPart) {
     if (childPart.start === childPart.end) {
-      this.notifyError(
+      this.emitError(
         childPart,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
         "Invalid placeholder, the expression cannot be missing"
