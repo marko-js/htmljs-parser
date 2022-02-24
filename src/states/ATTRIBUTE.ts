@@ -5,6 +5,7 @@ import {
   StateDefinition,
   Range,
   Events,
+  EventTypes,
   ExpressionRange,
   Parser,
 } from "../internal";
@@ -73,7 +74,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       case ATTR_STATE.NAME: {
         this.emit(
           (attr.name = {
-            type: Events.Types.AttrName,
+            type: EventTypes.AttrName,
             start: childPart.start,
             end: childPart.end,
             default: false,
@@ -109,7 +110,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         } else {
           attr.args = true;
           this.emit({
-            type: Events.Types.AttrArgs,
+            type: EventTypes.AttrArgs,
             start,
             end,
             value,
@@ -123,7 +124,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         const start = params.start;
         const end = this.skip(1); // include }
         this.emit({
-          type: Events.Types.AttrMethod,
+          type: EventTypes.AttrMethod,
           start,
           end,
           params,
@@ -151,7 +152,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
 
         if (attr.spread) {
           this.emit({
-            type: Events.Types.AttrSpread,
+            type: EventTypes.AttrSpread,
             start: attr.valueStart!,
             end: childPart.end,
             value: {
@@ -161,7 +162,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           });
         } else {
           this.emit({
-            type: Events.Types.AttrValue,
+            type: EventTypes.AttrValue,
             start: attr.valueStart!,
             end: childPart.end,
             bound: attr.bound,
@@ -255,7 +256,7 @@ function ensureAttrName(parser: Parser, attr: AttrMeta) {
   if (!attr.name && attr.default) {
     parser.emit(
       (attr.name = {
-        type: Events.Types.AttrName,
+        type: EventTypes.AttrName,
         start: attr.start,
         end: attr.start,
         default: true,

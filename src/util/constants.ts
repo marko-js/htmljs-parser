@@ -61,32 +61,32 @@ export interface TemplateRange extends Range {
   quasis: Range[];
 }
 
-export namespace Events {
-  export const enum Types {
-    Error,
-    Text,
-    Comment,
-    CDATA,
-    Declaration,
-    DocType,
-    Scriptlet,
-    Placeholder,
-    OpenTagStart,
-    TagName,
-    TagShorthandId,
-    TagShorthandClass,
-    TagVar,
-    TagArgs,
-    TagParams,
-    AttrName,
-    AttrArgs,
-    AttrValue,
-    AttrMethod,
-    AttrSpread,
-    OpenTagEnd,
-    CloseTag,
-  }
+export const enum EventTypes {
+  Error,
+  Text,
+  Comment,
+  CDATA,
+  Declaration,
+  DocType,
+  Scriptlet,
+  Placeholder,
+  OpenTagStart,
+  TagName,
+  TagShorthandId,
+  TagShorthandClass,
+  TagVar,
+  TagArgs,
+  TagParams,
+  AttrName,
+  AttrArgs,
+  AttrValue,
+  AttrMethod,
+  AttrSpread,
+  OpenTagEnd,
+  CloseTag,
+}
 
+export namespace Events {
   export type Any =
     | Error
     | Text
@@ -112,101 +112,101 @@ export namespace Events {
     | CloseTag;
 
   export interface Error extends Range {
-    type: Types.Error;
+    type: EventTypes.Error;
     code: string;
     message: string;
   }
 
   export interface Text extends Range {
-    type: Types.Text;
+    type: EventTypes.Text;
   }
 
   export interface Comment extends ExpressionRange {
-    type: Types.Comment;
+    type: EventTypes.Comment;
   }
 
   export interface CDATA extends ExpressionRange {
-    type: Types.CDATA;
+    type: EventTypes.CDATA;
   }
 
   export interface Declaration extends ExpressionRange {
-    type: Types.Declaration;
+    type: EventTypes.Declaration;
   }
 
   export interface DocType extends ExpressionRange {
-    type: Types.DocType;
+    type: EventTypes.DocType;
   }
 
   export interface Scriptlet extends ExpressionRange {
-    type: Types.Scriptlet;
+    type: EventTypes.Scriptlet;
     block: boolean;
   }
 
   export interface Placeholder extends ExpressionRange {
-    type: Types.Placeholder;
+    type: EventTypes.Placeholder;
     escape: boolean;
   }
 
   export interface OpenTagStart extends Range {
-    type: Types.OpenTagStart;
+    type: EventTypes.OpenTagStart;
   }
 
   export interface TagName extends TemplateRange {
-    type: Types.TagName;
+    type: EventTypes.TagName;
   }
 
   export interface TagShorthandId extends TemplateRange {
-    type: Types.TagShorthandId;
+    type: EventTypes.TagShorthandId;
   }
 
   export interface TagShorthandClass extends TemplateRange {
-    type: Types.TagShorthandClass;
+    type: EventTypes.TagShorthandClass;
   }
 
   export interface TagVar extends ExpressionRange {
-    type: Types.TagVar;
+    type: EventTypes.TagVar;
   }
 
   export interface TagArgs extends ExpressionRange {
-    type: Types.TagArgs;
+    type: EventTypes.TagArgs;
   }
 
   export interface TagParams extends ExpressionRange {
-    type: Types.TagParams;
+    type: EventTypes.TagParams;
   }
 
   export interface AttrName extends Range {
-    type: Types.AttrName;
+    type: EventTypes.AttrName;
     default: boolean;
   }
 
   export interface AttrArgs extends ExpressionRange {
-    type: Types.AttrArgs;
+    type: EventTypes.AttrArgs;
   }
 
   export interface AttrValue extends ExpressionRange {
-    type: Types.AttrValue;
+    type: EventTypes.AttrValue;
     bound: boolean;
   }
 
   export interface AttrMethod extends Range {
-    type: Types.AttrMethod;
+    type: EventTypes.AttrMethod;
     body: ExpressionRange;
     params: ExpressionRange;
   }
 
   export interface AttrSpread extends ExpressionRange {
-    type: Types.AttrSpread;
+    type: EventTypes.AttrSpread;
   }
 
   export interface OpenTagEnd extends Range {
-    type: Types.OpenTagEnd;
+    type: EventTypes.OpenTagEnd;
     openTagOnly: boolean;
     selfClosed: boolean;
   }
 
   export interface CloseTag extends Range {
-    type: Types.CloseTag;
+    type: EventTypes.CloseTag;
     value: Range | undefined;
   }
 }

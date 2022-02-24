@@ -6,6 +6,7 @@ import {
   isWhitespaceCode,
   Range,
   Events,
+  EventTypes,
 } from "../internal";
 import type { OpenTagMeta } from "../states";
 
@@ -245,7 +246,7 @@ export class Parser {
       const end = this.pos + offset;
       if (start < end) {
         this.emit({
-          type: Events.Types.Text,
+          type: EventTypes.Text,
           start,
           end,
         });
@@ -360,7 +361,7 @@ export class Parser {
     }
 
     this.emit({
-      type: Events.Types.Error,
+      type: EventTypes.Error,
       start,
       end,
       code,
@@ -390,7 +391,7 @@ export class Parser {
     }
 
     this.emit({
-      type: Events.Types.CloseTag,
+      type: EventTypes.CloseTag,
       start,
       end,
       value,

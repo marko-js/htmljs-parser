@@ -1,4 +1,4 @@
-import { CODE, Parser, StateDefinition, Range, Events } from "../internal";
+import { CODE, Parser, StateDefinition, Range, EventTypes } from "../internal";
 
 // We enter STATE.DECLARATION after we encounter a "<?"
 // while in the STATE.HTML_CONTENT.
@@ -38,7 +38,7 @@ function exitDeclaration(
   parser.skip(closeOffset);
   parser.exitState();
   parser.emit({
-    type: Events.Types.Declaration,
+    type: EventTypes.Declaration,
     start: declaration.start,
     end: declaration.end,
     value: {
