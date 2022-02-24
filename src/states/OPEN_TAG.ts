@@ -6,7 +6,7 @@ import {
   TemplateRange,
   Range,
   BODY_MODE,
-  Events,
+  EventTypes,
 } from "../internal";
 
 const enum TAG_STATE {
@@ -54,7 +54,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     this.endText();
 
     this.emit({
-      type: Events.Types.OpenTagStart,
+      type: EventTypes.OpenTagStart,
       start: tag.start,
       end: tag.start + (this.isConcise ? 0 : 1),
     });
@@ -64,7 +64,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     const { tagName, selfClosed, openTagOnly } = tag;
 
     this.emit({
-      type: Events.Types.OpenTagEnd,
+      type: EventTypes.OpenTagEnd,
       start: this.pos - (this.isConcise ? 0 : selfClosed ? 2 : 1),
       end: this.pos,
       selfClosed,
@@ -99,7 +99,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             }
 
             this.emit({
-              type: Events.Types.TagVar,
+              type: EventTypes.TagVar,
               start: childPart.start - 1, // include /,
               end: childPart.end,
               value: {
@@ -127,7 +127,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             } else {
               tag.hasArgs = true;
               this.emit({
-                type: Events.Types.TagArgs,
+                type: EventTypes.TagArgs,
                 start,
                 end,
                 value,
@@ -137,7 +137,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           }
           case TAG_STATE.PARAMS: {
             this.emit({
-              type: Events.Types.TagParams,
+              type: EventTypes.TagParams,
               start: childPart.start - 1, // include leading |
               end: this.skip(1), // include closing |
               value: {

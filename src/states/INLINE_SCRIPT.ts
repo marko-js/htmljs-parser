@@ -1,4 +1,4 @@
-import { CODE, Events, Range, STATE, StateDefinition } from "../internal";
+import { CODE, EventTypes, Range, STATE, StateDefinition } from "../internal";
 
 interface ScriptletMeta extends Range {
   block: boolean;
@@ -13,7 +13,7 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
 
   exit(inlineScript) {
     this.emit({
-      type: Events.Types.Scriptlet,
+      type: EventTypes.Scriptlet,
       start: inlineScript.start,
       end: inlineScript.end,
       block: inlineScript.block,
