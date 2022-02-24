@@ -5,7 +5,7 @@ import {
   StateDefinition,
   peek,
   TemplateRange,
-  Events,
+  EventTypes,
 } from "../internal";
 
 export interface TagNameMeta extends TemplateRange {
@@ -55,7 +55,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
 
         this.activeTag!.hasShorthandId = true;
         this.emit({
-          type: Events.Types.TagShorthandId,
+          type: EventTypes.TagShorthandId,
           start,
           end,
           quasis,
@@ -64,7 +64,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         break;
       case CODE.PERIOD:
         this.emit({
-          type: Events.Types.TagShorthandClass,
+          type: EventTypes.TagShorthandClass,
           start,
           end,
           quasis,
@@ -77,7 +77,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
           tagName.expressions.length === 0 &&
           this.matchAnyAtPos(tagName, ONLY_OPEN_TAGS);
         this.emit({
-          type: Events.Types.TagName,
+          type: EventTypes.TagName,
           start,
           end,
           quasis,

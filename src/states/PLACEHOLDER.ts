@@ -4,7 +4,7 @@ import {
   STATE,
   StateDefinition,
   Range,
-  Events,
+  EventTypes,
 } from "../internal";
 
 interface PlaceholderMeta extends Range {
@@ -23,7 +23,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
 
   exit(placeholder) {
     this.emit({
-      type: Events.Types.Placeholder,
+      type: EventTypes.Placeholder,
       start: placeholder.start,
       end: placeholder.end,
       escape: placeholder.escape,

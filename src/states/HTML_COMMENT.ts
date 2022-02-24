@@ -1,4 +1,4 @@
-import { CODE, Events, StateDefinition } from "../internal";
+import { CODE, EventTypes, StateDefinition } from "../internal";
 
 // We enter STATE.HTML_COMMENT after we encounter a "<--"
 // while in the STATE.HTML_CONTENT.
@@ -12,7 +12,7 @@ export const HTML_COMMENT: StateDefinition = {
 
   exit(comment) {
     this.emit({
-      type: Events.Types.Comment,
+      type: EventTypes.Comment,
       start: comment.start,
       end: comment.end,
       value: {

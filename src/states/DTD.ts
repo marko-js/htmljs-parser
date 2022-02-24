@@ -1,4 +1,4 @@
-import { CODE, Events, StateDefinition } from "../internal";
+import { CODE, EventTypes, StateDefinition } from "../internal";
 
 // We enter STATE.DTD after we encounter a "<!" while in the STATE.HTML_CONTENT.
 // We leave STATE.DTD if we see a ">".
@@ -11,7 +11,7 @@ export const DTD: StateDefinition = {
 
   exit(documentType) {
     this.emit({
-      type: Events.Types.DocType,
+      type: EventTypes.DocType,
       start: documentType.start,
       end: documentType.end,
       value: {
