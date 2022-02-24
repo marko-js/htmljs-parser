@@ -6,7 +6,7 @@ import {
   isWhitespaceCode,
   StateDefinition,
   peek,
-  Events,
+  EventTypes,
 } from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
@@ -30,7 +30,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
         this.emit({
-          type: Events.Types.Comment,
+          type: EventTypes.Comment,
           start: childPart.start,
           end: childPart.end,
           value: {
@@ -41,7 +41,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         break;
       case STATE.JS_COMMENT_BLOCK: {
         this.emit({
-          type: Events.Types.Comment,
+          type: EventTypes.Comment,
           start: childPart.start,
           end: childPart.end,
           value: {

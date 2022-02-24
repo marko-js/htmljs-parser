@@ -1,4 +1,4 @@
-import { CODE, Events, Parser, StateDefinition } from "../internal";
+import { CODE, EventTypes, Parser, StateDefinition } from "../internal";
 
 // We enter STATE.CDATA after we see "<![CDATA["
 export const CDATA: StateDefinition = {
@@ -10,7 +10,7 @@ export const CDATA: StateDefinition = {
 
   exit(cdata) {
     this.emit({
-      type: Events.Types.CDATA,
+      type: EventTypes.CDATA,
       start: cdata.start,
       end: cdata.end,
       value: {

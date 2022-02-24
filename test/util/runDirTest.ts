@@ -1,7 +1,7 @@
 import fs from "fs";
 import TreeBuilder from "./TreeBuilder";
 import { createParser } from "../../src";
-import { Events, ExpressionRange, Range } from "../../src/internal";
+import { Events, EventTypes, ExpressionRange, Range } from "../../src/internal";
 
 export default function runTest() {
   return function ({ test, resolve, snapshot }) {
@@ -43,7 +43,7 @@ function parse(text, inputPath) {
 
   for (const data of parser) {
     switch (data.type) {
-      case Events.Types.Error:
+      case EventTypes.Error:
         builder.listeners.onError({
           type: "error",
           message: data.message,
@@ -51,21 +51,21 @@ function parse(text, inputPath) {
           ...rangeToPos(data),
         });
         break;
-      case Events.Types.Text:
+      case EventTypes.Text:
         builder.listeners.onText({
           type: "text",
           ...rangeToPos(data),
           value: parser.read(data),
         });
         break;
-      case Events.Types.CDATA:
+      case EventTypes.CDATA:
         builder.listeners.onCDATA({
           type: "cdata",
           ...rangeToPos(data),
           value: parser.read(data.value),
         });
         break;
-      case Events.Types.DocType:
+      case EventTypes.DocType:
         builder.listeners.onDocumentType({
           type: "documentType",
           ...rangeToPos(data),
@@ -73,21 +73,21 @@ function parse(text, inputPath) {
         });
         break;
 
-      case Events.Types.Declaration:
+      case EventTypes.Declaration:
         builder.listeners.onDeclaration({
           type: "declaration",
           ...rangeToPos(data),
           value: parser.read(data.value),
         });
         break;
-      case Events.Types.Comment:
+      case EventTypes.Comment:
         builder.listeners.onComment({
           type: "comment",
           ...rangeToPos(data),
           value: parser.read(data),
         });
         break;
-      case Events.Types.Placeholder:
+      case EventTypes.Placeholder:
         builder.listeners.onPlaceholder({
           type: "placeholder",
           escape: data.escape,
@@ -98,11 +98,11 @@ function parse(text, inputPath) {
           },
         });
         break;
-      case Events.Types.OpenTagStart: {
+      case EventTypes.OpenTagStart: {
         isConcise = data.start === data.end;
         break;
       }
-      case Events.Types.TagName: {
+      case EventTypes.TagName: {
         curTagName = data;
         builder.listeners.onOpenTagName({
           type: "openTagName",
@@ -134,39 +134,39 @@ function parse(text, inputPath) {
         });
         break;
       }
-      case Events.Types.TagShorthandId:
+      case EventTypes.TagShorthandId:
         curShorthandId = data;
         break;
-      case Events.Types.TagShorthandClass:
+      case EventTypes.TagShorthandClass:
         curShorthandClassNames ??= [];
         curShorthandClassNames.push(data);
         break;
-      case Events.Types.TagVar:
+      case EventTypes.TagVar:
         curTagVar = data;
         break;
-      case Events.Types.TagArgs:
+      case EventTypes.TagArgs:
         curTagArgs = data;
         break;
-      case Events.Types.TagParams:
+      case EventTypes.TagParams:
         curTagParams = data;
         break;
-      case Events.Types.AttrName:
+      case EventTypes.AttrName:
         curAttrs ??= [];
         curAttrs.push((curAttr = { name: data }));
         break;
-      case Events.Types.AttrArgs:
+      case EventTypes.AttrArgs:
         curAttr.argument = data;
         break;
-      case Events.Types.AttrValue:
+      case EventTypes.AttrValue:
         curAttr.value = data.value;
         curAttr.bound = data.bound;
         break;
-      case Events.Types.AttrMethod:
+      case EventTypes.AttrMethod:
         curAttr.method = true;
         curAttr.argument = data.params;
         curAttr.value = data.body.value;
         break;
-      case Events.Types.AttrSpread:
+      case EventTypes.AttrSpread:
         curAttr = undefined;
         curAttrs ??= [];
         curAttrs.push({
@@ -174,7 +174,7 @@ function parse(text, inputPath) {
           spread: true,
         });
         break;
-      case Events.Types.OpenTagEnd:
+      case EventTypes.OpenTagEnd:
         curAttr = undefined;
         builder.listeners.onOpenTag({
           type: "openTag",
@@ -248,7 +248,7 @@ function parse(text, inputPath) {
         curTagParams = undefined;
         curAttrs = undefined;
         break;
-      case Events.Types.CloseTag:
+      case EventTypes.CloseTag:
         builder.listeners.onCloseTag({
           type: "closeTag",
           ...rangeToPos(data),
@@ -258,7 +258,7 @@ function parse(text, inputPath) {
           },
         });
         break;
-      case Events.Types.Scriptlet:
+      case EventTypes.Scriptlet:
         builder.listeners.onScriptlet({
           type: "scriptlet",
           block: data.block,
