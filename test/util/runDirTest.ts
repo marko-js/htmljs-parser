@@ -92,10 +92,7 @@ function parse(text, inputPath) {
           type: "placeholder",
           escape: data.escape,
           ...rangeToPos(data),
-          value: {
-            ...rangeToPos(data.value),
-            value: parser.read(data.value),
-          },
+          value: parser.read(data.value),
         });
         break;
       case EventTypes.OpenTagStart: {
@@ -104,34 +101,6 @@ function parse(text, inputPath) {
       }
       case EventTypes.TagName: {
         curTagName = data;
-        builder.listeners.onOpenTagName({
-          type: "openTagName",
-          tagName: {
-            ...rangeToPos(curTagName),
-            value: parser.read(curTagName),
-            expression:
-              curTagName.expressions.length === 1 &&
-              curTagName.quasis[0].start === curTagName.quasis[0].end &&
-              curTagName.quasis[1].start === curTagName.quasis[1].end
-                ? {
-                    value: parser.read(curTagName.expressions[0].value),
-                  }
-                : undefined,
-          },
-          pos: curTagName.start,
-          endPos: curTagName.end,
-          concise: isConcise,
-          shorthandId: curShorthandId && {
-            ...rangeToPos(curShorthandId),
-            value: parser.read(curShorthandId).slice(1),
-          },
-          shorthandClassNames:
-            curShorthandClassNames &&
-            curShorthandClassNames.map((shorthandClassName) => ({
-              ...rangeToPos(shorthandClassName),
-              value: parser.read(shorthandClassName).slice(1),
-            })),
-        });
         break;
       }
       case EventTypes.TagShorthandId:
@@ -178,18 +147,12 @@ function parse(text, inputPath) {
         curAttr = undefined;
         builder.listeners.onOpenTag({
           type: "openTag",
-          tagName: {
-            ...rangeToPos(curTagName),
-            value: parser.read(curTagName),
-            expression:
-              curTagName.expressions.length === 1 &&
-              curTagName.quasis[0].start === curTagName.quasis[0].end &&
-              curTagName.quasis[1].start === curTagName.quasis[1].end
-                ? {
-                    value: parser.read(curTagName.expressions[0].value),
-                  }
-                : undefined,
-          },
+          tagName: parser.read(curTagName),
+          tagNameExpression:
+            curTagName.expressions.length === 1 &&
+            curTagName.quasis[0].start === curTagName.quasis[0].end &&
+            curTagName.quasis[1].start === curTagName.quasis[1].end &&
+            parser.read(curTagName.expressions[0].value),
           var: curTagVar && {
             ...rangeToPos(curTagVar),
             value: parser.read(curTagVar.value),
@@ -209,16 +172,10 @@ function parse(text, inputPath) {
           openTagOnly: data.openTagOnly,
           attributes: (curAttrs || []).map((attr) => ({
             default: attr.name?.default,
-            name: attr.name && {
-              ...rangeToPos(attr.name),
-              value: parser.read(attr.name),
-            },
+            name: attr.name && parser.read(attr.name),
             pos: attr.name?.start ?? attr.value?.start,
             endPos: attr.value?.end ?? attr.name?.end,
-            value: attr.value && {
-              ...rangeToPos(attr.value),
-              value: parser.read(attr.value),
-            },
+            value: attr.value && parser.read(attr.value),
             bound: attr.bound,
             method: attr.method,
             spread: attr.spread,
@@ -249,19 +206,26 @@ function parse(text, inputPath) {
         curAttrs = undefined;
         break;
       case EventTypes.CloseTag:
-        builder.listeners.onCloseTag({
-          type: "closeTag",
-          ...rangeToPos(data),
-          tagName: data.value && {
-            ...rangeToPos(data.value),
-            value: parser.read(data.value),
-          },
-        });
+        builder.listeners.onCloseTag(
+          data.value
+            ? {
+                type: "closeTag",
+                ...rangeToPos(data),
+                tagName: parser.read(data.value),
+              }
+            : {
+                type: "closeTag",
+                pos: null,
+                endPos: null,
+                tagName: "",
+              }
+        );
         break;
       case EventTypes.Scriptlet:
         builder.listeners.onScriptlet({
           type: "scriptlet",
           block: data.block,
+          line: !data.block,
           ...rangeToPos(data),
           value: parser.read(data.value),
         });
