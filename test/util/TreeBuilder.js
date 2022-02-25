@@ -14,16 +14,14 @@ function attributesToString(attributes) {
     var attr = attributes[i];
     result += " ";
 
-    if (attr.name) {
-      result += attr.default ? "DEFAULT" : attr.name.value;
+    if (attr.default) {
+      result += "DEFAULT";
+    } else if (attr.name) {
+      result += attr.name;
     }
 
     if (attr.argument) {
       result += "(" + attr.argument.value + ")";
-    }
-
-    if (attr.spread) {
-      result += "...";
     }
 
     result += attributeAssignmentToString(attr);
@@ -36,16 +34,18 @@ function attributeAssignmentToString(attr) {
   var result = "";
 
   if (attr.value) {
-    if (attr.name) {
-      result += attr.method ? " " : "=";
-    }
-
-    if (attr.bound) {
-      result += "BOUND(" + attr.value.value + ")";
-    } else if (attr.method) {
-      result += "{" + attr.value.value + "}";
+    if (attr.method) {
+      result += " {" + attr.value + "}";
+    } else if (attr.spread) {
+      result += "...(" + attr.value + ")";
     } else {
-      result += "(" + attr.value.value + ")";
+      result += "=";
+
+      if (attr.bound) {
+        result += "BOUND(" + attr.value + ")";
+      } else {
+        result += "(" + attr.value + ")";
+      }
     }
   } else if (!attr.argument) {
     result += "=(EMPTY)";
@@ -76,9 +76,6 @@ class Node {
     switch (event.type) {
       case "text": {
         var line = "text:" + JSON.stringify(event.value);
-        if (out.includeTextParserState) {
-          line += " [parseMode=" + event.parseMode + "]";
-        }
         out.writeLine(line);
         break;
       }
@@ -89,29 +86,17 @@ class Node {
       }
 
       case "cdata": {
-        out.writeLine(
-          "cdata:" +
-            JSON.stringify(event.value) +
-            (out.includePositions ? ":" + event.pos + "-" + event.endPos : "")
-        );
+        out.writeLine("cdata:" + JSON.stringify(event.value));
         break;
       }
 
       case "declaration": {
-        out.writeLine(
-          "declaration:" +
-            JSON.stringify(event.value) +
-            (out.includePositions ? ":" + event.pos + "-" + event.endPos : "")
-        );
+        out.writeLine("declaration:" + JSON.stringify(event.value));
         break;
       }
 
       case "documentType": {
-        out.writeLine(
-          "documentType:" +
-            JSON.stringify(event.value) +
-            (out.includePositions ? ":" + event.pos + "-" + event.endPos : "")
-        );
+        out.writeLine("documentType:" + JSON.stringify(event.value));
         break;
       }
 
@@ -123,12 +108,10 @@ class Node {
       }
 
       case "scriptlet": {
-        if (event.tag) {
-          out.writeLine("scriptlet:" + JSON.stringify(event.value));
+        if (event.line) {
+          out.writeLine("scriptlet(line):" + JSON.stringify(event.value));
         } else if (event.block) {
           out.writeLine("scriptlet(block):" + JSON.stringify(event.value));
-        } else {
-          out.writeLine("scriptlet(line):" + JSON.stringify(event.value));
         }
         break;
       }
@@ -160,19 +143,20 @@ class ElementNode {
   write(out) {
     var event = this.event;
     var tagName = event.tagName;
+    var tagNameExpression = event.tagNameExpression;
     var argument = event.argument;
     var variable = event.var;
     var params = event.params;
     var attributes = event.attributes;
-    var openTagOnly = event.openTagOnly;
-    var selfClosed = event.selfClosed;
+    var openTagOnly = event.openTagOnly === true;
+    var selfClosed = event.selfClosed === true;
 
     var str = "<";
 
-    if (tagName.expression) {
-      str += "(" + tagName.expression.value + ")";
+    if (tagNameExpression) {
+      str += tagNameExpression;
     } else {
-      str += tagName.value || "div";
+      str += tagName || "div";
     }
 
     if (variable) {
@@ -185,10 +169,6 @@ class ElementNode {
 
     if (params) {
       str += " PARAMS=(" + params.value + ")";
-    }
-
-    if (out.includePositions) {
-      str += ":" + event.pos;
     }
 
     if (event.shorthandId) {
@@ -215,25 +195,16 @@ class ElementNode {
     });
     out.decIndent();
 
-    out.writeLine(
-      "</" + (/\${/.test(tagName.value) ? "" : tagName.value) + ">"
-    );
+    out.writeLine("</" + (/\${/.test(tagName) ? "" : tagName) + ">");
   }
 }
 
 class TreeBuilder {
-  constructor(src, options) {
-    options = options || {};
-
+  constructor(src) {
     this.src = src;
-    this.includePositions = options && options.includePositions === true;
-    this.includeTextParserState = options.includeTextParserState === true;
 
     this.root = new RootNode();
     this.stack = [this.root];
-
-    var openTagHandlers = options.openTagHandlers;
-    var openTagNameHandlers = options.openTagNameHandlers;
 
     this.listeners = {
       onText: (event) => {
@@ -252,7 +223,7 @@ class TreeBuilder {
         expect(src.substring(event.endPos - 1, event.endPos)).to.equal("}");
 
         var escapeFunc = escape ? "$escapeXml" : "$noEscapeXml";
-        event.value = escapeFunc + "(" + event.value.value + ")";
+        event.value = escapeFunc + "(" + event.value + ")";
         this.last.children.push(new Node(event));
       },
 
@@ -269,35 +240,22 @@ class TreeBuilder {
         this.last.children.push(new Node(event));
       },
 
-      onOpenTagName: (event, parser) => {
-        var tagName = event.tagName.value;
-        var openTagNameHandler =
-          openTagNameHandlers && openTagNameHandlers[tagName];
-        if (openTagNameHandler) {
-          openTagNameHandler.call(parser, event, parser);
-        }
-      },
-
-      onOpenTag: (event, parser) => {
+      onOpenTag: (event) => {
         var startPos = event.pos;
         var endPos = event.endPos;
         var tagName = event.tagName;
 
-        if (
-          !event.shorthandId &&
-          !event.shorthandClassNames &&
-          tagName.pos !== undefined
-        ) {
+        if (!event.shorthandId && !event.shorthandClassNames) {
           // Make sure the position information is correct, but only if the
           // shorthand syntax was not used on the tag name
           if (event.concise) {
-            expect(src.substring(startPos, tagName.endPos)).to.equal(
-              tagName.value
+            expect(src.substring(startPos, startPos + tagName.length)).to.equal(
+              tagName
             );
           } else {
-            expect(src.substring(startPos, tagName.endPos)).to.equal(
-              "<" + tagName.value
-            );
+            expect(
+              src.substring(startPos, startPos + 1 + tagName.length)
+            ).to.equal("<" + tagName);
 
             if (event.selfClosed) {
               expect(src.substring(endPos - 2, endPos)).to.equal("/>");
@@ -310,15 +268,10 @@ class TreeBuilder {
         var el = new ElementNode(event);
         this.last.children.push(el);
         this.stack.push(el);
-
-        var openTagHandler = openTagHandlers && openTagHandlers[tagName.value];
-        if (openTagHandler) {
-          openTagHandler.call(parser, event, parser);
-        }
       },
 
       onCloseTag: (event) => {
-        var tagName = event.tagName?.value;
+        var tagName = event.tagName;
 
         var last = this.stack.pop();
 
@@ -328,29 +281,8 @@ class TreeBuilder {
 
         var lastEvent = last.event;
 
-        if (tagName && (last.event.tagName.value || "div") !== tagName) {
-          if (
-            // accepts including the tag class/id shorthands as part of the close tag name.
-            tagName !==
-            src.slice(
-              lastEvent.tagName.pos,
-              Math.max(
-                lastEvent.shorthandId ? lastEvent.shorthandId.endPos : 0,
-                lastEvent.shorthandClassNames
-                  ? lastEvent.shorthandClassNames[
-                      lastEvent.shorthandClassNames.length - 1
-                    ].endPos
-                  : 0
-              )
-            )
-          ) {
-            throw new Error(
-              "Illegal state: incorrectly close tag: " +
-                last.event.tagName.value +
-                " != " +
-                tagName
-            );
-          }
+        if (last.event.tagName !== event.tagName) {
+          // throw new Error('Illegal state: incorrectly close tag: ' + last.event.tagName + ' != ' + tagName);
         }
 
         // Make sure the position information is correct
@@ -362,17 +294,19 @@ class TreeBuilder {
           lastEvent.selfClosed ||
           lastEvent.openTagOnly
         ) {
-          expect(startPos === endPos).to.equal(true);
-        } else if (
-          !lastEvent.tagName.shorthandId &&
-          !lastEvent.tagName.shorthandClassNames
-        ) {
-          var actualEndTag = src.substring(startPos, endPos);
-
-          if (actualEndTag !== "</" + tagName + ">" && actualEndTag !== "</>") {
-            throw new Error(
-              "Incorrect start/stop pos for close tag: " + actualEndTag
-            );
+          expect(startPos == null).to.equal(true);
+          expect(endPos == null).to.equal(true);
+        } else {
+          if (!lastEvent.shorthandId && !lastEvent.shorthandClassNames) {
+            var actualEndTag = src.substring(startPos, endPos);
+            if (
+              actualEndTag !== "</" + tagName + ">" &&
+              actualEndTag !== "</>"
+            ) {
+              throw new Error(
+                "Incorrect start/stop pos for close tag: " + actualEndTag
+              );
+            }
           }
         }
 
@@ -426,8 +360,6 @@ class TreeBuilder {
     var indent = "";
     var buffer = "";
     var out = {
-      includePositions: this.includePositions === true,
-      includeTextParserState: this.includeTextParserState === true,
       incIndent() {
         indent += "    ";
       },
