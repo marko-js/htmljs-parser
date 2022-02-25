@@ -70,7 +70,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
   char(code) {
     if (isWhitespaceCode(code)) {
-      this.indent += " "; // TODO: can just be a length?
+      this.indent += this.data[this.pos];
     } else {
       const curIndent = this.indent.length;
 
@@ -125,7 +125,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         }
 
         if (parentBlock.nestedIndent) {
-          if (parentBlock.nestedIndent.length !== this.indent.length) {
+          if (parentBlock.nestedIndent !== this.indent) {
             this.emitError(
               this.pos,
               "BAD_INDENTATION",
