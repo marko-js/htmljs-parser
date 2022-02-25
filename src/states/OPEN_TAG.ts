@@ -31,7 +31,7 @@ export interface OpenTagMeta extends Range {
   indent: string;
   nestedIndent?: string;
 }
-const PARSED_TEXT_TAGS = ["script", "style", "textarea"];
+const PARSED_TEXT_TAGS = ["script", "style", "textarea", "html-comment"];
 
 export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   name: "OPEN_TAG",
