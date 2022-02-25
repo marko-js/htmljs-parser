@@ -13,6 +13,7 @@ export interface TagNameMeta extends TemplateRange {
 }
 
 const ONLY_OPEN_TAGS = [
+  "area",
   "base",
   "br",
   "col",
@@ -20,7 +21,6 @@ const ONLY_OPEN_TAGS = [
   "embed",
   "img",
   "input",
-  "keygen",
   "link",
   "meta",
   "param",
