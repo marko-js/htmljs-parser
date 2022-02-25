@@ -1,4 +1,3 @@
-import type { OpenTagMeta } from ".";
 import {
   Parser,
   CODE,
@@ -79,7 +78,8 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         const len = this.blockStack.length;
         if (len) {
           if (
-            (this.blockStack[len - 1] as OpenTagMeta).indent.length >= curIndent
+            (this.blockStack[len - 1] as STATE.OpenTagMeta).indent.length >=
+            curIndent
           ) {
             const pos = this.pos - curIndent;
             this.closeTag(pos, pos, undefined);

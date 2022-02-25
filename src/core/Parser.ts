@@ -8,7 +8,6 @@ import {
   Events,
   EventTypes,
 } from "../internal";
-import type { OpenTagMeta } from "../states";
 
 export interface StateDefinition<P extends Range = Range> {
   name: string;
@@ -372,7 +371,7 @@ export class Parser {
   }
 
   closeTag(start: number, end: number, value: Range | undefined) {
-    const lastTag = this.blockStack.pop() as OpenTagMeta;
+    const lastTag = this.blockStack.pop() as STATE.OpenTagMeta;
 
     if (lastTag.beginMixedMode) {
       this.endingMixedModeAtEOL = true;
