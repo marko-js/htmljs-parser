@@ -99,14 +99,12 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           end: childPart.end,
         };
 
-        if (this.lookPastWhitespaceFor("{")) {
+        if (this.consumeWhitespaceIfBefore("{")) {
           attr.args = {
             start,
             end,
             value,
           };
-          this.consumeWhitespace();
-          this.rewind(1);
         } else {
           attr.args = true;
           this.emit({

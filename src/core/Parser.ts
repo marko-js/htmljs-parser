@@ -398,10 +398,17 @@ export class Parser {
 
   // --------------------------
 
-  lookPastWhitespaceFor(str: string, start = 1) {
-    let ahead = start;
-    while (isWhitespaceCode(this.lookAtCharCodeAhead(ahead))) ahead++;
-    return !!this.lookAheadFor(str, this.pos + ahead);
+  consumeWhitespaceIfBefore(str: string, start = 0) {
+    const { pos, data } = this;
+    let cur = pos + start;
+    while (isWhitespaceCode(data.charCodeAt(cur))) cur++;
+
+    if (this.lookAheadFor(str, cur)) {
+      this.pos = cur;
+      return true;
+    }
+
+    return false;
   }
 
   getPreviousNonWhitespaceCharCode(start = -1) {
