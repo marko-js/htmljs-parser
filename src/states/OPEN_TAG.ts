@@ -117,8 +117,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               end: childPart.end,
             };
 
-            if (this.lookPastWhitespaceFor("{")) {
-              this.consumeWhitespace();
+            if (this.consumeWhitespaceIfBefore("{")) {
               const attr = this.enterState(STATE.ATTRIBUTE);
               attr.start = start;
               attr.args = { start, end, value };
