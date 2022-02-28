@@ -46,7 +46,7 @@ export class Parser {
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
   public textParseMode!: "html" | "cdata" | "parsed-text";
-  public value: Events.Any;
+  public value!: Events.Any;
   public events!: Events.Any[];
   public eventIndex!: number;
   public done!: boolean;

@@ -339,10 +339,6 @@ class TreeBuilder {
       },
 
       onScriptlet: (event) => {
-        if (event.tag) {
-          expect(src.substring(event.pos, event.pos + 2)).to.equal("<%");
-          expect(src.substring(event.endPos - 2, event.endPos)).to.equal("%>");
-        }
         this.last.children.push(new Node(event));
       },
 
