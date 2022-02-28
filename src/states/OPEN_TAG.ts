@@ -250,8 +250,6 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         // The open tag is complete
         this.exitState();
 
-        this.htmlBlockDelimiter = "";
-
         const maxPos = this.maxPos;
         let curPos = this.pos + 1;
         // Skip until the next newline.
