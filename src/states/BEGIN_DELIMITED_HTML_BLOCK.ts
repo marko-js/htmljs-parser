@@ -2,6 +2,7 @@ import { Parser, CODE, StateDefinition, Range } from "../internal";
 
 export interface DelimitedHTMLBlockMeta extends Range {
   delimiter: string;
+  indent: string;
 }
 
 // In STATE.BEGIN_DELIMITED_HTML_BLOCK we have already found two consecutive hyphens. We expect
@@ -11,6 +12,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
     name: "BEGIN_DELIMITED_HTML_BLOCK",
 
     enter(block) {
+      block.indent = this.indent;
       block.delimiter = "";
     },
 
@@ -18,7 +20,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
       // We have reached the end of the first delimiter... we need to skip over any indentation on the next
       // line and we might also find that the multi-line, delimited block is immediately ended
       this.beginHtmlBlock(block.delimiter, false);
-      this.handleDelimitedBlockEOL(len, block.delimiter);
+      this.handleDelimitedBlockEOL(len, block.delimiter, block.indent);
     },
 
     eof: Parser.prototype.htmlEOF,

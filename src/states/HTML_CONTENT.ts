@@ -10,7 +10,7 @@ import {
 
 export interface HTMLContentMeta extends Range {
   singleLine: boolean;
-  indent: undefined | string;
+  indent: string;
   delimiter: undefined | string;
 }
 
@@ -43,7 +43,7 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       this.endText();
       this.endHtmlBlock();
     } else if (content.delimiter) {
-      this.handleDelimitedBlockEOL(len, content.delimiter);
+      this.handleDelimitedBlockEOL(len, content.delimiter, content.indent);
     } else {
       this.startText();
     }
