@@ -39,7 +39,6 @@ export class Parser {
   public isInAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
   public indent!: string; // Used to build the indent for the current concise line
   public isConcise!: boolean; // Set to true if parser is currently in concise mode
-  public htmlBlockIndent?: string; // Used to hold the indentation for a delimited, multiline HTML block
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
@@ -80,7 +79,6 @@ export class Parser {
     this.activeTag = undefined;
     this.activeAttr = undefined;
     this.beginMixedMode = false;
-    this.htmlBlockIndent = undefined;
     this.endingMixedModeAtEOL = false;
 
     // Enter initial state
@@ -255,7 +253,6 @@ export class Parser {
    * tags within a block are properly closed.
    */
   beginHtmlBlock(delimiter: string | undefined, singleLine: boolean) {
-    this.htmlBlockIndent = this.indent;
     this.blockStack.push({
       type: "html",
       delimiter,
@@ -301,7 +298,6 @@ export class Parser {
     }
 
     // Resert variables associated with parsing an HTML block
-    this.htmlBlockIndent = undefined;
     this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
@@ -469,12 +465,16 @@ export class Parser {
     this.skip(ahead);
   }
 
-  handleDelimitedBlockEOL(newLineLength: number, delimiter: string) {
+  handleDelimitedBlockEOL(
+    newLineLength: number,
+    delimiter: string,
+    indent: string
+  ) {
     // If we are within a delimited HTML block then we want to check if the next line is the end
     // delimiter. Since we are currently positioned at the start of the new line character our lookahead
     // will need to include the new line character, followed by the expected indentation, followed by
     // the delimiter.
-    const endHtmlBlockLookahead = this.htmlBlockIndent! + delimiter;
+    const endHtmlBlockLookahead = indent + delimiter;
 
     if (this.lookAheadFor(endHtmlBlockLookahead, this.pos + newLineLength)) {
       this.startText(); // we want to at least include the newline as text.
@@ -490,17 +490,15 @@ export class Parser {
           "A concise mode closing block delimiter can only be followed by whitespace."
         );
       }
-    } else if (
-      this.lookAheadFor(this.htmlBlockIndent!, this.pos + newLineLength)
-    ) {
+    } else if (this.lookAheadFor(indent, this.pos + newLineLength)) {
       // We know the next line does not end the multiline HTML block, but we need to check if there
       // is any indentation that we need to skip over as we continue parsing the HTML in this
       // multiline HTML block
 
       this.startText();
-      this.skip(this.htmlBlockIndent!.length);
+      this.skip(indent.length);
       // We stay in the same state since we are still parsing a multiline, delimited HTML block
-    } else if (this.htmlBlockIndent && !this.onlyWhitespaceRemainsOnLine()) {
+    } else if (indent && !this.onlyWhitespaceRemainsOnLine()) {
       this.endText();
       // the next line does not have enough indentation
       // so unless it is blank (whitespace only),
