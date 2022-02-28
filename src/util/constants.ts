@@ -199,6 +199,7 @@ export namespace Events {
     type: EventTypes.OpenTagEnd;
     openTagOnly: boolean;
     selfClosed: boolean;
+    statement: boolean;
   }
 
   export interface CloseTag extends Range {

@@ -7,7 +7,7 @@ import {
   Parser,
 } from "../internal";
 
-interface ExpressionMeta extends Range {
+export interface ExpressionMeta extends Range {
   groupStack: number[];
   terminator?: string | string[];
   skipOperators: boolean;

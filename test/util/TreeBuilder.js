@@ -142,6 +142,12 @@ class ElementNode {
 
   write(out) {
     var event = this.event;
+
+    if (event.statement) {
+      out.writeLine(event.statement);
+      return;
+    }
+
     var tagName = event.tagName;
     var tagNameExpression = event.tagNameExpression;
     var argument = event.argument;
@@ -187,6 +193,7 @@ class ElementNode {
       (openTagOnly ? " OPEN_ONLY" : "") +
       (selfClosed ? " SELF_CLOSED" : "") +
       ">";
+
     out.writeLine(str);
 
     out.incIndent();

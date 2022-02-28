@@ -29,6 +29,8 @@ const ONLY_OPEN_TAGS = [
   "wbr",
 ];
 
+const EXPRESSION_TAGS = ["import", "export", "static", "class"];
+
 // We enter STATE.TAG_NAME after we encounter a "<"
 // followed by a non-special character
 export const TAG_NAME: StateDefinition<TagNameMeta> = {
@@ -71,11 +73,24 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
           expressions,
         });
         break;
-      default:
-        this.activeTag!.tagName = tagName;
-        this.activeTag!.openTagOnly =
-          tagName.expressions.length === 0 &&
-          this.matchAnyAtPos(tagName, ONLY_OPEN_TAGS);
+      default: {
+        const tag = this.activeTag!;
+        tag.tagName = tagName;
+
+        if (tagName.expressions.length === 0) {
+          if (this.matchAnyAtPos(tagName, ONLY_OPEN_TAGS)) {
+            tag.openTagOnly = true;
+          } else if (
+            tag.concise &&
+            this.blockStack[0] === tag &&
+            this.matchAnyAtPos(tagName, EXPRESSION_TAGS)
+          ) {
+            tag.statement = true;
+            tag.openTagOnly = true;
+            this.enterState(STATE.EXPRESSION, { terminatedByEOL: true });
+          }
+        }
+
         this.emit({
           type: EventTypes.TagName,
           start,
@@ -83,11 +98,14 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
           quasis,
           expressions,
         });
+
         break;
+      }
     }
   },
 
   return(_, childPart, tagName) {
+    if ((childPart as STATE.ExpressionMeta).terminatedByEOL) return;
     if (childPart.start === childPart.end) {
       this.emitError(
         childPart,
