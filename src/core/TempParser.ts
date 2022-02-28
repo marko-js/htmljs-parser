@@ -169,6 +169,9 @@ export class TempParser {
             tagNameEndPos: curTagName!.end,
             selfClosed: data.selfClosed,
             openTagOnly: data.openTagOnly,
+            statement:
+              data.statement &&
+              parser.read({ start: curTagName!.start, end: data.end }),
             attributes: (curAttrs || []).map((attr) => ({
               default: attr.name?.default,
               name: attr.name && parser.read(attr.name),

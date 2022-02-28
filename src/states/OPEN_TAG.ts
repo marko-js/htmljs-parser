@@ -28,6 +28,7 @@ export interface OpenTagMeta extends Range {
   hasShorthandId: boolean;
   selfClosed: boolean;
   openTagOnly: boolean;
+  statement: boolean;
   indent: string;
   nestedIndent: string | undefined;
 }
@@ -40,6 +41,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     tag.type = "tag";
     tag.state = undefined;
     tag.hasAttrs = false;
+    tag.statement = false;
     tag.selfClosed = false;
     tag.openTagOnly = false;
     tag.bodyMode = BODY_MODE.HTML;
@@ -63,7 +65,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   },
 
   exit(tag) {
-    const { tagName, selfClosed, openTagOnly } = tag;
+    const { tagName, selfClosed, openTagOnly, statement } = tag;
 
     this.emit({
       type: EventTypes.OpenTagEnd,
@@ -71,6 +73,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       end: this.pos,
       selfClosed,
       openTagOnly,
+      statement,
     });
 
     if (!this.isConcise && (selfClosed || openTagOnly)) {

@@ -1,4 +1,4 @@
-import { CODE, STATE, StateDefinition, Parser, peek, Range } from "../internal";
+import { CODE, STATE, StateDefinition, Parser, Range } from "../internal";
 
 // We enter STATE.CLOSE_TAG after we see "</"
 export const CLOSE_TAG: StateDefinition = {
