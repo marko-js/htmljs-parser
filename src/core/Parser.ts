@@ -133,27 +133,6 @@ export class Parser {
     this.forward = false;
   }
 
-  checkForTerminator(terminator: string | string[]) {
-    if (typeof terminator === "string") {
-      if (this.data[this.pos] === terminator) {
-        return true;
-      } else if (terminator.length > 1) {
-        for (let i = 0; i < terminator.length; i++) {
-          if (this.data[this.pos + i] !== terminator[i]) {
-            return false;
-          }
-        }
-        return true;
-      }
-    } else {
-      for (let i = 0; i < terminator.length; i++) {
-        if (this.checkForTerminator(terminator[i])) {
-          return true;
-        }
-      }
-    }
-  }
-
   /**
    * Compare a position in the source to either another position, or a string.
    */

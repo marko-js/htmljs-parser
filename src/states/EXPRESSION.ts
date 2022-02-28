@@ -4,6 +4,7 @@ import {
   isWhitespaceCode,
   StateDefinition,
   Range,
+  Parser,
 } from "../internal";
 
 interface ExpressionMeta extends Range {
@@ -126,7 +127,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 
       if (
         expression.terminator &&
-        this.checkForTerminator(expression.terminator)
+        checkForTerminator(this, expression.terminator)
       ) {
         this.exitState();
         return;
@@ -269,6 +270,27 @@ function buildOperatorPattern(isConcise: boolean) {
     .join("|")}))`;
 
   return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "y");
+}
+
+function checkForTerminator(parser: Parser, terminator: string | string[]) {
+  if (typeof terminator === "string") {
+    if (parser.data[parser.pos] === terminator) {
+      return true;
+    } else if (terminator.length > 1) {
+      for (let i = 0; i < terminator.length; i++) {
+        if (parser.data[parser.pos + i] !== terminator[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+  } else {
+    for (let i = 0; i < terminator.length; i++) {
+      if (checkForTerminator(parser, terminator[i])) {
+        return true;
+      }
+    }
+  }
 }
 
 function canCharCodeBeFollowedByDivision(code: number) {
