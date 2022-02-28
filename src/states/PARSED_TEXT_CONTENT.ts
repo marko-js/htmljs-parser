@@ -1,4 +1,9 @@
-import { checkForCDATA, checkForClosingTag, checkForPlaceholder } from ".";
+import {
+  checkForCDATA,
+  checkForClosingTag,
+  checkForPlaceholder,
+  handleDelimitedBlockEOL,
+} from ".";
 import { Parser, STATE, CODE, StateDefinition, Range } from "../internal";
 
 export interface ParsedTextContentMeta extends Range {
@@ -25,7 +30,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
       this.endText();
       this.endHtmlBlock();
     } else if (content.delimiter) {
-      this.handleDelimitedBlockEOL(len, content.delimiter, content.indent);
+      handleDelimitedBlockEOL(this, len, content.delimiter, content.indent);
     } else {
       this.startText();
     }
