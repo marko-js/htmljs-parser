@@ -37,7 +37,6 @@ export class Parser {
   public activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
   public activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
   public isInAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
-  public isInSingleLineHtmlBlock!: boolean; // Set to true if the current block is for a single line HTML block
   public indent!: string; // Used to build the indent for the current concise line
   public isConcise!: boolean; // Set to true if parser is currently in concise mode
   public htmlBlockDelimiter?: string; // Current delimiter for multiline HTML blocks nested within a concise tag. e.g. "--"
@@ -85,7 +84,6 @@ export class Parser {
     this.htmlBlockIndent = undefined;
     this.endingMixedModeAtEOL = false;
     this.htmlBlockDelimiter = undefined;
-    this.isInSingleLineHtmlBlock = false;
 
     // Enter initial state
     this.enterState(STATE.CONCISE_HTML_CONTENT);
@@ -258,7 +256,7 @@ export class Parser {
    * return back to the previous parsing mode and to ensure that all
    * tags within a block are properly closed.
    */
-  beginHtmlBlock(delimiter?: string) {
+  beginHtmlBlock(delimiter: string | undefined, singleLine: boolean) {
     this.htmlBlockIndent = this.indent;
     this.htmlBlockDelimiter = delimiter;
     this.blockStack.push({
@@ -270,7 +268,8 @@ export class Parser {
     this.enterState(
       this.activeTag?.bodyMode === BODY_MODE.PARSED_TEXT
         ? STATE.PARSED_TEXT_CONTENT
-        : STATE.HTML_CONTENT
+        : STATE.HTML_CONTENT,
+      { singleLine }
     );
   }
 
@@ -303,11 +302,7 @@ export class Parser {
     // Resert variables associated with parsing an HTML block
     this.htmlBlockIndent = undefined;
     this.htmlBlockDelimiter = undefined;
-    this.isInSingleLineHtmlBlock = false;
-
-    if (this.activeState !== STATE.CONCISE_HTML_CONTENT) {
-      this.enterState(STATE.CONCISE_HTML_CONTENT);
-    }
+    this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
   /**

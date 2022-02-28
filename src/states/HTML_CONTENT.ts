@@ -5,18 +5,23 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
+  Range,
 } from "../internal";
+
+export interface HTMLContentMeta extends Range {
+  singleLine: boolean;
+}
 
 // In STATE.HTML_CONTENT we are looking for tags and placeholders but
 // everything in between is treated as text.
-export const HTML_CONTENT: StateDefinition = {
+export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
   name: "HTML_CONTENT",
 
   enter() {
     this.isConcise = false; // Back into non-concise HTML parsing
   },
 
-  eol(len) {
+  eol(len, content) {
     if (this.beginMixedMode) {
       this.beginMixedMode = false;
       this.endText(len);
@@ -25,7 +30,7 @@ export const HTML_CONTENT: StateDefinition = {
       this.endingMixedModeAtEOL = false;
       this.endText();
       this.endHtmlBlock();
-    } else if (this.isInSingleLineHtmlBlock) {
+    } else if (content.singleLine) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single
       // line HTML block then we should return back to the state to parse concise HTML.
       // A single line HTML block can be at the end of the tag or on its own line:
