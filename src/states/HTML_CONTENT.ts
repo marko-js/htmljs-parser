@@ -1,4 +1,4 @@
-import { checkForCDATA, checkForPlaceholder } from ".";
+import { checkForCDATA, checkForPlaceholder, handleDelimitedBlockEOL } from ".";
 import {
   Parser,
   CODE,
@@ -43,7 +43,7 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       this.endText();
       this.endHtmlBlock();
     } else if (content.delimiter) {
-      this.handleDelimitedBlockEOL(len, content.delimiter, content.indent);
+      handleDelimitedBlockEOL(this, len, content.delimiter, content.indent);
     } else {
       this.startText();
     }
