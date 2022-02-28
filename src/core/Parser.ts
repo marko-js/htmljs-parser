@@ -39,7 +39,6 @@ export class Parser {
   public isInAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
   public indent!: string; // Used to build the indent for the current concise line
   public isConcise!: boolean; // Set to true if parser is currently in concise mode
-  public htmlBlockDelimiter?: string; // Current delimiter for multiline HTML blocks nested within a concise tag. e.g. "--"
   public htmlBlockIndent?: string; // Used to hold the indentation for a delimited, multiline HTML block
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
@@ -83,7 +82,6 @@ export class Parser {
     this.beginMixedMode = false;
     this.htmlBlockIndent = undefined;
     this.endingMixedModeAtEOL = false;
-    this.htmlBlockDelimiter = undefined;
 
     // Enter initial state
     this.enterState(STATE.CONCISE_HTML_CONTENT);
@@ -258,7 +256,6 @@ export class Parser {
    */
   beginHtmlBlock(delimiter: string | undefined, singleLine: boolean) {
     this.htmlBlockIndent = this.indent;
-    this.htmlBlockDelimiter = delimiter;
     this.blockStack.push({
       type: "html",
       delimiter,
@@ -269,7 +266,11 @@ export class Parser {
       this.activeTag?.bodyMode === BODY_MODE.PARSED_TEXT
         ? STATE.PARSED_TEXT_CONTENT
         : STATE.HTML_CONTENT,
-      { singleLine }
+      {
+        singleLine,
+        delimiter,
+        indent: this.indent,
+      }
     );
   }
 
@@ -301,7 +302,6 @@ export class Parser {
 
     // Resert variables associated with parsing an HTML block
     this.htmlBlockIndent = undefined;
-    this.htmlBlockDelimiter = undefined;
     this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
@@ -469,13 +469,12 @@ export class Parser {
     this.skip(ahead);
   }
 
-  handleDelimitedBlockEOL(newLineLength: number) {
+  handleDelimitedBlockEOL(newLineLength: number, delimiter: string) {
     // If we are within a delimited HTML block then we want to check if the next line is the end
     // delimiter. Since we are currently positioned at the start of the new line character our lookahead
     // will need to include the new line character, followed by the expected indentation, followed by
     // the delimiter.
-    const endHtmlBlockLookahead =
-      this.htmlBlockIndent! + this.htmlBlockDelimiter;
+    const endHtmlBlockLookahead = this.htmlBlockIndent! + delimiter;
 
     if (this.lookAheadFor(endHtmlBlockLookahead, this.pos + newLineLength)) {
       this.startText(); // we want to at least include the newline as text.
