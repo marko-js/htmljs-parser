@@ -155,8 +155,8 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           break;
         case CODE.HTML_BLOCK_DELIMITER:
           if (this.lookAtCharCodeAhead(1) === CODE.HTML_BLOCK_DELIMITER) {
-            this.htmlBlockDelimiter = "-";
             this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
+            this.rewind(1);
           } else {
             this.emitError(
               this.pos,
