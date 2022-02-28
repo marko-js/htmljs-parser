@@ -4,10 +4,6 @@ import { CODE, EventTypes, Parser, StateDefinition } from "../internal";
 export const CDATA: StateDefinition = {
   name: "CDATA",
 
-  enter() {
-    this.textParseMode = "cdata";
-  },
-
   exit(cdata) {
     this.emit({
       type: EventTypes.CDATA,

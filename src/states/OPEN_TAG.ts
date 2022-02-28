@@ -17,7 +17,7 @@ const enum TAG_STATE {
 
 export interface OpenTagMeta extends Range {
   type: "tag";
-  body: BODY_MODE;
+  bodyMode: BODY_MODE;
   state: TAG_STATE | undefined;
   concise: boolean;
   beginMixedMode?: boolean;
@@ -29,7 +29,7 @@ export interface OpenTagMeta extends Range {
   selfClosed: boolean;
   openTagOnly: boolean;
   indent: string;
-  nestedIndent?: string;
+  nestedIndent: string | undefined;
 }
 const PARSED_TEXT_TAGS = ["script", "style", "textarea", "html-comment"];
 
@@ -42,6 +42,8 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     tag.hasAttrs = false;
     tag.selfClosed = false;
     tag.openTagOnly = false;
+    tag.bodyMode = BODY_MODE.HTML;
+    tag.nestedIndent = undefined;
     tag.hasShorthandId = false;
     tag.indent = this.indent;
     tag.concise = this.isConcise;
@@ -77,7 +79,10 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       tagName.expressions.length === 0 &&
       this.matchAnyAtPos(tagName, PARSED_TEXT_TAGS)
     ) {
-      this.enterParsedTextContentState();
+      tag.bodyMode = BODY_MODE.PARSED_TEXT;
+      this.enterState(
+        this.isConcise ? STATE.CONCISE_HTML_CONTENT : STATE.PARSED_TEXT_CONTENT
+      );
     }
   },
 

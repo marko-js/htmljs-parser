@@ -13,7 +13,6 @@ export const HTML_CONTENT: StateDefinition = {
   name: "HTML_CONTENT",
 
   enter() {
-    this.textParseMode = "html";
     this.isConcise = false; // Back into non-concise HTML parsing
   },
 
