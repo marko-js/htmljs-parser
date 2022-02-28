@@ -3,7 +3,7 @@ import { Parser, STATE, CODE, StateDefinition, Range } from "../internal";
 
 export interface ParsedTextContentMeta extends Range {
   singleLine: boolean;
-  indent: undefined | string;
+  indent: string;
   delimiter: undefined | string;
 }
 
@@ -12,10 +12,6 @@ export interface ParsedTextContentMeta extends Range {
 // placeholders
 export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
   name: "PARSED_TEXT_CONTENT",
-
-  enter(content) {
-    content.singleLine = content.singleLine === true;
-  },
 
   eol(len, content) {
     if (content.singleLine) {
@@ -29,7 +25,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
       this.endText();
       this.endHtmlBlock();
     } else if (content.delimiter) {
-      this.handleDelimitedBlockEOL(len, content.delimiter);
+      this.handleDelimitedBlockEOL(len, content.delimiter, content.indent);
     } else {
       this.startText();
     }
