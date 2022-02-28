@@ -36,29 +36,33 @@ export class TempParser {
         case EventTypes.Error:
           this._handlers.onError?.({
             type: "error",
-            message: data.message,
+            pos: data.start,
+            endPos: data.end,
             code: data.code,
-            ...rangeToPos(data),
+            message: data.message,
           });
           break;
         case EventTypes.Text:
           this._handlers.onText?.({
             type: "text",
-            ...rangeToPos(data),
+            pos: data.start,
+            endPos: data.end,
             value: parser.read(data),
           });
           break;
         case EventTypes.CDATA:
           this._handlers.onCDATA?.({
             type: "cdata",
-            ...rangeToPos(data),
+            pos: data.start,
+            endPos: data.end,
             value: parser.read(data.value),
           });
           break;
         case EventTypes.DocType:
           this._handlers.onDocumentType?.({
             type: "documentType",
-            ...rangeToPos(data),
+            pos: data.start,
+            endPos: data.end,
             value: parser.read(data.value),
           });
           break;
@@ -66,22 +70,25 @@ export class TempParser {
         case EventTypes.Declaration:
           this._handlers.onDeclaration?.({
             type: "declaration",
-            ...rangeToPos(data),
+            pos: data.start,
+            endPos: data.end,
             value: parser.read(data.value),
           });
           break;
         case EventTypes.Comment:
           this._handlers.onComment?.({
             type: "comment",
-            ...rangeToPos(data),
+            pos: data.start,
+            endPos: data.end,
             value: parser.read(data),
           });
           break;
         case EventTypes.Placeholder:
           this._handlers.onPlaceholder?.({
             type: "placeholder",
+            pos: data.start,
+            endPos: data.end,
             escape: data.escape,
-            ...rangeToPos(data),
             value: parser.read(data.value),
           });
           break;
@@ -143,15 +150,18 @@ export class TempParser {
               curTagName!.quasis[1].start === curTagName!.quasis[1].end &&
               parser.read(curTagName!.expressions[0].value),
             var: curTagVar && {
-              ...rangeToPos(curTagVar),
+              pos: curTagVar.start,
+              endPos: curTagVar.end,
               value: parser.read(curTagVar.value),
             },
             argument: curTagArgs && {
-              ...rangeToPos(curTagArgs),
+              pos: curTagArgs.start,
+              endPos: curTagArgs.end,
               value: parser.read(curTagArgs.value),
             },
             params: curTagParams && {
-              ...rangeToPos(curTagParams),
+              pos: curTagParams.start,
+              endPos: curTagParams.end,
               value: parser.read(curTagParams.value),
             },
             pos: curTagName!.start - (isConcise ? 0 : 1),
@@ -169,19 +179,22 @@ export class TempParser {
               method: attr.method,
               spread: attr.spread,
               argument: attr.argument && {
-                ...attr.argument,
+                pos: attr.argument.start,
+                endPos: attr.argument.end,
                 value: parser.read(attr.argument.value),
               },
             })),
             concise: isConcise,
             shorthandId: curShorthandId && {
-              ...rangeToPos(curShorthandId),
+              pos: curShorthandId.start,
+              endPos: curShorthandId.end,
               value: parser.read(curShorthandId).slice(1),
             },
             shorthandClassNames:
               curShorthandClassNames &&
               curShorthandClassNames.map((shorthandClassName) => ({
-                ...rangeToPos(shorthandClassName),
+                pos: shorthandClassName.start,
+                endPos: shorthandClassName.end,
                 value: parser.read(shorthandClassName).slice(1),
               })),
           });
@@ -200,7 +213,8 @@ export class TempParser {
             data.value
               ? {
                   type: "closeTag",
-                  ...rangeToPos(data),
+                  pos: data.start,
+                  endPos: data.end,
                   tagName: parser.read(data.value),
                 }
               : {
@@ -214,20 +228,14 @@ export class TempParser {
         case EventTypes.Scriptlet:
           this._handlers.onScriptlet?.({
             type: "scriptlet",
+            pos: data.start,
+            endPos: data.end,
             block: data.block,
             line: !data.block,
-            ...rangeToPos(data),
             value: parser.read(data.value),
           });
           break;
       }
     }
   }
-}
-
-function rangeToPos(range: Range) {
-  return {
-    pos: range.start,
-    endPos: range.end,
-  };
 }
