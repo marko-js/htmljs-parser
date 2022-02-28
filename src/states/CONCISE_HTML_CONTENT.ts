@@ -144,7 +144,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         case CODE.OPEN_ANGLE_BRACKET:
           this.beginMixedMode = true;
           this.rewind(1);
-          this.beginHtmlBlock();
+          this.beginHtmlBlock(undefined, false);
           return;
         case CODE.DOLLAR:
           if (isWhitespaceCode(this.lookAtCharCodeAhead(1))) {
