@@ -66,11 +66,11 @@ export function checkForClosingTag(parser: Parser) {
 }
 
 function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
-  const lastBlock = peek(parser.blockStack);
+  const activeTag = parser.activeTag;
   const closeTagNameStart = closeTag.start + 2; // strip </
   const closeTagNameEnd = closeTag.end - 1; // strip >
 
-  if (!lastBlock || lastBlock.type !== "tag") {
+  if (!activeTag) {
     return parser.emitError(
       closeTag!,
       "EXTRA_CLOSING_TAG",
@@ -89,16 +89,16 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
     if (
       !parser.matchAtPos(
         closeTagNamePos,
-        lastBlock.tagName.end > lastBlock.tagName.start
-          ? lastBlock.tagName
+        activeTag.tagName.end > activeTag.tagName.start
+          ? activeTag.tagName
           : "div"
       )
     ) {
       if (
-        lastBlock.shorthandEnd === undefined ||
+        activeTag.shorthandEnd === undefined ||
         !parser.matchAtPos(closeTagNamePos, {
-          start: lastBlock.tagName.start,
-          end: lastBlock.shorthandEnd,
+          start: activeTag.tagName.start,
+          end: activeTag.shorthandEnd,
         })
       ) {
         return parser.emitError(
@@ -107,7 +107,7 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
           'The closing "' +
             parser.read(closeTagNamePos) +
             '" tag does not match the corresponding opening "' +
-            (parser.read(lastBlock.tagName) || "div") +
+            (parser.read(activeTag.tagName) || "div") +
             '" tag'
         );
       }
