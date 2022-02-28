@@ -465,50 +465,6 @@ export class Parser {
     this.skip(ahead);
   }
 
-  handleDelimitedBlockEOL(
-    newLineLength: number,
-    delimiter: string,
-    indent: string
-  ) {
-    // If we are within a delimited HTML block then we want to check if the next line is the end
-    // delimiter. Since we are currently positioned at the start of the new line character our lookahead
-    // will need to include the new line character, followed by the expected indentation, followed by
-    // the delimiter.
-    const endHtmlBlockLookahead = indent + delimiter;
-
-    if (this.lookAheadFor(endHtmlBlockLookahead, this.pos + newLineLength)) {
-      this.startText(); // we want to at least include the newline as text.
-      this.endText(newLineLength);
-      this.skip(endHtmlBlockLookahead.length + newLineLength);
-
-      if (this.consumeWhitespaceOnLine(0)) {
-        this.endHtmlBlock();
-      } else {
-        this.emitError(
-          this.pos,
-          "INVALID_CHARACTER",
-          "A concise mode closing block delimiter can only be followed by whitespace."
-        );
-      }
-    } else if (this.lookAheadFor(indent, this.pos + newLineLength)) {
-      // We know the next line does not end the multiline HTML block, but we need to check if there
-      // is any indentation that we need to skip over as we continue parsing the HTML in this
-      // multiline HTML block
-
-      this.startText();
-      this.skip(indent.length);
-      // We stay in the same state since we are still parsing a multiline, delimited HTML block
-    } else if (indent && !this.onlyWhitespaceRemainsOnLine()) {
-      this.endText();
-      // the next line does not have enough indentation
-      // so unless it is blank (whitespace only),
-      // we will end the block
-      this.endHtmlBlock();
-    } else {
-      this.startText();
-    }
-  }
-
   next(): Parser {
     if (this.hasEvent()) return this;
 
