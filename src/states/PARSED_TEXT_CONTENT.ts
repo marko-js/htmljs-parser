@@ -7,10 +7,6 @@ import { Parser, STATE, CODE, StateDefinition } from "../internal";
 export const PARSED_TEXT_CONTENT: StateDefinition = {
   name: "PARSED_TEXT_CONTENT",
 
-  enter() {
-    this.textParseMode = "parsed-text";
-  },
-
   eol(len) {
     if (this.isInSingleLineHtmlBlock) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single

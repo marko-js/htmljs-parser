@@ -6,6 +6,7 @@ import {
   StateDefinition,
   peek,
   EventTypes,
+  BODY_MODE,
 } from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
@@ -101,21 +102,24 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         }
       }
 
-      const parentBlock = peek(this.blockStack);
+      const parentTag = peek(this.blockStack) as STATE.OpenTagMeta | undefined;
 
-      if (parentBlock) {
-        if (parentBlock.type === "tag" && parentBlock.openTagOnly) {
+      if (parentTag) {
+        if (parentTag.openTagOnly) {
           this.emitError(
             this.pos,
             "INVALID_BODY",
             `The "${this.read(
-              parentBlock.tagName
+              parentTag.tagName
             )}" tag does not allow nested body content`
           );
           return;
         }
 
-        if (parentBlock.body && code !== CODE.HTML_BLOCK_DELIMITER) {
+        if (
+          parentTag.bodyMode === BODY_MODE.PARSED_TEXT &&
+          code !== CODE.HTML_BLOCK_DELIMITER
+        ) {
           this.emitError(
             this.pos,
             "ILLEGAL_LINE_START",
@@ -124,17 +128,15 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           return;
         }
 
-        if (parentBlock.nestedIndent) {
-          if (parentBlock.nestedIndent !== this.indent) {
-            this.emitError(
-              this.pos,
-              "BAD_INDENTATION",
-              "Line indentation does match indentation of previous line"
-            );
-            return;
-          }
-        } else {
-          parentBlock.nestedIndent = this.indent;
+        if (parentTag.nestedIndent === undefined) {
+          parentTag.nestedIndent = this.indent;
+        } else if (parentTag.nestedIndent !== this.indent) {
+          this.emitError(
+            this.pos,
+            "BAD_INDENTATION",
+            "Line indentation does match indentation of previous line"
+          );
+          return;
         }
       }
 

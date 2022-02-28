@@ -1,5 +1,5 @@
 import { checkForClosingTag } from ".";
-import { CODE, StateDefinition } from "../internal";
+import { BODY_MODE, CODE, StateDefinition } from "../internal";
 
 // We enter STATE.JS_COMMENT_LINE after we encounter a "//" sequence
 // when parsing JavaScript code.
@@ -19,7 +19,7 @@ export const JS_COMMENT_LINE: StateDefinition = {
     if (
       !this.isConcise &&
       code === CODE.OPEN_ANGLE_BRACKET &&
-      this.textParseMode === "parsed-text"
+      this.activeTag?.bodyMode === BODY_MODE.PARSED_TEXT
     ) {
       // First, see if we need to see if we reached the closing tag
       // eg: <script>//foo</script>
