@@ -8,7 +8,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition = {
   eol(len) {
     // We have reached the end of the first delimiter... we need to skip over any indentation on the next
     // line and we might also find that the multi-line, delimited block is immediately ended
-    this.beginHtmlBlock(this.htmlBlockDelimiter);
+    this.beginHtmlBlock(this.htmlBlockDelimiter, false);
     this.handleDelimitedBlockEOL(len);
   },
 
@@ -19,9 +19,8 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition = {
     if (code === CODE.HTML_BLOCK_DELIMITER) {
       this.htmlBlockDelimiter += "-";
     } else if (!this.consumeWhitespaceOnLine()) {
-      this.isInSingleLineHtmlBlock = true;
       this.pos = startPos + 1;
-      this.beginHtmlBlock();
+      this.beginHtmlBlock(undefined, true);
       this.rewind(1);
     }
   },
