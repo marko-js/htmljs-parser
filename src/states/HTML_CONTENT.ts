@@ -10,6 +10,8 @@ import {
 
 export interface HTMLContentMeta extends Range {
   singleLine: boolean;
+  indent: undefined | string;
+  delimiter: undefined | string;
 }
 
 // In STATE.HTML_CONTENT we are looking for tags and placeholders but
@@ -40,8 +42,8 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       //
       this.endText();
       this.endHtmlBlock();
-    } else if (this.htmlBlockDelimiter) {
-      this.handleDelimitedBlockEOL(len);
+    } else if (content.delimiter) {
+      this.handleDelimitedBlockEOL(len, content.delimiter);
     } else {
       this.startText();
     }
