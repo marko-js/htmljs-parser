@@ -45,19 +45,18 @@ export class Parser {
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
-  public textParseMode!: "html" | "cdata" | "parsed-text";
   public value!: Events.Any;
   public events!: Events.Any[];
   public eventIndex!: number;
   public done!: boolean;
-  public blockStack!: ((
+  public blockStack!: (
     | STATE.OpenTagMeta
     | {
         type: "html";
         delimiter?: string;
         indent: string;
       }
-  ) & { body?: BODY_MODE; nestedIndent?: string })[]; // Used to keep track of HTML tags and HTML blocks
+  )[]; // Used to keep track of HTML tags and HTML blocks
 
   constructor(data: string, filename: string) {
     this.filename = filename;
@@ -83,7 +82,6 @@ export class Parser {
     this.activeTag = undefined;
     this.activeAttr = undefined;
     this.beginMixedMode = false;
-    this.textParseMode = "html";
     this.htmlBlockIndent = undefined;
     this.endingMixedModeAtEOL = false;
     this.htmlBlockDelimiter = undefined;
@@ -270,7 +268,7 @@ export class Parser {
     });
 
     this.enterState(
-      this.activeTag?.body === BODY_MODE.PARSED_TEXT
+      this.activeTag?.bodyMode === BODY_MODE.PARSED_TEXT
         ? STATE.PARSED_TEXT_CONTENT
         : STATE.HTML_CONTENT
     );
@@ -516,29 +514,6 @@ export class Parser {
       this.endHtmlBlock();
     } else {
       this.startText();
-    }
-  }
-
-  enterParsedTextContentState() {
-    const lastBlock = peek(this.blockStack);
-
-    if (
-      !lastBlock ||
-      lastBlock.type === "html" ||
-      lastBlock.tagName.start === lastBlock.tagName.end
-    ) {
-      throw new Error(
-        'The "parsed text content" parser state is only allowed within a tag'
-      );
-    }
-
-    if (this.isConcise) {
-      // We will transition into the STATE.PARSED_TEXT_CONTENT state
-      // for each of the nested HTML blocks
-      lastBlock.body = BODY_MODE.PARSED_TEXT;
-      this.enterState(STATE.CONCISE_HTML_CONTENT);
-    } else {
-      this.enterState(STATE.PARSED_TEXT_CONTENT);
     }
   }
 

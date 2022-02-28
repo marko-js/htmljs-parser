@@ -38,13 +38,9 @@ export const enum CODE {
   TAB = 9,
 }
 
-export const enum MODE {
-  HTML = 1,
-  CONCISE = 2,
-}
-
 export const enum BODY_MODE {
-  PARSED_TEXT = 1, // Body of a tag is treated as text, but placeholders will be parsed
+  HTML,
+  PARSED_TEXT, // Body of a tag is treated as text, but placeholders will be parsed
 }
 
 export interface Range {
