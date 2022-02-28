@@ -1,14 +1,22 @@
 import { checkForCDATA, checkForClosingTag, checkForPlaceholder } from ".";
-import { Parser, STATE, CODE, StateDefinition } from "../internal";
+import { Parser, STATE, CODE, StateDefinition, Range } from "../internal";
+
+export interface ParsedTextContentMeta extends Range {
+  singleLine: boolean;
+}
 
 // We enter STATE.PARSED_TEXT_CONTENT when we are parsing
 // the body of a tag does not contain HTML tags but may contains
 // placeholders
-export const PARSED_TEXT_CONTENT: StateDefinition = {
+export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
   name: "PARSED_TEXT_CONTENT",
 
-  eol(len) {
-    if (this.isInSingleLineHtmlBlock) {
+  enter(content) {
+    content.singleLine = content.singleLine === true;
+  },
+
+  eol(len, content) {
+    if (content.singleLine) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single
       // line HTML block then we should return back to the state to parse concise HTML.
       // A single line HTML block can be at the end of the tag or on its own line:
