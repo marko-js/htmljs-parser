@@ -445,17 +445,17 @@ export class Parser {
   }
 
   next(): Parser {
-    if (this.hasEvent()) return this;
-
     let { pos } = this;
     const { maxPos, data } = this;
 
     if (pos >= maxPos) {
+      if (this.hasEvent()) return this;
       this.done = true;
       return this;
     }
 
     do {
+      if (this.hasEvent()) return this;
       const code = data.charCodeAt(pos);
 
       if (code === CODE.NEWLINE) {
@@ -475,8 +475,6 @@ export class Parser {
       } else {
         this.forward = true;
       }
-
-      if (this.hasEvent()) return this;
     } while ((pos = this.pos) < maxPos);
 
     do {

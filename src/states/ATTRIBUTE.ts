@@ -186,9 +186,9 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       (code === CODE.PERIOD && this.lookAheadFor(".."))
     ) {
       attr.valueStart = this.pos;
-      ensureAttrName(this, attr);
 
       if (code === CODE.COLON) {
+        ensureAttrName(this, attr);
         attr.bound = true;
         this.skip(2); // skip :=
         this.consumeWhitespace();
@@ -196,6 +196,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         attr.spread = true;
         this.skip(3); // skip ...
       } else {
+        ensureAttrName(this, attr);
         this.skip(1); // skip =
         this.consumeWhitespace();
       }
