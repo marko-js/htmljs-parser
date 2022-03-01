@@ -1,4 +1,4 @@
-import { CODE, STATE, StateDefinition, Parser, Range } from "../internal";
+import { CODE, StateDefinition, Parser, Range } from "../internal";
 
 // We enter STATE.CLOSE_TAG after we see "</"
 export const CLOSE_TAG: StateDefinition = {
@@ -49,16 +49,16 @@ export function checkForClosingTag(parser: Parser) {
   }
 
   if (match) {
-    if (parser.activeState === STATE.JS_COMMENT_LINE) {
+    parser.endText();
+
+    if (
+      ensureExpectedCloseTag(parser, {
+        start: parser.pos,
+        end: parser.skip(skip),
+      })
+    ) {
       parser.exitState();
     }
-
-    parser.endText();
-    ensureExpectedCloseTag(parser, {
-      start: parser.pos,
-      end: parser.skip(skip),
-    });
-    parser.forward = false;
     return true;
   }
 
@@ -71,13 +71,15 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
   const closeTagNameEnd = closeTag.end - 1; // strip >
 
   if (!activeTag) {
-    return parser.emitError(
+    parser.emitError(
       closeTag!,
       "EXTRA_CLOSING_TAG",
       'The closing "' +
         parser.read({ start: closeTagNameStart, end: closeTagNameEnd }) +
         '" tag was not expected'
     );
+
+    return false;
   }
 
   const closeTagNamePos = {
@@ -101,7 +103,7 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
           end: activeTag.shorthandEnd,
         })
       ) {
-        return parser.emitError(
+        parser.emitError(
           closeTag,
           "MISMATCHED_CLOSING_TAG",
           'The closing "' +
@@ -110,9 +112,12 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
             (parser.read(activeTag.tagName) || "div") +
             '" tag'
         );
+
+        return false;
       }
     }
   }
 
   parser.closeTag(closeTag.start, closeTag.end, closeTagNamePos);
+  return true;
 }
