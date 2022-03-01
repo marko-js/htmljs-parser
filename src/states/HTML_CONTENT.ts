@@ -1,4 +1,3 @@
-import { checkForCDATA, checkForPlaceholder, handleDelimitedBlockEOL } from ".";
 import {
   Parser,
   CODE,
@@ -43,7 +42,12 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       this.endText();
       this.endHtmlBlock();
     } else if (content.delimiter) {
-      handleDelimitedBlockEOL(this, len, content.delimiter, content.indent);
+      STATE.handleDelimitedBlockEOL(
+        this,
+        len,
+        content.delimiter,
+        content.indent
+      );
     } else {
       this.startText();
     }
@@ -53,7 +57,7 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
 
   char(code) {
     if (code === CODE.OPEN_ANGLE_BRACKET) {
-      if (checkForCDATA(this)) return;
+      if (STATE.checkForCDATA(this)) return;
 
       const nextCode = this.lookAtCharCodeAhead(1);
 
@@ -103,7 +107,7 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       this.endText();
       this.enterState(STATE.INLINE_SCRIPT);
       this.skip(1); // skip space
-    } else if (!checkForPlaceholder(this, code)) {
+    } else if (!STATE.checkForPlaceholder(this, code)) {
       this.startText();
     }
   },
