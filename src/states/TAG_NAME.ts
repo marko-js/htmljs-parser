@@ -80,11 +80,27 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         if (tagName.expressions.length === 0) {
           if (this.matchAnyAtPos(tagName, ONLY_OPEN_TAGS)) {
             tag.openTagOnly = true;
-          } else if (
-            tag.concise &&
-            this.blockStack[0] === tag &&
-            this.matchAnyAtPos(tagName, EXPRESSION_TAGS)
-          ) {
+          } else if (this.matchAnyAtPos(tagName, EXPRESSION_TAGS)) {
+            if (!tag.concise) {
+              return this.emitError(
+                tagName,
+                "RESERVED_TAG_NAME",
+                `The "${this.read(
+                  tagName
+                )}" tag is reserved as a statement and cannot be used as an HTML tag.`
+              );
+            }
+
+            if (this.blockStack[0] !== tag) {
+              return this.emitError(
+                tagName,
+                "ROOT_TAG_ONLY",
+                `The "${this.read(
+                  tagName
+                )}" statement can only be used at the root of the template.`
+              );
+            }
+
             tag.statement = true;
             tag.openTagOnly = true;
             this.enterState(STATE.EXPRESSION, { terminatedByEOL: true });
