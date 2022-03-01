@@ -130,7 +130,8 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
   },
 
   eol() {
-    if (this.isConcise) this.exitState(); // TODO: is concise guard needed?
+    this.activeTag!.shorthandEnd = this.pos;
+    this.exitState();
   },
 
   eof() {

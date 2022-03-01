@@ -80,7 +80,7 @@ export class TempParser {
             type: "comment",
             pos: data.start,
             endPos: data.end,
-            value: parser.read(data),
+            value: parser.read(data.value),
           });
           break;
         case EventTypes.Placeholder:
@@ -174,7 +174,11 @@ export class TempParser {
               parser.read({ start: curTagName!.start, end: data.end }),
             attributes: (curAttrs || []).map((attr) => ({
               default: attr.name?.default,
-              name: attr.name && parser.read(attr.name),
+              name: attr.name
+                ? attr.name.default
+                  ? "default"
+                  : parser.read(attr.name)
+                : undefined,
               pos: attr.name?.start ?? attr.value?.start,
               endPos: attr.value?.end ?? attr.name?.end,
               value: attr.value && parser.read(attr.value),
@@ -240,5 +244,7 @@ export class TempParser {
           break;
       }
     }
+
+    this._handlers.onfinish?.();
   }
 }
