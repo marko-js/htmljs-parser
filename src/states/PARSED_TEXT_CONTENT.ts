@@ -1,9 +1,3 @@
-import {
-  checkForCDATA,
-  checkForClosingTag,
-  checkForPlaceholder,
-  handleDelimitedBlockEOL,
-} from ".";
 import { Parser, STATE, CODE, StateDefinition, Range } from "../internal";
 
 export interface ParsedTextContentMeta extends Range {
@@ -30,7 +24,12 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
       this.endText();
       this.endHtmlBlock();
     } else if (content.delimiter) {
-      handleDelimitedBlockEOL(this, len, content.delimiter, content.indent);
+      STATE.handleDelimitedBlockEOL(
+        this,
+        len,
+        content.delimiter,
+        content.indent
+      );
     } else {
       this.startText();
     }
@@ -42,7 +41,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
     switch (code) {
       case CODE.OPEN_ANGLE_BRACKET:
         if (!this.isConcise) {
-          checkForClosingTag(this) || checkForCDATA(this);
+          STATE.checkForClosingTag(this) || STATE.checkForCDATA(this);
         }
         break;
       case CODE.FORWARD_SLASH:
@@ -63,7 +62,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
         this.enterState(STATE.TEMPLATE_STRING);
         break;
       default:
-        if (!checkForPlaceholder(this, code)) this.startText();
+        if (!STATE.checkForPlaceholder(this, code)) this.startText();
         break;
     }
   },
