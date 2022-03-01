@@ -40,8 +40,11 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
   char(code) {
     switch (code) {
       case CODE.OPEN_ANGLE_BRACKET:
-        if (!this.isConcise) {
-          STATE.checkForClosingTag(this) || STATE.checkForCDATA(this);
+        if (
+          this.isConcise ||
+          !(STATE.checkForClosingTag(this) || STATE.checkForCDATA(this))
+        ) {
+          this.startText();
         }
         break;
       case CODE.FORWARD_SLASH:
