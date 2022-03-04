@@ -2198,7 +2198,13 @@ class Parser extends BaseParser {
                             openTagEOL();
                         }
                         return;
-                    } else if (currentPart.parentState === STATE_TAG_NAME) {
+                    } else if (
+                        currentPart.parentState === STATE_TAG_NAME ||
+                        (isConcise && (
+                            currentPart.parentState === STATE_TAG_ARGS ||
+                            currentPart.parentState === STATE_WITHIN_OPEN_TAG)
+                        )
+                    ) {
                         currentPart.endPos = parser.pos;
                         endExpression();
 

@@ -18,12 +18,22 @@
   event.preventDefault();
 }/>
 
-<foo/bar(event) { 
+foo onclick(event) { 
   console.log("hello"); 
   event.preventDefault();
-}/>
+}
 
-<foo/bar (event) { 
+foo onclick (event) { 
   console.log("hello"); 
   event.preventDefault();
-}/>
+}
+
+foo(event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+foo (event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}

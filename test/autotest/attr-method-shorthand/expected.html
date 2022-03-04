@@ -1,40 +1,14 @@
-<foo onclick=function(event) { 
-  console.log("hello"); 
-  event.preventDefault();
-} SELF_CLOSED>
-</foo>
-text:"\n"
-text:"\n"
-<foo onclick=function(event) { 
-  console.log("hello"); 
-  event.preventDefault();
-} SELF_CLOSED>
-</foo>
-text:"\n"
-text:"\n"
-<foo DEFAULT=function(event) { 
-  console.log("hello"); 
-  event.preventDefault();
-} SELF_CLOSED>
-</foo>
-text:"\n"
-text:"\n"
-<foo DEFAULT=function(event) { 
-  console.log("hello"); 
-  event.preventDefault();
-} SELF_CLOSED>
-</foo>
-text:"\n"
-text:"\n"
-<foo VAR=(bar) DEFAULT=function(event) { 
-  console.log("hello"); 
-  event.preventDefault();
-} SELF_CLOSED>
-</foo>
-text:"\n"
-text:"\n"
-<foo VAR=(bar) DEFAULT=function(event) { 
-  console.log("hello"); 
-  event.preventDefault();
-} SELF_CLOSED>
-</foo>
+<let VAR=(count) DEFAULT=0>
+</let>
+<effect DEFAULT=function() {
+  const interval = setInterval(() => {
+    count += 1
+  }, 1000);
+  return () => clearInterval(interval)
+}>
+</effect>
+<div>
+    text:"The count is "
+    ${"$escapeXml(count)"}
+    text:"!"
+</div>
