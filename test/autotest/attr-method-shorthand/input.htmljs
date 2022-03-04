@@ -17,3 +17,23 @@
   console.log("hello"); 
   event.preventDefault();
 }/>
+
+foo onclick(event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+foo onclick (event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+foo(event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+foo (event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}
