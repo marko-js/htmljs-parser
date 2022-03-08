@@ -56,12 +56,6 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     this.endingMixedModeAtEOL = false;
     this.blockStack.push(tag);
     this.endText();
-
-    this.emit({
-      type: EventTypes.OpenTagStart,
-      start: tag.start,
-      end: tag.start + (this.isConcise ? 0 : 1),
-    });
   },
 
   exit(tag) {

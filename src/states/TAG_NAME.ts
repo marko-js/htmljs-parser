@@ -113,6 +113,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
           end,
           quasis,
           expressions,
+          concise: this.isConcise,
         });
 
         break;
