@@ -66,7 +66,6 @@ export const enum EventTypes {
   DocType,
   Scriptlet,
   Placeholder,
-  OpenTagStart,
   TagName,
   TagShorthandId,
   TagShorthandClass,
@@ -92,7 +91,6 @@ export namespace Events {
     | DocType
     | Placeholder
     | Scriptlet
-    | OpenTagStart
     | TagName
     | TagShorthandId
     | TagShorthandClass
@@ -143,12 +141,9 @@ export namespace Events {
     escape: boolean;
   }
 
-  export interface OpenTagStart extends Range {
-    type: EventTypes.OpenTagStart;
-  }
-
   export interface TagName extends TemplateRange {
     type: EventTypes.TagName;
+    concise: boolean;
   }
 
   export interface TagShorthandId extends TemplateRange {

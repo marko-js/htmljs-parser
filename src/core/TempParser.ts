@@ -6,7 +6,6 @@ export class TempParser {
   }
   parse(data: string, filename: string) {
     const parser = new Parser(data, filename);
-    let isConcise = true;
     let curTagName: Events.TagName | undefined = undefined;
     let curShorthandId: Events.TagShorthandId | undefined;
     let curShorthandClassNames: Events.TagShorthandClass[] | undefined;
@@ -86,10 +85,6 @@ export class TempParser {
             value: parser.read(data.value),
           });
           break;
-        case EventTypes.OpenTagStart: {
-          isConcise = data.start === data.end;
-          break;
-        }
         case EventTypes.TagName: {
           curTagName = data;
           break;
@@ -158,7 +153,7 @@ export class TempParser {
               endPos: curTagParams.end,
               value: parser.read(curTagParams.value),
             },
-            pos: curTagName!.start - (isConcise ? 0 : 1),
+            pos: curTagName!.start - (curTagName!.concise ? 0 : 1),
             endPos: data.end,
             tagNameEndPos: curTagName!.end,
             selfClosed: data.selfClosed,
@@ -185,7 +180,7 @@ export class TempParser {
                 value: parser.read(attr.argument.value),
               },
             })),
-            concise: isConcise,
+            concise: curTagName!.concise,
             shorthandId: curShorthandId && {
               pos: curShorthandId.start,
               endPos: curShorthandId.end,
