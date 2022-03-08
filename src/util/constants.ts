@@ -57,6 +57,13 @@ export interface TemplateRange extends Range {
   quasis: Range[];
 }
 
+export const enum OpenTagEnding {
+  tag = 0,
+  self = 1 << 0,
+  void = 1 << 1,
+  code = 1 << 2,
+}
+
 export const enum EventTypes {
   Error,
   Text,
@@ -192,9 +199,7 @@ export namespace Events {
 
   export interface OpenTagEnd extends Range {
     type: EventTypes.OpenTagEnd;
-    openTagOnly: boolean;
-    selfClosed: boolean;
-    statement: boolean;
+    ending: OpenTagEnding;
   }
 
   export interface CloseTag extends Range {

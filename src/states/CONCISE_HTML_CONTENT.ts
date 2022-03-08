@@ -7,6 +7,7 @@ import {
   peek,
   EventTypes,
   BODY_MODE,
+  OpenTagEnding,
 } from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
@@ -105,7 +106,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       const parentTag = peek(this.blockStack) as STATE.OpenTagMeta | undefined;
 
       if (parentTag) {
-        if (parentTag.openTagOnly) {
+        if (parentTag.ending !== OpenTagEnding.tag) {
           this.emitError(
             this.pos,
             "INVALID_BODY",
