@@ -7,6 +7,7 @@ import {
   Range,
   BODY_MODE,
   EventTypes,
+  OpenTagEnding,
 } from "../internal";
 
 const enum TAG_STATE {
@@ -26,9 +27,7 @@ export interface OpenTagMeta extends Range {
   hasArgs: boolean;
   hasAttrs: boolean;
   hasShorthandId: boolean;
-  selfClosed: boolean;
-  openTagOnly: boolean;
-  statement: boolean;
+  ending: OpenTagEnding;
   indent: string;
   nestedIndent: string | undefined;
 }
@@ -41,9 +40,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     tag.type = "tag";
     tag.state = undefined;
     tag.hasAttrs = false;
-    tag.statement = false;
-    tag.selfClosed = false;
-    tag.openTagOnly = false;
+    tag.ending = OpenTagEnding.tag;
     tag.bodyMode = BODY_MODE.HTML;
     tag.nestedIndent = undefined;
     tag.hasShorthandId = false;
@@ -59,18 +56,17 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   },
 
   exit(tag) {
-    const { tagName, selfClosed, openTagOnly, statement } = tag;
+    const { tagName, ending } = tag;
 
     this.emit({
       type: EventTypes.OpenTagEnd,
-      start: this.pos - (this.isConcise ? 0 : selfClosed ? 2 : 1),
+      start:
+        this.pos - (this.isConcise ? 0 : ending & OpenTagEnding.self ? 2 : 1),
       end: this.pos,
-      selfClosed,
-      openTagOnly,
-      statement,
+      ending,
     });
 
-    if (!this.isConcise && (selfClosed || openTagOnly)) {
+    if (!this.isConcise && ending !== OpenTagEnding.tag) {
       this.closeTag(this.pos, this.pos, undefined);
     } else if (
       tagName.expressions.length === 0 &&
@@ -307,7 +303,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       code === CODE.FORWARD_SLASH &&
       this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET
     ) {
-      tag.selfClosed = true;
+      tag.ending |= OpenTagEnding.self;
       this.skip(2); // skip />
       this.exitState();
       return;
