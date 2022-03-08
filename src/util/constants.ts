@@ -48,12 +48,12 @@ export interface Range {
   end: number;
 }
 
-export interface ExpressionRange extends Range {
+export interface ValueRange extends Range {
   value: Range;
 }
 
 export interface TemplateRange extends Range {
-  expressions: ExpressionRange[];
+  expressions: ValueRange[];
   quasis: Range[];
 }
 
@@ -117,28 +117,28 @@ export namespace Events {
     type: EventTypes.Text;
   }
 
-  export interface Comment extends ExpressionRange {
+  export interface Comment extends ValueRange {
     type: EventTypes.Comment;
   }
 
-  export interface CDATA extends ExpressionRange {
+  export interface CDATA extends ValueRange {
     type: EventTypes.CDATA;
   }
 
-  export interface Declaration extends ExpressionRange {
+  export interface Declaration extends ValueRange {
     type: EventTypes.Declaration;
   }
 
-  export interface DocType extends ExpressionRange {
+  export interface DocType extends ValueRange {
     type: EventTypes.DocType;
   }
 
-  export interface Scriptlet extends ExpressionRange {
+  export interface Scriptlet extends ValueRange {
     type: EventTypes.Scriptlet;
     block: boolean;
   }
 
-  export interface Placeholder extends ExpressionRange {
+  export interface Placeholder extends ValueRange {
     type: EventTypes.Placeholder;
     escape: boolean;
   }
@@ -159,15 +159,15 @@ export namespace Events {
     type: EventTypes.TagShorthandClass;
   }
 
-  export interface TagVar extends ExpressionRange {
+  export interface TagVar extends ValueRange {
     type: EventTypes.TagVar;
   }
 
-  export interface TagArgs extends ExpressionRange {
+  export interface TagArgs extends ValueRange {
     type: EventTypes.TagArgs;
   }
 
-  export interface TagParams extends ExpressionRange {
+  export interface TagParams extends ValueRange {
     type: EventTypes.TagParams;
   }
 
@@ -176,22 +176,22 @@ export namespace Events {
     default: boolean;
   }
 
-  export interface AttrArgs extends ExpressionRange {
+  export interface AttrArgs extends ValueRange {
     type: EventTypes.AttrArgs;
   }
 
-  export interface AttrValue extends ExpressionRange {
+  export interface AttrValue extends ValueRange {
     type: EventTypes.AttrValue;
     bound: boolean;
   }
 
   export interface AttrMethod extends Range {
     type: EventTypes.AttrMethod;
-    body: ExpressionRange;
-    params: ExpressionRange;
+    body: ValueRange;
+    params: ValueRange;
   }
 
-  export interface AttrSpread extends ExpressionRange {
+  export interface AttrSpread extends ValueRange {
     type: EventTypes.AttrSpread;
   }
 
