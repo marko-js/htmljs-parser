@@ -1,10 +1,4 @@
-import {
-  Events,
-  EventTypes,
-  ExpressionRange,
-  Parser,
-  Range,
-} from "../internal";
+import { Events, EventTypes, ValueRange, Parser, Range } from "../internal";
 
 export class TempParser {
   constructor(private _handlers: any) {
@@ -23,7 +17,7 @@ export class TempParser {
       | {
           name?: Events.AttrName;
           value?: Range;
-          argument?: ExpressionRange;
+          argument?: ValueRange;
           method?: boolean;
           spread?: boolean;
           bound?: boolean;
