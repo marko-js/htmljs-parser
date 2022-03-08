@@ -6,7 +6,7 @@ import {
   Range,
   Events,
   EventTypes,
-  ExpressionRange,
+  ValueRange,
   Parser,
 } from "../internal";
 
@@ -118,7 +118,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         break;
       }
       case ATTR_STATE.BLOCK: {
-        const params = attr.args as ExpressionRange;
+        const params = attr.args as ValueRange;
         const start = params.start;
         const end = this.skip(1); // include }
         this.emit({
