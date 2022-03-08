@@ -1,4 +1,11 @@
-import { Events, EventTypes, ValueRange, Parser, Range } from "../internal";
+import {
+  Events,
+  EventTypes,
+  ValueRange,
+  Parser,
+  Range,
+  OpenTagEnding,
+} from "../internal";
 
 export class TempParser {
   constructor(private _handlers: any) {
@@ -156,10 +163,10 @@ export class TempParser {
             pos: curTagName!.start - (curTagName!.concise ? 0 : 1),
             endPos: data.end,
             tagNameEndPos: curTagName!.end,
-            selfClosed: data.selfClosed,
-            openTagOnly: data.openTagOnly,
-            statement:
-              data.statement &&
+            selfClosed: Boolean(data.ending & OpenTagEnding.self),
+            openTagOnly: Boolean(data.ending & OpenTagEnding.void),
+            code:
+              Boolean(data.ending & OpenTagEnding.code) &&
               parser.read({ start: curTagName!.start, end: data.end }),
             attributes: (curAttrs || []).map((attr) => ({
               default: attr.name?.default,

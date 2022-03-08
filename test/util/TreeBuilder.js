@@ -143,8 +143,8 @@ class ElementNode {
   write(out) {
     var event = this.event;
 
-    if (event.statement) {
-      out.writeLine(event.statement);
+    if (event.code) {
+      out.writeLine(event.code);
       return;
     }
 
