@@ -38,13 +38,15 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
   name: "TAG_NAME",
 
   enter(tagName) {
+    const start = tagName.start + (tagName.shorthandCode ? 1 : 0);
     tagName.expressions = [];
-    tagName.quasis = [{ start: tagName.start, end: tagName.end }];
+    tagName.quasis = [{ start, end: start }];
   },
 
   exit(tagName) {
     const { start, end, quasis, expressions } = tagName;
-    peek(quasis)!.end = end;
+    const last = peek(quasis)!;
+    if (last.end < end) last.end = end;
 
     switch (tagName.shorthandCode) {
       case CODE.NUMBER_SIGN:
@@ -134,7 +136,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
     const interpolationStart = childPart.start - 2; // include ${
     const interpolationEnd = this.skip(1); // include }
     const nextQuasiStart = interpolationEnd + 1;
-    peek(tagName.quasis)!.end = interpolationStart - 1;
+    peek(tagName.quasis)!.end = interpolationStart;
     tagName.expressions.push({
       start: interpolationStart,
       end: interpolationEnd,
