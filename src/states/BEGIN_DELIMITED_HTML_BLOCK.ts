@@ -16,14 +16,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
       block.delimiter = "";
     },
 
-    eol(len, block) {
-      // We have reached the end of the first delimiter... we need to skip over any indentation on the next
-      // line and we might also find that the multi-line, delimited block is immediately ended
-      this.beginHtmlBlock(block.delimiter, false);
-      handleDelimitedBlockEOL(this, len, block.delimiter, block.indent);
-    },
-
-    eof: Parser.prototype.htmlEOF,
+    exit() {},
 
     char(code, block) {
       if (code === CODE.HTML_BLOCK_DELIMITER) {
@@ -37,6 +30,17 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
         }
       }
     },
+
+    eol(len, block) {
+      // We have reached the end of the first delimiter... we need to skip over any indentation on the next
+      // line and we might also find that the multi-line, delimited block is immediately ended
+      this.beginHtmlBlock(block.delimiter, false);
+      handleDelimitedBlockEOL(this, len, block.delimiter, block.indent);
+    },
+
+    eof: Parser.prototype.htmlEOF,
+
+    return() {},
   };
 
 export function handleDelimitedBlockEOL(

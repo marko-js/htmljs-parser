@@ -5,23 +5,22 @@ import {
   peek,
   isWhitespaceCode,
   Range,
-  Events,
-  EventTypes,
+  Handlers,
 } from "../internal";
 
 export interface StateDefinition<P extends Range = Range> {
   name: string;
-  eol?: (this: Parser, length: number, activeRange: P) => void;
-  eof?: (this: Parser, activeRange: P) => void;
-  enter?: (this: Parser, activeRange: P) => void;
-  exit?: (this: Parser, activeRange: P) => void;
-  return?: (
+  enter: (this: Parser, activeRange: P) => void;
+  exit: (this: Parser, activeRange: P) => void;
+  char: (this: Parser, code: number, activeRange: P) => void;
+  eol: (this: Parser, length: number, activeRange: P) => void;
+  eof: (this: Parser, activeRange: P) => void;
+  return: (
     this: Parser,
     childState: StateDefinition,
     childPart: Range,
     activeRange: P
   ) => void;
-  char: (this: Parser, code: number, activeRange: P) => void;
 }
 
 export class Parser {
@@ -42,10 +41,6 @@ export class Parser {
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
-  public value!: Events.Any;
-  public events!: Events.Any[];
-  public eventIndex!: number;
-  public done!: boolean;
   public blockStack!: (
     | STATE.OpenTagMeta
     | {
@@ -55,54 +50,29 @@ export class Parser {
       }
   )[]; // Used to keep track of HTML tags and HTML blocks
 
-  constructor(data: string, filename: string) {
-    this.filename = filename;
-    this.data = data;
+  constructor(public handlers: Handlers) {
+    this.handlers = handlers;
+    this.reset();
+  }
 
-    // Move to first position
-    // Skip the byte order mark (BOM) sequence
-    // at the beginning of the file if there is one:
-    // - https://en.wikipedia.org/wiki/Byte_order_mark
-    // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
-    this.pos = data.charCodeAt(0) === 0xfeff ? 1 : 0;
-    this.maxPos = data.length;
-    this.textPos = -1;
-    this.indent = "";
+  reset() {
+    this.pos = this.maxPos = this.textPos = -1;
+    this.data = this.filename = this.indent = "";
+    this.activeTag = this.activeAttr = undefined;
+    this.isInAttrGroup =
+      this.beginMixedMode =
+      this.endingMixedModeAtEOL =
+        false;
     this.blockStack = [];
     this.rangeStack = [];
     this.stateStack = [];
-    this.events = [];
-    this.eventIndex = 0;
     this.forward = true;
     this.isConcise = true;
-    this.isInAttrGroup = false;
-    this.activeTag = undefined;
-    this.activeAttr = undefined;
-    this.beginMixedMode = false;
-    this.endingMixedModeAtEOL = false;
-
-    // Enter initial state
     this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
   read(node: Range) {
     return this.data.slice(node.start, node.end);
-  }
-
-  emit(event: Events.Any) {
-    if (this.pos <= this.maxPos) {
-      this.events.push(event);
-    }
-  }
-
-  hasEvent() {
-    const { events } = this;
-    if (this.eventIndex !== events.length) {
-      this.value = events[this.eventIndex++];
-      return true;
-    }
-
-    return false;
   }
 
   enterState<P extends Range = Range>(
@@ -112,7 +82,7 @@ export class Parser {
     range.start = this.pos;
     this.stateStack.push((this.activeState = state as StateDefinition));
     this.rangeStack.push((this.activeRange = range as unknown as P));
-    state.enter?.call(this, range as unknown as P);
+    state.enter.call(this, range as unknown as P);
     return this.activeRange as P;
   }
 
@@ -123,13 +93,8 @@ export class Parser {
     this.activeState = this.stateStack[last];
     this.activeRange = this.rangeStack[last];
     childPart.end = this.pos;
-    childState.exit?.call(this, childPart);
-    this.activeState.return?.call(
-      this,
-      childState,
-      childPart,
-      this.activeRange
-    );
+    childState.exit.call(this, childPart);
+    this.activeState.return.call(this, childState, childPart, this.activeRange);
     this.forward = false;
   }
 
@@ -199,10 +164,6 @@ export class Parser {
     return (this.pos += offset);
   }
 
-  end() {
-    this.pos = this.maxPos + 1;
-  }
-
   startText(offset = 0) {
     if (this.textPos === -1) {
       this.textPos = this.pos + offset;
@@ -214,11 +175,7 @@ export class Parser {
     if (start !== -1) {
       const end = this.pos + offset;
       if (start < end) {
-        this.emit({
-          type: EventTypes.Text,
-          start,
-          end,
-        });
+        this.handlers.onText?.({ start, end });
       }
 
       this.textPos = -1;
@@ -326,15 +283,14 @@ export class Parser {
       end = range.end;
     }
 
-    this.emit({
-      type: EventTypes.Error,
+    this.handlers.onError?.({
       start,
       end,
       code,
       message,
     });
 
-    this.end();
+    this.pos = this.maxPos + 1;
   }
 
   closeTag(start: number, end: number, value: Range | undefined) {
@@ -356,8 +312,7 @@ export class Parser {
       this.activeTag = undefined;
     }
 
-    this.emit({
-      type: EventTypes.CloseTag,
+    this.handlers.onCloseTag?.({
       start,
       end,
       value,
@@ -428,7 +383,7 @@ export class Parser {
       ahead++;
     }
 
-    this.end();
+    this.pos = this.maxPos;
     return true;
   }
 
@@ -444,27 +399,27 @@ export class Parser {
     this.skip(ahead);
   }
 
-  next(): Parser {
-    let { pos } = this;
-    const { maxPos, data } = this;
+  parse(data: string, filename: string) {
+    this.data = data;
+    this.filename = filename;
+    const maxPos = (this.maxPos = data.length);
 
-    if (pos >= maxPos) {
-      if (this.hasEvent()) return this;
-      this.done = true;
-      return this;
-    }
+    // Skip the byte order mark (BOM) sequence
+    // at the beginning of the file if there is one:
+    // - https://en.wikipedia.org/wiki/Byte_order_mark
+    // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
+    this.pos = data.charCodeAt(0) === 0xfeff ? 1 : 0;
 
-    do {
-      if (this.hasEvent()) return this;
-      const code = data.charCodeAt(pos);
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
 
       if (code === CODE.NEWLINE) {
-        this.activeState.eol?.call(this, 1, this.activeRange);
+        this.activeState.eol.call(this, 1, this.activeRange);
       } else if (
         code === CODE.CARRIAGE_RETURN &&
-        data.charCodeAt(pos + 1) === CODE.NEWLINE
+        data.charCodeAt(this.pos + 1) === CODE.NEWLINE
       ) {
-        this.activeState.eol?.call(this, 2, this.activeRange);
+        this.activeState.eol.call(this, 2, this.activeRange);
         this.pos++;
       } else {
         this.activeState.char.call(this, code, this.activeRange);
@@ -475,17 +430,12 @@ export class Parser {
       } else {
         this.forward = true;
       }
-    } while ((pos = this.pos) < maxPos);
+    }
 
-    do {
+    while (this.pos === this.maxPos) {
       this.forward = true;
-      this.activeState.eof?.call(this, this.activeRange);
-    } while (!this.forward);
-
-    return this.next();
-  }
-
-  [Symbol.iterator]() {
-    return this;
+      this.activeState.eof.call(this, this.activeRange);
+      if (this.forward) break;
+    }
   }
 }
