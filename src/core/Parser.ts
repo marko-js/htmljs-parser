@@ -164,20 +164,16 @@ export class Parser {
     return (this.pos += offset);
   }
 
-  startText(offset = 0) {
+  startText() {
     if (this.textPos === -1) {
-      this.textPos = this.pos + offset;
+      this.textPos = this.pos;
     }
   }
 
-  endText(offset = 0) {
+  endText() {
     const start = this.textPos;
     if (start !== -1) {
-      const end = this.pos + offset;
-      if (start < end) {
-        this.handlers.onText?.({ start, end });
-      }
-
+      this.handlers.onText?.({ start, end: this.pos });
       this.textPos = -1;
     }
   }

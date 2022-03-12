@@ -57,8 +57,9 @@ export function handleDelimitedBlockEOL(
 
   if (parser.lookAheadFor(endHtmlBlockLookahead, parser.pos + newLineLength)) {
     parser.startText(); // we want to at least include the newline as text.
-    parser.endText(newLineLength);
-    parser.skip(endHtmlBlockLookahead.length + newLineLength);
+    parser.skip(newLineLength);
+    parser.endText();
+    parser.skip(endHtmlBlockLookahead.length);
 
     if (parser.consumeWhitespaceOnLine(0)) {
       parser.endHtmlBlock();
