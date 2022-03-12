@@ -29,69 +29,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       expression.terminatedByWhitespace === true;
   },
 
-  eol(_, expression) {
-    if (
-      expression.groupStack.length === 0 &&
-      (expression.terminatedByWhitespace || expression.terminatedByEOL)
-    ) {
-      this.exitState();
-    }
-  },
-
-  eof(expression) {
-    if (
-      expression.groupStack.length === 0 &&
-      (this.isConcise || expression.terminatedByEOL)
-    ) {
-      this.exitState();
-    } else {
-      // TODO: refactor to avoid using parentState
-      const parentState = this.stateStack[this.stateStack.length - 2];
-
-      if (parentState === STATE.ATTRIBUTE) {
-        const attr = this.activeAttr!;
-        if (!attr.default && !attr.spread && !attr.name) {
-          return this.emitError(
-            expression,
-            "MALFORMED_OPEN_TAG",
-            'EOF reached while parsing attribute name for the "' +
-              this.read(this.activeTag!.tagName) +
-              '" tag'
-          );
-        }
-
-        return this.emitError(
-          expression,
-          "MALFORMED_OPEN_TAG",
-          `EOF reached while parsing attribute value for the ${
-            attr.default
-              ? "default"
-              : attr.spread
-              ? "..."
-              : `"${this.read(attr.name!)}"`
-          } attribute`
-        );
-      } else if (parentState === STATE.TAG_NAME) {
-        return this.emitError(
-          expression,
-          "MALFORMED_OPEN_TAG",
-          "EOF reached while parsing tag name"
-        );
-      } else if (parentState === STATE.PLACEHOLDER) {
-        return this.emitError(
-          expression,
-          "MALFORMED_PLACEHOLDER",
-          "EOF reached while parsing placeholder"
-        );
-      }
-
-      return this.emitError(
-        expression,
-        "INVALID_EXPRESSION",
-        "EOF reached while parsing expression"
-      );
-    }
-  },
+  exit() {},
 
   char(code, expression) {
     const depth = expression.groupStack.length;
@@ -207,6 +145,72 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       }
     }
   },
+
+  eol(_, expression) {
+    if (
+      expression.groupStack.length === 0 &&
+      (expression.terminatedByWhitespace || expression.terminatedByEOL)
+    ) {
+      this.exitState();
+    }
+  },
+
+  eof(expression) {
+    if (
+      expression.groupStack.length === 0 &&
+      (this.isConcise || expression.terminatedByEOL)
+    ) {
+      this.exitState();
+    } else {
+      // TODO: refactor to avoid using parentState
+      const parentState = this.stateStack[this.stateStack.length - 2];
+
+      if (parentState === STATE.ATTRIBUTE) {
+        const attr = this.activeAttr!;
+        if (!attr.spread && !attr.name) {
+          return this.emitError(
+            expression,
+            "MALFORMED_OPEN_TAG",
+            'EOF reached while parsing attribute name for the "' +
+              this.read(this.activeTag!.tagName) +
+              '" tag'
+          );
+        }
+
+        return this.emitError(
+          expression,
+          "MALFORMED_OPEN_TAG",
+          `EOF reached while parsing attribute value for the ${
+            attr.spread
+              ? "..."
+              : attr.name
+              ? `"${this.read(attr.name)}"`
+              : `"default"`
+          } attribute`
+        );
+      } else if (parentState === STATE.TAG_NAME) {
+        return this.emitError(
+          expression,
+          "MALFORMED_OPEN_TAG",
+          "EOF reached while parsing tag name"
+        );
+      } else if (parentState === STATE.PLACEHOLDER) {
+        return this.emitError(
+          expression,
+          "MALFORMED_PLACEHOLDER",
+          "EOF reached while parsing placeholder"
+        );
+      }
+
+      return this.emitError(
+        expression,
+        "INVALID_EXPRESSION",
+        "EOF reached while parsing expression"
+      );
+    }
+  },
+
+  return() {},
 };
 
 function buildOperatorPattern(isConcise: boolean) {

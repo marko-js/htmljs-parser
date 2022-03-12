@@ -9,6 +9,22 @@ export const REGULAR_EXPRESSION: StateDefinition<RegExpMeta> = {
     regExp.isInCharSet = false;
   },
 
+  exit() {},
+
+  char(code, regExp) {
+    if (code === CODE.BACK_SLASH) {
+      // Handle escape sequence
+      this.skip(1); // skip \
+    } else if (code === CODE.OPEN_SQUARE_BRACKET && regExp.isInCharSet) {
+      regExp.isInCharSet = true;
+    } else if (code === CODE.CLOSE_SQUARE_BRACKET && regExp.isInCharSet) {
+      regExp.isInCharSet = false;
+    } else if (code === CODE.FORWARD_SLASH && !regExp.isInCharSet) {
+      this.skip(1); // skip /
+      this.exitState();
+    }
+  },
+
   eol(_, regExp) {
     this.emitError(
       regExp,
@@ -25,17 +41,5 @@ export const REGULAR_EXPRESSION: StateDefinition<RegExpMeta> = {
     );
   },
 
-  char(code, regExp) {
-    if (code === CODE.BACK_SLASH) {
-      // Handle escape sequence
-      this.skip(1); // skip \
-    } else if (code === CODE.OPEN_SQUARE_BRACKET && regExp.isInCharSet) {
-      regExp.isInCharSet = true;
-    } else if (code === CODE.CLOSE_SQUARE_BRACKET && regExp.isInCharSet) {
-      regExp.isInCharSet = false;
-    } else if (code === CODE.FORWARD_SLASH && !regExp.isInCharSet) {
-      this.skip(1); // skip /
-      this.exitState();
-    }
-  },
+  return() {},
 };

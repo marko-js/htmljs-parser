@@ -8,13 +8,7 @@ export const CLOSE_TAG: StateDefinition = {
     this.endText();
   },
 
-  eof(closeTag) {
-    this.emitError(
-      closeTag,
-      "MALFORMED_CLOSE_TAG",
-      "EOF reached while parsing closing tag"
-    );
-  },
+  exit() {},
 
   char(code, closeTag) {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
@@ -23,6 +17,18 @@ export const CLOSE_TAG: StateDefinition = {
       ensureExpectedCloseTag(this, closeTag);
     }
   },
+
+  eol() {},
+
+  eof(closeTag) {
+    this.emitError(
+      closeTag,
+      "MALFORMED_CLOSE_TAG",
+      "EOF reached while parsing closing tag"
+    );
+  },
+
+  return() {},
 };
 
 export function checkForClosingTag(parser: Parser) {

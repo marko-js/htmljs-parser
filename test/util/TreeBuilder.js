@@ -160,7 +160,7 @@ class ElementNode {
     var str = "<";
 
     if (tagNameExpression) {
-      str += tagNameExpression;
+      str += `\${${tagNameExpression}}`;
     } else {
       str += tagName || "div";
     }

@@ -1,4 +1,4 @@
-import { CODE, EventTypes, StateDefinition } from "../internal";
+import { CODE, StateDefinition } from "../internal";
 
 // We enter STATE.DTD after we encounter a "<!" while in the STATE.HTML_CONTENT.
 // We leave STATE.DTD if we see a ">".
@@ -10,8 +10,7 @@ export const DTD: StateDefinition = {
   },
 
   exit(documentType) {
-    this.emit({
-      type: EventTypes.DocType,
+    this.handlers.onDoctype?.({
       start: documentType.start,
       end: documentType.end,
       value: {
@@ -21,6 +20,15 @@ export const DTD: StateDefinition = {
     });
   },
 
+  char(code) {
+    if (code === CODE.CLOSE_ANGLE_BRACKET) {
+      this.skip(1); // skip >
+      this.exitState();
+    }
+  },
+
+  eol() {},
+
   eof(documentType) {
     this.emitError(
       documentType,
@@ -29,10 +37,5 @@ export const DTD: StateDefinition = {
     );
   },
 
-  char(code) {
-    if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.skip(1); // skip >
-      this.exitState();
-    }
-  },
+  return() {},
 };
