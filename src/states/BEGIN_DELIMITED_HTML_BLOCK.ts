@@ -62,7 +62,9 @@ export function handleDelimitedBlockEOL(
     parser.skip(endHtmlBlockLookahead.length);
 
     if (parser.consumeWhitespaceOnLine(0)) {
-      parser.endHtmlBlock();
+      parser.endText();
+      parser.exitState();
+      parser.exitState();
     } else {
       parser.emitError(
         parser.pos,
@@ -82,7 +84,9 @@ export function handleDelimitedBlockEOL(
     // the next line does not have enough indentation
     // so unless it is blank (whitespace only),
     // we will end the block
-    parser.endHtmlBlock();
+    parser.endText();
+    parser.exitState();
+    parser.exitState();
   } else {
     parser.startText();
   }

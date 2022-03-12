@@ -136,6 +136,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
   return(childState, childPart) {
     this.indent = "";
+    this.isConcise = true;
 
     switch (childState) {
       case STATE.JS_COMMENT_LINE:
