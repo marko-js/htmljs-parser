@@ -193,8 +193,7 @@ export class Parser {
    */
   endHtmlBlock() {
     this.endText();
-    // Resert variables associated with parsing an HTML block
-    this.enterState(STATE.CONCISE_HTML_CONTENT);
+    this.exitState();
   }
 
   /**

@@ -84,10 +84,12 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
   eol(len, content) {
     if (this.beginMixedMode) {
       this.beginMixedMode = false;
-      this.endHtmlBlock();
+      this.endText();
+      this.exitState();
     } else if (this.endingMixedModeAtEOL) {
       this.endingMixedModeAtEOL = false;
-      this.endHtmlBlock();
+      this.endText();
+      this.exitState();
     } else if (content.singleLine) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single
       // line HTML block then we should return back to the state to parse concise HTML.
@@ -96,7 +98,9 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       // span class="hello" - This is an HTML block at the end of a tag
       //     - This is an HTML block on its own line
       //
-      this.endHtmlBlock();
+      this.endText();
+      this.exitState();
+      this.exitState();
     } else if (content.delimiter) {
       STATE.handleDelimitedBlockEOL(
         this,
