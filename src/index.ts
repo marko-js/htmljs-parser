@@ -1,8 +1,10 @@
-import { Handlers, Parser } from "./internal";
-
-export type { Handlers, Ranges, Range } from "./internal";
-
-export { OpenTagEnding } from "./internal";
+import { type Handlers, Parser } from "./internal";
+export {
+  OpenTagEnding,
+  type Handlers,
+  type Ranges,
+  type Range,
+} from "./internal";
 
 export function createParser(handlers: Handlers) {
   return new Parser(handlers);
