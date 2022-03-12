@@ -48,13 +48,49 @@ export interface Range {
   end: number;
 }
 
-export interface ValueRange extends Range {
-  value: Range;
-}
+export namespace Ranges {
+  export interface Value extends Range {
+    value: Range;
+  }
 
-export interface TemplateRange extends Range {
-  expressions: ValueRange[];
-  quasis: Range[];
+  export interface Template extends Range {
+    expressions: Value[];
+    quasis: Range[];
+  }
+
+  export interface Error extends Range {
+    code: string;
+    message: string;
+  }
+
+  export interface Scriptlet extends Value {
+    block: boolean;
+  }
+
+  export interface Placeholder extends Value {
+    escape: boolean;
+  }
+
+  export interface TagName extends Template {
+    concise: boolean;
+  }
+
+  export interface AttrValue extends Value {
+    bound: boolean;
+  }
+
+  export interface AttrMethod extends Range {
+    body: Value;
+    params: Value;
+  }
+
+  export interface OpenTagEnd extends Range {
+    ending: OpenTagEnding;
+  }
+
+  export interface CloseTag extends Range {
+    value: Range | undefined;
+  }
 }
 
 export const enum OpenTagEnding {
@@ -64,146 +100,26 @@ export const enum OpenTagEnding {
   code = 1 << 2,
 }
 
-export const enum EventTypes {
-  Error,
-  Text,
-  Comment,
-  CDATA,
-  Declaration,
-  DocType,
-  Scriptlet,
-  Placeholder,
-  TagName,
-  TagShorthandId,
-  TagShorthandClass,
-  TagVar,
-  TagArgs,
-  TagParams,
-  AttrName,
-  AttrArgs,
-  AttrValue,
-  AttrMethod,
-  AttrSpread,
-  OpenTagEnd,
-  CloseTag,
-}
-
-export namespace Events {
-  export type Any =
-    | Error
-    | Text
-    | Comment
-    | CDATA
-    | Declaration
-    | DocType
-    | Placeholder
-    | Scriptlet
-    | TagName
-    | TagShorthandId
-    | TagShorthandClass
-    | TagVar
-    | TagArgs
-    | TagParams
-    | AttrName
-    | AttrArgs
-    | AttrValue
-    | AttrMethod
-    | AttrSpread
-    | OpenTagEnd
-    | CloseTag;
-
-  export interface Error extends Range {
-    type: EventTypes.Error;
-    code: string;
-    message: string;
-  }
-
-  export interface Text extends Range {
-    type: EventTypes.Text;
-  }
-
-  export interface Comment extends ValueRange {
-    type: EventTypes.Comment;
-  }
-
-  export interface CDATA extends ValueRange {
-    type: EventTypes.CDATA;
-  }
-
-  export interface Declaration extends ValueRange {
-    type: EventTypes.Declaration;
-  }
-
-  export interface DocType extends ValueRange {
-    type: EventTypes.DocType;
-  }
-
-  export interface Scriptlet extends ValueRange {
-    type: EventTypes.Scriptlet;
-    block: boolean;
-  }
-
-  export interface Placeholder extends ValueRange {
-    type: EventTypes.Placeholder;
-    escape: boolean;
-  }
-
-  export interface TagName extends TemplateRange {
-    type: EventTypes.TagName;
-    concise: boolean;
-  }
-
-  export interface TagShorthandId extends TemplateRange {
-    type: EventTypes.TagShorthandId;
-  }
-
-  export interface TagShorthandClass extends TemplateRange {
-    type: EventTypes.TagShorthandClass;
-  }
-
-  export interface TagVar extends ValueRange {
-    type: EventTypes.TagVar;
-  }
-
-  export interface TagArgs extends ValueRange {
-    type: EventTypes.TagArgs;
-  }
-
-  export interface TagParams extends ValueRange {
-    type: EventTypes.TagParams;
-  }
-
-  export interface AttrName extends Range {
-    type: EventTypes.AttrName;
-    default: boolean;
-  }
-
-  export interface AttrArgs extends ValueRange {
-    type: EventTypes.AttrArgs;
-  }
-
-  export interface AttrValue extends ValueRange {
-    type: EventTypes.AttrValue;
-    bound: boolean;
-  }
-
-  export interface AttrMethod extends Range {
-    type: EventTypes.AttrMethod;
-    body: ValueRange;
-    params: ValueRange;
-  }
-
-  export interface AttrSpread extends ValueRange {
-    type: EventTypes.AttrSpread;
-  }
-
-  export interface OpenTagEnd extends Range {
-    type: EventTypes.OpenTagEnd;
-    ending: OpenTagEnding;
-  }
-
-  export interface CloseTag extends Range {
-    type: EventTypes.CloseTag;
-    value: Range | undefined;
-  }
+export interface Handlers {
+  onError?(data: Ranges.Error): void;
+  onText?(data: Range): void;
+  onComment?(data: Ranges.Value): void;
+  onCDATA?(data: Ranges.Value): void;
+  onDeclaration?(data: Ranges.Value): void;
+  onDoctype?(data: Ranges.Value): void;
+  onScriptlet?(data: Ranges.Scriptlet): void;
+  onPlaceholder?(data: Ranges.Placeholder): void;
+  onTagName?(data: Ranges.TagName): void;
+  onTagShorthandId?(data: Ranges.Template): void;
+  onTagShorthandClass?(data: Ranges.Template): void;
+  onTagVar?(data: Ranges.Value): void;
+  onTagArgs?(data: Ranges.Value): void;
+  onTagParams?(data: Ranges.Value): void;
+  onAttrName?(data: Range): void;
+  onAttrArgs?(data: Ranges.Value): void;
+  onAttrValue?(data: Ranges.AttrValue): void;
+  onAttrMethod?(data: Ranges.AttrMethod): void;
+  onAttrSpread?(data: Ranges.Value): void;
+  onOpenTagEnd?(data: Ranges.OpenTagEnd): void;
+  onCloseTag?(data: Ranges.CloseTag): void;
 }

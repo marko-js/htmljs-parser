@@ -4,10 +4,8 @@ import {
   isWhitespaceCode,
   StateDefinition,
   Range,
-  Events,
-  EventTypes,
-  ValueRange,
   Parser,
+  Ranges,
 } from "../internal";
 
 const enum ATTR_STATE {
@@ -19,10 +17,9 @@ const enum ATTR_STATE {
 
 export interface AttrMeta extends Range {
   state: undefined | ATTR_STATE;
-  name: undefined | Events.AttrName;
+  name: undefined | Range;
   valueStart: number;
-  args: boolean | Events.AttrMethod["params"];
-  default: boolean;
+  args: boolean | Ranges.AttrMethod["params"];
   spread: boolean;
   bound: boolean;
 }
@@ -40,141 +37,10 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
     attr.args = false;
     attr.bound = false;
     attr.spread = false;
-    attr.default = !this.activeTag!.hasAttrs;
   },
 
   exit() {
     this.activeAttr = undefined;
-  },
-
-  eol() {
-    if (this.isConcise) {
-      this.exitState();
-    }
-  },
-
-  eof(attr) {
-    if (this.isConcise) {
-      this.exitState();
-    } else {
-      this.emitError(
-        attr,
-        "MALFORMED_OPEN_TAG",
-        'EOF reached while parsing attribute "' +
-          (attr.name ? this.read(attr.name) : "default") +
-          '" for the "' +
-          this.read(this.activeTag!.tagName) +
-          '" tag'
-      );
-    }
-  },
-
-  return(_, childPart, attr) {
-    switch (attr.state) {
-      case ATTR_STATE.NAME: {
-        this.emit(
-          (attr.name = {
-            type: EventTypes.AttrName,
-            start: childPart.start,
-            end: childPart.end,
-            default: false,
-          })
-        );
-        break;
-      }
-      case ATTR_STATE.ARGUMENT: {
-        if (attr.args) {
-          this.emitError(
-            childPart,
-            "ILLEGAL_ATTRIBUTE_ARGUMENT",
-            "An attribute can only have one set of arguments"
-          );
-          return;
-        }
-
-        const start = childPart.start - 1; // include (
-        const end = this.skip(1); // include )
-        const value = {
-          start: childPart.start,
-          end: childPart.end,
-        };
-
-        if (this.consumeWhitespaceIfBefore("{")) {
-          attr.args = {
-            start,
-            end,
-            value,
-          };
-        } else {
-          attr.args = true;
-          this.emit({
-            type: EventTypes.AttrArgs,
-            start,
-            end,
-            value,
-          });
-        }
-
-        break;
-      }
-      case ATTR_STATE.BLOCK: {
-        const params = attr.args as ValueRange;
-        const start = params.start;
-        const end = this.skip(1); // include }
-        this.emit({
-          type: EventTypes.AttrMethod,
-          start,
-          end,
-          params,
-          body: {
-            start: childPart.start - 1, // include {
-            end,
-            value: {
-              start: childPart.start,
-              end: childPart.end,
-            },
-          },
-        });
-        this.exitState();
-        break;
-      }
-
-      case ATTR_STATE.VALUE: {
-        if (childPart.start === childPart.end) {
-          return this.emitError(
-            childPart,
-            "ILLEGAL_ATTRIBUTE_VALUE",
-            "Missing value for attribute"
-          );
-        }
-
-        if (attr.spread) {
-          this.emit({
-            type: EventTypes.AttrSpread,
-            start: attr.valueStart!,
-            end: childPart.end,
-            value: {
-              start: childPart.start,
-              end: childPart.end,
-            },
-          });
-        } else {
-          this.emit({
-            type: EventTypes.AttrValue,
-            start: attr.valueStart!,
-            end: childPart.end,
-            bound: attr.bound,
-            value: {
-              start: childPart.start,
-              end: childPart.end,
-            },
-          });
-        }
-
-        this.exitState();
-        break;
-      }
-    }
   },
 
   char(code, attr) {
@@ -230,7 +96,6 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       });
       this.rewind(1);
     } else if (attr.state === undefined) {
-      attr.default = false;
       attr.state = ATTR_STATE.NAME;
       this.enterState(STATE.EXPRESSION, {
         terminatedByWhitespace: true,
@@ -249,17 +114,137 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       this.exitState();
     }
   },
+
+  eol() {
+    if (this.isConcise) {
+      this.exitState();
+    }
+  },
+
+  eof(attr) {
+    if (this.isConcise) {
+      this.exitState();
+    } else {
+      this.emitError(
+        attr,
+        "MALFORMED_OPEN_TAG",
+        'EOF reached while parsing attribute "' +
+          (attr.name ? this.read(attr.name) : "default") +
+          '" for the "' +
+          this.read(this.activeTag!.tagName) +
+          '" tag'
+      );
+    }
+  },
+
+  return(_, childPart, attr) {
+    switch (attr.state) {
+      case ATTR_STATE.NAME: {
+        attr.name = {
+          start: childPart.start,
+          end: childPart.end,
+        };
+
+        this.handlers.onAttrName?.(attr.name);
+        break;
+      }
+      case ATTR_STATE.ARGUMENT: {
+        if (attr.args) {
+          this.emitError(
+            childPart,
+            "ILLEGAL_ATTRIBUTE_ARGUMENT",
+            "An attribute can only have one set of arguments"
+          );
+          return;
+        }
+
+        const start = childPart.start - 1; // include (
+        const end = this.skip(1); // include )
+        const value = {
+          start: childPart.start,
+          end: childPart.end,
+        };
+
+        if (this.consumeWhitespaceIfBefore("{")) {
+          attr.args = {
+            start,
+            end,
+            value,
+          };
+        } else {
+          attr.args = true;
+          this.handlers.onAttrArgs?.({
+            start,
+            end,
+            value,
+          });
+        }
+
+        break;
+      }
+      case ATTR_STATE.BLOCK: {
+        const params = attr.args as Ranges.Value;
+        const start = params.start;
+        const end = this.skip(1); // include }
+        this.handlers.onAttrMethod?.({
+          start,
+          end,
+          params,
+          body: {
+            start: childPart.start - 1, // include {
+            end,
+            value: {
+              start: childPart.start,
+              end: childPart.end,
+            },
+          },
+        });
+        this.exitState();
+        break;
+      }
+
+      case ATTR_STATE.VALUE: {
+        if (childPart.start === childPart.end) {
+          return this.emitError(
+            childPart,
+            "ILLEGAL_ATTRIBUTE_VALUE",
+            "Missing value for attribute"
+          );
+        }
+
+        if (attr.spread) {
+          this.handlers.onAttrSpread?.({
+            start: attr.valueStart!,
+            end: childPart.end,
+            value: {
+              start: childPart.start,
+              end: childPart.end,
+            },
+          });
+        } else {
+          this.handlers.onAttrValue?.({
+            start: attr.valueStart!,
+            end: childPart.end,
+            bound: attr.bound,
+            value: {
+              start: childPart.start,
+              end: childPart.end,
+            },
+          });
+        }
+
+        this.exitState();
+        break;
+      }
+    }
+  },
 };
 
 function ensureAttrName(parser: Parser, attr: AttrMeta) {
-  if (!attr.name && attr.default) {
-    parser.emit(
-      (attr.name = {
-        type: EventTypes.AttrName,
-        start: attr.start,
-        end: attr.start,
-        default: true,
-      })
-    );
+  if (!attr.name) {
+    parser.handlers.onAttrName?.({
+      start: attr.start,
+      end: attr.start,
+    });
   }
 }

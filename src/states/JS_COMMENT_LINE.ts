@@ -6,13 +6,9 @@ import { BODY_MODE, CODE, STATE, StateDefinition } from "../internal";
 export const JS_COMMENT_LINE: StateDefinition = {
   name: "JS_COMMENT_LINE",
 
-  eol() {
-    this.exitState();
-  },
+  enter() {},
 
-  eof() {
-    this.exitState();
-  },
+  exit() {},
 
   char(code) {
     if (
@@ -25,4 +21,14 @@ export const JS_COMMENT_LINE: StateDefinition = {
       STATE.checkForClosingTag(this);
     }
   },
+
+  eol() {
+    this.exitState();
+  },
+
+  eof() {
+    this.exitState();
+  },
+
+  return() {},
 };

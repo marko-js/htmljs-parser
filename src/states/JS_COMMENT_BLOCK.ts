@@ -5,13 +5,8 @@ import { CODE, StateDefinition } from "../internal";
 export const JS_COMMENT_BLOCK: StateDefinition = {
   name: "JS_COMMENT_BLOCK",
 
-  eof(comment) {
-    this.emitError(
-      comment,
-      "MALFORMED_COMMENT",
-      "EOF reached while parsing multi-line JavaScript comment"
-    );
-  },
+  enter() {},
+  exit() {},
 
   char(code) {
     if (
@@ -22,4 +17,16 @@ export const JS_COMMENT_BLOCK: StateDefinition = {
       this.exitState();
     }
   },
+
+  eol() {},
+
+  eof(comment) {
+    this.emitError(
+      comment,
+      "MALFORMED_COMMENT",
+      "EOF reached while parsing multi-line JavaScript comment"
+    );
+  },
+
+  return() {},
 };

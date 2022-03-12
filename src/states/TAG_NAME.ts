@@ -4,12 +4,11 @@ import {
   isWhitespaceCode,
   StateDefinition,
   peek,
-  TemplateRange,
-  EventTypes,
   OpenTagEnding,
+  Ranges,
 } from "../internal";
 
-export interface TagNameMeta extends TemplateRange {
+export interface TagNameMeta extends Ranges.Template {
   shorthandCode?: CODE.NUMBER_SIGN | CODE.PERIOD;
 }
 
@@ -59,8 +58,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         }
 
         this.activeTag!.hasShorthandId = true;
-        this.emit({
-          type: EventTypes.TagShorthandId,
+        this.handlers.onTagShorthandId?.({
           start,
           end,
           quasis,
@@ -68,8 +66,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         });
         break;
       case CODE.PERIOD:
-        this.emit({
-          type: EventTypes.TagShorthandClass,
+        this.handlers.onTagShorthandClass?.({
           start,
           end,
           quasis,
@@ -109,8 +106,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
           }
         }
 
-        this.emit({
-          type: EventTypes.TagName,
+        this.handlers.onTagName?.({
           start,
           end,
           quasis,
@@ -121,40 +117,6 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         break;
       }
     }
-  },
-
-  return(_, childPart, tagName) {
-    if ((childPart as STATE.ExpressionMeta).terminatedByEOL) return;
-    if (childPart.start === childPart.end) {
-      this.emitError(
-        childPart,
-        "PLACEHOLDER_EXPRESSION_REQUIRED",
-        "Invalid placeholder, the expression cannot be missing"
-      );
-    }
-
-    const interpolationStart = childPart.start - 2; // include ${
-    const interpolationEnd = this.skip(1); // include }
-    const nextQuasiStart = interpolationEnd + 1;
-    peek(tagName.quasis)!.end = interpolationStart;
-    tagName.expressions.push({
-      start: interpolationStart,
-      end: interpolationEnd,
-      value: {
-        start: childPart.start,
-        end: childPart.end,
-      },
-    });
-    tagName.quasis.push({ start: nextQuasiStart, end: nextQuasiStart });
-  },
-
-  eol() {
-    this.activeTag!.shorthandEnd = this.pos;
-    this.exitState();
-  },
-
-  eof() {
-    this.exitState();
   },
 
   char(code) {
@@ -183,5 +145,39 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       this.enterState(TAG_NAME, { shorthandCode: code }); // Shorthands reuse the TAG_NAME state
       this.skip(1); // skip . or #
     }
+  },
+
+  eol() {
+    this.activeTag!.shorthandEnd = this.pos;
+    this.exitState();
+  },
+
+  eof() {
+    this.exitState();
+  },
+
+  return(_, childPart, tagName) {
+    if ((childPart as STATE.ExpressionMeta).terminatedByEOL) return;
+    if (childPart.start === childPart.end) {
+      this.emitError(
+        childPart,
+        "PLACEHOLDER_EXPRESSION_REQUIRED",
+        "Invalid placeholder, the expression cannot be missing"
+      );
+    }
+
+    const interpolationStart = childPart.start - 2; // include ${
+    const interpolationEnd = this.skip(1); // include }
+    const nextQuasiStart = interpolationEnd + 1;
+    peek(tagName.quasis)!.end = interpolationStart;
+    tagName.expressions.push({
+      start: interpolationStart,
+      end: interpolationEnd,
+      value: {
+        start: childPart.start,
+        end: childPart.end,
+      },
+    });
+    tagName.quasis.push({ start: nextQuasiStart, end: nextQuasiStart });
   },
 };

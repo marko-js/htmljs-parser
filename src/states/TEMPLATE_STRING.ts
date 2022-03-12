@@ -3,25 +3,9 @@ import { CODE, STATE, StateDefinition } from "../internal";
 export const TEMPLATE_STRING: StateDefinition = {
   name: "TEMPLATE_STRING",
 
-  return(_, childPart) {
-    if (childPart.start === childPart.end) {
-      this.emitError(
-        childPart,
-        "PLACEHOLDER_EXPRESSION_REQUIRED",
-        "Invalid placeholder, the expression cannot be missing"
-      );
-    }
+  enter() {},
 
-    this.skip(1); // skip closing }
-  },
-
-  eof(templateString) {
-    this.emitError(
-      templateString,
-      "INVALID_TEMPLATE_STRING",
-      "EOF reached while parsing template string expression"
-    );
-  },
+  exit() {},
 
   char(code) {
     if (
@@ -41,5 +25,27 @@ export const TEMPLATE_STRING: StateDefinition = {
         this.exitState();
       }
     }
+  },
+
+  eof(templateString) {
+    this.emitError(
+      templateString,
+      "INVALID_TEMPLATE_STRING",
+      "EOF reached while parsing template string expression"
+    );
+  },
+
+  eol() {},
+
+  return(_, childPart) {
+    if (childPart.start === childPart.end) {
+      this.emitError(
+        childPart,
+        "PLACEHOLDER_EXPRESSION_REQUIRED",
+        "Invalid placeholder, the expression cannot be missing"
+      );
+    }
+
+    this.skip(1); // skip closing }
   },
 };
