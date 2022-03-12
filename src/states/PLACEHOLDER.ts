@@ -1,11 +1,4 @@
-import {
-  CODE,
-  Parser,
-  STATE,
-  StateDefinition,
-  Range,
-  EventTypes,
-} from "../internal";
+import { CODE, Parser, STATE, StateDefinition, Range } from "../internal";
 
 interface PlaceholderMeta extends Range {
   escape: boolean;
@@ -22,8 +15,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
   },
 
   exit(placeholder) {
-    this.emit({
-      type: EventTypes.Placeholder,
+    this.handlers.onPlaceholder?.({
       start: placeholder.start,
       end: placeholder.end,
       escape: placeholder.escape,
@@ -33,6 +25,12 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
       },
     });
   },
+
+  char() {},
+
+  eol() {},
+
+  eof() {},
 
   return(_, childPart) {
     if (childPart.start === childPart.end) {
@@ -45,8 +43,6 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
     this.skip(1); // skip }
     this.exitState();
   },
-
-  char() {},
 };
 
 export function checkForPlaceholder(parser: Parser, code: number) {

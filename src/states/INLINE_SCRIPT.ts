@@ -1,4 +1,4 @@
-import { CODE, EventTypes, Range, STATE, StateDefinition } from "../internal";
+import { CODE, Range, STATE, StateDefinition } from "../internal";
 
 interface ScriptletMeta extends Range {
   block: boolean;
@@ -12,8 +12,7 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
   },
 
   exit(inlineScript) {
-    this.emit({
-      type: EventTypes.Scriptlet,
+    this.handlers.onScriptlet?.({
       start: inlineScript.start,
       end: inlineScript.end,
       block: inlineScript.block,
@@ -24,11 +23,8 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
     });
   },
 
-  return(_, childPart, inlineScript) {
-    if (inlineScript.block) this.skip(1); // skip }
-    inlineScript.value = childPart;
-    this.exitState();
-  },
+  eol() {},
+  eof() {},
 
   char(code, inlineScript) {
     if (code === CODE.OPEN_CURLY_BRACE) {
@@ -43,5 +39,11 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
       this.enterState(STATE.EXPRESSION, { terminatedByEOL: true });
       this.rewind(1);
     }
+  },
+
+  return(_, childPart, inlineScript) {
+    if (inlineScript.block) this.skip(1); // skip }
+    inlineScript.value = childPart;
+    this.exitState();
   },
 };

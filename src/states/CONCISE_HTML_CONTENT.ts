@@ -5,7 +5,6 @@ import {
   isWhitespaceCode,
   StateDefinition,
   peek,
-  EventTypes,
   BODY_MODE,
   OpenTagEnding,
 } from "../internal";
@@ -14,60 +13,12 @@ import {
 export const CONCISE_HTML_CONTENT: StateDefinition = {
   name: "CONCISE_HTML_CONTENT",
 
-  eol() {
-    this.indent = "";
-  },
-
-  eof: Parser.prototype.htmlEOF,
-
   enter() {
     this.isConcise = true;
     this.indent = "";
   },
 
-  return(childState, childPart) {
-    this.indent = "";
-
-    switch (childState) {
-      case STATE.JS_COMMENT_LINE:
-        this.emit({
-          type: EventTypes.Comment,
-          start: childPart.start,
-          end: childPart.end,
-          value: {
-            start: childPart.start + 2, // strip //
-            end: childPart.end,
-          },
-        });
-        break;
-      case STATE.JS_COMMENT_BLOCK: {
-        this.emit({
-          type: EventTypes.Comment,
-          start: childPart.start,
-          end: childPart.end,
-          value: {
-            start: childPart.start + 2, // strip /*
-            end: childPart.end - 2, // strip */,
-          },
-        });
-
-        if (
-          childState === STATE.JS_COMMENT_BLOCK &&
-          !this.consumeWhitespaceOnLine(0)
-        ) {
-          // Make sure there is only whitespace on the line
-          // after the ending "*/" sequence
-          this.emitError(
-            this.pos,
-            "INVALID_CHARACTER",
-            "In concise mode a javascript comment block can only be followed by whitespace characters and a newline."
-          );
-        }
-
-        break;
-      }
-    }
-  },
+  exit() {},
 
   char(code) {
     if (isWhitespaceCode(code)) {
@@ -189,6 +140,54 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
       this.enterState(STATE.OPEN_TAG);
       this.rewind(1); // START_TAG_NAME expects to start at the first character
+    }
+  },
+
+  eol() {
+    this.indent = "";
+  },
+
+  eof: Parser.prototype.htmlEOF,
+
+  return(childState, childPart) {
+    this.indent = "";
+
+    switch (childState) {
+      case STATE.JS_COMMENT_LINE:
+        this.handlers.onComment?.({
+          start: childPart.start,
+          end: childPart.end,
+          value: {
+            start: childPart.start + 2, // strip //
+            end: childPart.end,
+          },
+        });
+        break;
+      case STATE.JS_COMMENT_BLOCK: {
+        this.handlers.onComment?.({
+          start: childPart.start,
+          end: childPart.end,
+          value: {
+            start: childPart.start + 2, // strip /*
+            end: childPart.end - 2, // strip */,
+          },
+        });
+
+        if (
+          childState === STATE.JS_COMMENT_BLOCK &&
+          !this.consumeWhitespaceOnLine(0)
+        ) {
+          // Make sure there is only whitespace on the line
+          // after the ending "*/" sequence
+          this.emitError(
+            this.pos,
+            "INVALID_CHARACTER",
+            "In concise mode a javascript comment block can only be followed by whitespace characters and a newline."
+          );
+        }
+
+        break;
+      }
     }
   },
 };

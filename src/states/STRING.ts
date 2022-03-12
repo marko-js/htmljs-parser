@@ -7,13 +7,9 @@ interface StringMeta extends Range {
 export const STRING: StateDefinition<StringMeta> = {
   name: "STRING",
 
-  eof(string) {
-    this.emitError(
-      string,
-      "INVALID_STRING",
-      "EOF reached while parsing string expression"
-    );
-  },
+  enter() {},
+
+  exit() {},
 
   char(code, string) {
     switch (code) {
@@ -27,4 +23,16 @@ export const STRING: StateDefinition<StringMeta> = {
         break;
     }
   },
+
+  eol() {},
+
+  eof(string) {
+    this.emitError(
+      string,
+      "INVALID_STRING",
+      "EOF reached while parsing string expression"
+    );
+  },
+
+  return() {},
 };

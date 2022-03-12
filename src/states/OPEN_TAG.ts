@@ -3,11 +3,10 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  TemplateRange,
   Range,
   BODY_MODE,
-  EventTypes,
   OpenTagEnding,
+  Ranges,
 } from "../internal";
 
 const enum TAG_STATE {
@@ -22,7 +21,7 @@ export interface OpenTagMeta extends Range {
   state: TAG_STATE | undefined;
   concise: boolean;
   beginMixedMode?: boolean;
-  tagName: TemplateRange;
+  tagName: Ranges.Template;
   shorthandEnd: number;
   hasArgs: boolean;
   hasAttrs: boolean;
@@ -58,8 +57,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   exit(tag) {
     const { tagName, ending } = tag;
 
-    this.emit({
-      type: EventTypes.OpenTagEnd,
+    this.handlers.onOpenTagEnd?.({
       start:
         this.pos - (this.isConcise ? 0 : ending & OpenTagEnding.self ? 2 : 1),
       end: this.pos,
@@ -76,77 +74,6 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       this.enterState(
         this.isConcise ? STATE.CONCISE_HTML_CONTENT : STATE.PARSED_TEXT_CONTENT
       );
-    }
-  },
-
-  return(childState, childPart, tag) {
-    switch (childState) {
-      case STATE.JS_COMMENT_BLOCK: {
-        /* Ignore comments within an open tag */
-        break;
-      }
-      case STATE.EXPRESSION: {
-        switch (tag.state) {
-          case TAG_STATE.VAR: {
-            if (childPart.start === childPart.end) {
-              return this.emitError(
-                childPart,
-                "MISSING_TAG_VARIABLE",
-                "A slash was found that was not followed by a variable name or lhs expression"
-              );
-            }
-
-            this.emit({
-              type: EventTypes.TagVar,
-              start: childPart.start - 1, // include /,
-              end: childPart.end,
-              value: {
-                start: childPart.start,
-                end: childPart.end,
-              },
-            });
-            break;
-          }
-          case TAG_STATE.ARGUMENT: {
-            const start = childPart.start - 1; // include (
-            const end = this.skip(1); // include )
-            const value = {
-              start: childPart.start,
-              end: childPart.end,
-            };
-
-            if (this.consumeWhitespaceIfBefore("{")) {
-              const attr = this.enterState(STATE.ATTRIBUTE);
-              attr.start = start;
-              attr.args = { start, end, value };
-              tag.hasAttrs = true;
-              this.rewind(1);
-            } else {
-              tag.hasArgs = true;
-              this.emit({
-                type: EventTypes.TagArgs,
-                start,
-                end,
-                value,
-              });
-            }
-            break;
-          }
-          case TAG_STATE.PARAMS: {
-            this.emit({
-              type: EventTypes.TagParams,
-              start: childPart.start - 1, // include leading |
-              end: this.skip(1), // include closing |
-              value: {
-                start: childPart.start,
-                end: childPart.end,
-              },
-            });
-            break;
-          }
-        }
-        break;
-      }
     }
   },
 
@@ -377,6 +304,75 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       }
 
       this.rewind(1);
+    }
+  },
+
+  return(childState, childPart, tag) {
+    switch (childState) {
+      case STATE.JS_COMMENT_BLOCK: {
+        /* Ignore comments within an open tag */
+        break;
+      }
+      case STATE.EXPRESSION: {
+        switch (tag.state) {
+          case TAG_STATE.VAR: {
+            if (childPart.start === childPart.end) {
+              return this.emitError(
+                childPart,
+                "MISSING_TAG_VARIABLE",
+                "A slash was found that was not followed by a variable name or lhs expression"
+              );
+            }
+
+            this.handlers.onTagVar?.({
+              start: childPart.start - 1, // include /,
+              end: childPart.end,
+              value: {
+                start: childPart.start,
+                end: childPart.end,
+              },
+            });
+            break;
+          }
+          case TAG_STATE.ARGUMENT: {
+            const start = childPart.start - 1; // include (
+            const end = this.skip(1); // include )
+            const value = {
+              start: childPart.start,
+              end: childPart.end,
+            };
+
+            if (this.consumeWhitespaceIfBefore("{")) {
+              const attr = this.enterState(STATE.ATTRIBUTE);
+              attr.start = start;
+              attr.args = { start, end, value };
+              tag.hasAttrs = true;
+              this.rewind(1);
+            } else {
+              tag.hasArgs = true;
+              this.handlers.onTagArgs?.({
+                start,
+                end,
+                value,
+              });
+            }
+            break;
+          }
+          case TAG_STATE.PARAMS: {
+            const end = this.skip(1); // include closing |
+            this.handlers.onTagParams?.({
+              start: childPart.start - 1, // include leading |
+              end,
+              value: {
+                start: childPart.start,
+                end: childPart.end,
+              },
+            });
+            break;
+          }
+        }
+        break;
+      }
     }
   },
 };

@@ -22,38 +22,7 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
     this.isConcise = false; // Back into non-concise HTML parsing
   },
 
-  eol(len, content) {
-    if (this.beginMixedMode) {
-      this.beginMixedMode = false;
-      this.endText(len);
-      this.endHtmlBlock();
-    } else if (this.endingMixedModeAtEOL) {
-      this.endingMixedModeAtEOL = false;
-      this.endText();
-      this.endHtmlBlock();
-    } else if (content.singleLine) {
-      // We are parsing "HTML" and we reached the end of the line. If we are within a single
-      // line HTML block then we should return back to the state to parse concise HTML.
-      // A single line HTML block can be at the end of the tag or on its own line:
-      //
-      // span class="hello" - This is an HTML block at the end of a tag
-      //     - This is an HTML block on its own line
-      //
-      this.endText();
-      this.endHtmlBlock();
-    } else if (content.delimiter) {
-      STATE.handleDelimitedBlockEOL(
-        this,
-        len,
-        content.delimiter,
-        content.indent
-      );
-    } else {
-      this.startText();
-    }
-  },
-
-  eof: Parser.prototype.htmlEOF,
+  exit() {},
 
   char(code) {
     if (code === CODE.OPEN_ANGLE_BRACKET) {
@@ -111,6 +80,41 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       this.startText();
     }
   },
+
+  eol(len, content) {
+    if (this.beginMixedMode) {
+      this.beginMixedMode = false;
+      this.endText(len);
+      this.endHtmlBlock();
+    } else if (this.endingMixedModeAtEOL) {
+      this.endingMixedModeAtEOL = false;
+      this.endText();
+      this.endHtmlBlock();
+    } else if (content.singleLine) {
+      // We are parsing "HTML" and we reached the end of the line. If we are within a single
+      // line HTML block then we should return back to the state to parse concise HTML.
+      // A single line HTML block can be at the end of the tag or on its own line:
+      //
+      // span class="hello" - This is an HTML block at the end of a tag
+      //     - This is an HTML block on its own line
+      //
+      this.endText();
+      this.endHtmlBlock();
+    } else if (content.delimiter) {
+      STATE.handleDelimitedBlockEOL(
+        this,
+        len,
+        content.delimiter,
+        content.indent
+      );
+    } else {
+      this.startText();
+    }
+  },
+
+  eof: Parser.prototype.htmlEOF,
+
+  return() {},
 };
 
 function isBeginningOfLine(parser: Parser) {
