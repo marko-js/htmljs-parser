@@ -1,4 +1,4 @@
-import { Parser, CODE, StateDefinition, Range } from "../internal";
+import { Parser, CODE, StateDefinition, Range, STATE } from "../internal";
 
 export interface DelimitedHTMLBlockMeta extends Range {
   delimiter: string;
@@ -35,7 +35,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
       // We have reached the end of the first delimiter... we need to skip over any indentation on the next
       // line and we might also find that the multi-line, delimited block is immediately ended
       this.beginHtmlBlock(block.delimiter, false);
-      handleDelimitedBlockEOL(this, len, block.delimiter, block.indent);
+      handleDelimitedBlockEOL(this, len, block);
     },
 
     eof: Parser.prototype.htmlEOF,
@@ -43,11 +43,36 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
     return() {},
   };
 
-export function handleDelimitedBlockEOL(
+export function handleDelimitedEOL(
   parser: Parser,
   newLineLength: number,
-  delimiter: string,
-  indent: string
+  content: STATE.ParsedTextContentMeta | STATE.HTMLContentMeta
+) {
+  if (content.singleLine) {
+    parser.endText();
+    parser.exitState();
+    parser.exitState();
+    return true;
+  }
+
+  if (content.delimiter) {
+    handleDelimitedBlockEOL(parser, newLineLength, content);
+    return true;
+  }
+
+  return false;
+}
+
+function handleDelimitedBlockEOL(
+  parser: Parser,
+  newLineLength: number,
+  {
+    indent,
+    delimiter,
+  }:
+    | STATE.ParsedTextContentMeta
+    | STATE.HTMLContentMeta
+    | DelimitedHTMLBlockMeta
 ) {
   // If we are within a delimited HTML block then we want to check if the next line is the end
   // delimiter. Since we are currently positioned at the start of the new line character our lookahead
