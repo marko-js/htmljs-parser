@@ -29,6 +29,7 @@ export interface OpenTagMeta extends Range {
   ending: OpenTagEnding;
   indent: string;
   nestedIndent: string | undefined;
+  parentTag: OpenTagMeta | undefined;
 }
 const PARSED_TEXT_TAGS = ["script", "style", "textarea", "html-comment"];
 
@@ -46,11 +47,11 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     tag.indent = this.indent;
     tag.concise = this.isConcise;
     tag.beginMixedMode = this.beginMixedMode || this.endingMixedModeAtEOL;
+    tag.parentTag = this.activeTag;
 
     this.activeTag = tag;
     this.beginMixedMode = false;
     this.endingMixedModeAtEOL = false;
-    this.blockStack.push(tag);
     this.endText();
   },
 
