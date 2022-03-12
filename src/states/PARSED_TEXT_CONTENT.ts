@@ -58,7 +58,6 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
       // span class="hello" - This is an HTML block at the end of a tag
       //     - This is an HTML block on its own line
       //
-      this.endText();
       this.endHtmlBlock();
     } else if (content.delimiter) {
       STATE.handleDelimitedBlockEOL(
