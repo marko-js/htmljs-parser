@@ -1,13 +1,9 @@
-import { Parser, TempParser } from "./internal";
+import { Handlers, Parser } from "./internal";
 
-export type { Events, Range, ValueRange, TemplateRange } from "./internal";
+export type { Handlers, Ranges, Range } from "./internal";
 
-export { EventTypes, OpenTagEnding } from "./internal";
+export { OpenTagEnding } from "./internal";
 
-export function createParser(text: string, filename: string) {
-  return new Parser(text, filename);
-}
-
-export function createLegacyParser(listeners: any) {
-  return new TempParser(listeners);
+export function createParser(handlers: Handlers) {
+  return new Parser(handlers);
 }
