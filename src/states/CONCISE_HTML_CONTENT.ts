@@ -4,7 +4,6 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  peek,
   BODY_MODE,
   OpenTagEnding,
 } from "../internal";
@@ -25,36 +24,22 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       this.indent += this.data[this.pos];
     } else {
       const curIndent = this.indent.length;
+      const indentStart = this.pos - curIndent;
+      let parentTag = this.activeTag;
 
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const len = this.blockStack.length;
-        if (len) {
-          if (
-            (this.blockStack[len - 1] as STATE.OpenTagMeta).indent.length >=
-            curIndent
-          ) {
-            const pos = this.pos - curIndent;
-            this.closeTag(pos, pos, undefined);
-          } else {
-            // Indentation is greater than the last tag so we are starting a
-            // nested tag and there are no more tags to end
-            break;
-          }
-        } else {
-          if (this.indent) {
-            this.emitError(
-              this.pos,
-              "BAD_INDENTATION",
-              "Line has extra indentation at the beginning"
-            );
-            return;
-          }
-          break;
-        }
+      while (parentTag && parentTag.indent.length >= curIndent) {
+        this.closeTag(indentStart, indentStart, undefined);
+        parentTag = this.activeTag;
       }
 
-      const parentTag = peek(this.blockStack) as STATE.OpenTagMeta | undefined;
+      if (!parentTag && curIndent) {
+        this.emitError(
+          this.pos,
+          "BAD_INDENTATION",
+          "Line has extra indentation at the beginning"
+        );
+        return;
+      }
 
       if (parentTag) {
         if (parentTag.ending !== OpenTagEnding.tag) {

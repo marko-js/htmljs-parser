@@ -2,7 +2,6 @@ import {
   BODY_MODE,
   CODE,
   STATE,
-  peek,
   isWhitespaceCode,
   Range,
   Handlers,
@@ -41,14 +40,6 @@ export class Parser {
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
-  public blockStack!: (
-    | STATE.OpenTagMeta
-    | {
-        type: "html";
-        delimiter?: string;
-        indent: string;
-      }
-  )[]; // Used to keep track of HTML tags and HTML blocks
 
   constructor(public handlers: Handlers) {
     this.handlers = handlers;
@@ -63,7 +54,6 @@ export class Parser {
       this.beginMixedMode =
       this.endingMixedModeAtEOL =
         false;
-    this.blockStack = [];
     this.rangeStack = [];
     this.stateStack = [];
     this.forward = true;
@@ -185,12 +175,6 @@ export class Parser {
    * tags within a block are properly closed.
    */
   beginHtmlBlock(delimiter: string | undefined, singleLine: boolean) {
-    this.blockStack.push({
-      type: "html",
-      delimiter,
-      indent: this.indent,
-    });
-
     this.enterState(
       this.activeTag?.bodyMode === BODY_MODE.PARSED_TEXT
         ? STATE.PARSED_TEXT_CONTENT
@@ -208,27 +192,6 @@ export class Parser {
    * and we are exiting out of non-concise mode.
    */
   endHtmlBlock() {
-    // Make sure all tags in this HTML block are closed
-    for (let i = this.blockStack.length; i--; ) {
-      const block = this.blockStack[i];
-      if (block.type === "html") {
-        // Remove the HTML block from the stack since it has ended
-        this.blockStack.pop();
-        // We have reached the point where the HTML block started
-        // so we can stop
-        break;
-      } else {
-        // The current block is for an HTML tag and it still open. When a tag is tag is closed
-        // it is removed from the stack
-        this.emitError(
-          block,
-          "MISSING_END_TAG",
-          'Missing ending "' + this.read(block.tagName) + '" tag'
-        );
-        return;
-      }
-    }
-
     // Resert variables associated with parsing an HTML block
     this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
@@ -239,31 +202,19 @@ export class Parser {
   htmlEOF() {
     this.endText();
 
-    while (this.blockStack.length) {
-      const curBlock = peek(this.blockStack)!;
-      if (curBlock.type === "tag") {
-        if (curBlock.concise) {
-          this.closeTag(this.pos, this.pos, undefined);
-        } else {
-          // We found an unclosed tag on the stack that is not for a concise tag. That means
-          // there is a problem with the template because all open tags should have a closing
-          // tag
-          //
-          // NOTE: We have already closed tags that are open tag only or self-closed
-          return this.emitError(
-            curBlock,
-            "MISSING_END_TAG",
-            'Missing ending "' + this.read(curBlock.tagName) + '" tag'
-          );
-        }
-      } else if (curBlock.type === "html") {
-        // We reached the end of file while still within a single line HTML block. That's okay
-        // though since we know the line is completed. We'll continue ending all open concise tags.
-        this.blockStack.pop();
+    while (this.activeTag) {
+      if (this.activeTag.concise) {
+        this.closeTag(this.pos, this.pos, undefined);
       } else {
-        // There is a bug in our this...
-        throw new Error(
-          "Illegal state. There should not be any non-concise tags on the stack when in concise mode"
+        // We found an unclosed tag on the stack that is not for a concise tag. That means
+        // there is a problem with the template because all open tags should have a closing
+        // tag
+        //
+        // NOTE: We have already closed tags that are open tag only or self-closed
+        return this.emitError(
+          this.activeTag,
+          "MISSING_END_TAG",
+          'Missing ending "' + this.read(this.activeTag.tagName) + '" tag'
         );
       }
     }
@@ -290,24 +241,9 @@ export class Parser {
   }
 
   closeTag(start: number, end: number, value: Range | undefined) {
-    const lastTag = this.blockStack.pop() as STATE.OpenTagMeta;
-
-    if (lastTag.beginMixedMode) {
-      this.endingMixedModeAtEOL = true;
-    }
-
-    for (let i = this.blockStack.length; i--; ) {
-      const block = this.blockStack[i];
-      if (block.type === "tag") {
-        this.activeTag = block;
-        break;
-      }
-    }
-
-    if (this.activeTag === lastTag) {
-      this.activeTag = undefined;
-    }
-
+    const { beginMixedMode, parentTag } = this.activeTag!;
+    if (beginMixedMode) this.endingMixedModeAtEOL = true;
+    this.activeTag = parentTag;
     this.handlers.onCloseTag?.({
       start,
       end,
