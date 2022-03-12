@@ -91,7 +91,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
               );
             }
 
-            if (this.blockStack[0] !== tag) {
+            if (tag.parentTag) {
               return this.emitError(
                 tagName,
                 "ROOT_TAG_ONLY",
