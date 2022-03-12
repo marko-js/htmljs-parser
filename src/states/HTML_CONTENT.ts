@@ -84,7 +84,7 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
   eol(len, content) {
     if (this.beginMixedMode) {
       this.beginMixedMode = false;
-      this.endText(len);
+      this.endText();
       this.endHtmlBlock();
     } else if (this.endingMixedModeAtEOL) {
       this.endingMixedModeAtEOL = false;
