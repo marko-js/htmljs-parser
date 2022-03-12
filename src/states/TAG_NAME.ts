@@ -3,7 +3,6 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  peek,
   OpenTagEnding,
   Ranges,
 } from "../internal";
@@ -44,7 +43,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
 
   exit(tagName) {
     const { start, end, quasis, expressions } = tagName;
-    const last = peek(quasis)!;
+    const last = quasis[quasis.length - 1];
     if (last.end < end) last.end = end;
 
     switch (tagName.shorthandCode) {
@@ -166,18 +165,20 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       );
     }
 
-    const interpolationStart = childPart.start - 2; // include ${
-    const interpolationEnd = this.skip(1); // include }
-    const nextQuasiStart = interpolationEnd + 1;
-    peek(tagName.quasis)!.end = interpolationStart;
-    tagName.expressions.push({
-      start: interpolationStart,
-      end: interpolationEnd,
+    const { quasis, expressions } = tagName;
+    const start = childPart.start - 2; // include ${
+    const end = this.skip(1); // include }
+    const nextStart = end + 1;
+    expressions.push({
+      start,
+      end,
       value: {
         start: childPart.start,
         end: childPart.end,
       },
     });
-    tagName.quasis.push({ start: nextQuasiStart, end: nextQuasiStart });
+
+    quasis[quasis.length - 1].end = start;
+    quasis.push({ start: nextStart, end: nextStart });
   },
 };
