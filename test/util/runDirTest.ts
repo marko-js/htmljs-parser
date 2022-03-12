@@ -1,6 +1,6 @@
 import fs from "fs";
 import TreeBuilder from "./TreeBuilder";
-import { TempParser } from "../../src/internal";
+import { TempParser } from "../../src/core/TempParser";
 
 export default function runTest() {
   return function ({ test, resolve, snapshot }) {
