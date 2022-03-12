@@ -84,11 +84,9 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
   eol(len, content) {
     if (this.beginMixedMode) {
       this.beginMixedMode = false;
-      this.endText();
       this.endHtmlBlock();
     } else if (this.endingMixedModeAtEOL) {
       this.endingMixedModeAtEOL = false;
-      this.endText();
       this.endHtmlBlock();
     } else if (content.singleLine) {
       // We are parsing "HTML" and we reached the end of the line. If we are within a single
@@ -98,7 +96,6 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       // span class="hello" - This is an HTML block at the end of a tag
       //     - This is an HTML block on its own line
       //
-      this.endText();
       this.endHtmlBlock();
     } else if (content.delimiter) {
       STATE.handleDelimitedBlockEOL(
