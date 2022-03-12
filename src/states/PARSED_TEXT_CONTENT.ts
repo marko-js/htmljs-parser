@@ -50,25 +50,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
   },
 
   eol(len, content) {
-    if (content.singleLine) {
-      // We are parsing "HTML" and we reached the end of the line. If we are within a single
-      // line HTML block then we should return back to the state to parse concise HTML.
-      // A single line HTML block can be at the end of the tag or on its own line:
-      //
-      // span class="hello" - This is an HTML block at the end of a tag
-      //     - This is an HTML block on its own line
-      //
-      this.endText();
-      this.exitState();
-      this.exitState();
-    } else if (content.delimiter) {
-      STATE.handleDelimitedBlockEOL(
-        this,
-        len,
-        content.delimiter,
-        content.indent
-      );
-    } else {
+    if (!STATE.handleDelimitedEOL(this, len, content)) {
       this.startText();
     }
   },
