@@ -188,15 +188,6 @@ export class Parser {
   }
 
   /**
-   * This method gets called when we are in non-concise mode
-   * and we are exiting out of non-concise mode.
-   */
-  endHtmlBlock() {
-    this.endText();
-    this.exitState();
-  }
-
-  /**
    * This gets called when we reach EOF outside of a tag.
    */
   htmlEOF() {
