@@ -1,6 +1,6 @@
 import fs from "fs";
 import TreeBuilder from "./TreeBuilder";
-import { createLegacyParser } from "../../src";
+import { TempParser } from "../../src/internal";
 
 export default function runTest() {
   return function ({ test, resolve, snapshot }) {
@@ -22,7 +22,7 @@ export default function runTest() {
 
 function parse(text, inputPath) {
   const builder = new TreeBuilder(text);
-  const parser = createLegacyParser(builder.listeners);
+  const parser = new TempParser(builder.listeners);
   parser.parse(text, inputPath);
   return builder.toString();
 }
