@@ -12,9 +12,13 @@ import {
 export const CONCISE_HTML_CONTENT: StateDefinition = {
   name: "CONCISE_HTML_CONTENT",
 
-  enter() {
+  enter(start) {
     this.isConcise = true;
     this.indent = "";
+    return {
+      start,
+      end: start,
+    };
   },
 
   exit() {},

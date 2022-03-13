@@ -16,7 +16,6 @@ const enum TAG_STATE {
 }
 
 export interface OpenTagMeta extends Range {
-  type: "tag";
   bodyMode: BODY_MODE;
   state: TAG_STATE | undefined;
   concise: boolean;
@@ -36,23 +35,29 @@ const PARSED_TEXT_TAGS = ["script", "style", "textarea", "html-comment"];
 export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   name: "OPEN_TAG",
 
-  enter(tag) {
-    tag.type = "tag";
-    tag.state = undefined;
-    tag.hasAttrs = false;
-    tag.ending = OpenTagEnding.tag;
-    tag.bodyMode = BODY_MODE.HTML;
-    tag.nestedIndent = undefined;
-    tag.hasShorthandId = false;
-    tag.indent = this.indent;
-    tag.concise = this.isConcise;
-    tag.beginMixedMode = this.beginMixedMode || this.endingMixedModeAtEOL;
-    tag.parentTag = this.activeTag;
+  enter(start) {
+    const tag = (this.activeTag = {
+      start,
+      end: start,
+      state: undefined,
+      parentTag: this.activeTag,
+      nestedIndent: undefined,
+      indent: this.indent,
+      hasShorthandId: false,
+      hasArgs: false,
+      hasAttrs: false,
+      shorthandEnd: -1,
+      tagName: undefined!,
+      ending: OpenTagEnding.tag,
+      concise: this.isConcise,
+      bodyMode: BODY_MODE.HTML,
+      beginMixedMode: this.beginMixedMode || this.endingMixedModeAtEOL,
+    });
 
-    this.activeTag = tag;
     this.beginMixedMode = false;
     this.endingMixedModeAtEOL = false;
     this.endText();
+    return tag;
   },
 
   exit(tag) {
@@ -264,13 +269,12 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     } else if (code === CODE.FORWARD_SLASH && !tag.hasAttrs) {
       tag.state = TAG_STATE.VAR;
       this.skip(1); // skip /
-      this.enterState(STATE.EXPRESSION, {
-        skipOperators: true,
-        terminatedByWhitespace: true,
-        terminator: this.isConcise
-          ? [";", "(", "|", "=", ":="]
-          : [">", "/>", "(", "|", "=", ":="],
-      });
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.skipOperators = true;
+      expr.terminatedByWhitespace = true;
+      expr.terminator = this.isConcise
+        ? [";", "(", "|", "=", ":="]
+        : [">", "/>", "(", "|", "=", ":="];
       this.rewind(1);
     } else if (code === CODE.OPEN_PAREN && !tag.hasAttrs) {
       if (tag.hasArgs) {
@@ -283,18 +287,16 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       }
       tag.state = TAG_STATE.ARGUMENT;
       this.skip(1); // skip (
-      this.enterState(STATE.EXPRESSION, {
-        skipOperators: true,
-        terminator: ")",
-      });
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.skipOperators = true;
+      expr.terminator = ")";
       this.rewind(1);
     } else if (code === CODE.PIPE && !tag.hasAttrs) {
       tag.state = TAG_STATE.PARAMS;
       this.skip(1); // skip |
-      this.enterState(STATE.EXPRESSION, {
-        skipOperators: true,
-        terminator: "|",
-      });
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.skipOperators = true;
+      expr.terminator = "|";
       this.rewind(1);
     } else {
       if (tag.tagName) {

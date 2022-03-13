@@ -7,8 +7,17 @@ interface ScriptletMeta extends Range {
 export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
   name: "INLINE_SCRIPT",
 
-  enter(inlineScript) {
-    inlineScript.block = false;
+  enter(start) {
+    this.endText();
+    return {
+      start,
+      end: start,
+      block: false,
+      value: {
+        start,
+        end: start,
+      },
+    };
   },
 
   exit(inlineScript) {
@@ -30,20 +39,21 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
     if (code === CODE.OPEN_CURLY_BRACE) {
       inlineScript.block = true;
       this.skip(1); // skip {
-      this.enterState(STATE.EXPRESSION, {
-        terminator: "}",
-        skipOperators: true,
-      });
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.terminator = "}";
+      expr.skipOperators = true;
       this.rewind(1);
     } else {
-      this.enterState(STATE.EXPRESSION, { terminatedByEOL: true });
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.terminatedByEOL = true;
       this.rewind(1);
     }
   },
 
   return(_, childPart, inlineScript) {
     if (inlineScript.block) this.skip(1); // skip }
-    inlineScript.value = childPart;
+    inlineScript.value.start = childPart.start;
+    inlineScript.value.end = childPart.end;
     this.exitState();
   },
 };

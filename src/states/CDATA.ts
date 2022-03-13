@@ -4,7 +4,12 @@ import { CODE, Parser, StateDefinition } from "../internal";
 export const CDATA: StateDefinition = {
   name: "CDATA",
 
-  enter() {},
+  enter(start) {
+    return {
+      start,
+      end: start,
+    };
+  },
 
   exit(cdata) {
     this.handlers.onCDATA?.({

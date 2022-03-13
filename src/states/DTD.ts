@@ -5,8 +5,12 @@ import { CODE, StateDefinition } from "../internal";
 export const DTD: StateDefinition = {
   name: "DTD",
 
-  enter() {
+  enter(start) {
     this.endText();
+    return {
+      start,
+      end: start,
+    };
   },
 
   exit(documentType) {

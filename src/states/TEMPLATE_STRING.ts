@@ -3,7 +3,12 @@ import { CODE, STATE, StateDefinition } from "../internal";
 export const TEMPLATE_STRING: StateDefinition = {
   name: "TEMPLATE_STRING",
 
-  enter() {},
+  enter(start) {
+    return {
+      start,
+      end: start,
+    };
+  },
 
   exit() {},
 
@@ -13,10 +18,9 @@ export const TEMPLATE_STRING: StateDefinition = {
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
       this.skip(1); // skip {
-      this.enterState(STATE.EXPRESSION, {
-        skipOperators: true,
-        terminator: "}",
-      });
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.skipOperators = true;
+      expr.terminator = "}";
     } else {
       if (code === CODE.BACK_SLASH) {
         this.skip(1); // skip \

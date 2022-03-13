@@ -8,8 +8,8 @@ import {
 } from "../internal";
 
 export interface HTMLContentMeta extends Range {
-  singleLine: boolean;
   indent: string;
+  singleLine: boolean;
   delimiter: undefined | string;
 }
 
@@ -18,8 +18,15 @@ export interface HTMLContentMeta extends Range {
 export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
   name: "HTML_CONTENT",
 
-  enter() {
+  enter(start) {
     this.isConcise = false; // Back into non-concise HTML parsing
+    return {
+      start,
+      end: start,
+      indent: "",
+      singleLine: false,
+      delimiter: undefined,
+    };
   },
 
   exit() {},

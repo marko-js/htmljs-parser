@@ -9,7 +9,7 @@ import {
 
 export interface StateDefinition<P extends Range = Range> {
   name: string;
-  enter: (this: Parser, activeRange: P) => void;
+  enter: (this: Parser, pos: number) => P;
   exit: (this: Parser, activeRange: P) => void;
   char: (this: Parser, code: number, activeRange: P) => void;
   eol: (this: Parser, length: number, activeRange: P) => void;
@@ -65,15 +65,13 @@ export class Parser {
     return this.data.slice(node.start, node.end);
   }
 
-  enterState<P extends Range = Range>(
-    state: StateDefinition<P>,
-    range: Partial<P> = {}
-  ): P {
-    range.start = this.pos;
-    this.stateStack.push((this.activeState = state as StateDefinition));
-    this.rangeStack.push((this.activeRange = range as unknown as P));
-    state.enter.call(this, range as unknown as P);
-    return this.activeRange as P;
+  enterState<P extends Range = Range>(state: StateDefinition<P>): P {
+    const range = (this.activeRange = state.enter.call(this, this.pos));
+    this.stateStack.push(
+      (this.activeState = state as unknown as StateDefinition)
+    );
+    this.rangeStack.push(range);
+    return range;
   }
 
   exitState() {
@@ -175,16 +173,15 @@ export class Parser {
    * tags within a block are properly closed.
    */
   beginHtmlBlock(delimiter: string | undefined, singleLine: boolean) {
-    this.enterState(
+    const content = this.enterState(
       this.activeTag?.bodyMode === BODY_MODE.PARSED_TEXT
         ? STATE.PARSED_TEXT_CONTENT
-        : STATE.HTML_CONTENT,
-      {
-        singleLine,
-        delimiter,
-        indent: this.indent,
-      }
+        : STATE.HTML_CONTENT
     );
+
+    content.singleLine = singleLine;
+    content.delimiter = delimiter;
+    content.indent = this.indent;
   }
 
   /**
