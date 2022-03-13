@@ -1,8 +1,8 @@
 import { Parser, STATE, CODE, StateDefinition, Range } from "../internal";
 
 export interface ParsedTextContentMeta extends Range {
-  singleLine: boolean;
   indent: string;
+  singleLine: boolean;
   delimiter: undefined | string;
 }
 
@@ -12,7 +12,15 @@ export interface ParsedTextContentMeta extends Range {
 export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
   name: "PARSED_TEXT_CONTENT",
 
-  enter() {},
+  enter(start) {
+    return {
+      start,
+      end: start,
+      indent: "",
+      singleLine: false,
+      delimiter: undefined,
+    };
+  },
 
   exit() {},
 

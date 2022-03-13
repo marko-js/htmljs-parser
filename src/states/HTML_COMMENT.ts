@@ -6,8 +6,12 @@ import { CODE, StateDefinition } from "../internal";
 export const HTML_COMMENT: StateDefinition = {
   name: "HTML_COMMENT",
 
-  enter() {
+  enter(start) {
     this.endText();
+    return {
+      start,
+      end: start,
+    };
   },
 
   exit(comment) {

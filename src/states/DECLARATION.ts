@@ -7,8 +7,12 @@ import { CODE, Parser, StateDefinition, Range } from "../internal";
 export const DECLARATION: StateDefinition = {
   name: "DECLARATION",
 
-  enter() {
+  enter(start) {
     this.endText();
+    return {
+      start,
+      end: start,
+    };
   },
 
   exit() {},

@@ -7,7 +7,13 @@ interface StringMeta extends Range {
 export const STRING: StateDefinition<StringMeta> = {
   name: "STRING",
 
-  enter() {},
+  enter(start) {
+    return {
+      start,
+      end: start,
+      quoteCharCode: CODE.DOUBLE_QUOTE,
+    };
+  },
 
   exit() {},
 

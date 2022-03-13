@@ -11,9 +11,13 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
   {
     name: "BEGIN_DELIMITED_HTML_BLOCK",
 
-    enter(block) {
-      block.indent = this.indent;
-      block.delimiter = "";
+    enter(start) {
+      return {
+        start,
+        end: start,
+        indent: this.indent,
+        delimiter: "",
+      };
     },
 
     exit() {},
