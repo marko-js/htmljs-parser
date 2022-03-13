@@ -77,9 +77,11 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       this.matchAnyAtPos(tagName, PARSED_TEXT_TAGS)
     ) {
       tag.bodyMode = BODY_MODE.PARSED_TEXT;
-      this.enterState(
-        this.isConcise ? STATE.CONCISE_HTML_CONTENT : STATE.PARSED_TEXT_CONTENT
-      );
+      if (this.isConcise) {
+        this.enterState(STATE.CONCISE_HTML_CONTENT);
+      } else {
+        this.enterState(STATE.PARSED_TEXT_CONTENT);
+      }
     }
   },
 
