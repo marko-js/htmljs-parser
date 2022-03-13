@@ -9,7 +9,7 @@ import {
 
 export interface StateDefinition<P extends Range = Range> {
   name: string;
-  enter: (this: Parser, pos: number) => P;
+  enter: (this: Parser, pos: number) => Partial<P>;
   exit: (this: Parser, activeRange: P) => void;
   char: (this: Parser, code: number, activeRange: P) => void;
   eol: (this: Parser, length: number, activeRange: P) => void;
@@ -65,13 +65,13 @@ export class Parser {
     return this.data.slice(node.start, node.end);
   }
 
-  enterState<P extends Range = Range>(state: StateDefinition<P>): P {
-    const range = (this.activeRange = state.enter.call(this, this.pos));
+  enterState<P extends Range>(state: StateDefinition<P>): P {
+    const range = (this.activeRange = state.enter.call(this, this.pos) as P);
     this.stateStack.push(
       (this.activeState = state as unknown as StateDefinition)
     );
     this.rangeStack.push(range);
-    return range;
+    return range as P;
   }
 
   exitState() {
