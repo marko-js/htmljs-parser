@@ -6,7 +6,12 @@ import { BODY_MODE, CODE, STATE, StateDefinition } from "../internal";
 export const JS_COMMENT_LINE: StateDefinition = {
   name: "JS_COMMENT_LINE",
 
-  enter() {},
+  enter(start) {
+    return {
+      start,
+      end: start,
+    };
+  },
 
   exit() {},
 

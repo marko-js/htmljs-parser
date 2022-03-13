@@ -5,8 +5,12 @@ interface RegExpMeta extends Range {
 }
 export const REGULAR_EXPRESSION: StateDefinition<RegExpMeta> = {
   name: "REGULAR_EXPRESSION",
-  enter(regExp) {
-    regExp.isInCharSet = false;
+  enter(start) {
+    return {
+      start,
+      end: start,
+      isInCharSet: false,
+    };
   },
 
   exit() {},
