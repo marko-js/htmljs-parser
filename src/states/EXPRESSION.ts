@@ -21,12 +21,15 @@ const htmlOperatorPattern = buildOperatorPattern(false);
 export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   name: "EXPRESSION",
 
-  enter(expression) {
-    expression.groupStack = [];
-    expression.skipOperators = expression.skipOperators === true;
-    expression.terminatedByEOL = expression.terminatedByEOL === true;
-    expression.terminatedByWhitespace =
-      expression.terminatedByWhitespace === true;
+  enter(start) {
+    return {
+      start,
+      end: start,
+      groupStack: [],
+      skipOperators: false,
+      terminatedByEOL: false,
+      terminatedByWhitespace: false,
+    };
   },
 
   exit() {},
@@ -73,11 +76,11 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
     }
 
     switch (code) {
-      case CODE.SINGLE_QUOTE:
       case CODE.DOUBLE_QUOTE:
-        this.enterState(STATE.STRING, {
-          quoteCharCode: code,
-        });
+        this.enterState(STATE.STRING);
+        break;
+      case CODE.SINGLE_QUOTE:
+        this.enterState(STATE.STRING).quoteCharCode = code;
         break;
       case CODE.BACKTICK:
         this.enterState(STATE.TEMPLATE_STRING);

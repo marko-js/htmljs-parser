@@ -6,12 +6,12 @@ interface PlaceholderMeta extends Range {
 export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
   name: "PLACEHOLDER",
 
-  enter(placeholder) {
-    placeholder.escape = placeholder.escape !== false;
-    this.endText();
-    this.skip(placeholder.escape ? 2 : 3); // skip ${ or $!{
-    this.enterState(STATE.EXPRESSION, { terminator: "}" });
-    this.rewind(1);
+  enter(start) {
+    return {
+      start,
+      end: start,
+      escape: false,
+    };
   },
 
   exit(placeholder) {
@@ -81,7 +81,11 @@ export function checkForPlaceholder(parser: Parser, code: number) {
         }
       }
 
-      parser.enterState(PLACEHOLDER, { escape });
+      parser.endText();
+      parser.enterState(PLACEHOLDER).escape = escape;
+      parser.skip(escape ? 2 : 3); // skip ${ or $!{
+      parser.enterState(STATE.EXPRESSION).terminator = "}";
+      parser.rewind(1);
       return true;
     }
   }

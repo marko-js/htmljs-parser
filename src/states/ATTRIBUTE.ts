@@ -29,14 +29,17 @@ export interface AttrMeta extends Range {
 export const ATTRIBUTE: StateDefinition<AttrMeta> = {
   name: "ATTRIBUTE",
 
-  enter(attr) {
-    this.activeAttr = attr;
-    attr.state = undefined;
-    attr.name = undefined;
-    attr.valueStart = -1;
-    attr.args = false;
-    attr.bound = false;
-    attr.spread = false;
+  enter(start) {
+    return (this.activeAttr = {
+      start,
+      end: start,
+      valueStart: start,
+      state: undefined,
+      name: undefined,
+      args: false,
+      bound: false,
+      spread: false,
+    });
   },
 
   exit() {
@@ -68,47 +71,42 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       }
 
       attr.state = ATTR_STATE.VALUE;
-      this.enterState(STATE.EXPRESSION, {
-        terminatedByWhitespace: true,
-        terminator: [
-          this.isConcise ? "]" : "/>",
-          this.isConcise ? ";" : ">",
-          ",",
-        ],
-      });
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.terminatedByWhitespace = true;
+      expr.terminator = [
+        this.isConcise ? "]" : "/>",
+        this.isConcise ? ";" : ">",
+        ",",
+      ];
 
       this.rewind(1);
     } else if (code === CODE.OPEN_PAREN) {
       ensureAttrName(this, attr);
       attr.state = ATTR_STATE.ARGUMENT;
       this.skip(1); // skip (
-      this.enterState(STATE.EXPRESSION, {
-        terminator: ")",
-      });
+      this.enterState(STATE.EXPRESSION).terminator = ")";
       this.rewind(1);
     } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
       ensureAttrName(this, attr);
       attr.state = ATTR_STATE.BLOCK;
       this.skip(1); // skip {
-      this.enterState(STATE.EXPRESSION, {
-        terminatedByWhitespace: false,
-        terminator: "}",
-      });
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.terminatedByWhitespace = false;
+      expr.terminator = "}";
       this.rewind(1);
     } else if (attr.state === undefined) {
       attr.state = ATTR_STATE.NAME;
-      this.enterState(STATE.EXPRESSION, {
-        terminatedByWhitespace: true,
-        skipOperators: true,
-        terminator: [
-          this.isConcise ? "]" : "/>",
-          this.isConcise ? ";" : ">",
-          ":=",
-          "=",
-          ",",
-          "(",
-        ],
-      });
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.terminatedByWhitespace = true;
+      expr.skipOperators = true;
+      expr.terminator = [
+        this.isConcise ? "]" : "/>",
+        this.isConcise ? ";" : ">",
+        ":=",
+        "=",
+        ",",
+        "(",
+      ];
       this.rewind(1);
     } else {
       this.exitState();
@@ -214,7 +212,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
 
         if (attr.spread) {
           this.handlers.onAttrSpread?.({
-            start: attr.valueStart!,
+            start: attr.valueStart,
             end: childPart.end,
             value: {
               start: childPart.start,
@@ -223,7 +221,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           });
         } else {
           this.handlers.onAttrValue?.({
-            start: attr.valueStart!,
+            start: attr.valueStart,
             end: childPart.end,
             bound: attr.bound,
             value: {

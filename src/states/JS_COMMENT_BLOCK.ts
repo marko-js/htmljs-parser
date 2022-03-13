@@ -5,7 +5,13 @@ import { CODE, StateDefinition } from "../internal";
 export const JS_COMMENT_BLOCK: StateDefinition = {
   name: "JS_COMMENT_BLOCK",
 
-  enter() {},
+  enter(start) {
+    return {
+      start,
+      end: start,
+    };
+  },
+
   exit() {},
 
   char(code) {

@@ -35,10 +35,13 @@ const CODE_TAGS = ["import", "export", "static", "class"];
 export const TAG_NAME: StateDefinition<TagNameMeta> = {
   name: "TAG_NAME",
 
-  enter(tagName) {
-    const start = tagName.start + (tagName.shorthandCode ? 1 : 0);
-    tagName.expressions = [];
-    tagName.quasis = [{ start, end: start }];
+  enter(start) {
+    return {
+      start,
+      end: start,
+      expressions: [],
+      quasis: [{ start, end: start }],
+    };
   },
 
   exit(tagName) {
@@ -101,7 +104,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
             }
 
             tag.ending |= OpenTagEnding.code;
-            this.enterState(STATE.EXPRESSION, { terminatedByEOL: true });
+            this.enterState(STATE.EXPRESSION).terminatedByEOL = true;
           }
         }
 
@@ -124,7 +127,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
       this.skip(2); // skip ${
-      this.enterState(STATE.EXPRESSION, { terminator: "}" });
+      this.enterState(STATE.EXPRESSION).terminator = "}";
       this.rewind(1);
     } else if (
       isWhitespaceCode(code) ||
@@ -141,8 +144,9 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       this.exitState();
     } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
       this.exitState();
-      this.enterState(TAG_NAME, { shorthandCode: code }); // Shorthands reuse the TAG_NAME state
-      this.skip(1); // skip . or #
+      const shorthand = this.enterState(TAG_NAME);
+      shorthand.shorthandCode = code;
+      shorthand.quasis[0].start = this.skip(1); // skip . or #
     }
   },
 
