@@ -28,7 +28,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       this.indent += this.data[this.pos];
     } else {
       const curIndent = this.indent.length;
-      const indentStart = this.pos - curIndent;
+      const indentStart = this.pos - curIndent - 1;
       let parentTag = this.activeTag;
 
       while (parentTag && parentTag.indent.length >= curIndent) {
