@@ -1,0 +1,8 @@
+1╭─ <a><b selected something test=/*
+ │   ││ │ │        │         │    ╰─ error(MALFORMED_COMMENT:EOF reached while parsing multi-line JavaScript comment)
+ │   ││ │ │        │         ╰─ attrName "test"
+ │   ││ │ │        ╰─ attrName "something"
+ │   ││ │ ╰─ attrName "selected"
+ │   ││ ╰─ tagName
+ │   │╰─ openTagEnd(a)
+ ╰─  ╰─ tagName

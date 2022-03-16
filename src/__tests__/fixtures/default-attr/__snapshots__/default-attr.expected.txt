@@ -1,0 +1,10 @@
+1╭─ <a = test b = 2/>
+ │   │ │ │    │ │ ││ ╰─ closeTag(a)
+ │   │ │ │    │ │ │╰─ openTagEnd(a) "/>"
+ │   │ │ │    │ │ ╰─ attrValue.value
+ │   │ │ │    │ ╰─ attrValue "= 2"
+ │   │ │ │    ╰─ attrName
+ │   │ │ ╰─ attrValue.value "test"
+ │   │ ├─ attrValue "= test"
+ │   │ ╰─ attrName
+ ╰─  ╰─ tagName

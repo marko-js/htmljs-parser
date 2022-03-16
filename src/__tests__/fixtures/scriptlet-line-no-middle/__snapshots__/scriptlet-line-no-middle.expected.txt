@@ -1,0 +1,9 @@
+1╭─ tag $ var foo = 123;
+ │  │   │ │   │   │ │   ├─ closeTag(tag)
+ │  │   │ │   │   │ │   ╰─ openTagEnd(tag)
+ │  │   │ │   │   │ ╰─ attrValue.value "123"
+ │  │   │ │   │   ╰─ attrValue "= 123"
+ │  │   │ │   ╰─ attrName "foo"
+ │  │   │ ╰─ attrName "var"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "tag"

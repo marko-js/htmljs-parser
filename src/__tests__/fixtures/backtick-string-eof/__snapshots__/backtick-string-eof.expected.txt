@@ -1,0 +1,5 @@
+1╭─ <hello message=`Hello
+ │   │     │       ╰─ error(INVALID_TEMPLATE_STRING:EOF reached while parsing template string expression)
+ │   │     ╰─ attrName "message"
+ ╰─  ╰─ tagName "hello"
+2╰─     ${foo}!></hello>

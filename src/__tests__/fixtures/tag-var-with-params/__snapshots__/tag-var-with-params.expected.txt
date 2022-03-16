@@ -1,0 +1,13 @@
+1╭─ <foo/var|param|>
+ │   │  ││  ││     ╰─ openTagEnd(foo)
+ │   │  ││  │╰─ tagParams.value "param"
+ │   │  ││  ╰─ tagParams "|param|"
+ │   │  │╰─ tagVar.value "var"
+ │   │  ╰─ tagVar "/var"
+ ╰─  ╰─ tagName "foo"
+2╭─   Hello ${param}
+ ╰─ ╰─ text "\n  Hello "
+3╭─ </foo>
+ │  │ ╰─ closeTag(foo).value "foo"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTag(foo) "</foo>"

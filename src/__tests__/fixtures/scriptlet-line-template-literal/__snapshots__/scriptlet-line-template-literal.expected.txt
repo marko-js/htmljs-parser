@@ -1,0 +1,6 @@
+1╭─ $ var html = `
+ │   │╰─ scriptlet.value "var html = `\n<!doctype html>\n<div>${bar}</div>\n`"
+ ╰─  ╰─ scriptlet " var html = `\n<!doctype html>\n<div>${bar}</div>\n`"
+2├─ <!doctype html>
+3├─ <div>${bar}</div>
+4╰─ `

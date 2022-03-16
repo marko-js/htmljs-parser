@@ -1,9 +1,0 @@
-var colors=['red', 'green', 'blue']
-<div>
-    <span class="foo">
-        Hello ${data.name}!
-        </span>
-</div> <b>This is not
-    allowed</b>
-p class="foo"
-    <span>Test</span>

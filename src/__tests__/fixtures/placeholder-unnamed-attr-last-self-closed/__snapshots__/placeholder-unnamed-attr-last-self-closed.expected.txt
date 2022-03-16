@@ -1,0 +1,9 @@
+1╭─ <div class="foo" ...myCustomAttrs/>
+ │   │   │    ││     │  │            │ ╰─ closeTag(div)
+ │   │   │    ││     │  │            ╰─ openTagEnd(div) "/>"
+ │   │   │    ││     │  ╰─ attrSpread.value "myCustomAttrs"
+ │   │   │    ││     ╰─ attrSpread "...myCustomAttrs"
+ │   │   │    │╰─ attrValue.value "\"foo\""
+ │   │   │    ╰─ attrValue "=\"foo\""
+ │   │   ╰─ attrName "class"
+ ╰─  ╰─ tagName "div"

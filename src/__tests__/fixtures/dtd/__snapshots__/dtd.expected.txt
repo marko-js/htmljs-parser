@@ -1,0 +1,3 @@
+1╭─ <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">
+ │  │ ╰─ doctype.value "DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.0//EN\""
+ ╰─ ╰─ doctype "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.0//EN\">"

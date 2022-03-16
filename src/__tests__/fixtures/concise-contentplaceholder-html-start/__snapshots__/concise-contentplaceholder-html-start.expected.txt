@@ -1,0 +1,7 @@
+1╭─ -- ${data.name} some html - <b>bold</b>
+ │                 │             │││   │ ╰─ closeTag(b).value
+ │                 │             │││   ╰─ closeTag(b) "</b>"
+ │                 │             ││╰─ text "bold"
+ │                 │             │╰─ openTagEnd(b)
+ │                 │             ╰─ tagName
+ ╰─                ╰─ text " some html - "

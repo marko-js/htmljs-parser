@@ -1,0 +1,10 @@
+1╭─ <assign data.someArray[0].doSomething('test').hello=1+1/>
+ │   │      │                            ││      │     ││  │ ╰─ closeTag(assign)
+ │   │      │                            ││      │     ││  ╰─ openTagEnd(assign) "/>"
+ │   │      │                            ││      │     │╰─ attrValue.value "1+1"
+ │   │      │                            ││      │     ╰─ attrValue "=1+1"
+ │   │      │                            ││      ╰─ attrName ".hello"
+ │   │      │                            │╰─ attrArgs.value "'test'"
+ │   │      │                            ╰─ attrArgs "('test')"
+ │   │      ╰─ attrName "data.someArray[0].doSomething"
+ ╰─  ╰─ tagName "assign"

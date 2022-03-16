@@ -1,0 +1,4 @@
+1╭─ $ {
+2╭─     /
+ ╰─     ╰─ error(INVALID_REGULAR_EXPRESSION:EOL reached while parsing regular expression)
+3╰─ }

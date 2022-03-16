@@ -1,0 +1,8 @@
+1╭─ var foo=void false
+ │  │   │  │╰─ attrValue.value "void false"
+ │  │   │  ╰─ attrValue "=void false"
+ │  │   ╰─ attrName "foo"
+ ╰─ ╰─ tagName "var"
+2╭─ 
+ │  ├─ openTagEnd(var)
+ ╰─ ╰─ closeTag(var)

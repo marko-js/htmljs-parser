@@ -1,0 +1,10 @@
+1╭─ ﻿style {
+ │   │     ╰─ attrName "{\n    .example {\n        margin-left: calc((-100% / 12 - 200px) / 2);\n    }\n}"
+ ╰─  ╰─ tagName "style"
+2├─     .example {
+3├─         margin-left: calc((-100% / 12 - 200px) / 2);
+4├─     }
+5├─ }
+6╭─ 
+ │  ├─ openTagEnd(style)
+ ╰─ ╰─ closeTag(style)

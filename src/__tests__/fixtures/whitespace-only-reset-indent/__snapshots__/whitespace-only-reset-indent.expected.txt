@@ -1,0 +1,10 @@
+1╭─ div -- The next line has spaces on it
+ │  │   │  ╰─ text "The next line has spaces on it"
+ │  │   ╰─ openTagEnd(div)
+ ╰─ ╰─ tagName "div"
+2├─    
+3╭─ span
+ │  │   ├─ closeTag(span)
+ │  │   ╰─ openTagEnd(span)
+ │  ├─ closeTag(div)
+ ╰─ ╰─ tagName "span"

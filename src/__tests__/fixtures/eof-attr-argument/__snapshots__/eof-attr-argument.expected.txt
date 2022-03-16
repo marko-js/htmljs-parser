@@ -1,0 +1,4 @@
+1╭─ <div if(a==b
+ │   │   │  ╰─ error(MALFORMED_OPEN_TAG:EOF reached while parsing attribute value for the "if" attribute)
+ │   │   ╰─ attrName "if"
+ ╰─  ╰─ tagName "div"

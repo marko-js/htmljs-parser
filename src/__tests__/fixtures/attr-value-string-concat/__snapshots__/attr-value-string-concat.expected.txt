@@ -1,0 +1,8 @@
+1╭─ <div foo='a'+bar></div>
+ │   │   │  ││      ││ ╰─ closeTag(div).value "div"
+ │   │   │  ││      │╰─ closeTag(div) "</div>"
+ │   │   │  ││      ╰─ openTagEnd(div)
+ │   │   │  │╰─ attrValue.value "'a'+bar"
+ │   │   │  ╰─ attrValue "='a'+bar"
+ │   │   ╰─ attrName "foo"
+ ╰─  ╰─ tagName "div"

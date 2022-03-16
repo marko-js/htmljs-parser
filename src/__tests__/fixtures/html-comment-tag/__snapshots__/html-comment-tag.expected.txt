@@ -1,0 +1,30 @@
+1╭─ <div>
+ │   │  ╰─ openTagEnd(div)
+ ╰─  ╰─ tagName "div"
+2╭─   <!--123-->
+ │  │ │   ╰─ comment.value "123"
+ │  │ ╰─ comment "<!--123-->"
+ ╰─ ╰─ text "\n  "
+3╭─   <html-comment>abc</html-comment>
+ │  │  │           ││  │ ╰─ closeTag(html-comment).value "html-comment"
+ │  │  │           ││  ╰─ closeTag(html-comment) "</html-comment>"
+ │  │  │           │╰─ text "abc"
+ │  │  │           ╰─ openTagEnd(html-comment)
+ │  │  ╰─ tagName "html-comment"
+ ╰─ ╰─ text "\n  "
+4╭─   <!--[if lt IE 9]><script src="..."></script><![endif]-->
+ │  │ │   ╰─ comment.value "[if lt IE 9]><script src=\"...\"></script><![endif]"
+ │  │ ╰─ comment "<!--[if lt IE 9]><script src=\"...\"></script><![endif]-->"
+ ╰─ ╰─ text "\n  "
+5╭─   <html-comment>[if lt IE 9]><script src="..."></script><![endif]</html-comment>
+ │  │  │           ││                                                │ ╰─ closeTag(html-comment).value "html-comment"
+ │  │  │           ││                                                ╰─ closeTag(html-comment) "</html-comment>"
+ │  │  │           │╰─ text "[if lt IE 9]><script src=\"...\"></script><![endif]"
+ │  │  │           ╰─ openTagEnd(html-comment)
+ │  │  ╰─ tagName "html-comment"
+ ╰─ ╰─ text "\n  "
+6╭─ </div>
+ │  │ ╰─ closeTag(div).value "div"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTag(div) "</div>"
+7╰─ 

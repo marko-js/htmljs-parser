@@ -1,0 +1,2 @@
+1╭─ <!DOCTYPE html PUBLIC
+ ╰─ ╰─ error(MALFORMED_DOCUMENT_TYPE:EOF reached while parsing document type)

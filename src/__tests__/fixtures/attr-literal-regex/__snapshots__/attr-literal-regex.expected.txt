@@ -1,0 +1,31 @@
+1╭─ <div data=/foo//>
+ │   │   │   ││    ╰─ openTagEnd(div) "/>"
+ │   │   │   │╰─ attrValue.value "/foo/"
+ │   │   │   ╰─ attrValue "=/foo/"
+ │   │   ╰─ attrName "data"
+ ╰─  ╰─ tagName "div"
+2╭─ <div data=/foo/></div>
+ │  ││   │   ││    ││ ╰─ closeTag(div).value "div"
+ │  ││   │   ││    │╰─ closeTag(div) "</div>"
+ │  ││   │   ││    ╰─ openTagEnd(div)
+ │  ││   │   │╰─ attrValue.value "/foo/"
+ │  ││   │   ╰─ attrValue "=/foo/"
+ │  ││   ╰─ attrName "data"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ closeTag(div)
+3╭─ <div data=/flag/i></div>
+ │   │   │   ││      ││ ╰─ closeTag(div).value "div"
+ │   │   │   ││      │╰─ closeTag(div) "</div>"
+ │   │   │   ││      ╰─ openTagEnd(div)
+ │   │   │   │╰─ attrValue.value "/flag/i"
+ │   │   │   ╰─ attrValue "=/flag/i"
+ │   │   ╰─ attrName "data"
+ ╰─  ╰─ tagName "div"
+4╭─ <div data=/with space/></div>
+ │   │   │   ││           ││ ╰─ closeTag(div).value "div"
+ │   │   │   ││           │╰─ closeTag(div) "</div>"
+ │   │   │   ││           ╰─ openTagEnd(div)
+ │   │   │   │╰─ attrValue.value "/with space/"
+ │   │   │   ╰─ attrValue "=/with space/"
+ │   │   ╰─ attrName "data"
+ ╰─  ╰─ tagName "div"

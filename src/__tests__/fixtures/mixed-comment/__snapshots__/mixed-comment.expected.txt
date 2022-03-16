@@ -1,0 +1,22 @@
+1╭─ p class="foo"
+ │  │ │    │╰─ attrValue.value "\"foo\""
+ │  │ │    ╰─ attrValue "=\"foo\""
+ │  │ ╰─ attrName "class"
+ ╰─ ╰─ tagName
+2╭─     <!--
+ │  │   ╰─ comment "<!--\n    A multiline HTML comment\n    should be okay\n    -->"
+ ╰─ ╰─ openTagEnd(p)
+3╭─     A multiline HTML comment
+ ╰─ ╰─ comment.value "\n    A multiline HTML comment\n    should be okay\n    "
+4├─     should be okay
+5├─     -->
+6╭─ div class="bar" -- <!-- test -->
+ │  │   │    ││     │  │   │        ╰─ closeTag(div)
+ │  │   │    ││     │  │   ╰─ comment.value " test "
+ │  │   │    ││     │  ╰─ comment "<!-- test -->"
+ │  │   │    ││     ╰─ openTagEnd(div)
+ │  │   │    │╰─ attrValue.value "\"bar\""
+ │  │   │    ╰─ attrValue "=\"bar\""
+ │  │   ╰─ attrName "class"
+ │  ├─ closeTag(p)
+ ╰─ ╰─ tagName "div"

@@ -1,0 +1,12 @@
+1╭─ p
+ ╰─ ╰─ tagName
+2╭─   /*
+ │  │ ╰─ comment "/*\n  This is a\n  multiline comment\n  */"
+ ╰─ ╰─ openTagEnd(p)
+3╭─   This is a
+ ╰─ ╰─ comment.value "\n  This is a\n  multiline comment\n  "
+4├─   multiline comment
+5├─   */
+6╭─   -- This is the body of the p tag
+ │       │                            ╰─ closeTag(p)
+ ╰─      ╰─ text "This is the body of the p tag"

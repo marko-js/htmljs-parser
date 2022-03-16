@@ -1,0 +1,19 @@
+1╭─ a [ href="http://www.ebay.com"
+ │  │   │   │╰─ attrValue.value "\"http://www.ebay.com\""
+ │  │   │   ╰─ attrValue "=\"http://www.ebay.com\""
+ │  │   ╰─ attrName "href"
+ ╰─ ╰─ tagName
+2╭─   target="_blank"
+ │    │     │╰─ attrValue.value "\"_blank\""
+ │    │     ╰─ attrValue "=\"_blank\""
+ ╰─   ╰─ attrName "target"
+3╭─   style="background-color: yellow"
+ │    │    │╰─ attrValue.value "\"background-color: yellow\""
+ │    │    ╰─ attrValue "=\"background-color: yellow\""
+ ╰─   ╰─ attrName "style"
+4╭─     class]
+ ╰─     ╰─ attrName "class"
+5╭─   -- This is the body of the a tag
+ │  │    │                            ╰─ closeTag(a)
+ │  │    ╰─ text "This is the body of the a tag"
+ ╰─ ╰─ openTagEnd(a)
