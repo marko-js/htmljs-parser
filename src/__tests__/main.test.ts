@@ -179,7 +179,9 @@ for (const entry of fs.readdirSync(FIXTURES)) {
           if (range.end > range.start) {
             const txt = parser.read(part.range);
             if (txt.length > 1 || /\s/.test(txt)) {
-              label += ` ${JSON.stringify(parser.read(part.range))}`;
+              label += ` ${JSON.stringify(
+                parser.read(part.range).replace(/\r\n/g, "\n")
+              )}`;
             }
           }
 
