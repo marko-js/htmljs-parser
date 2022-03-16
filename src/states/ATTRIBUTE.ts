@@ -9,6 +9,7 @@ import {
 } from "../internal";
 
 const enum ATTR_STATE {
+  UNKNOWN,
   NAME,
   VALUE,
   ARGUMENT,
@@ -16,7 +17,7 @@ const enum ATTR_STATE {
 }
 
 export interface AttrMeta extends Range {
-  state: undefined | ATTR_STATE;
+  state: ATTR_STATE;
   name: undefined | Range;
   valueStart: number;
   args: boolean | Ranges.AttrMethod["params"];
@@ -64,7 +65,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       start,
       end: start,
       valueStart: start,
-      state: undefined,
+      state: ATTR_STATE.UNKNOWN,
       name: undefined,
       args: false,
       bound: false,
@@ -122,7 +123,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       expr.terminatedByWhitespace = false;
       expr.terminator = CODE.CLOSE_CURLY_BRACE;
       this.rewind(1);
-    } else if (attr.state === undefined) {
+    } else if (attr.state === ATTR_STATE.UNKNOWN) {
       attr.state = ATTR_STATE.NAME;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
