@@ -10,14 +10,16 @@ import {
 } from "../internal";
 
 const enum TAG_STATE {
+  UNKNOWN,
   VAR,
   ARGUMENT,
   PARAMS,
+  ATTR_GROUP,
 }
 
 export interface OpenTagMeta extends Range {
   bodyMode: BODY_MODE;
-  state: TAG_STATE | undefined;
+  state: TAG_STATE;
   concise: boolean;
   beginMixedMode?: boolean;
   tagName: Ranges.Template;
@@ -55,7 +57,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     const tag = (this.activeTag = {
       start,
       end: start,
-      state: undefined,
+      state: TAG_STATE.UNKNOWN,
       parentTag: this.activeTag,
       nestedIndent: undefined,
       indent: this.indent,
@@ -101,8 +103,8 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     }
   },
 
-  eol() {
-    if (this.isConcise && !this.isInAttrGroup) {
+  eol(_, tag) {
+    if (this.isConcise && tag.state !== TAG_STATE.ATTR_GROUP) {
       // In concise mode we always end the open tag
       this.exitState();
     }
@@ -110,7 +112,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
 
   eof(tag) {
     if (this.isConcise) {
-      if (this.isInAttrGroup) {
+      if (tag.state === TAG_STATE.ATTR_GROUP) {
         this.emitError(
           tag,
           "MALFORMED_OPEN_TAG",
@@ -182,7 +184,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           return;
         }
 
-        if (this.isInAttrGroup) {
+        if (tag.state === TAG_STATE.ATTR_GROUP) {
           this.emitError(
             this.pos,
             "MALFORMED_OPEN_TAG",
@@ -222,7 +224,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
         return;
       } else if (code === CODE.OPEN_SQUARE_BRACKET) {
-        if (this.isInAttrGroup) {
+        if (tag.state === TAG_STATE.ATTR_GROUP) {
           this.emitError(
             this.pos,
             "MALFORMED_OPEN_TAG",
@@ -231,10 +233,10 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           return;
         }
 
-        this.isInAttrGroup = true;
+        tag.state = TAG_STATE.ATTR_GROUP;
         return;
       } else if (code === CODE.CLOSE_SQUARE_BRACKET) {
-        if (!this.isInAttrGroup) {
+        if (tag.state !== TAG_STATE.ATTR_GROUP) {
           this.emitError(
             this.pos,
             "MALFORMED_OPEN_TAG",
@@ -243,7 +245,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           return;
         }
 
-        this.isInAttrGroup = false;
+        tag.state = TAG_STATE.UNKNOWN;
         return;
       }
     } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
