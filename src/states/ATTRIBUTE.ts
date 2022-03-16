@@ -24,6 +24,36 @@ export interface AttrMeta extends Range {
   bound: boolean;
 }
 
+const HTML_VALUE_TERMINATORS = [
+  CODE.CLOSE_ANGLE_BRACKET,
+  CODE.COMMA,
+  [CODE.FORWARD_SLASH, CODE.CLOSE_ANGLE_BRACKET],
+];
+
+const CONCISE_VALUE_TERMINATORS = [
+  CODE.CLOSE_SQUARE_BRACKET,
+  CODE.SEMICOLON,
+  CODE.COMMA,
+];
+
+const HTML_NAME_TERMINATORS = [
+  CODE.CLOSE_ANGLE_BRACKET,
+  CODE.COMMA,
+  CODE.OPEN_PAREN,
+  CODE.EQUAL,
+  [CODE.COLON, CODE.EQUAL],
+  [CODE.FORWARD_SLASH, CODE.CLOSE_ANGLE_BRACKET],
+];
+
+const CONCISE_NAME_TERMINATORS = [
+  CODE.CLOSE_SQUARE_BRACKET,
+  CODE.SEMICOLON,
+  CODE.EQUAL,
+  CODE.COMMA,
+  CODE.OPEN_PAREN,
+  [CODE.COLON, CODE.EQUAL],
+];
+
 // We enter STATE.ATTRIBUTE when we see a non-whitespace
 // character after reading the tag name
 export const ATTRIBUTE: StateDefinition<AttrMeta> = {
@@ -73,18 +103,16 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       attr.state = ATTR_STATE.VALUE;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
-      expr.terminator = [
-        this.isConcise ? "]" : "/>",
-        this.isConcise ? ";" : ">",
-        ",",
-      ];
+      expr.terminator = this.isConcise
+        ? CONCISE_VALUE_TERMINATORS
+        : HTML_VALUE_TERMINATORS;
 
       this.rewind(1);
     } else if (code === CODE.OPEN_PAREN) {
       ensureAttrName(this, attr);
       attr.state = ATTR_STATE.ARGUMENT;
       this.skip(1); // skip (
-      this.enterState(STATE.EXPRESSION).terminator = ")";
+      this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_PAREN;
       this.rewind(1);
     } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
       ensureAttrName(this, attr);
@@ -92,21 +120,16 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       this.skip(1); // skip {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = false;
-      expr.terminator = "}";
+      expr.terminator = CODE.CLOSE_CURLY_BRACE;
       this.rewind(1);
     } else if (attr.state === undefined) {
       attr.state = ATTR_STATE.NAME;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
       expr.skipOperators = true;
-      expr.terminator = [
-        this.isConcise ? "]" : "/>",
-        this.isConcise ? ";" : ">",
-        ":=",
-        "=",
-        ",",
-        "(",
-      ];
+      expr.terminator = this.isConcise
+        ? CONCISE_NAME_TERMINATORS
+        : HTML_NAME_TERMINATORS;
       this.rewind(1);
     } else {
       this.exitState();

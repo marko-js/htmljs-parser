@@ -40,7 +40,7 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
       inlineScript.block = true;
       this.skip(1); // skip {
       const expr = this.enterState(STATE.EXPRESSION);
-      expr.terminator = "}";
+      expr.terminator = CODE.CLOSE_CURLY_BRACE;
       expr.skipOperators = true;
       this.rewind(1);
     } else {

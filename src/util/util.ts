@@ -21,7 +21,7 @@ export function getLoc(lines: number[], range: Range): Location {
 export function getPos(
   lines: number[],
   startLine: number,
-  pos: number
+  index: number
 ): Position {
   let max = lines.length - 1;
   let line = startLine;
@@ -29,7 +29,7 @@ export function getPos(
   while (line < max) {
     const mid = (1 + line + max) >>> 1;
 
-    if (lines[mid] <= pos) {
+    if (lines[mid] <= index) {
       line = mid;
     } else {
       max = mid - 1;
@@ -38,12 +38,12 @@ export function getPos(
 
   return {
     line: line + 1,
-    column: line === 0 ? pos + 1 : pos - lines[line],
+    column: index - lines[line],
   };
 }
 
 export function getLines(src: string) {
-  const lines = [0];
+  const lines = [-1];
   for (let i = 0; i < src.length; i++) {
     if (src.charCodeAt(i) === CODE.NEWLINE) {
       lines.push(i);

@@ -9,7 +9,7 @@ import {
 
 export interface ExpressionMeta extends Range {
   groupStack: number[];
-  terminator?: string | string[];
+  terminator?: number | (number | number[])[];
   skipOperators: boolean;
   terminatedByEOL: boolean;
   terminatedByWhitespace: boolean;
@@ -66,9 +66,13 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         return;
       }
 
+      const { terminator } = expression;
+
       if (
-        expression.terminator &&
-        checkForTerminator(this, expression.terminator)
+        terminator &&
+        (typeof terminator === "number"
+          ? terminator === code
+          : checkForTerminators(this, code, terminator))
       ) {
         this.exitState();
         return;
@@ -279,21 +283,21 @@ function buildOperatorPattern(isConcise: boolean) {
   return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "y");
 }
 
-function checkForTerminator(parser: Parser, terminator: string | string[]) {
-  if (typeof terminator === "string") {
-    if (parser.data[parser.pos] === terminator) {
-      return true;
-    } else if (terminator.length > 1) {
-      for (let i = 0; i < terminator.length; i++) {
-        if (parser.data[parser.pos + i] !== terminator[i]) {
-          return false;
+function checkForTerminators(
+  parser: Parser,
+  code: number,
+  terminators: (number | number[])[]
+) {
+  outer: for (const terminator of terminators) {
+    if (typeof terminator === "number") {
+      if (code === terminator) return true;
+    } else {
+      if (terminator[0] === code) {
+        for (let i = terminator.length; i-- > 1; ) {
+          if (parser.data.charCodeAt(parser.pos + i) !== terminator[i])
+            continue outer;
         }
-      }
-      return true;
-    }
-  } else {
-    for (let i = 0; i < terminator.length; i++) {
-      if (checkForTerminator(parser, terminator[i])) {
+
         return true;
       }
     }
