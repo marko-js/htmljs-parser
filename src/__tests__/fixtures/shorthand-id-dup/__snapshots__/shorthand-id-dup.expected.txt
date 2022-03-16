@@ -1,0 +1,5 @@
+1╭─ #foo#bar
+ │  ││  ╰─ error(INVALID_TAG_SHORTHAND:Multiple shorthand ID parts are not allowed on the same tag) "#bar"
+ │  │╰─ tagShorthandId.quasis[0] "foo"
+ │  ├─ tagShorthandId "#foo"
+ ╰─ ╰─ tagName

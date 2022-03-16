@@ -1,0 +1,25 @@
+1╭─ a
+ ╰─ ╰─ tagName
+2╭─     b
+ │  │   ╰─ tagName
+ ╰─ ╰─ openTagEnd(a)
+3╭─         c
+ │  │       ╰─ tagName
+ ╰─ ╰─ openTagEnd(b)
+4╭─         c2
+ │  │       ╰─ tagName "c2"
+ │  ├─ closeTag(c)
+ ╰─ ╰─ openTagEnd(c)
+5╭─     b2
+ │  │   ╰─ tagName "b2"
+ │  ├─ closeTag(b)
+ │  ├─ closeTag(c2)
+ ╰─ ╰─ openTagEnd(c2)
+6╭─ a2
+ │  ├─ closeTag(a)
+ │  ├─ closeTag(b2)
+ │  ├─ openTagEnd(b2)
+ ╰─ ╰─ tagName "a2"
+7╭─ 
+ │  ├─ openTagEnd(a2)
+ ╰─ ╰─ closeTag(a2)

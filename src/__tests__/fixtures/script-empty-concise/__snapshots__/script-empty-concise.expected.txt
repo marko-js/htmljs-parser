@@ -1,0 +1,15 @@
+1╭─ head
+ ╰─ ╰─ tagName "head"
+2╭─     script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"
+ │  │   │      │  │╰─ attrValue.value "\"http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js\""
+ │  │   │      │  ╰─ attrValue "=\"http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js\""
+ │  │   │      ╰─ attrName "src"
+ │  │   ╰─ tagName "script"
+ ╰─ ╰─ openTagEnd(head)
+3╭─     lasso-head
+ │  │   │         ├─ closeTag(head)
+ │  │   │         ├─ closeTag(lasso-head)
+ │  │   │         ╰─ openTagEnd(lasso-head)
+ │  │   ╰─ tagName "lasso-head"
+ │  ├─ closeTag(script)
+ ╰─ ╰─ openTagEnd(script)

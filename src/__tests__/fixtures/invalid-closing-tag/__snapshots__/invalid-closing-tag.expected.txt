@@ -1,0 +1,5 @@
+1╭─ <div> </span> </div>
+ │   │  ││╰─ error(MISMATCHED_CLOSING_TAG:The closing "span" tag does not match the corresponding opening "div" tag) "</span>"
+ │   │  │╰─ text " "
+ │   │  ╰─ openTagEnd(div)
+ ╰─  ╰─ tagName "div"

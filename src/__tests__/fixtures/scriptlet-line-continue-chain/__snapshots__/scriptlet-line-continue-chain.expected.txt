@@ -1,0 +1,12 @@
+1╭─ $ var foo;
+ │   │╰─ scriptlet.value "var foo;"
+ ╰─  ╰─ scriptlet " var foo;"
+2╭─ $ if (condition1) {
+ │   │╰─ scriptlet.value "if (condition1) {\n    foo = 1;\n} else if (condition2) {\n    foo = 2;\n} else {\n    foo = 3;\n}"
+ ╰─  ╰─ scriptlet " if (condition1) {\n    foo = 1;\n} else if (condition2) {\n    foo = 2;\n} else {\n    foo = 3;\n}"
+3├─     foo = 1;
+4├─ } else if (condition2) {
+5├─     foo = 2;
+6├─ } else {
+7├─     foo = 3;
+8╰─ }

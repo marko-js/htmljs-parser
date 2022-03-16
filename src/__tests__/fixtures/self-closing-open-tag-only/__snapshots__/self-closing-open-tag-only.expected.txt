@@ -1,0 +1,8 @@
+1╭─ <img src="foo.png"/>
+ │   │   │  ││        ╰─ openTagEnd(img) "/>"
+ │   │   │  │╰─ attrValue.value "\"foo.png\""
+ │   │   │  ╰─ attrValue "=\"foo.png\""
+ │   │   ╰─ attrName "src"
+ ╰─  ╰─ tagName "img"
+2╭─ 
+ ╰─ ╰─ closeTag(img)

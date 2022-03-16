@@ -1,0 +1,8 @@
+1╭─ <a data=123"abc"></a>
+ │   │ │   ││       ││ ╰─ closeTag(a).value
+ │   │ │   ││       │╰─ closeTag(a) "</a>"
+ │   │ │   ││       ╰─ openTagEnd(a)
+ │   │ │   │╰─ attrValue.value "123\"abc\""
+ │   │ │   ╰─ attrValue "=123\"abc\""
+ │   │ ╰─ attrName "data"
+ ╰─  ╰─ tagName

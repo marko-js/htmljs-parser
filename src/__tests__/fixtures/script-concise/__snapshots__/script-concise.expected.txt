@@ -1,0 +1,15 @@
+1╭─ script
+ ╰─ ╰─ tagName "script"
+2╭─     ---
+ ╰─ ╰─ openTagEnd(script)
+3╭─     This is text
+ ╰─ ╰─ text "\n    This is text\n    within the </script> block\n"
+4├─     within the </script> block
+5├─     ---
+6╭─     -- This should be okay too
+ ╰─        ╰─ text "This should be okay too"
+7╭─ div
+ │  │  ├─ closeTag(div)
+ │  │  ╰─ openTagEnd(div)
+ │  ├─ closeTag(script)
+ ╰─ ╰─ tagName "div"

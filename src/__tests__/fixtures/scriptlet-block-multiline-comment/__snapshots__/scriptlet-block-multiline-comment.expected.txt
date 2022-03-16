@@ -1,0 +1,6 @@
+1╭─ $ {
+ ╰─  ╰─ scriptlet:block " {\n    /* foo */\n    var foo = 123;\n}"
+2╭─     /* foo */
+ ╰─ ╰─ scriptlet:block.value "\n    /* foo */\n    var foo = 123;\n"
+3├─     var foo = 123;
+4╰─ }

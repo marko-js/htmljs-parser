@@ -1,0 +1,8 @@
+1╭─ var foo = new Date(2000,0,1)
+ │  │   │   │ ╰─ attrValue.value "new Date(2000,0,1)"
+ │  │   │   ╰─ attrValue "= new Date(2000,0,1)"
+ │  │   ╰─ attrName "foo"
+ ╰─ ╰─ tagName "var"
+2╭─ 
+ │  ├─ openTagEnd(var)
+ ╰─ ╰─ closeTag(var)

@@ -1,0 +1,9 @@
+1╭─ <div class="foo" \\${myCustomAttrs}></div>
+ │   │   │    ││     │                 ││ ╰─ closeTag(div).value "div"
+ │   │   │    ││     │                 │╰─ closeTag(div) "</div>"
+ │   │   │    ││     │                 ╰─ openTagEnd(div)
+ │   │   │    ││     ╰─ attrName "\\\\${myCustomAttrs}"
+ │   │   │    │╰─ attrValue.value "\"foo\""
+ │   │   │    ╰─ attrValue "=\"foo\""
+ │   │   ╰─ attrName "class"
+ ╰─  ╰─ tagName "div"

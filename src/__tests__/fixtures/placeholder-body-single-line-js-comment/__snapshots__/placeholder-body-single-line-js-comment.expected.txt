@@ -1,0 +1,7 @@
+1╭─ <script>// Copyright ${date}
+ │   │     │╰─ text "// Copyright ${date}\n"
+ │   │     ╰─ openTagEnd(script)
+ ╰─  ╰─ tagName "script"
+2╭─ </script>
+ │  │ ╰─ closeTag(script).value "script"
+ ╰─ ╰─ closeTag(script) "</script>"

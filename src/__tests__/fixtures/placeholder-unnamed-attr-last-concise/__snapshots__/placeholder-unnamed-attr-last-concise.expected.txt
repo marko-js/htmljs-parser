@@ -1,0 +1,15 @@
+1╭─ div class="foo" ...myCustomAttrs
+ │  │   │    ││     │  ╰─ attrSpread.value "myCustomAttrs"
+ │  │   │    ││     ╰─ attrSpread "...myCustomAttrs"
+ │  │   │    │╰─ attrValue.value "\"foo\""
+ │  │   │    ╰─ attrValue "=\"foo\""
+ │  │   ╰─ attrName "class"
+ ╰─ ╰─ tagName "div"
+2╭─     span.bar
+ │  │   │   ││  ├─ closeTag(div)
+ │  │   │   ││  ├─ closeTag(span)
+ │  │   │   ││  ╰─ openTagEnd(span)
+ │  │   │   │╰─ tagShorthandClass.quasis[0] "bar"
+ │  │   │   ╰─ tagShorthandClass ".bar"
+ │  │   ╰─ tagName "span"
+ ╰─ ╰─ openTagEnd(div)

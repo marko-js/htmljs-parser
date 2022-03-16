@@ -1,0 +1,11 @@
+1╭─ var foo = typeof 'foo',bar=typeof 'bar'
+ │  │   │   │ │            │  │╰─ attrValue.value "typeof 'bar'"
+ │  │   │   │ │            │  ╰─ attrValue "=typeof 'bar'"
+ │  │   │   │ │            ╰─ attrName "bar"
+ │  │   │   │ ╰─ attrValue.value "typeof 'foo'"
+ │  │   │   ╰─ attrValue "= typeof 'foo'"
+ │  │   ╰─ attrName "foo"
+ ╰─ ╰─ tagName "var"
+2╭─ 
+ │  ├─ openTagEnd(var)
+ ╰─ ╰─ closeTag(var)

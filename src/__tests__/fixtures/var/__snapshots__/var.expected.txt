@@ -1,0 +1,25 @@
+1╭─ var pageTitle="Marko Templating Engine"
+ │  │   │        │╰─ attrValue.value "\"Marko Templating Engine\""
+ │  │   │        ╰─ attrValue "=\"Marko Templating Engine\""
+ │  │   ╰─ attrName "pageTitle"
+ ╰─ ╰─ tagName "var"
+2╭─ var currentPage='home'
+ │  │   │          │╰─ attrValue.value "'home'"
+ │  │   │          ╰─ attrValue "='home'"
+ │  │   ╰─ attrName "currentPage"
+ │  ├─ closeTag(var)
+ │  ├─ openTagEnd(var)
+ ╰─ ╰─ tagName "var"
+3╭─ 
+ ╰─ ╰─ openTagEnd(var)
+4╭─ <!DOCTYPE html>
+ │  │ ╰─ doctype.value "DOCTYPE html"
+ │  ├─ closeTag(var)
+ ╰─ ╰─ doctype "<!DOCTYPE html>"
+5╭─ html lang="en"
+ │  │    │   ││   ├─ closeTag(html)
+ │  │    │   ││   ╰─ openTagEnd(html)
+ │  │    │   │╰─ attrValue.value "\"en\""
+ │  │    │   ╰─ attrValue "=\"en\""
+ │  │    ╰─ attrName "lang"
+ ╰─ ╰─ tagName "html"

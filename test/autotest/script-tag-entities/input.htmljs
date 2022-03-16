@@ -1,1 +1,0 @@
-<script>console.log('<div>Hello ${input.name}</div>');</script>

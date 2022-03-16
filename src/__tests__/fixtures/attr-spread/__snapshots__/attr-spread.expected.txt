@@ -1,0 +1,44 @@
+1╭─ <span ...a/>
+ │   │    │  │╰─ openTagEnd(span) "/>"
+ │   │    │  ╰─ attrSpread.value
+ │   │    ╰─ attrSpread "...a"
+ ╰─  ╰─ tagName "span"
+2╭─ <span a ...b/>
+ │  ││    │ │  │╰─ openTagEnd(span) "/>"
+ │  ││    │ │  ╰─ attrSpread.value
+ │  ││    │ ╰─ attrSpread "...b"
+ │  ││    ╰─ attrName
+ │  │╰─ tagName "span"
+ ╰─ ╰─ closeTag(span)
+3╭─ <span a ...b ...c/>
+ │  ││    │ │  │ │  │╰─ openTagEnd(span) "/>"
+ │  ││    │ │  │ │  ╰─ attrSpread.value
+ │  ││    │ │  │ ╰─ attrSpread "...c"
+ │  ││    │ │  ╰─ attrSpread.value
+ │  ││    │ ╰─ attrSpread "...b"
+ │  ││    ╰─ attrName
+ │  │╰─ tagName "span"
+ ╰─ ╰─ closeTag(span)
+4╭─ <span a ...b c ...d/>
+ │  ││    │ │  │ │ │  │╰─ openTagEnd(span) "/>"
+ │  ││    │ │  │ │ │  ╰─ attrSpread.value
+ │  ││    │ │  │ │ ╰─ attrSpread "...d"
+ │  ││    │ │  │ ╰─ attrName
+ │  ││    │ │  ╰─ attrSpread.value
+ │  ││    │ ╰─ attrSpread "...b"
+ │  ││    ╰─ attrName
+ │  │╰─ tagName "span"
+ ╰─ ╰─ closeTag(span)
+5╭─ <span a ...b c ...d e/>
+ │  ││    │ │  │ │ │  │ │╰─ openTagEnd(span) "/>"
+ │  ││    │ │  │ │ │  │ ╰─ attrName
+ │  ││    │ │  │ │ │  ╰─ attrSpread.value
+ │  ││    │ │  │ │ ╰─ attrSpread "...d"
+ │  ││    │ │  │ ╰─ attrName
+ │  ││    │ │  ╰─ attrSpread.value
+ │  ││    │ ╰─ attrSpread "...b"
+ │  ││    ╰─ attrName
+ │  │╰─ tagName "span"
+ ╰─ ╰─ closeTag(span)
+6╭─ 
+ ╰─ ╰─ closeTag(span)

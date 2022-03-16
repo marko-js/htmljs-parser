@@ -1,0 +1,8 @@
+1╭─ <style a=b>/* block comment within <style> */"string within \"<style>\""'string within \'<style>\''
+ │  ││     ││││╰─ text "/* block comment within <style> */\"string within \\\"<style>\\\"\"'string within \\'<style>\\''"
+ │  ││     │││╰─ openTagEnd(style)
+ │  ││     ││╰─ attrValue.value
+ │  ││     │╰─ attrValue "=b"
+ │  ││     ╰─ attrName
+ │  │╰─ tagName "style"
+ ╰─ ╰─ error(MISSING_END_TAG:Missing ending "style" tag) "<style a=b>"

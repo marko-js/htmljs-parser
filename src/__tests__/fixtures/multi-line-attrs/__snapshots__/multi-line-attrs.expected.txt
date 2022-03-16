@@ -1,0 +1,20 @@
+1╭─ <custom-tag
+ ╰─  ╰─ tagName "custom-tag"
+2╭─   data-attr-a
+ ╰─   ╰─ attrName "data-attr-a"
+3╭─   data-attr-b
+ ╰─   ╰─ attrName "data-attr-b"
+4╭─   data-attr-c
+ ╰─   ╰─ attrName "data-attr-c"
+5╭─   data-attr-d
+ ╰─   ╰─ attrName "data-attr-d"
+6╭─   data-attr-e
+ ╰─   ╰─ attrName "data-attr-e"
+7╭─   preserve-attr-a
+ ╰─   ╰─ attrName "preserve-attr-a"
+8╭─   not-preserve-attr-a
+ ╰─   ╰─ attrName "not-preserve-attr-a"
+9╭─ />
+ ╰─ ╰─ openTagEnd(custom-tag) "/>"
+10╭─ 
+  ╰─ ╰─ closeTag(custom-tag)

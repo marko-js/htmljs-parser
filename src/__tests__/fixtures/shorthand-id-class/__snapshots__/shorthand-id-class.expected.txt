@@ -1,0 +1,8 @@
+1╭─ #foo.bar
+ │  ││  ││  ├─ closeTag()
+ │  ││  ││  ╰─ openTagEnd()
+ │  ││  │╰─ tagShorthandClass.quasis[0] "bar"
+ │  ││  ╰─ tagShorthandClass ".bar"
+ │  │╰─ tagShorthandId.quasis[0] "foo"
+ │  ├─ tagShorthandId "#foo"
+ ╰─ ╰─ tagName

@@ -1,0 +1,6 @@
+1╭─ <style>/* block comment within <style> */"string within \"<style>\""'string within \'<style>\''</style>
+ │   │    ││                                                                                       │ ╰─ closeTag(style).value "style"
+ │   │    ││                                                                                       ╰─ closeTag(style) "</style>"
+ │   │    │╰─ text "/* block comment within <style> */\"string within \\\"<style>\\\"\"'string within \\'<style>\\''"
+ │   │    ╰─ openTagEnd(style)
+ ╰─  ╰─ tagName "style"

@@ -1,0 +1,5 @@
+1╭─ <div>Hello ${(x</div>
+ │   │  ││       ╰─ error(MALFORMED_PLACEHOLDER:EOF reached while parsing placeholder)
+ │   │  │╰─ text "Hello "
+ │   │  ╰─ openTagEnd(div)
+ ╰─  ╰─ tagName "div"

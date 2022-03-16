@@ -1,0 +1,20 @@
+1╭─ a foo=a++ bar=b--
+ │  │ │  ││   │  │╰─ attrValue.value "b--"
+ │  │ │  ││   │  ╰─ attrValue "=b--"
+ │  │ │  ││   ╰─ attrName "bar"
+ │  │ │  │╰─ attrValue.value "a++"
+ │  │ │  ╰─ attrValue "=a++"
+ │  │ ╰─ attrName "foo"
+ ╰─ ╰─ tagName
+2╭─ a foo=++a bar=--b
+ │  │ │  ││   │  ││  ├─ closeTag(a)
+ │  │ │  ││   │  ││  ╰─ openTagEnd(a)
+ │  │ │  ││   │  │╰─ attrValue.value "--b"
+ │  │ │  ││   │  ╰─ attrValue "=--b"
+ │  │ │  ││   ╰─ attrName "bar"
+ │  │ │  │╰─ attrValue.value "++a"
+ │  │ │  ╰─ attrValue "=++a"
+ │  │ ╰─ attrName "foo"
+ │  ├─ closeTag(a)
+ │  ├─ openTagEnd(a)
+ ╰─ ╰─ tagName

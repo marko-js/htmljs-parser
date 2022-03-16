@@ -1,0 +1,12 @@
+1╭─ <a a=123+456/* test */ b=a+'123'>test</a>
+ │   │ │││                 │││      ││   │ ╰─ closeTag(a).value
+ │   │ │││                 │││      ││   ╰─ closeTag(a) "</a>"
+ │   │ │││                 │││      │╰─ text "test"
+ │   │ │││                 │││      ╰─ openTagEnd(a)
+ │   │ │││                 ││╰─ attrValue.value "a+'123'"
+ │   │ │││                 │╰─ attrValue "=a+'123'"
+ │   │ │││                 ╰─ attrName
+ │   │ ││╰─ attrValue.value "123+456/* test */"
+ │   │ │╰─ attrValue "=123+456/* test */"
+ │   │ ╰─ attrName
+ ╰─  ╰─ tagName

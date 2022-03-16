@@ -1,0 +1,13 @@
+1╭─ <foo a="1", b="2" c="3" />
+ │   │   │││    │││   │││   │ ╰─ closeTag(foo)
+ │   │   │││    │││   │││   ╰─ openTagEnd(foo) "/>"
+ │   │   │││    │││   ││╰─ attrValue.value "\"3\""
+ │   │   │││    │││   │╰─ attrValue "=\"3\""
+ │   │   │││    │││   ╰─ attrName
+ │   │   │││    ││╰─ attrValue.value "\"2\""
+ │   │   │││    │╰─ attrValue "=\"2\""
+ │   │   │││    ╰─ attrName
+ │   │   ││╰─ attrValue.value "\"1\""
+ │   │   │╰─ attrValue "=\"1\""
+ │   │   ╰─ attrName
+ ╰─  ╰─ tagName "foo"

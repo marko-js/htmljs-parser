@@ -43,6 +43,16 @@ export const enum BODY_MODE {
   PARSED_TEXT, // Body of a tag is treated as text, but placeholders will be parsed
 }
 
+export interface Position {
+  line: number;
+  column: number;
+}
+
+export interface Location {
+  start: Position;
+  end: Position;
+}
+
 export interface Range {
   start: number;
   end: number;

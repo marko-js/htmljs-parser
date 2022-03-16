@@ -1,0 +1,4 @@
+1╭─ <a />
+ │   │ │ ╰─ closeTag(a)
+ │   │ ╰─ openTagEnd(a) "/>"
+ ╰─  ╰─ tagName

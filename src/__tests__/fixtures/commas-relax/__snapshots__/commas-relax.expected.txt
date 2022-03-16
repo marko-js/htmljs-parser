@@ -1,0 +1,11 @@
+1╭─ static const x = {
+ ╰─ ╰─ tagName "static"
+2├─   hello: true
+3├─ };
+4╭─ 
+ ╰─ ╰─ openTagEnd(static)
+5╭─ import mod, { b as bar } from "./bar"
+ │  │                                    ├─ closeTag(import)
+ │  │                                    ╰─ openTagEnd(import)
+ │  ├─ closeTag(static)
+ ╰─ ╰─ tagName "import"

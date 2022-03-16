@@ -5,6 +5,9 @@ import {
   isWhitespaceCode,
   Range,
   Handlers,
+  getLines,
+  getLoc,
+  getPos,
 } from "../internal";
 
 export interface StateDefinition<P extends Range = Range> {
@@ -40,6 +43,7 @@ export class Parser {
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   public textPos!: number; // Used to buffer text that is found within the body of a tag
+  public lines: undefined | number[]; // Keeps track of line indexes to provide line/column info.
 
   constructor(public handlers: Handlers) {
     this.handlers = handlers;
@@ -61,8 +65,16 @@ export class Parser {
     this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
-  read(node: Range) {
-    return this.data.slice(node.start, node.end);
+  read(range: Range) {
+    return this.data.slice(range.start, range.end);
+  }
+
+  toPos(index: number) {
+    return getPos(this.lines || (this.lines = getLines(this.data)), 0, index);
+  }
+
+  toLoc(range: Range) {
+    return getLoc(this.lines || (this.lines = getLines(this.data)), range);
   }
 
   enterState<P extends Range>(state: StateDefinition<P>): P {

@@ -1,5 +1,4 @@
-htmljs-parser
-=============
+# htmljs-parser
 
 HTML parsers written according to the HTML spec will interpret all
 attribute values as strings which makes it challenging to properly
@@ -12,7 +11,6 @@ For example, consider a HTML-based template that wishes to
 support a custom tag named `<say-hello>` that supports an
 attribute named `message` that can be a string literal or a JavaScript expression.
 
-
 Ideally, the template compiler should be able to handle any of the following:
 
 ```html
@@ -24,28 +22,34 @@ Ideally, the template compiler should be able to handle any of the following:
 This parser extends the HTML grammar to add these important features:
 
 - JavaScript expressions as attribute values
+
 ```html
 <say-hello message=("Hello " + personName) count=2+2 large=true />
 ```
+
 - Placeholders in the content of an element
+
 ```html
-<div>
-    Hello ${personName}
-</div>
+<div>Hello ${personName}</div>
 ```
+
 - Placeholders within attribute value strings
+
 ```html
-<div data-message="Hello ${personName}!">
+<div data-message="Hello ${personName}!"></div>
 ```
+
 - JavaScript flow-control statements within HTML elements
+
 ```html
 <div for(a in b) />
 <div if(a === b) />
 ```
+
 - JavaScript flow-control statements as elements
+
 ```html
-<for (a in b)>
-<if (a in b)>
+<for (a in b)> <if (a in b)></if></for>
 ```
 
 # Installation
@@ -57,82 +61,82 @@ npm install htmljs-parser
 # Usage
 
 ```javascript
-var parser = require('htmljs-parser').createParser({
-    onText: function(event) {
-        // Text within an HTML element
-        var value = event.value;
-    },
+var parser = require("htmljs-parser").createParser({
+  onText: function (event) {
+    // Text within an HTML element
+    var value = event.value;
+  },
 
-    onPlaceholder: function(event) {
-        //  ${<value>]} // escape = true
-        // $!{<value>]} // escape = false
-        var value = event.value; // String
-        var escaped = event.escaped; // boolean
-        var withinBody = event.withinBody; // boolean
-        var withinAttribute = event.withinAttribute; // boolean
-        var withinOpenTag = event.withinOpenTag; // boolean
-        var pos = event.pos; // Integer
-    },
+  onPlaceholder: function (event) {
+    //  ${<value>]} // escape = true
+    // $!{<value>]} // escape = false
+    var value = event.value; // String
+    var escaped = event.escaped; // boolean
+    var withinBody = event.withinBody; // boolean
+    var withinAttribute = event.withinAttribute; // boolean
+    var withinOpenTag = event.withinOpenTag; // boolean
+    var pos = event.pos; // Integer
+  },
 
-    onString: function(event) {
-        // Text within ""
-        var value = event.value; // String
-        var pos = event.pos; // Integer
-    },
+  onString: function (event) {
+    // Text within ""
+    var value = event.value; // String
+    var pos = event.pos; // Integer
+  },
 
-    onCDATA: function(event) {
-        // <![CDATA[<value>]]>
-        var value = event.value; // String
-        var pos = event.pos; // Integer
-    },
+  onCDATA: function (event) {
+    // <![CDATA[<value>]]>
+    var value = event.value; // String
+    var pos = event.pos; // Integer
+  },
 
-    onOpenTag: function(event) {
-        var tagName = event.tagName; // String
-        var attributes = event.attributes; // Array
-        var argument = event.argument; // Object
-        var pos = event.pos; // Integer
-    },
+  onOpenTag: function (event) {
+    var tagName = event.tagName; // String
+    var attributes = event.attributes; // Array
+    var argument = event.argument; // Object
+    var pos = event.pos; // Integer
+  },
 
-    onCloseTag: function(event) {
-        // close tag
-        var tagName = event.tagName; // String
-        var pos = event.pos; // Integer
-    },
+  onCloseTag: function (event) {
+    // close tag
+    var tagName = event.tagName; // String
+    var pos = event.pos; // Integer
+  },
 
-    onDocumentType: function(event) {
-        // Document Type/DTD
-        // <!<value>>
-        // Example: <!DOCTYPE html>
-        var value = event.value; // String
-        var pos = event.pos; // Integer
-    },
+  onDocumentType: function (event) {
+    // Document Type/DTD
+    // <!<value>>
+    // Example: <!DOCTYPE html>
+    var value = event.value; // String
+    var pos = event.pos; // Integer
+  },
 
-    onDeclaration: function(event) {
-        // Declaration
-        // <?<value>?>
-        // Example: <?xml version="1.0" encoding="UTF-8" ?>
-        var value = event.value; // String
-        var pos = event.pos; // Integer
-    },
+  onDeclaration: function (event) {
+    // Declaration
+    // <?<value>?>
+    // Example: <?xml version="1.0" encoding="UTF-8" ?>
+    var value = event.value; // String
+    var pos = event.pos; // Integer
+  },
 
-    onComment: function(event) {
-        // Text within XML comment
-        var value = event.value; // String
-        var pos = event.pos; // Integer
-    },
+  onComment: function (event) {
+    // Text within XML comment
+    var value = event.value; // String
+    var pos = event.pos; // Integer
+  },
 
-    onScriptlet: function(event) {
-        // Text within <% %>
-        var value = event.value; // String
-        var pos = event.pos; // Integer
-    },
+  onScriptlet: function (event) {
+    // Text within <% %>
+    var value = event.value; // String
+    var pos = event.pos; // Integer
+  },
 
-    onError: function(event) {
-        // Error
-        var message = event.message; // String
-        var code = event.code; // String
-        var pos = event.pos; // Integer
-    }
+  onError: function (event) {
+    // Error
+    var message = event.message; // String
+    var code = event.code; // String
+    var pos = event.pos; // Integer
+  },
 });
 
 parser.parse(str);
@@ -147,15 +151,15 @@ to be changed (usually in response to an `onOpenTag` event).
 There are three content parsing modes:
 
 - **HTML Content (DEFAULT):**
-    The parser will look for any HTML tag and content placeholders while in
-    this mode and parse opening and closing tags accordingly.
+  The parser will look for any HTML tag and content placeholders while in
+  this mode and parse opening and closing tags accordingly.
 
 - **Parsed Text Content**: The parser will look for the closing tag that matches
-    the current open tag as well as content placeholders but all other content
-    will be interpreted as text.
+  the current open tag as well as content placeholders but all other content
+  will be interpreted as text.
 
 - **Static Text Content**: The parser will look for the closing tag that matches
-    the current open tag but all other content will be interpreted as raw text.
+  the current open tag but all other content will be interpreted as raw text.
 
 ```javascript
 var htmljs = require('htmljs-parser');
@@ -205,7 +209,7 @@ encountered.
 INPUT:
 
 ```html
-<div>
+<div></div>
 ```
 
 OUTPUT EVENT:
@@ -223,7 +227,7 @@ OUTPUT EVENT:
 INPUT:
 
 ```html
-<div class="demo" disabled=false data-number=123>
+<div class="demo" disabled="false" data-number="123"></div>
 ```
 
 OUTPUT EVENT:
@@ -277,7 +281,7 @@ OUTPUT EVENT:
 INPUT:
 
 ```html
-<for(var i = 0; i < 10; i++)>
+<for(var i="0;" i < 10; i++)></for(var>
 ```
 
 OUTPUT EVENT:
@@ -299,7 +303,7 @@ OUTPUT EVENT:
 INPUT:
 
 ```html
-<div if(x > y)>
+<div if(x>y)></div>
 ```
 
 OUTPUT EVENT:
@@ -411,8 +415,7 @@ cannot use placeholders for these blocks of code.
 INPUT:
 
 ```html
-${"This is an escaped placeholder"}
-$!{"This is a non-escaped placeholder"}
+${"This is an escaped placeholder"} $!{"This is a non-escaped placeholder"}
 ```
 
 OUTPUT EVENTS
@@ -429,7 +432,7 @@ ${name}
 }
 ```
 
---------
+---
 
 ```html
 $!{name}

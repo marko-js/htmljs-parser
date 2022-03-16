@@ -1,0 +1,8 @@
+1╭─ <div data-foo="Hello ${foo}"></div>
+ │   │   │       ││             ││ ╰─ closeTag(div).value "div"
+ │   │   │       ││             │╰─ closeTag(div) "</div>"
+ │   │   │       ││             ╰─ openTagEnd(div)
+ │   │   │       │╰─ attrValue.value "\"Hello ${foo}\""
+ │   │   │       ╰─ attrValue "=\"Hello ${foo}\""
+ │   │   ╰─ attrName "data-foo"
+ ╰─  ╰─ tagName "div"

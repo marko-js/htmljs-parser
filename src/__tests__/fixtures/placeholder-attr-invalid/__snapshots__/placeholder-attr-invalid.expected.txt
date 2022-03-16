@@ -1,0 +1,8 @@
+1╭─ <foo invalid="${;"></foo>
+ │   │   │      ││    ││ ╰─ closeTag(foo).value "foo"
+ │   │   │      ││    │╰─ closeTag(foo) "</foo>"
+ │   │   │      ││    ╰─ openTagEnd(foo)
+ │   │   │      │╰─ attrValue.value "\"${;\""
+ │   │   │      ╰─ attrValue "=\"${;\""
+ │   │   ╰─ attrName "invalid"
+ ╰─  ╰─ tagName "foo"

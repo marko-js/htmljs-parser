@@ -1,0 +1,7 @@
+1╭─ <script>Hello ${xyz}!</script>
+ │   │     ││           ││ ╰─ closeTag(script).value "script"
+ │   │     ││           │╰─ closeTag(script) "</script>"
+ │   │     ││           ╰─ text
+ │   │     │╰─ text "Hello "
+ │   │     ╰─ openTagEnd(script)
+ ╰─  ╰─ tagName "script"

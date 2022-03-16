@@ -1,0 +1,14 @@
+1╭─ $ var str /* test */ = '' /**
+ │   │╰─ scriptlet.value "var str /* test */ = '' /**\n* Test\n*/"
+ ╰─  ╰─ scriptlet " var str /* test */ = '' /**\n* Test\n*/"
+2├─ * Test
+3├─ */
+4├─ 
+5╭─ <div>
+ │   │  ╰─ openTagEnd(div)
+ ╰─  ╰─ tagName "div"
+6╭─   Hello
+ ╰─ ╰─ text "\n  Hello\n"
+7╭─ </div>
+ │  │ ╰─ closeTag(div).value "div"
+ ╰─ ╰─ closeTag(div) "</div>"
