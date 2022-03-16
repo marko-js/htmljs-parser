@@ -20,7 +20,7 @@ export const TEMPLATE_STRING: StateDefinition = {
       this.skip(1); // skip {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
-      expr.terminator = "}";
+      expr.terminator = CODE.CLOSE_CURLY_BRACE;
     } else {
       if (code === CODE.BACK_SLASH) {
         this.skip(1); // skip \
