@@ -31,6 +31,22 @@ export interface OpenTagMeta extends Range {
   parentTag: OpenTagMeta | undefined;
 }
 const PARSED_TEXT_TAGS = ["script", "style", "textarea", "html-comment"];
+const CONCISE_TAG_VAR_TERMINATORS = [
+  CODE.SEMICOLON,
+  CODE.OPEN_PAREN,
+  CODE.PIPE,
+  CODE.EQUAL,
+  [CODE.COLON, CODE.EQUAL],
+];
+
+const HTML_TAG_VAR_TERMINATORS = [
+  CODE.CLOSE_ANGLE_BRACKET,
+  CODE.OPEN_PAREN,
+  CODE.PIPE,
+  CODE.EQUAL,
+  [CODE.COLON, CODE.EQUAL],
+  [CODE.FORWARD_SLASH, CODE.CLOSE_ANGLE_BRACKET],
+];
 
 export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   name: "OPEN_TAG",
@@ -275,8 +291,8 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       expr.skipOperators = true;
       expr.terminatedByWhitespace = true;
       expr.terminator = this.isConcise
-        ? [";", "(", "|", "=", ":="]
-        : [">", "/>", "(", "|", "=", ":="];
+        ? CONCISE_TAG_VAR_TERMINATORS
+        : HTML_TAG_VAR_TERMINATORS;
       this.rewind(1);
     } else if (code === CODE.OPEN_PAREN && !tag.hasAttrs) {
       if (tag.hasArgs) {
@@ -291,14 +307,14 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       this.skip(1); // skip (
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
-      expr.terminator = ")";
+      expr.terminator = CODE.CLOSE_PAREN;
       this.rewind(1);
     } else if (code === CODE.PIPE && !tag.hasAttrs) {
       tag.state = TAG_STATE.PARAMS;
       this.skip(1); // skip |
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
-      expr.terminator = "|";
+      expr.terminator = CODE.PIPE;
       this.rewind(1);
     } else {
       if (tag.tagName) {

@@ -127,7 +127,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
       this.skip(2); // skip ${
-      this.enterState(STATE.EXPRESSION).terminator = "}";
+      this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_CURLY_BRACE;
       this.rewind(1);
     } else if (
       isWhitespaceCode(code) ||
