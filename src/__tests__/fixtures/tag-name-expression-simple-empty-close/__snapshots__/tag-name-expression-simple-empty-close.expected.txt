@@ -1,0 +1,10 @@
+1╭─ <${foo}>
+ │   │     ╰─ openTagEnd(${foo})
+ │   ├─ tagName.expressions[0] "${foo}"
+ │   ├─ tagName.quasis[0]
+ ╰─  ╰─ tagName "${foo}"
+2╭─ </>
+ │  │ ╰─ closeTag(${foo}).value
+ │  ├─ text "\n"
+ │  ├─ tagName.quasis[1]
+ ╰─ ╰─ closeTag(${foo}) "</>"

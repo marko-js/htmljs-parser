@@ -1,0 +1,55 @@
+1╭─ --
+2╭─ This is top-level text
+ ╰─ ╰─ text "\nThis is top-level text\n"
+3├─ --
+4╭─ p
+ ╰─ ╰─ tagName
+5╭─     --
+ ╰─ ╰─ openTagEnd(p)
+6╭─     This is text that spans multiple lines.
+ ╰─ ╰─ text "\n    This is text that spans multiple lines.\n\n    "
+7├─ 
+8╭─     <strong>You can throw in some HTML markup if you want!</strong>
+ │       │     ││                                             │ ╰─ closeTag(strong).value "strong"
+ │       │     ││                                             ╰─ closeTag(strong) "</strong>"
+ │       │     │╰─ text "You can throw in some HTML markup if you want!"
+ │       │     ╰─ openTagEnd(strong)
+ ╰─      ╰─ tagName "strong"
+9╭─     --
+ ╰─ ╰─ text "\n"
+10╭─ p
+  │  ├─ closeTag(p)
+  ╰─ ╰─ tagName
+11╭─     -----
+  ╰─ ╰─ openTagEnd(p)
+12╭─     If you really want to you can change the block delimiter for the following
+  ╰─ ╰─ text "\n    If you really want to you can change the block delimiter for the following\n    reasons:\n    - Avoid accidentally ending a block\n    - To improve readability\n"
+13├─     reasons:
+14├─     - Avoid accidentally ending a block
+15├─     - To improve readability
+16├─     -----
+17╭─ i -- This text will be in italics
+  │  │ │  ╰─ text "This text will be in italics"
+  │  │ ╰─ openTagEnd(i)
+  │  ├─ closeTag(p)
+  ╰─ ╰─ tagName
+18╭─ b
+  │  ├─ closeTag(i)
+  ╰─ ╰─ tagName
+19╭─     -- This text will be bold
+  │  │      ╰─ text "This text will be bold"
+  ╰─ ╰─ openTagEnd(b)
+20╭─     -- This is okay too
+  ╰─        ╰─ text "This is okay too"
+21╭─ app-hello
+  │  ├─ closeTag(b)
+  ╰─ ╰─ tagName "app-hello"
+22╭─     -- ${data.name} some html - <b>bold</b>
+  │  │                  │             │││   │ │ ╰─ closeTag(app-hello)
+  │  │                  │             │││   │ ╰─ closeTag(b).value
+  │  │                  │             │││   ╰─ closeTag(b) "</b>"
+  │  │                  │             ││╰─ text "bold"
+  │  │                  │             │╰─ openTagEnd(b)
+  │  │                  │             ╰─ tagName
+  │  │                  ╰─ text " some html - "
+  ╰─ ╰─ openTagEnd(app-hello)

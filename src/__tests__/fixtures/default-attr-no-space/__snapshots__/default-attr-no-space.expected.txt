@@ -1,0 +1,20 @@
+1╭─ <a=test b=2/>
+ │   │││    │││╰─ openTagEnd(a) "/>"
+ │   │││    ││╰─ attrValue.value
+ │   │││    │╰─ attrValue "=2"
+ │   │││    ╰─ attrName
+ │   ││╰─ attrValue.value "test"
+ │   │├─ attrValue "=test"
+ │   │╰─ attrName
+ ╰─  ╰─ tagName
+2╭─ <if=(a && b)>
+ │  ││ ││       ╰─ openTagEnd(if)
+ │  ││ │╰─ attrValue.value "(a && b)"
+ │  ││ ├─ attrValue "=(a && b)"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName "if"
+ ╰─ ╰─ closeTag(a)
+3╭─ </if>
+ │  │ ╰─ closeTag(if).value "if"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTag(if) "</if>"

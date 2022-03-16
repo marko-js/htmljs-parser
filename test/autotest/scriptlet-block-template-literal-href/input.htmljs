@@ -1,4 +1,0 @@
-$ {
-    var href = `https://ebay.com`;
-    console.log(href);
-}

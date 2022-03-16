@@ -1,0 +1,8 @@
+1╭─ <a data=((a-b)/2 + ")")></a>
+ │   │ │   ││              ││ ╰─ closeTag(a).value
+ │   │ │   ││              │╰─ closeTag(a) "</a>"
+ │   │ │   ││              ╰─ openTagEnd(a)
+ │   │ │   │╰─ attrValue.value "((a-b)/2 + \")\")"
+ │   │ │   ╰─ attrValue "=((a-b)/2 + \")\")"
+ │   │ ╰─ attrName "data"
+ ╰─  ╰─ tagName

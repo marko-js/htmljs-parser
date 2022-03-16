@@ -1,0 +1,8 @@
+1╭─ <custom data=("Hello $!{name}!" + " This is a test.")></custom>
+ │   │      │   ││                                       ││ ╰─ closeTag(custom).value "custom"
+ │   │      │   ││                                       │╰─ closeTag(custom) "</custom>"
+ │   │      │   ││                                       ╰─ openTagEnd(custom)
+ │   │      │   │╰─ attrValue.value "(\"Hello $!{name}!\" + \" This is a test.\")"
+ │   │      │   ╰─ attrValue "=(\"Hello $!{name}!\" + \" This is a test.\")"
+ │   │      ╰─ attrName "data"
+ ╰─  ╰─ tagName "custom"

@@ -1,0 +1,7 @@
+1╭─ var a = 'foo' instanceof String
+ │  │   │ │ │                      ├─ closeTag(var)
+ │  │   │ │ │                      ╰─ openTagEnd(var)
+ │  │   │ │ ╰─ attrValue.value "'foo' instanceof String"
+ │  │   │ ╰─ attrValue "= 'foo' instanceof String"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "var"

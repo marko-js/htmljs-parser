@@ -1,0 +1,5 @@
+1╭─ $ var foo = () => {
+ │   │╰─ scriptlet.value "var foo = () => {\n    return 123;\n};"
+ ╰─  ╰─ scriptlet " var foo = () => {\n    return 123;\n};"
+2├─     return 123;
+3╰─ };

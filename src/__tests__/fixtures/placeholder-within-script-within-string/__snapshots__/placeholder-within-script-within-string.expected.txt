@@ -1,0 +1,7 @@
+1╭─ <script>alert("Hello ${xyz}!")</script>
+ │   │     ││                  │  │ ╰─ closeTag(script).value "script"
+ │   │     ││                  │  ╰─ closeTag(script) "</script>"
+ │   │     ││                  ╰─ text "!\")"
+ │   │     │╰─ text "alert(\"Hello "
+ │   │     ╰─ openTagEnd(script)
+ ╰─  ╰─ tagName "script"

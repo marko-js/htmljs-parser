@@ -1,4 +1,0 @@
-$ var html = `
-<!doctype html>
-<div>${bar}</div>
-`

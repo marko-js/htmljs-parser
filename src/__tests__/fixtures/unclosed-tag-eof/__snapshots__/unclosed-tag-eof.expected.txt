@@ -1,0 +1,9 @@
+1╭─ <div>
+ │  ││  ╰─ openTagEnd(div)
+ │  │╰─ tagName "div"
+ ╰─ ╰─ error(MISSING_END_TAG:Missing ending "div" tag) "<div>"
+2╭─   <span/>
+ │  │  │   │ ╰─ closeTag(span)
+ │  │  │   ╰─ openTagEnd(span) "/>"
+ │  │  ╰─ tagName "span"
+ ╰─ ╰─ text "\n  "

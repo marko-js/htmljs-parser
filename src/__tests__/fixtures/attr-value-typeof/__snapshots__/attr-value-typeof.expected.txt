@@ -1,0 +1,7 @@
+1╭─ var test = typeof 'foo' === 'string'
+ │  │   │    │ │                        ├─ closeTag(var)
+ │  │   │    │ │                        ╰─ openTagEnd(var)
+ │  │   │    │ ╰─ attrValue.value "typeof 'foo' === 'string'"
+ │  │   │    ╰─ attrValue "= typeof 'foo' === 'string'"
+ │  │   ╰─ attrName "test"
+ ╰─ ╰─ tagName "var"

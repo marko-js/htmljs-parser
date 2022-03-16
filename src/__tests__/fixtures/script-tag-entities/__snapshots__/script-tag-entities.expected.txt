@@ -1,0 +1,8 @@
+1╭─ <script>console.log('<div>Hello ${input.name}</div>');</script>
+ │   │     ││                                    │        │ ╰─ closeTag(script).value "script"
+ │   │     ││                                    │        ╰─ closeTag(script) "</script>"
+ │   │     ││                                    ╰─ text "</div>');"
+ │   │     │╰─ text "console.log('<div>Hello "
+ │   │     ╰─ openTagEnd(script)
+ ╰─  ╰─ tagName "script"
+2╰─ 

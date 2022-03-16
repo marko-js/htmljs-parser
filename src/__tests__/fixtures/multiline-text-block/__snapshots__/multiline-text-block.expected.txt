@@ -1,0 +1,5 @@
+1╭─ ---
+2╭─ Line 1
+ ╰─ ╰─ text "\nLine 1\nLine 2\n"
+3├─ Line 2
+4╰─ ---

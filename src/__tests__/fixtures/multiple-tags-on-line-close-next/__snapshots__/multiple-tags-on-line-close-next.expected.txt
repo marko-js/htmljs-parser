@@ -1,0 +1,12 @@
+1╭─ <span></span><div>
+ │   │   ││ │     │  ╰─ openTagEnd(div)
+ │   │   ││ │     ╰─ tagName "div"
+ │   │   ││ ╰─ closeTag(span).value "span"
+ │   │   │╰─ closeTag(span) "</span>"
+ │   │   ╰─ openTagEnd(span)
+ ╰─  ╰─ tagName "span"
+2╭─ </div>
+ │  │ ╰─ closeTag(div).value "div"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTag(div) "</div>"
+3╰─ 

@@ -1,0 +1,7 @@
+1╭─ <div>Hello ${xyz}!</div>
+ │   │  ││           ││ ╰─ closeTag(div).value "div"
+ │   │  ││           │╰─ closeTag(div) "</div>"
+ │   │  ││           ╰─ text
+ │   │  │╰─ text "Hello "
+ │   │  ╰─ openTagEnd(div)
+ ╰─  ╰─ tagName "div"

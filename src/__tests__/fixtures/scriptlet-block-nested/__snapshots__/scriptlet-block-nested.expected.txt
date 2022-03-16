@@ -1,0 +1,18 @@
+1╭─ $ {
+ ╰─  ╰─ scriptlet:block " {\n    var data = {\n        a:1\n        b:2\n    };\n\n    function foo() {\n        console.log([\n            { hello:'world' }\n        ]);\n\n        return null;\n    }\n\n    foo();\n}"
+2╭─     var data = {
+ ╰─ ╰─ scriptlet:block.value "\n    var data = {\n        a:1\n        b:2\n    };\n\n    function foo() {\n        console.log([\n            { hello:'world' }\n        ]);\n\n        return null;\n    }\n\n    foo();\n"
+3├─         a:1
+4├─         b:2
+5├─     };
+6├─ 
+7├─     function foo() {
+8├─         console.log([
+9├─             { hello:'world' }
+10├─         ]);
+11├─ 
+12├─         return null;
+13├─     }
+14├─ 
+15├─     foo();
+16╰─ }

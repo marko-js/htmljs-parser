@@ -1,0 +1,6 @@
+1╭─ $ {
+ ╰─  ╰─ scriptlet:block " {\n    var href = `https://ebay.com`;\n    console.log(href);\n}"
+2╭─     var href = `https://ebay.com`;
+ ╰─ ╰─ scriptlet:block.value "\n    var href = `https://ebay.com`;\n    console.log(href);\n"
+3├─     console.log(href);
+4╰─ }

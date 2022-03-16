@@ -1,0 +1,46 @@
+1╭─ var colors=['red', 'green', 'blue']
+ │  │   │     │╰─ attrValue.value "['red', 'green', 'blue']"
+ │  │   │     ╰─ attrValue "=['red', 'green', 'blue']"
+ │  │   ╰─ attrName "colors"
+ ╰─ ╰─ tagName "var"
+2╭─ <div>
+ │  ││  ╰─ openTagEnd(div)
+ │  │╰─ tagName "div"
+ │  ├─ closeTag(var)
+ ╰─ ╰─ openTagEnd(var)
+3╭─     <span class="foo">
+ │  │    │    │    ││    ╰─ openTagEnd(span)
+ │  │    │    │    │╰─ attrValue.value "\"foo\""
+ │  │    │    │    ╰─ attrValue "=\"foo\""
+ │  │    │    ╰─ attrName "class"
+ │  │    ╰─ tagName "span"
+ ╰─ ╰─ text "\n    "
+4╭─         Hello ${data.name}!
+ │  │                         ╰─ text "!\n        "
+ ╰─ ╰─ text "\n        Hello "
+5╭─         </span>
+ │          │ ╰─ closeTag(span).value "span"
+ ╰─         ╰─ closeTag(span) "</span>"
+6╭─ </div> <b>This is after the span</b>
+ │  │ │   │ │││                     │ ╰─ closeTag(b).value
+ │  │ │   │ │││                     ╰─ closeTag(b) "</b>"
+ │  │ │   │ ││╰─ text "This is after the span"
+ │  │ │   │ │╰─ openTagEnd(b)
+ │  │ │   │ ╰─ tagName
+ │  │ │   ╰─ text " "
+ │  │ ╰─ closeTag(div).value "div"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTag(div) "</div>"
+7╭─ p class="foo"
+ │  │ │    │╰─ attrValue.value "\"foo\""
+ │  │ │    ╰─ attrValue "=\"foo\""
+ │  │ ╰─ attrName "class"
+ ╰─ ╰─ tagName
+8╭─     <span>Test</span>
+ │  │    │   ││   │ │    ╰─ closeTag(p)
+ │  │    │   ││   │ ╰─ closeTag(span).value "span"
+ │  │    │   ││   ╰─ closeTag(span) "</span>"
+ │  │    │   │╰─ text "Test"
+ │  │    │   ╰─ openTagEnd(span)
+ │  │    ╰─ tagName "span"
+ ╰─ ╰─ openTagEnd(p)

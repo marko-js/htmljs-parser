@@ -1,1 +1,0 @@
-var isString=typeof 'hello' === 'string'

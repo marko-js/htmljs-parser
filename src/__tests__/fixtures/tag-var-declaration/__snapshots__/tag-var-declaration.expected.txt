@@ -1,0 +1,85 @@
+1╭─ <${foo}/someVar>
+ │   │     ││      ╰─ openTagEnd(${foo})
+ │   │     │├─ tagVar.value "someVar"
+ │   │     │╰─ tagName.quasis[1]
+ │   │     ╰─ tagVar "/someVar"
+ │   ├─ tagName.expressions[0] "${foo}"
+ │   ├─ tagName.quasis[0]
+ ╰─  ╰─ tagName "${foo}"
+2╭─ </>
+ │  │ ╰─ closeTag(${foo}).value
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTag(${foo}) "</>"
+3├─ 
+4╭─ <let/foo/>
+ │   │  ││  ╰─ openTagEnd(let) "/>"
+ │   │  │╰─ tagVar.value "foo"
+ │   │  ╰─ tagVar "/foo"
+ ╰─  ╰─ tagName "let"
+5╭─ <let/foo=1/>
+ │  ││  ││  ││╰─ openTagEnd(let) "/>"
+ │  ││  ││  │╰─ attrValue.value
+ │  ││  ││  ├─ attrValue "=1"
+ │  ││  ││  ╰─ attrName
+ │  ││  │╰─ tagVar.value "foo"
+ │  ││  ╰─ tagVar "/foo"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ closeTag(let)
+6╭─ <let/foo = 1/>
+ │  ││  ││   │ │╰─ openTagEnd(let) "/>"
+ │  ││  ││   │ ╰─ attrValue.value
+ │  ││  ││   ├─ attrValue "= 1"
+ │  ││  ││   ╰─ attrName
+ │  ││  │╰─ tagVar.value "foo"
+ │  ││  ╰─ tagVar "/foo"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ closeTag(let)
+7╭─ <let/foo + 1/>
+ │  ││  ││   │ │╰─ openTagEnd(let) "/>"
+ │  ││  ││   │ ╰─ attrName
+ │  ││  ││   ╰─ attrName
+ │  ││  │╰─ tagVar.value "foo"
+ │  ││  ╰─ tagVar "/foo"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ closeTag(let)
+8╭─ <let/{ x, y }/>
+ │  ││  ││       ╰─ openTagEnd(let) "/>"
+ │  ││  │╰─ tagVar.value "{ x, y }"
+ │  ││  ╰─ tagVar "/{ x, y }"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ closeTag(let)
+9╭─ 
+ ╰─ ╰─ closeTag(let)
+10╭─ <button/loginButton>
+  │   │     ││          ╰─ openTagEnd(button)
+  │   │     │╰─ tagVar.value "loginButton"
+  │   │     ╰─ tagVar "/loginButton"
+  ╰─  ╰─ tagName "button"
+11╭─   login
+  ╰─ ╰─ text "\n  login\n"
+12╭─ </>
+  │  │ ╰─ closeTag(button).value
+  ╰─ ╰─ closeTag(button) "</>"
+13╭─ <button/loginButton >
+  │   │     ││           ╰─ openTagEnd(button)
+  │   │     │╰─ tagVar.value "loginButton"
+  │   │     ╰─ tagVar "/loginButton"
+  ╰─  ╰─ tagName "button"
+14╭─   login
+  ╰─ ╰─ text "\n  login\n"
+15╭─ </>
+  │  │ ╰─ closeTag(button).value
+  ╰─ ╰─ closeTag(button) "</>"
+16├─ 
+17╭─ <div/ref/>
+  │   │  ││  ╰─ openTagEnd(div) "/>"
+  │   │  │╰─ tagVar.value "ref"
+  │   │  ╰─ tagVar "/ref"
+  ╰─  ╰─ tagName "div"
+18╭─ <div/ref />
+  │  ││  ││   │ ╰─ closeTag(div)
+  │  ││  ││   ╰─ openTagEnd(div) "/>"
+  │  ││  │╰─ tagVar.value "ref"
+  │  ││  ╰─ tagVar "/ref"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ closeTag(div)
