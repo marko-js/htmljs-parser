@@ -1,1 +1,0 @@
-<a a=123+256 b c= d=(a + (1/2) /* comment */)>test</a>

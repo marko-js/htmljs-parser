@@ -1,0 +1,8 @@
+1╭─ img src="marko.png"
+ │  │   │  │╰─ attrValue.value "\"marko.png\""
+ │  │   │  ╰─ attrValue "=\"marko.png\""
+ │  │   ╰─ attrName "src"
+ ╰─ ╰─ tagName "img"
+2╭─     This is not allowed!
+ │  │   ╰─ error(INVALID_BODY:The "img" tag does not allow nested body content)
+ ╰─ ╰─ openTagEnd(img)

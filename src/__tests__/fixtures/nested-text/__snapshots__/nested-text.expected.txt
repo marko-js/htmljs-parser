@@ -1,0 +1,18 @@
+1╭─ div
+ ╰─ ╰─ tagName "div"
+2╭─     ---
+ ╰─ ╰─ openTagEnd(div)
+3╭─     This is
+ ╰─ ╰─ text "\n    This is\n    multi-line text\n"
+4├─     multi-line text
+5├─     ---
+6╭─     span -- This is body text of span
+ │      │    │  ╰─ text "This is body text of span"
+ │      │    ╰─ openTagEnd(span)
+ ╰─     ╰─ tagName "span"
+7╭─         -- This is also body text of span
+ ╰─            ╰─ text "This is also body text of span"
+8╭─     -- Hello Universe
+ │  │      │             ╰─ closeTag(div)
+ │  │      ╰─ text "Hello Universe"
+ ╰─ ╰─ closeTag(span)

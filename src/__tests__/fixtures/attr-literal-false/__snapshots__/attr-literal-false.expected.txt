@@ -1,0 +1,8 @@
+1╭─ <div data=false></div>
+ │   │   │   ││    ││ ╰─ closeTag(div).value "div"
+ │   │   │   ││    │╰─ closeTag(div) "</div>"
+ │   │   │   ││    ╰─ openTagEnd(div)
+ │   │   │   │╰─ attrValue.value "false"
+ │   │   │   ╰─ attrValue "=false"
+ │   │   ╰─ attrName "data"
+ ╰─  ╰─ tagName "div"

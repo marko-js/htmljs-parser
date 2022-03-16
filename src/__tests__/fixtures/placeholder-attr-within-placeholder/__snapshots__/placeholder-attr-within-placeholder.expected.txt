@@ -1,0 +1,8 @@
+1╭─ <custom data=`${`Hello ${data.firstName + data.lastName}`}`></custom>
+ │   │      │   ││                                             ││ ╰─ closeTag(custom).value "custom"
+ │   │      │   ││                                             │╰─ closeTag(custom) "</custom>"
+ │   │      │   ││                                             ╰─ openTagEnd(custom)
+ │   │      │   │╰─ attrValue.value "`${`Hello ${data.firstName + data.lastName}`}`"
+ │   │      │   ╰─ attrValue "=`${`Hello ${data.firstName + data.lastName}`}`"
+ │   │      ╰─ attrName "data"
+ ╰─  ╰─ tagName "custom"

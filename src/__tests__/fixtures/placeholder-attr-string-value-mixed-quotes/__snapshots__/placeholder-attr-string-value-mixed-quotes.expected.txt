@@ -1,0 +1,9 @@
+1╭─ <custom name="${'some text'}">TEST</custom>
+ │   │      │   ││               ││   │ ╰─ closeTag(custom).value "custom"
+ │   │      │   ││               ││   ╰─ closeTag(custom) "</custom>"
+ │   │      │   ││               │╰─ text "TEST"
+ │   │      │   ││               ╰─ openTagEnd(custom)
+ │   │      │   │╰─ attrValue.value "\"${'some text'}\""
+ │   │      │   ╰─ attrValue "=\"${'some text'}\""
+ │   │      ╰─ attrName "name"
+ ╰─  ╰─ tagName "custom"

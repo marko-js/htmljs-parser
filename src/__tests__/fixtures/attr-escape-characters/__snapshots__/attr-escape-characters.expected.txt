@@ -1,0 +1,11 @@
+1╭─ <div foo='\"hello\"'>
+ │   │   │  ││          ╰─ openTagEnd(div)
+ │   │   │  │╰─ attrValue.value "'\\\"hello\\\"'"
+ │   │   │  ╰─ attrValue "='\\\"hello\\\"'"
+ │   │   ╰─ attrName "foo"
+ ╰─  ╰─ tagName "div"
+2╭─     Hello World!
+ ╰─ ╰─ text "\n    Hello World!\n"
+3╭─ </div>
+ │  │ ╰─ closeTag(div).value "div"
+ ╰─ ╰─ closeTag(div) "</div>"

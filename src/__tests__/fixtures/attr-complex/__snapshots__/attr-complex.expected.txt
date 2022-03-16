@@ -1,0 +1,13 @@
+1╭─ <a a=123+256 b c= d=(a + (1/2) /* comment */)>test</a>
+ │   │ │││       │ ││ │                          ││   │ ╰─ closeTag(a).value
+ │   │ │││       │ ││ │                          ││   ╰─ closeTag(a) "</a>"
+ │   │ │││       │ ││ │                          │╰─ text "test"
+ │   │ │││       │ ││ │                          ╰─ openTagEnd(a)
+ │   │ │││       │ ││ ╰─ attrValue.value "d=(a + (1/2) /* comment */)"
+ │   │ │││       │ │╰─ attrValue "= d=(a + (1/2) /* comment */)"
+ │   │ │││       │ ╰─ attrName
+ │   │ │││       ╰─ attrName
+ │   │ ││╰─ attrValue.value "123+256"
+ │   │ │╰─ attrValue "=123+256"
+ │   │ ╰─ attrName
+ ╰─  ╰─ tagName

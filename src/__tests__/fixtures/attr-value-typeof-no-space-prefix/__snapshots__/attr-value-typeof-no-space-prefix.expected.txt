@@ -1,0 +1,8 @@
+1╭─ var isString=typeof 'hello' === 'string'
+ │  │   │       │╰─ attrValue.value "typeof 'hello' === 'string'"
+ │  │   │       ╰─ attrValue "=typeof 'hello' === 'string'"
+ │  │   ╰─ attrName "isString"
+ ╰─ ╰─ tagName "var"
+2╭─ 
+ │  ├─ openTagEnd(var)
+ ╰─ ╰─ closeTag(var)

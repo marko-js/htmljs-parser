@@ -1,0 +1,8 @@
+1╭─ p
+ ╰─ ╰─ tagName
+2╭─     -- Line 1
+ │  │      ╰─ text "Line 1"
+ ╰─ ╰─ openTagEnd(p)
+3╭─     -- Line 2
+ │         │     ╰─ closeTag(p)
+ ╰─        ╰─ text "Line 2"

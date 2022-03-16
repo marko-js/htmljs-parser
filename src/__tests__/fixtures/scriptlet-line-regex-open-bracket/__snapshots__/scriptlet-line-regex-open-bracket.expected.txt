@@ -1,0 +1,3 @@
+1╭─ $ var foo = /[[]/;
+ │   │╰─ scriptlet.value "var foo = /[[]/;"
+ ╰─  ╰─ scriptlet " var foo = /[[]/;"

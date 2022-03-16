@@ -1,0 +1,2 @@
+1╭─     var colors=['red', 'green', 'blue']
+ ╰─     ╰─ error(BAD_INDENTATION:Line has extra indentation at the beginning)

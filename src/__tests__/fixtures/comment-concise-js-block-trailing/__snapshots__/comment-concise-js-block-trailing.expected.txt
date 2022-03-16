@@ -1,0 +1,11 @@
+1╭─ p
+ ╰─ ╰─ tagName
+2╭─   /*
+ │  │ ╰─ comment "/*\n  This is a\n  multiline comment\n  */"
+ ╰─ ╰─ openTagEnd(p)
+3╭─   This is a
+ ╰─ ╰─ comment.value "\n  This is a\n  multiline comment\n  "
+4├─   multiline comment
+5╭─   */ This is not okay
+ ╰─      ╰─ error(INVALID_CHARACTER:In concise mode a javascript comment block can only be followed by whitespace characters and a newline.)
+6╰─   -- This is the body of the p tag

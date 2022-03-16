@@ -1,0 +1,14 @@
+1╭─ <test a=123 b=456, c=789></test>
+ │   │    │││   │││    │││  ││ ╰─ closeTag(test).value "test"
+ │   │    │││   │││    │││  │╰─ closeTag(test) "</test>"
+ │   │    │││   │││    │││  ╰─ openTagEnd(test)
+ │   │    │││   │││    ││╰─ attrValue.value "789"
+ │   │    │││   │││    │╰─ attrValue "=789"
+ │   │    │││   │││    ╰─ attrName
+ │   │    │││   ││╰─ attrValue.value "456"
+ │   │    │││   │╰─ attrValue "=456"
+ │   │    │││   ╰─ attrName
+ │   │    ││╰─ attrValue.value "123"
+ │   │    │╰─ attrValue "=123"
+ │   │    ╰─ attrName
+ ╰─  ╰─ tagName "test"

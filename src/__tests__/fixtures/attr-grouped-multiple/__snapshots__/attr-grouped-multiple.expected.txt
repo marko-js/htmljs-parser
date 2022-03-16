@@ -1,0 +1,18 @@
+1╭─ a [ foo=bar ] target="_blank" [
+ │  │   │  ││     │     │╰─ attrValue.value "\"_blank\""
+ │  │   │  ││     │     ╰─ attrValue "=\"_blank\""
+ │  │   │  ││     ╰─ attrName "target"
+ │  │   │  │╰─ attrValue.value "bar"
+ │  │   │  ╰─ attrValue "=bar"
+ │  │   ╰─ attrName "foo"
+ ╰─ ╰─ tagName
+2╭─   style="background-color: yellow"
+ │    │    │╰─ attrValue.value "\"background-color: yellow\""
+ │    │    ╰─ attrValue "=\"background-color: yellow\""
+ ╰─   ╰─ attrName "style"
+3╭─     class]
+ ╰─     ╰─ attrName "class"
+4╭─   -- This is the body of the a tag
+ │  │    │                            ╰─ closeTag(a)
+ │  │    ╰─ text "This is the body of the a tag"
+ ╰─ ╰─ openTagEnd(a)

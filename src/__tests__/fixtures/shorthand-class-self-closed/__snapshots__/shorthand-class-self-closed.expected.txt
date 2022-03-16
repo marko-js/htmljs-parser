@@ -1,0 +1,14 @@
+1╭─ <span>
+ │   │   ╰─ openTagEnd(span)
+ ╰─  ╰─ tagName "span"
+2╭─     <div.color/>
+ │  │    │  ││    ╰─ openTagEnd(div) "/>"
+ │  │    │  │╰─ tagShorthandClass.quasis[0] "color"
+ │  │    │  ╰─ tagShorthandClass ".color"
+ │  │    ╰─ tagName "div"
+ ╰─ ╰─ text "\n    "
+3╭─ </span>
+ │  │ ╰─ closeTag(span).value "span"
+ │  ├─ text "\n"
+ │  ├─ closeTag(div)
+ ╰─ ╰─ closeTag(span) "</span>"

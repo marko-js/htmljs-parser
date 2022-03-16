@@ -1,0 +1,21 @@
+1╭─ div class="foo"
+ │  │   │    │╰─ attrValue.value "\"foo\""
+ │  │   │    ╰─ attrValue "=\"foo\""
+ │  │   ╰─ attrName "class"
+ ╰─ ╰─ tagName "div"
+2╭─     span class="bar"
+ │  │   │    │    │╰─ attrValue.value "\"bar\""
+ │  │   │    │    ╰─ attrValue "=\"bar\""
+ │  │   │    ╰─ attrName "class"
+ │  │   ╰─ tagName "span"
+ ╰─ ╰─ openTagEnd(div)
+3╭─     span class="baz"
+ │  │   │    │    ││    ├─ closeTag(div)
+ │  │   │    │    ││    ├─ closeTag(span)
+ │  │   │    │    ││    ╰─ openTagEnd(span)
+ │  │   │    │    │╰─ attrValue.value "\"baz\""
+ │  │   │    │    ╰─ attrValue "=\"baz\""
+ │  │   │    ╰─ attrName "class"
+ │  │   ╰─ tagName "span"
+ │  ├─ closeTag(span)
+ ╰─ ╰─ openTagEnd(span)

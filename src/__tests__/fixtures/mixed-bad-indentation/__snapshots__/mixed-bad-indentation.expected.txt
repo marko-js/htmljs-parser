@@ -1,0 +1,11 @@
+1╭─ p
+ ╰─ ╰─ tagName
+2╭─     <b>Hello</b>
+ │  │    │││    │ ╰─ closeTag(b).value
+ │  │    │││    ╰─ closeTag(b) "</b>"
+ │  │    ││╰─ text "Hello"
+ │  │    │╰─ openTagEnd(b)
+ │  │    ╰─ tagName
+ ╰─ ╰─ openTagEnd(p)
+3╭─         BAD
+ ╰─         ╰─ error(BAD_INDENTATION:Line indentation does match indentation of previous line)

@@ -1,0 +1,14 @@
+1╭─ var pageTitle = 1+2;
+ │  │   │         │ ╰─ attrValue.value "1+2"
+ │  │   │         ╰─ attrValue "= 1+2"
+ │  │   ╰─ attrName "pageTitle"
+ ╰─ ╰─ tagName "var"
+2╭─ var pageTitle = "hi";
+ │  │   │         │ │    ├─ closeTag(var)
+ │  │   │         │ │    ╰─ openTagEnd(var)
+ │  │   │         │ ╰─ attrValue.value "\"hi\""
+ │  │   │         ╰─ attrValue "= \"hi\""
+ │  │   ╰─ attrName "pageTitle"
+ │  ├─ closeTag(var)
+ │  ├─ openTagEnd(var)
+ ╰─ ╰─ tagName "var"

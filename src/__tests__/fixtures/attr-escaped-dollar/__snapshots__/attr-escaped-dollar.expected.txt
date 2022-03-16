@@ -1,0 +1,8 @@
+1╭─ <span data-foo="\$name"></span>
+ │   │    │       ││       ││ ╰─ closeTag(span).value "span"
+ │   │    │       ││       │╰─ closeTag(span) "</span>"
+ │   │    │       ││       ╰─ openTagEnd(span)
+ │   │    │       │╰─ attrValue.value "\"\\$name\""
+ │   │    │       ╰─ attrValue "=\"\\$name\""
+ │   │    ╰─ attrName "data-foo"
+ ╰─  ╰─ tagName "span"

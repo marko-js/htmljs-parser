@@ -1,0 +1,6 @@
+1╭─ <a>1 < > <> 2<</a>
+ │   │││          │ ╰─ closeTag(a).value
+ │   │││          ╰─ closeTag(a) "</a>"
+ │   ││╰─ text "1 < > <> 2<"
+ │   │╰─ openTagEnd(a)
+ ╰─  ╰─ tagName

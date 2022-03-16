@@ -1,0 +1,6 @@
+1╭─ div
+ ╰─ ╰─ tagName "div"
+2╭─   static const x = 1
+ │  │ ╰─ error(ROOT_TAG_ONLY:"static" can only be used at the root of the template.) "static"
+ ╰─ ╰─ openTagEnd(div)
+3╰─ 

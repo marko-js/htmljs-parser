@@ -1,0 +1,13 @@
+1╭─ foo
+ ╰─ ╰─ tagName "foo"
+2╭─ bar
+ │  ├─ closeTag(foo)
+ │  ├─ openTagEnd(foo)
+ ╰─ ╰─ tagName "bar"
+3╭─ 
+ ╰─ ╰─ openTagEnd(bar)
+4╭─ baz
+ │  │  ├─ closeTag(baz)
+ │  │  ╰─ openTagEnd(baz)
+ │  ├─ closeTag(bar)
+ ╰─ ╰─ tagName "baz"

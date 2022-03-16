@@ -1,0 +1,11 @@
+1╭─ <script>
+ │   │     ╰─ openTagEnd(script)
+ ╰─  ╰─ tagName "script"
+2╭─ \${test}
+ │  │╰─ text "${test}\n\\"
+ ╰─ ╰─ text "\n"
+3├─ \\${test}
+4╭─ </script>
+ │  │ ╰─ closeTag(script).value "script"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTag(script) "</script>"

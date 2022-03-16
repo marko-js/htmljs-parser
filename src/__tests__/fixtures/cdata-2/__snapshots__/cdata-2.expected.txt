@@ -1,0 +1,11 @@
+1╭─ <div>
+ │   │  ╰─ openTagEnd(div)
+ ╰─  ╰─ tagName "div"
+2╭─     BEFORE<![CDATA[<within><!-- just text -->]]>AFTER
+ │  │         │        │                            ╰─ text "AFTER\n"
+ │  │         │        ╰─ cdata.value "<within><!-- just text -->"
+ │  │         ╰─ cdata "<![CDATA[<within><!-- just text -->]]>"
+ ╰─ ╰─ text "\n    BEFORE"
+3╭─ </div>
+ │  │ ╰─ closeTag(div).value "div"
+ ╰─ ╰─ closeTag(div) "</div>"

@@ -1,0 +1,8 @@
+1╭─ ﻿<lasso-page package-path="./browser.json"/>
+ │    │          │           ││               ╰─ openTagEnd(lasso-page) "/>"
+ │    │          │           │╰─ attrValue.value "\"./browser.json\""
+ │    │          │           ╰─ attrValue "=\"./browser.json\""
+ │    │          ╰─ attrName "package-path"
+ ╰─   ╰─ tagName "lasso-page"
+2╭─ 
+ ╰─ ╰─ closeTag(lasso-page)

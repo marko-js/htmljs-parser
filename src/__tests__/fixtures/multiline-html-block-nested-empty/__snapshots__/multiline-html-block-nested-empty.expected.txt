@@ -1,0 +1,7 @@
+1╭─ p
+ ╰─ ╰─ tagName
+2╭─     ---
+ ╰─ ╰─ openTagEnd(p)
+3╭─     ---
+ │  │      ╰─ closeTag(p)
+ ╰─ ╰─ text "\n"

@@ -1,0 +1,7 @@
+1╭─ <for (x in y)></for>
+ │   │   ││      ││ ╰─ closeTag(for).value "for"
+ │   │   ││      │╰─ closeTag(for) "</for>"
+ │   │   ││      ╰─ openTagEnd(for)
+ │   │   │╰─ tagArgs.value "x in y"
+ │   │   ╰─ tagArgs "(x in y)"
+ ╰─  ╰─ tagName "for"

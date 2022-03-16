@@ -1,0 +1,27 @@
+1╭─ <div> A <img src="image1.png"> B <img src="image2.png"> C <img src="image3.png"> D </div>
+ │   │  ││   │   │  ││           ││   │   │  ││           ││   │   │  ││           ││  │ ╰─ closeTag(div).value "div"
+ │   │  ││   │   │  ││           ││   │   │  ││           ││   │   │  ││           ││  ╰─ closeTag(div) "</div>"
+ │   │  ││   │   │  ││           ││   │   │  ││           ││   │   │  ││           │├─ text " D "
+ │   │  ││   │   │  ││           ││   │   │  ││           ││   │   │  ││           │╰─ closeTag(img)
+ │   │  ││   │   │  ││           ││   │   │  ││           ││   │   │  ││           ╰─ openTagEnd(img)
+ │   │  ││   │   │  ││           ││   │   │  ││           ││   │   │  │╰─ attrValue.value "\"image3.png\""
+ │   │  ││   │   │  ││           ││   │   │  ││           ││   │   │  ╰─ attrValue "=\"image3.png\""
+ │   │  ││   │   │  ││           ││   │   │  ││           ││   │   ╰─ attrName "src"
+ │   │  ││   │   │  ││           ││   │   │  ││           ││   ╰─ tagName "img"
+ │   │  ││   │   │  ││           ││   │   │  ││           │├─ text " C "
+ │   │  ││   │   │  ││           ││   │   │  ││           │╰─ closeTag(img)
+ │   │  ││   │   │  ││           ││   │   │  ││           ╰─ openTagEnd(img)
+ │   │  ││   │   │  ││           ││   │   │  │╰─ attrValue.value "\"image2.png\""
+ │   │  ││   │   │  ││           ││   │   │  ╰─ attrValue "=\"image2.png\""
+ │   │  ││   │   │  ││           ││   │   ╰─ attrName "src"
+ │   │  ││   │   │  ││           ││   ╰─ tagName "img"
+ │   │  ││   │   │  ││           │├─ text " B "
+ │   │  ││   │   │  ││           │╰─ closeTag(img)
+ │   │  ││   │   │  ││           ╰─ openTagEnd(img)
+ │   │  ││   │   │  │╰─ attrValue.value "\"image1.png\""
+ │   │  ││   │   │  ╰─ attrValue "=\"image1.png\""
+ │   │  ││   │   ╰─ attrName "src"
+ │   │  ││   ╰─ tagName "img"
+ │   │  │╰─ text " A "
+ │   │  ╰─ openTagEnd(div)
+ ╰─  ╰─ tagName "div"

@@ -1,0 +1,8 @@
+1╭─ <a><b selected something test=123
+ │   ││ │ │        │         │    ╰─ error(MALFORMED_OPEN_TAG:EOF reached while parsing attribute value for the "test" attribute)
+ │   ││ │ │        │         ╰─ attrName "test"
+ │   ││ │ │        ╰─ attrName "something"
+ │   ││ │ ╰─ attrName "selected"
+ │   ││ ╰─ tagName
+ │   │╰─ openTagEnd(a)
+ ╰─  ╰─ tagName

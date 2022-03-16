@@ -1,0 +1,7 @@
+1╭─ <var foo='bar'/>
+ │   │   │  ││    │ ╰─ closeTag(var)
+ │   │   │  ││    ╰─ openTagEnd(var) "/>"
+ │   │   │  │╰─ attrValue.value "'bar'"
+ │   │   │  ╰─ attrValue "='bar'"
+ │   │   ╰─ attrName "foo"
+ ╰─  ╰─ tagName "var"
