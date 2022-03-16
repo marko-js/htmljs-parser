@@ -18,7 +18,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       label: string;
     }[][] = Array.from({ length: lines.length }, () => []);
     const addRange = (label: string, range: Range) => {
-      const pos = parser.toPos(range.start);
+      const pos = parser.positionAt(range.start);
       partsByLine[pos.line - 1].push({
         label,
         range,
