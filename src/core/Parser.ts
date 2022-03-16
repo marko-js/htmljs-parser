@@ -69,11 +69,11 @@ export class Parser {
     return this.data.slice(range.start, range.end);
   }
 
-  toPos(index: number) {
+  positionAt(index: number) {
     return getPos(this.lines || (this.lines = getLines(this.data)), 0, index);
   }
 
-  toLoc(range: Range) {
+  locationAt(range: Range) {
     return getLoc(this.lines || (this.lines = getLines(this.data)), range);
   }
 
