@@ -8,8 +8,7 @@
   "env": {
     "node": true,
     "mocha": true,
-    "es2020": true,
-    "browser": true
+    "es2020": true
   },
   "overrides": [
     {
