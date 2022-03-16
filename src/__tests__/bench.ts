@@ -5,20 +5,15 @@ import cp from "child_process";
 import degit from "degit";
 import Benchmark from "benchmark";
 import { repository } from "../../package.json";
-import { createParser } from "..";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const API = require("../../dist") as typeof import("..");
 const FIXTURES = path.join(__dirname, "fixtures");
 const GREP = new RegExp(process.env.GREP || ".", "g");
 const COMPARE = process.env.COMPARE;
 
 (async () => {
-  let altParser:
-    | undefined
-    | {
-        createParser(handlers: unknown): {
-          parse(src: string, filename: string): void;
-        };
-      };
+  let compareModule: undefined | typeof API;
 
   if (COMPARE) {
     const tempDir = await fs.promises.mkdtemp(
@@ -31,7 +26,7 @@ const COMPARE = process.env.COMPARE;
       );
     });
 
-    altParser = require(tempDir);
+    compareModule = require(tempDir);
   }
 
   for (const entry of fs.readdirSync(FIXTURES)) {
@@ -40,35 +35,16 @@ const COMPARE = process.env.COMPARE;
 
     const src = await fs.promises.readFile(filename, "utf-8");
     const suite = new Benchmark.Suite();
+    const { createParser } = API;
     suite.add(entry, () => {
-      const parser = createParser({
-        onError() {},
-        onText() {},
-        onCDATA() {},
-        onDoctype() {},
-        onDeclaration() {},
-        onComment() {},
-        onTagName() {},
-        onTagShorthandId() {},
-        onTagShorthandClass() {},
-        onTagVar() {},
-        onTagArgs() {},
-        onTagParams() {},
-        onAttrName() {},
-        onAttrArgs() {},
-        onAttrValue() {},
-        onAttrMethod() {},
-        onAttrSpread() {},
-        onOpenTagEnd() {},
-        onCloseTag() {},
-        onScriptlet() {},
-      });
+      const parser = createParser({});
       parser.parse(src, filename);
     });
 
-    if (altParser) {
+    if (compareModule) {
+      const { createParser } = compareModule;
       suite.add(`${entry} #${COMPARE}`, () => {
-        const parser = altParser!.createParser({});
+        const parser = createParser({});
         parser.parse(src, filename);
       });
     }
@@ -81,8 +57,8 @@ const COMPARE = process.env.COMPARE;
     suite.run();
     await pending;
 
-    if (altParser) {
-      console.log(`Fastest is ${suite.filter("fastest").map("name")}`);
+    if (compareModule) {
+      console.log(`Fastest is ${suite.filter("fastest").map("name")}\n`);
     }
   }
 })();
