@@ -37,7 +37,6 @@ export class Parser {
   public forward!: boolean;
   public activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
   public activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
-  public isInAttrGroup!: boolean; // Set to true if the parser is within a concise mode attribute group
   public indent!: string; // Used to build the indent for the current concise line
   public isConcise!: boolean; // Set to true if parser is currently in concise mode
   public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
@@ -54,10 +53,7 @@ export class Parser {
     this.pos = this.maxPos = this.textPos = -1;
     this.data = this.filename = this.indent = "";
     this.activeTag = this.activeAttr = undefined;
-    this.isInAttrGroup =
-      this.beginMixedMode =
-      this.endingMixedModeAtEOL =
-        false;
+    this.beginMixedMode = this.endingMixedModeAtEOL = false;
     this.rangeStack = [];
     this.stateStack = [];
     this.forward = true;
