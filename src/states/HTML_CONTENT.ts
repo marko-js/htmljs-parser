@@ -4,11 +4,11 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  Range,
   htmlEOF,
+  Meta,
 } from "../internal";
 
-export interface HTMLContentMeta extends Range {
+export interface HTMLContentMeta extends Meta {
   indent: string;
   singleLine: boolean;
   delimiter: undefined | string;
@@ -19,9 +19,11 @@ export interface HTMLContentMeta extends Range {
 export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
   name: "HTML_CONTENT",
 
-  enter(start) {
+  enter(parent, start) {
     this.isConcise = false; // Back into non-concise HTML parsing
     return {
+      state: HTML_CONTENT as StateDefinition,
+      parent,
       start,
       end: start,
       indent: "",

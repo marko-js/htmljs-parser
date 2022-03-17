@@ -6,9 +6,10 @@ import {
   Range,
   Parser,
   Ranges,
+  Meta,
 } from "../internal";
 
-const enum ATTR_STATE {
+const enum ATTR_STAGE {
   UNKNOWN,
   NAME,
   VALUE,
@@ -16,8 +17,8 @@ const enum ATTR_STATE {
   BLOCK,
 }
 
-export interface AttrMeta extends Range {
-  state: ATTR_STATE;
+export interface AttrMeta extends Meta {
+  stage: ATTR_STAGE;
   name: undefined | Range;
   valueStart: number;
   args: boolean | Ranges.AttrMethod["params"];
@@ -60,12 +61,14 @@ const CONCISE_NAME_TERMINATORS = [
 export const ATTRIBUTE: StateDefinition<AttrMeta> = {
   name: "ATTRIBUTE",
 
-  enter(start) {
+  enter(parent, start) {
     return (this.activeAttr = {
+      state: ATTRIBUTE as StateDefinition,
+      parent,
       start,
       end: start,
       valueStart: start,
-      state: ATTR_STATE.UNKNOWN,
+      stage: ATTR_STAGE.UNKNOWN,
       name: undefined,
       args: false,
       bound: false,
@@ -101,7 +104,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         this.consumeWhitespace();
       }
 
-      attr.state = ATTR_STATE.VALUE;
+      attr.stage = ATTR_STAGE.VALUE;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
       expr.terminator = this.isConcise
@@ -111,20 +114,20 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       this.rewind(1);
     } else if (code === CODE.OPEN_PAREN) {
       ensureAttrName(this, attr);
-      attr.state = ATTR_STATE.ARGUMENT;
+      attr.stage = ATTR_STAGE.ARGUMENT;
       this.skip(1); // skip (
       this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_PAREN;
       this.rewind(1);
     } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
       ensureAttrName(this, attr);
-      attr.state = ATTR_STATE.BLOCK;
+      attr.stage = ATTR_STAGE.BLOCK;
       this.skip(1); // skip {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = false;
       expr.terminator = CODE.CLOSE_CURLY_BRACE;
       this.rewind(1);
-    } else if (attr.state === ATTR_STATE.UNKNOWN) {
-      attr.state = ATTR_STATE.NAME;
+    } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
+      attr.stage = ATTR_STAGE.NAME;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
       expr.skipOperators = true;
@@ -159,32 +162,32 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
     }
   },
 
-  return(_, childPart, attr) {
-    switch (attr.state) {
-      case ATTR_STATE.NAME: {
+  return(child, attr) {
+    switch (attr.stage) {
+      case ATTR_STAGE.NAME: {
         attr.name = {
-          start: childPart.start,
-          end: childPart.end,
+          start: child.start,
+          end: child.end,
         };
 
         this.handlers.onAttrName?.(attr.name);
         break;
       }
-      case ATTR_STATE.ARGUMENT: {
+      case ATTR_STAGE.ARGUMENT: {
         if (attr.args) {
           this.emitError(
-            childPart,
+            child,
             "ILLEGAL_ATTRIBUTE_ARGUMENT",
             "An attribute can only have one set of arguments"
           );
           return;
         }
 
-        const start = childPart.start - 1; // include (
+        const start = child.start - 1; // include (
         const end = this.skip(1); // include )
         const value = {
-          start: childPart.start,
-          end: childPart.end,
+          start: child.start,
+          end: child.end,
         };
 
         if (this.consumeWhitespaceIfBefore("{")) {
@@ -204,7 +207,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
 
         break;
       }
-      case ATTR_STATE.BLOCK: {
+      case ATTR_STAGE.BLOCK: {
         const params = attr.args as Ranges.Value;
         const start = params.start;
         const end = this.skip(1); // include }
@@ -213,11 +216,11 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           end,
           params,
           body: {
-            start: childPart.start - 1, // include {
+            start: child.start - 1, // include {
             end,
             value: {
-              start: childPart.start,
-              end: childPart.end,
+              start: child.start,
+              end: child.end,
             },
           },
         });
@@ -225,10 +228,10 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         break;
       }
 
-      case ATTR_STATE.VALUE: {
-        if (childPart.start === childPart.end) {
+      case ATTR_STAGE.VALUE: {
+        if (child.start === child.end) {
           return this.emitError(
-            childPart,
+            child,
             "ILLEGAL_ATTRIBUTE_VALUE",
             "Missing value for attribute"
           );
@@ -237,20 +240,20 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         if (attr.spread) {
           this.handlers.onAttrSpread?.({
             start: attr.valueStart,
-            end: childPart.end,
+            end: child.end,
             value: {
-              start: childPart.start,
-              end: childPart.end,
+              start: child.start,
+              end: child.end,
             },
           });
         } else {
           this.handlers.onAttrValue?.({
             start: attr.valueStart,
-            end: childPart.end,
+            end: child.end,
             bound: attr.bound,
             value: {
-              start: childPart.start,
-              end: childPart.end,
+              start: child.start,
+              end: child.end,
             },
           });
         }

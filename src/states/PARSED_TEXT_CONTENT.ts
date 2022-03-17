@@ -1,6 +1,6 @@
-import { STATE, CODE, StateDefinition, Range, htmlEOF } from "../internal";
+import { STATE, CODE, StateDefinition, htmlEOF, Meta } from "../internal";
 
-export interface ParsedTextContentMeta extends Range {
+export interface ParsedTextContentMeta extends Meta {
   indent: string;
   singleLine: boolean;
   delimiter: undefined | string;
@@ -12,8 +12,10 @@ export interface ParsedTextContentMeta extends Range {
 export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
   name: "PARSED_TEXT_CONTENT",
 
-  enter(start) {
+  enter(parent, start) {
     return {
+      state: PARSED_TEXT_CONTENT as StateDefinition,
+      parent,
       start,
       end: start,
       indent: "",
