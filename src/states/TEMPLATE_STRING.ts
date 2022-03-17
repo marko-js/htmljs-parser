@@ -3,8 +3,10 @@ import { CODE, STATE, StateDefinition } from "../internal";
 export const TEMPLATE_STRING: StateDefinition = {
   name: "TEMPLATE_STRING",
 
-  enter(start) {
+  enter(parent, start) {
     return {
+      state: TEMPLATE_STRING,
+      parent,
       start,
       end: start,
     };
@@ -41,10 +43,10 @@ export const TEMPLATE_STRING: StateDefinition = {
 
   eol() {},
 
-  return(_, childPart) {
-    if (childPart.start === childPart.end) {
+  return(child) {
+    if (child.start === child.end) {
       this.emitError(
-        childPart,
+        child,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
         "Invalid placeholder, the expression cannot be missing"
       );

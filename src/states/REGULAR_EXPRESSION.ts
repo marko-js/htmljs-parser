@@ -1,12 +1,14 @@
-import { CODE, Range, StateDefinition } from "../internal";
+import { CODE, StateDefinition, Meta } from "../internal";
 
-interface RegExpMeta extends Range {
+interface RegExpMeta extends Meta {
   isInCharSet: boolean;
 }
 export const REGULAR_EXPRESSION: StateDefinition<RegExpMeta> = {
   name: "REGULAR_EXPRESSION",
-  enter(start) {
+  enter(parent, start) {
     return {
+      state: REGULAR_EXPRESSION as StateDefinition,
+      parent,
       start,
       end: start,
       isInCharSet: false,

@@ -12,10 +12,12 @@ import {
 export const CONCISE_HTML_CONTENT: StateDefinition = {
   name: "CONCISE_HTML_CONTENT",
 
-  enter(start) {
+  enter(parent, start) {
     this.isConcise = true;
     this.indent = "";
     return {
+      state: CONCISE_HTML_CONTENT,
+      parent,
       start,
       end: start,
     };
@@ -138,35 +140,32 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
   eof: htmlEOF,
 
-  return(childState, childPart) {
+  return(child) {
     this.indent = "";
     this.isConcise = true;
 
-    switch (childState) {
+    switch (child.state) {
       case STATE.JS_COMMENT_LINE:
         this.handlers.onComment?.({
-          start: childPart.start,
-          end: childPart.end,
+          start: child.start,
+          end: child.end,
           value: {
-            start: childPart.start + 2, // strip //
-            end: childPart.end,
+            start: child.start + 2, // strip //
+            end: child.end,
           },
         });
         break;
       case STATE.JS_COMMENT_BLOCK: {
         this.handlers.onComment?.({
-          start: childPart.start,
-          end: childPart.end,
+          start: child.start,
+          end: child.end,
           value: {
-            start: childPart.start + 2, // strip /*
-            end: childPart.end - 2, // strip */,
+            start: child.start + 2, // strip /*
+            end: child.end - 2, // strip */,
           },
         });
 
-        if (
-          childState === STATE.JS_COMMENT_BLOCK &&
-          !this.consumeWhitespaceOnLine(0)
-        ) {
+        if (!this.consumeWhitespaceOnLine(0)) {
           // Make sure there is only whitespace on the line
           // after the ending "*/" sequence
           this.emitError(

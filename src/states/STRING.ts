@@ -1,14 +1,16 @@
-import { CODE, Range, StateDefinition } from "../internal";
+import { CODE, StateDefinition, Meta } from "../internal";
 
-interface StringMeta extends Range {
+interface StringMeta extends Meta {
   quoteCharCode: number;
 }
 
 export const STRING: StateDefinition<StringMeta> = {
   name: "STRING",
 
-  enter(start) {
+  enter(parent, start) {
     return {
+      state: STRING as StateDefinition,
+      parent,
       start,
       end: start,
       quoteCharCode: CODE.DOUBLE_QUOTE,

@@ -1,15 +1,17 @@
-import { CODE, Range, STATE, StateDefinition } from "../internal";
+import { CODE, Range, STATE, StateDefinition, Meta } from "../internal";
 
-interface ScriptletMeta extends Range {
+interface ScriptletMeta extends Meta {
   block: boolean;
   value: Range;
 }
 export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
   name: "INLINE_SCRIPT",
 
-  enter(start) {
+  enter(parent, start) {
     this.endText();
     return {
+      state: INLINE_SCRIPT as StateDefinition,
+      parent,
       start,
       end: start,
       block: false,
@@ -50,10 +52,10 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
     }
   },
 
-  return(_, childPart, inlineScript) {
+  return(child, inlineScript) {
     if (inlineScript.block) this.skip(1); // skip }
-    inlineScript.value.start = childPart.start;
-    inlineScript.value.end = childPart.end;
+    inlineScript.value.start = child.start;
+    inlineScript.value.end = child.end;
     this.exitState();
   },
 };
