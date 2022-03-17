@@ -81,14 +81,13 @@ export class Parser {
   }
 
   exitState() {
-    const child = this.activeRange;
-    const { parent } = child;
-    child.end = this.pos;
-    this.activeRange = parent;
+    const { activeRange, activeState } = this;
+    const parent = (this.activeRange = activeRange.parent);
     this.activeState = parent.state;
-    child.state.exit.call(this, child);
-    parent.state.return.call(this, child, parent);
     this.forward = false;
+    activeRange.end = this.pos;
+    activeState.exit.call(this, activeRange);
+    this.activeState.return.call(this, activeRange, parent);
   }
 
   /**

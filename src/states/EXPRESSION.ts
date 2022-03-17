@@ -9,7 +9,7 @@ import {
 
 export interface ExpressionMeta extends Meta {
   groupStack: number[];
-  terminator?: number | (number | number[])[];
+  terminator: number | (number | number[])[];
   skipOperators: boolean;
   terminatedByEOL: boolean;
   terminatedByWhitespace: boolean;
@@ -28,6 +28,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       start,
       end: start,
       groupStack: [],
+      terminator: -1,
       skipOperators: false,
       terminatedByEOL: false,
       terminatedByWhitespace: false,
@@ -37,9 +38,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   exit() {},
 
   char(code, expression) {
-    const depth = expression.groupStack.length;
-
-    if (depth === 0) {
+    if (!expression.groupStack.length) {
       if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
         if (expression.skipOperators) {
           this.exitState();
@@ -68,13 +67,10 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         return;
       }
 
-      const { terminator } = expression;
-
       if (
-        terminator &&
-        (typeof terminator === "number"
-          ? terminator === code
-          : checkForTerminators(this, code, terminator))
+        typeof expression.terminator === "number"
+          ? expression.terminator === code
+          : checkForTerminators(this, code, expression.terminator)
       ) {
         this.exitState();
         return;
@@ -127,7 +123,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       case CODE.CLOSE_PAREN:
       case CODE.CLOSE_SQUARE_BRACKET:
       case CODE.CLOSE_CURLY_BRACE: {
-        if (depth === 0) {
+        if (!expression.groupStack.length) {
           return this.emitError(
             expression,
             "INVALID_EXPRESSION",
@@ -157,7 +153,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 
   eol(_, expression) {
     if (
-      expression.groupStack.length === 0 &&
+      !expression.groupStack.length &&
       (expression.terminatedByWhitespace || expression.terminatedByEOL)
     ) {
       this.exitState();
@@ -166,7 +162,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 
   eof(expression) {
     if (
-      expression.groupStack.length === 0 &&
+      !expression.groupStack.length &&
       (this.isConcise || expression.terminatedByEOL)
     ) {
       this.exitState();
