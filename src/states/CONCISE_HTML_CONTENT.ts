@@ -1,11 +1,11 @@
 import {
-  Parser,
   CODE,
   STATE,
   isWhitespaceCode,
   StateDefinition,
   BODY_MODE,
   OpenTagEnding,
+  htmlEOF,
 } from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
@@ -136,7 +136,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
     this.indent = "";
   },
 
-  eof: Parser.prototype.htmlEOF,
+  eof: htmlEOF,
 
   return(childState, childPart) {
     this.indent = "";

@@ -50,14 +50,13 @@ export class Parser {
   }
 
   reset() {
+    this.forward = this.isConcise = true;
     this.pos = this.maxPos = this.textPos = -1;
     this.data = this.filename = this.indent = "";
     this.activeTag = this.activeAttr = undefined;
     this.beginMixedMode = this.endingMixedModeAtEOL = false;
     this.rangeStack = [];
     this.stateStack = [];
-    this.forward = true;
-    this.isConcise = true;
     this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
@@ -190,30 +189,6 @@ export class Parser {
     content.singleLine = singleLine;
     content.delimiter = delimiter;
     content.indent = this.indent;
-  }
-
-  /**
-   * This gets called when we reach EOF outside of a tag.
-   */
-  htmlEOF() {
-    this.endText();
-
-    while (this.activeTag) {
-      if (this.activeTag.concise) {
-        this.closeTag(this.pos, this.pos, undefined);
-      } else {
-        // We found an unclosed tag on the stack that is not for a concise tag. That means
-        // there is a problem with the template because all open tags should have a closing
-        // tag
-        //
-        // NOTE: We have already closed tags that are open tag only or self-closed
-        return this.emitError(
-          this.activeTag,
-          "MISSING_END_TAG",
-          'Missing ending "' + this.read(this.activeTag.tagName) + '" tag'
-        );
-      }
-    }
   }
 
   emitError(range: number | Range, code: string, message: string) {
