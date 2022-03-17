@@ -1,13 +1,15 @@
-import { CODE, Parser, STATE, StateDefinition, Range } from "../internal";
+import { CODE, Parser, STATE, StateDefinition, Meta } from "../internal";
 
-interface PlaceholderMeta extends Range {
+interface PlaceholderMeta extends Meta {
   escape: boolean;
 }
 export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
   name: "PLACEHOLDER",
 
-  enter(start) {
+  enter(parent, start) {
     return {
+      state: PLACEHOLDER as StateDefinition,
+      parent,
       start,
       end: start,
       escape: false,
@@ -32,10 +34,10 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
 
   eof() {},
 
-  return(_, childPart) {
-    if (childPart.start === childPart.end) {
+  return(child) {
+    if (child.start === child.end) {
       this.emitError(
-        childPart,
+        child,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
         "Invalid placeholder, the expression cannot be missing"
       );

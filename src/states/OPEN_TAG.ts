@@ -3,13 +3,13 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  Range,
   BODY_MODE,
   OpenTagEnding,
   Ranges,
+  Meta,
 } from "../internal";
 
-const enum TAG_STATE {
+const enum TAG_STAGE {
   UNKNOWN,
   VAR,
   ARGUMENT,
@@ -17,9 +17,9 @@ const enum TAG_STATE {
   ATTR_GROUP,
 }
 
-export interface OpenTagMeta extends Range {
+export interface OpenTagMeta extends Meta {
   bodyMode: BODY_MODE;
-  state: TAG_STATE;
+  stage: TAG_STAGE;
   concise: boolean;
   beginMixedMode?: boolean;
   tagName: Ranges.Template;
@@ -53,11 +53,13 @@ const HTML_TAG_VAR_TERMINATORS = [
 export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   name: "OPEN_TAG",
 
-  enter(start) {
+  enter(parent, start) {
     const tag = (this.activeTag = {
+      state: OPEN_TAG as StateDefinition,
+      parent,
       start,
       end: start,
-      state: TAG_STATE.UNKNOWN,
+      stage: TAG_STAGE.UNKNOWN,
       parentTag: this.activeTag,
       nestedIndent: undefined,
       indent: this.indent,
@@ -104,7 +106,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   },
 
   eol(_, tag) {
-    if (this.isConcise && tag.state !== TAG_STATE.ATTR_GROUP) {
+    if (this.isConcise && tag.stage !== TAG_STAGE.ATTR_GROUP) {
       // In concise mode we always end the open tag
       this.exitState();
     }
@@ -112,7 +114,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
 
   eof(tag) {
     if (this.isConcise) {
-      if (tag.state === TAG_STATE.ATTR_GROUP) {
+      if (tag.stage === TAG_STAGE.ATTR_GROUP) {
         this.emitError(
           tag,
           "MALFORMED_OPEN_TAG",
@@ -184,7 +186,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           return;
         }
 
-        if (tag.state === TAG_STATE.ATTR_GROUP) {
+        if (tag.stage === TAG_STAGE.ATTR_GROUP) {
           this.emitError(
             this.pos,
             "MALFORMED_OPEN_TAG",
@@ -224,7 +226,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
         return;
       } else if (code === CODE.OPEN_SQUARE_BRACKET) {
-        if (tag.state === TAG_STATE.ATTR_GROUP) {
+        if (tag.stage === TAG_STAGE.ATTR_GROUP) {
           this.emitError(
             this.pos,
             "MALFORMED_OPEN_TAG",
@@ -233,10 +235,10 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           return;
         }
 
-        tag.state = TAG_STATE.ATTR_GROUP;
+        tag.stage = TAG_STAGE.ATTR_GROUP;
         return;
       } else if (code === CODE.CLOSE_SQUARE_BRACKET) {
-        if (tag.state !== TAG_STATE.ATTR_GROUP) {
+        if (tag.stage !== TAG_STAGE.ATTR_GROUP) {
           this.emitError(
             this.pos,
             "MALFORMED_OPEN_TAG",
@@ -245,7 +247,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           return;
         }
 
-        tag.state = TAG_STATE.UNKNOWN;
+        tag.stage = TAG_STAGE.UNKNOWN;
         return;
       }
     } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
@@ -287,7 +289,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       this.consumeWhitespace();
       this.rewind(1);
     } else if (code === CODE.FORWARD_SLASH && !tag.hasAttrs) {
-      tag.state = TAG_STATE.VAR;
+      tag.stage = TAG_STAGE.VAR;
       this.skip(1); // skip /
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
@@ -305,14 +307,14 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         );
         return;
       }
-      tag.state = TAG_STATE.ARGUMENT;
+      tag.stage = TAG_STAGE.ARGUMENT;
       this.skip(1); // skip (
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
       expr.terminator = CODE.CLOSE_PAREN;
       this.rewind(1);
     } else if (code === CODE.PIPE && !tag.hasAttrs) {
-      tag.state = TAG_STATE.PARAMS;
+      tag.stage = TAG_STAGE.PARAMS;
       this.skip(1); // skip |
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
@@ -330,39 +332,39 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     }
   },
 
-  return(childState, childPart, tag) {
-    switch (childState) {
+  return(child, tag) {
+    switch (child.state) {
       case STATE.JS_COMMENT_BLOCK: {
         /* Ignore comments within an open tag */
         break;
       }
       case STATE.EXPRESSION: {
-        switch (tag.state) {
-          case TAG_STATE.VAR: {
-            if (childPart.start === childPart.end) {
+        switch (tag.stage) {
+          case TAG_STAGE.VAR: {
+            if (child.start === child.end) {
               return this.emitError(
-                childPart,
+                child,
                 "MISSING_TAG_VARIABLE",
                 "A slash was found that was not followed by a variable name or lhs expression"
               );
             }
 
             this.handlers.onTagVar?.({
-              start: childPart.start - 1, // include /,
-              end: childPart.end,
+              start: child.start - 1, // include /,
+              end: child.end,
               value: {
-                start: childPart.start,
-                end: childPart.end,
+                start: child.start,
+                end: child.end,
               },
             });
             break;
           }
-          case TAG_STATE.ARGUMENT: {
-            const start = childPart.start - 1; // include (
+          case TAG_STAGE.ARGUMENT: {
+            const start = child.start - 1; // include (
             const end = this.skip(1); // include )
             const value = {
-              start: childPart.start,
-              end: childPart.end,
+              start: child.start,
+              end: child.end,
             };
 
             if (this.consumeWhitespaceIfBefore("{")) {
@@ -381,14 +383,14 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             }
             break;
           }
-          case TAG_STATE.PARAMS: {
+          case TAG_STAGE.PARAMS: {
             const end = this.skip(1); // include closing |
             this.handlers.onTagParams?.({
-              start: childPart.start - 1, // include leading |
+              start: child.start - 1, // include leading |
               end,
               value: {
-                start: childPart.start,
-                end: childPart.end,
+                start: child.start,
+                end: child.end,
               },
             });
             break;

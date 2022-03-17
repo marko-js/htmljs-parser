@@ -10,19 +10,22 @@ import {
   getPos,
 } from "../internal";
 
-export interface StateDefinition<P extends Range = Range> {
+export interface Meta extends Range {
+  parent: Meta;
+  state: StateDefinition;
+}
+export interface StateDefinition<P extends Meta = Meta> {
   name: string;
-  enter: (this: Parser, pos: number) => Partial<P>;
+  enter: (
+    this: Parser,
+    parent: Meta,
+    pos: number
+  ) => Partial<P & { state: unknown }>;
   exit: (this: Parser, activeRange: P) => void;
   char: (this: Parser, code: number, activeRange: P) => void;
   eol: (this: Parser, length: number, activeRange: P) => void;
   eof: (this: Parser, activeRange: P) => void;
-  return: (
-    this: Parser,
-    childState: StateDefinition,
-    childPart: Range,
-    activeRange: P
-  ) => void;
+  return: (this: Parser, child: Meta, activeRange: P) => void;
 }
 
 export class Parser {
@@ -31,9 +34,7 @@ export class Parser {
   public data!: string;
   public filename!: string;
   public activeState!: StateDefinition;
-  public stateStack!: StateDefinition[]; // Used to keep track of nested states.
-  public activeRange!: Range; // The current pos object at the top of the stack
-  public rangeStack!: Range[]; // Used to keep track of parts such as CDATA, expressions, declarations, etc.
+  public activeRange!: Meta;
   public forward!: boolean;
   public activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
   public activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
@@ -55,8 +56,6 @@ export class Parser {
     this.data = this.filename = this.indent = "";
     this.activeTag = this.activeAttr = undefined;
     this.beginMixedMode = this.endingMixedModeAtEOL = false;
-    this.rangeStack = [];
-    this.stateStack = [];
     this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
@@ -72,24 +71,23 @@ export class Parser {
     return getLoc(this.lines || (this.lines = getLines(this.data)), range);
   }
 
-  enterState<P extends Range>(state: StateDefinition<P>): P {
-    const range = (this.activeRange = state.enter.call(this, this.pos) as P);
-    this.stateStack.push(
-      (this.activeState = state as unknown as StateDefinition)
-    );
-    this.rangeStack.push(range);
-    return range as P;
+  enterState<P extends Meta>(state: StateDefinition<P>): P {
+    this.activeState = state as unknown as StateDefinition;
+    return (this.activeRange = state.enter.call(
+      this,
+      this.activeRange,
+      this.pos
+    ) as P);
   }
 
   exitState() {
-    const childPart = this.rangeStack.pop()!;
-    const childState = this.stateStack.pop()!;
-    const last = this.rangeStack.length - 1;
-    this.activeState = this.stateStack[last];
-    this.activeRange = this.rangeStack[last];
-    childPart.end = this.pos;
-    childState.exit.call(this, childPart);
-    this.activeState.return.call(this, childState, childPart, this.activeRange);
+    const child = this.activeRange;
+    const { parent } = child;
+    child.end = this.pos;
+    this.activeRange = parent;
+    this.activeState = parent.state;
+    child.state.exit.call(this, child);
+    parent.state.return.call(this, child, parent);
     this.forward = false;
   }
 

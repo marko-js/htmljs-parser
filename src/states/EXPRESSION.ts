@@ -3,11 +3,11 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  Range,
   Parser,
+  Meta,
 } from "../internal";
 
-export interface ExpressionMeta extends Range {
+export interface ExpressionMeta extends Meta {
   groupStack: number[];
   terminator?: number | (number | number[])[];
   skipOperators: boolean;
@@ -21,8 +21,10 @@ const htmlOperatorPattern = buildOperatorPattern(false);
 export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   name: "EXPRESSION",
 
-  enter(start) {
+  enter(parent, start) {
     return {
+      state: EXPRESSION as StateDefinition,
+      parent,
       start,
       end: start,
       groupStack: [],
@@ -170,43 +172,47 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       this.exitState();
     } else {
       // TODO: refactor to avoid using parentState
-      const parentState = this.stateStack[this.stateStack.length - 2];
+      const { parent } = expression;
 
-      if (parentState === STATE.ATTRIBUTE) {
-        const attr = this.activeAttr!;
-        if (!attr.spread && !attr.name) {
+      switch (parent.state) {
+        case STATE.ATTRIBUTE: {
+          const attr = parent as STATE.AttrMeta;
+          if (!attr.spread && !attr.name) {
+            return this.emitError(
+              expression,
+              "MALFORMED_OPEN_TAG",
+              'EOF reached while parsing attribute name for the "' +
+                this.read(this.activeTag!.tagName) +
+                '" tag'
+            );
+          }
+
           return this.emitError(
             expression,
             "MALFORMED_OPEN_TAG",
-            'EOF reached while parsing attribute name for the "' +
-              this.read(this.activeTag!.tagName) +
-              '" tag'
+            `EOF reached while parsing attribute value for the ${
+              attr.spread
+                ? "..."
+                : attr.name
+                ? `"${this.read(attr.name)}"`
+                : `"default"`
+            } attribute`
           );
         }
 
-        return this.emitError(
-          expression,
-          "MALFORMED_OPEN_TAG",
-          `EOF reached while parsing attribute value for the ${
-            attr.spread
-              ? "..."
-              : attr.name
-              ? `"${this.read(attr.name)}"`
-              : `"default"`
-          } attribute`
-        );
-      } else if (parentState === STATE.TAG_NAME) {
-        return this.emitError(
-          expression,
-          "MALFORMED_OPEN_TAG",
-          "EOF reached while parsing tag name"
-        );
-      } else if (parentState === STATE.PLACEHOLDER) {
-        return this.emitError(
-          expression,
-          "MALFORMED_PLACEHOLDER",
-          "EOF reached while parsing placeholder"
-        );
+        case STATE.TAG_NAME:
+          return this.emitError(
+            expression,
+            "MALFORMED_OPEN_TAG",
+            "EOF reached while parsing tag name"
+          );
+
+        case STATE.PLACEHOLDER:
+          return this.emitError(
+            expression,
+            "MALFORMED_PLACEHOLDER",
+            "EOF reached while parsing placeholder"
+          );
       }
 
       return this.emitError(
