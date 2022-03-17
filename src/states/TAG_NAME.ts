@@ -5,9 +5,10 @@ import {
   StateDefinition,
   OpenTagEnding,
   Ranges,
+  Meta,
 } from "../internal";
 
-export interface TagNameMeta extends Ranges.Template {
+export interface TagNameMeta extends Meta, Ranges.Template {
   shorthandCode?: CODE.NUMBER_SIGN | CODE.PERIOD;
 }
 
@@ -35,8 +36,10 @@ const CODE_TAGS = ["import", "export", "static", "class"];
 export const TAG_NAME: StateDefinition<TagNameMeta> = {
   name: "TAG_NAME",
 
-  enter(start) {
+  enter(parent, start) {
     return {
+      state: TAG_NAME as StateDefinition,
+      parent,
       start,
       end: start,
       expressions: [],
@@ -159,26 +162,26 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
     this.exitState();
   },
 
-  return(_, childPart, tagName) {
-    if ((childPart as STATE.ExpressionMeta).terminatedByEOL) return;
-    if (childPart.start === childPart.end) {
+  return(child, tagName) {
+    if ((child as STATE.ExpressionMeta).terminatedByEOL) return;
+    if (child.start === child.end) {
       this.emitError(
-        childPart,
+        child,
         "PLACEHOLDER_EXPRESSION_REQUIRED",
         "Invalid placeholder, the expression cannot be missing"
       );
     }
 
     const { quasis, expressions } = tagName;
-    const start = childPart.start - 2; // include ${
+    const start = child.start - 2; // include ${
     const end = this.skip(1); // include }
     const nextStart = end + 1;
     expressions.push({
       start,
       end,
       value: {
-        start: childPart.start,
-        end: childPart.end,
+        start: child.start,
+        end: child.end,
       },
     });
 

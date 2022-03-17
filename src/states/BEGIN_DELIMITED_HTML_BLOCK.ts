@@ -2,12 +2,12 @@ import {
   Parser,
   CODE,
   StateDefinition,
-  Range,
   STATE,
   htmlEOF,
+  Meta,
 } from "../internal";
 
-export interface DelimitedHTMLBlockMeta extends Range {
+export interface DelimitedHTMLBlockMeta extends Meta {
   delimiter: string;
   indent: string;
 }
@@ -18,8 +18,10 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
   {
     name: "BEGIN_DELIMITED_HTML_BLOCK",
 
-    enter(start) {
+    enter(parent, start) {
       return {
+        state: BEGIN_DELIMITED_HTML_BLOCK as StateDefinition,
+        parent,
         start,
         end: start,
         indent: this.indent,

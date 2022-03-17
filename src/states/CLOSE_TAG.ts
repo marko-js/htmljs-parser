@@ -4,10 +4,12 @@ import { CODE, StateDefinition, Parser, Range } from "../internal";
 export const CLOSE_TAG: StateDefinition = {
   name: "CLOSE_TAG",
 
-  enter(start) {
+  enter(parent, start) {
     this.endText();
 
     return {
+      state: CLOSE_TAG,
+      parent,
       start,
       end: start,
     };
