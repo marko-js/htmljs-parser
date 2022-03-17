@@ -1,4 +1,11 @@
-import { Parser, CODE, StateDefinition, Range, STATE } from "../internal";
+import {
+  Parser,
+  CODE,
+  StateDefinition,
+  Range,
+  STATE,
+  htmlEOF,
+} from "../internal";
 
 export interface DelimitedHTMLBlockMeta extends Range {
   delimiter: string;
@@ -42,7 +49,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
       handleDelimitedBlockEOL(this, len, block);
     },
 
-    eof: Parser.prototype.htmlEOF,
+    eof: htmlEOF,
 
     return() {},
   };

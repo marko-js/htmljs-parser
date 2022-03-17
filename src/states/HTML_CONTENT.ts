@@ -5,6 +5,7 @@ import {
   isWhitespaceCode,
   StateDefinition,
   Range,
+  htmlEOF,
 } from "../internal";
 
 export interface HTMLContentMeta extends Range {
@@ -102,7 +103,7 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
     }
   },
 
-  eof: Parser.prototype.htmlEOF,
+  eof: htmlEOF,
 
   return() {},
 };

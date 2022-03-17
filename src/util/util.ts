@@ -1,4 +1,4 @@
-import { CODE } from "../internal";
+import { CODE, type Parser } from "../internal";
 import type { Location, Position, Range } from "./constants";
 
 export function isWhitespaceCode(code: number) {
@@ -51,4 +51,25 @@ export function getLines(src: string) {
   }
 
   return lines;
+}
+
+export function htmlEOF(this: Parser) {
+  this.endText();
+
+  while (this.activeTag) {
+    if (this.activeTag.concise) {
+      this.closeTag(this.pos, this.pos, undefined);
+    } else {
+      // We found an unclosed tag on the stack that is not for a concise tag. That means
+      // there is a problem with the template because all open tags should have a closing
+      // tag
+      //
+      // NOTE: We have already closed tags that are open tag only or self-closed
+      return this.emitError(
+        this.activeTag,
+        "MISSING_END_TAG",
+        'Missing ending "' + this.read(this.activeTag.tagName) + '" tag'
+      );
+    }
+  }
 }
