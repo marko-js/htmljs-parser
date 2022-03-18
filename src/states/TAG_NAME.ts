@@ -129,9 +129,9 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      this.skip(2); // skip ${
+      this.pos += 2; // skip ${
       this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_CURLY_BRACE;
-      this.rewind(1);
+      this.pos--;
     } else if (
       isWhitespaceCode(code) ||
       code === CODE.EQUAL ||
@@ -149,7 +149,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       this.exitState();
       const shorthand = this.enterState(TAG_NAME);
       shorthand.shorthandCode = code;
-      shorthand.quasis[0].start = this.skip(1); // skip . or #
+      shorthand.quasis[0].start = ++this.pos; // skip . or #
     }
   },
 
@@ -174,7 +174,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
 
     const { quasis, expressions } = tagName;
     const start = child.start - 2; // include ${
-    const end = this.skip(1); // include }
+    const end = ++this.pos; // include }
     const nextStart = end + 1;
     expressions.push({
       start,

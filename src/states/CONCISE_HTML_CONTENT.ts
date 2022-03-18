@@ -86,12 +86,12 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       switch (code) {
         case CODE.OPEN_ANGLE_BRACKET:
           this.beginMixedMode = true;
-          this.rewind(1);
+          this.pos--;
           this.beginHtmlBlock(undefined, false);
           return;
         case CODE.DOLLAR:
           if (isWhitespaceCode(this.lookAtCharCodeAhead(1))) {
-            this.skip(1); // skip space after $
+            this.pos++; // skip space after $
             this.enterState(STATE.INLINE_SCRIPT);
             return;
           }
@@ -99,7 +99,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         case CODE.HTML_BLOCK_DELIMITER:
           if (this.lookAtCharCodeAhead(1) === CODE.HTML_BLOCK_DELIMITER) {
             this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
-            this.rewind(1);
+            this.pos--;
           } else {
             this.emitError(
               this.pos,
@@ -113,11 +113,11 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           switch (this.lookAtCharCodeAhead(1)) {
             case CODE.FORWARD_SLASH:
               this.enterState(STATE.JS_COMMENT_LINE);
-              this.skip(1); // skip /
+              this.pos++; // skip /
               return;
             case CODE.ASTERISK:
               this.enterState(STATE.JS_COMMENT_BLOCK);
-              this.skip(1); // skip *
+              this.pos++; // skip *
               return;
             default:
               this.emitError(
@@ -130,7 +130,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       }
 
       this.enterState(STATE.OPEN_TAG);
-      this.rewind(1); // START_TAG_NAME expects to start at the first character
+      this.pos--; // START_TAG_NAME expects to start at the first character
     }
   },
 

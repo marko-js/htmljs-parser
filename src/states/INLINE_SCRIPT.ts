@@ -40,20 +40,20 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
   char(code, inlineScript) {
     if (code === CODE.OPEN_CURLY_BRACE) {
       inlineScript.block = true;
-      this.skip(1); // skip {
+      this.pos++; // skip {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminator = CODE.CLOSE_CURLY_BRACE;
       expr.skipOperators = true;
-      this.rewind(1);
+      this.pos--;
     } else {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByEOL = true;
-      this.rewind(1);
+      this.pos--;
     }
   },
 
   return(child, inlineScript) {
-    if (inlineScript.block) this.skip(1); // skip }
+    if (inlineScript.block) this.pos++; // skip }
     inlineScript.value.start = child.start;
     inlineScript.value.end = child.end;
     this.exitState();
