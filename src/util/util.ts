@@ -12,9 +12,7 @@ export function isWhitespaceCode(code: number) {
 export function getLoc(lines: number[], range: Range): Location {
   const start = getPos(lines, 0, range.start);
   const end =
-    range.start === range.end
-      ? start
-      : getPos(lines, start.line - 1, range.end);
+    range.start === range.end ? start : getPos(lines, start.line, range.end);
   return { start, end };
 }
 
@@ -37,8 +35,8 @@ export function getPos(
   }
 
   return {
-    line: line + 1,
-    column: index - lines[line],
+    line,
+    character: index - lines[line],
   };
 }
 
