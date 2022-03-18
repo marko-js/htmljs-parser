@@ -140,7 +140,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   char(code, tag) {
     if (this.isConcise) {
       if (code === CODE.SEMICOLON) {
-        this.skip(1); // skip ;
+        this.pos++; // skip ;
         this.exitState();
         if (!this.consumeWhitespaceOnLine(0)) {
           switch (this.lookAtCharCodeAhead(0)) {
@@ -148,11 +148,11 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               switch (this.lookAtCharCodeAhead(1)) {
                 case CODE.FORWARD_SLASH:
                   this.enterState(STATE.JS_COMMENT_LINE);
-                  this.skip(2); // skip //
+                  this.pos += 2; // skip //
                   return;
                 case CODE.ASTERISK:
                   this.enterState(STATE.JS_COMMENT_BLOCK);
-                  this.skip(2); // skip /*
+                  this.pos += 2; // skip /*
                   return;
               }
               break;
@@ -160,7 +160,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               if (this.lookAheadFor("!--")) {
                 // html comment
                 this.enterState(STATE.HTML_COMMENT);
-                this.skip(4); // <!--
+                this.pos += 4; // <!--
                 return;
               }
               break;
@@ -251,7 +251,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         return;
       }
     } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.skip(1); // skip >
+      this.pos++; // skip >
       this.exitState();
       return;
     } else if (
@@ -259,7 +259,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET
     ) {
       tag.ending |= OpenTagEnding.self;
-      this.skip(2); // skip />
+      this.pos += 2; // skip />
       this.exitState();
       return;
     }
@@ -278,26 +278,26 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     ) {
       // Skip over code inside a JavaScript block comment
       this.enterState(STATE.JS_COMMENT_BLOCK);
-      this.skip(1); // skip *
+      this.pos++; // skip *
       return;
     }
 
     if (isWhitespaceCode(code)) {
       // ignore whitespace within element...
     } else if (code === CODE.COMMA) {
-      this.skip(1); // skip ,
+      this.pos++; // skip ,
       this.consumeWhitespace();
-      this.rewind(1);
+      this.pos--;
     } else if (code === CODE.FORWARD_SLASH && !tag.hasAttrs) {
       tag.stage = TAG_STAGE.VAR;
-      this.skip(1); // skip /
+      this.pos++; // skip /
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
       expr.terminatedByWhitespace = true;
       expr.terminator = this.isConcise
         ? CONCISE_TAG_VAR_TERMINATORS
         : HTML_TAG_VAR_TERMINATORS;
-      this.rewind(1);
+      this.pos--;
     } else if (code === CODE.OPEN_PAREN && !tag.hasAttrs) {
       if (tag.hasArgs) {
         this.emitError(
@@ -308,18 +308,18 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         return;
       }
       tag.stage = TAG_STAGE.ARGUMENT;
-      this.skip(1); // skip (
+      this.pos++; // skip (
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
       expr.terminator = CODE.CLOSE_PAREN;
-      this.rewind(1);
+      this.pos--;
     } else if (code === CODE.PIPE && !tag.hasAttrs) {
       tag.stage = TAG_STAGE.PARAMS;
-      this.skip(1); // skip |
+      this.pos++; // skip |
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
       expr.terminator = CODE.PIPE;
-      this.rewind(1);
+      this.pos--;
     } else {
       if (tag.tagName) {
         this.enterState(STATE.ATTRIBUTE);
@@ -328,7 +328,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         this.enterState(STATE.TAG_NAME);
       }
 
-      this.rewind(1);
+      this.pos--;
     }
   },
 
@@ -361,7 +361,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           }
           case TAG_STAGE.ARGUMENT: {
             const start = child.start - 1; // include (
-            const end = this.skip(1); // include )
+            const end = ++this.pos; // include )
             const value = {
               start: child.start,
               end: child.end,
@@ -372,7 +372,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               attr.start = start;
               attr.args = { start, end, value };
               tag.hasAttrs = true;
-              this.rewind(1);
+              this.pos--;
             } else {
               tag.hasArgs = true;
               this.handlers.onTagArgs?.({
@@ -384,7 +384,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             break;
           }
           case TAG_STAGE.PARAMS: {
-            const end = this.skip(1); // include closing |
+            const end = ++this.pos; // include closing |
             this.handlers.onTagParams?.({
               start: child.start - 1, // include leading |
               end,

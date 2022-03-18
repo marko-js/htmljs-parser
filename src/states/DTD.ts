@@ -28,7 +28,7 @@ export const DTD: StateDefinition = {
 
   char(code) {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.skip(1); // skip >
+      this.pos++; // skip >
       this.exitState();
     }
   },

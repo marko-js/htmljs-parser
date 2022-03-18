@@ -19,15 +19,15 @@ export const TEMPLATE_STRING: StateDefinition = {
       code === CODE.DOLLAR &&
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
-      this.skip(1); // skip {
+      this.pos++; // skip {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
       expr.terminator = CODE.CLOSE_CURLY_BRACE;
     } else {
       if (code === CODE.BACK_SLASH) {
-        this.skip(1); // skip \
+        this.pos++; // skip \
       } else if (code === CODE.BACKTICK) {
-        this.skip(1); // skip `
+        this.pos++; // skip `
         this.exitState();
       }
     }
@@ -52,6 +52,6 @@ export const TEMPLATE_STRING: StateDefinition = {
       );
     }
 
-    this.skip(1); // skip closing }
+    this.pos++; // skip closing }
   },
 };

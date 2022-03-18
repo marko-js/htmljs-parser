@@ -23,10 +23,10 @@ export const STRING: StateDefinition<StringMeta> = {
     switch (code) {
       case CODE.BACK_SLASH:
         // Handle string escape sequence
-        this.skip(1); // skip \
+        this.pos++; // skip \
         break;
       case string.quoteCharCode:
-        this.skip(1); // skip ' or "
+        this.pos++; // skip ' or "
         this.exitState();
         break;
     }

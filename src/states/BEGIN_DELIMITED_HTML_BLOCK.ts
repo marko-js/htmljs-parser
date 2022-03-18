@@ -39,7 +39,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
         if (!this.consumeWhitespaceOnLine()) {
           this.pos = startPos + 1;
           this.beginHtmlBlock(undefined, true);
-          this.rewind(1);
+          this.pos--;
         }
       }
     },
@@ -95,9 +95,9 @@ function handleDelimitedBlockEOL(
 
   if (parser.lookAheadFor(endHtmlBlockLookahead, parser.pos + newLineLength)) {
     parser.startText(); // we want to at least include the newline as text.
-    parser.skip(newLineLength);
+    parser.pos += newLineLength;
     parser.endText();
-    parser.skip(endHtmlBlockLookahead.length);
+    parser.pos += endHtmlBlockLookahead.length;
 
     if (parser.consumeWhitespaceOnLine(0)) {
       parser.endText();
@@ -116,7 +116,7 @@ function handleDelimitedBlockEOL(
     // multiline HTML block
 
     parser.startText();
-    parser.skip(indent.length);
+    parser.pos += indent.length;
     // We stay in the same state since we are still parsing a multiline, delimited HTML block
   } else if (indent && !parser.onlyWhitespaceRemainsOnLine()) {
     // the next line does not have enough indentation
