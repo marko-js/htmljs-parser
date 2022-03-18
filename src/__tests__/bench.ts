@@ -4,7 +4,6 @@ import path from "path";
 import cp from "child_process";
 import degit from "degit";
 import Benchmark from "benchmark";
-import { repository } from "../../package.json";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const API = require("../../dist") as typeof import("..");
@@ -19,7 +18,9 @@ const COMPARE = process.env.COMPARE;
     const tempDir = await fs.promises.mkdtemp(
       path.join(os.tmpdir(), "htmljs-parser-bench")
     );
-    await degit(`${repository.url}#${COMPARE}`).clone(tempDir);
+    await degit(
+      `https://github.com/marko-js/htmljs-parser.git#${COMPARE}`
+    ).clone(tempDir);
     await new Promise<void>((resolve, reject) => {
       cp.exec("npm ci && npm run --if-present build", { cwd: tempDir }, (err) =>
         err ? reject(err) : resolve()
