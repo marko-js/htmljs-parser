@@ -226,7 +226,7 @@ function buildOperatorPattern(isConcise: boolean) {
   const binary =
     "[*%<&^|?:]" + // Any of these characters can always continue an expression
     "|=[=>]" + // We only continue after an equals if it is => or ==
-    "|/[^*/>]" + // We only continue after a forward slash if it isn't //, /* or />
+    "|/(?:\\b|\\s)" + // We only continue after a forward slash if it isn't //, /* or />
     "|\\.(?=\\s)" + // We only continue after a period if it's followed by a space
     "|\\bin(?:stanceof)(?=\\s+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
   const unary =
