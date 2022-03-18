@@ -54,8 +54,8 @@ export class Parser {
     this.forward = this.isConcise = true;
     this.pos = this.maxPos = this.textPos = -1;
     this.data = this.filename = this.indent = "";
-    this.activeTag = this.activeAttr = undefined;
     this.beginMixedMode = this.endingMixedModeAtEOL = false;
+    this.lines = this.activeTag = this.activeAttr = undefined;
     this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
