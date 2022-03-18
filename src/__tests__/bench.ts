@@ -39,14 +39,14 @@ const COMPARE = process.env.COMPARE;
     const { createParser } = API;
     suite.add(entry, () => {
       const parser = createParser({});
-      parser.parse(src, filename);
+      parser.parse(src);
     });
 
     if (compareModule) {
       const { createParser } = compareModule;
       suite.add(`${entry} #${COMPARE}`, () => {
         const parser = createParser({});
-        parser.parse(src, filename);
+        parser.parse(src);
       });
     }
 

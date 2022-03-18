@@ -117,7 +117,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
         addValueRange(range.block ? `scriptlet:block` : `scriptlet`, range);
       },
     });
-    parser.parse(src, filename);
+    parser.parse(src);
 
     let result = "";
     for (let line = 0; line < partsByLine.length; line++) {
