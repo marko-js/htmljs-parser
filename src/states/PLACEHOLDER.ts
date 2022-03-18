@@ -42,7 +42,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
         "Invalid placeholder, the expression cannot be missing"
       );
     }
-    this.skip(1); // skip }
+    this.pos++; // skip }
     this.exitState();
   },
 };
@@ -71,23 +71,23 @@ export function checkForPlaceholder(parser: Parser, code: number) {
 
         if (remainder) {
           parser.endText();
-          parser.skip(extra);
+          parser.pos += extra;
           parser.startText();
-          parser.skip(escape ? 2 : 3); // skip the ${ or $!{
+          parser.pos += escape ? 2 : 3; // skip the ${ or $!{
           return true;
         } else {
           parser.startText();
-          parser.skip(extra); // include half of the backslashes.
+          parser.pos += extra; // include half of the backslashes.
           parser.endText();
-          parser.skip(extra);
+          parser.pos += extra;
         }
       }
 
       parser.endText();
       parser.enterState(PLACEHOLDER).escape = escape;
-      parser.skip(escape ? 2 : 3); // skip ${ or $!{
+      parser.pos += escape ? 2 : 3; // skip ${ or $!{
       parser.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_CURLY_BRACE;
-      parser.rewind(1);
+      parser.pos--;
       return true;
     }
   }

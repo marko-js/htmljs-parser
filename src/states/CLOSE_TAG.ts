@@ -19,7 +19,7 @@ export const CLOSE_TAG: StateDefinition = {
 
   char(code, closeTag) {
     if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.skip(1); // skip >
+      this.pos++; // skip >
       this.exitState();
       ensureExpectedCloseTag(this, closeTag);
     }
@@ -67,7 +67,7 @@ export function checkForClosingTag(parser: Parser) {
     if (
       ensureExpectedCloseTag(parser, {
         start: parser.pos,
-        end: parser.skip(skip),
+        end: (parser.pos += skip),
       })
     ) {
       parser.exitState();

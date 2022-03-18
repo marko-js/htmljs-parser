@@ -32,7 +32,7 @@ export const HTML_COMMENT: StateDefinition = {
       let offset = 1;
       let next: number;
       while ((next = this.lookAtCharCodeAhead(offset++)) === CODE.HYPHEN);
-      this.skip(offset); // skip all -
+      this.pos += offset; // skip all -
 
       if (next === CODE.CLOSE_ANGLE_BRACKET) {
         this.exitState();

@@ -47,7 +47,7 @@ function exitDeclaration(
   declaration: Range,
   closeOffset: number
 ) {
-  parser.skip(closeOffset);
+  parser.pos += closeOffset;
   parser.exitState();
   parser.handlers.onDeclaration?.({
     start: declaration.start,
