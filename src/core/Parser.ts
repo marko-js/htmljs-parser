@@ -32,7 +32,6 @@ export class Parser {
   public pos!: number;
   public maxPos!: number;
   public data!: string;
-  public filename!: string;
   public activeState!: StateDefinition;
   public activeRange!: Meta;
   public forward!: boolean;
@@ -47,16 +46,6 @@ export class Parser {
 
   constructor(public handlers: Handlers) {
     this.handlers = handlers;
-    this.reset();
-  }
-
-  reset() {
-    this.forward = this.isConcise = true;
-    this.pos = this.maxPos = this.textPos = -1;
-    this.data = this.filename = this.indent = "";
-    this.beginMixedMode = this.endingMixedModeAtEOL = false;
-    this.lines = this.activeTag = this.activeAttr = undefined;
-    this.enterState(STATE.CONCISE_HTML_CONTENT);
   }
 
   read(range: Range) {
@@ -291,16 +280,21 @@ export class Parser {
     this.pos += ahead;
   }
 
-  parse(data: string, filename: string) {
-    this.data = data;
-    this.filename = filename;
+  parse(data: string) {
     const maxPos = (this.maxPos = data.length);
+    this.data = data;
+    this.indent = "";
+    this.textPos = -1;
+    this.forward = this.isConcise = true;
+    this.beginMixedMode = this.endingMixedModeAtEOL = false;
+    this.lines = this.activeTag = this.activeAttr = undefined;
 
     // Skip the byte order mark (BOM) sequence
     // at the beginning of the file if there is one:
     // - https://en.wikipedia.org/wiki/Byte_order_mark
     // > The Unicode Standard permits the BOM in UTF-8, but does not require or recommend its use.
     this.pos = data.charCodeAt(0) === 0xfeff ? 1 : 0;
+    this.enterState(STATE.CONCISE_HTML_CONTENT);
 
     while (this.pos < maxPos) {
       const code = data.charCodeAt(this.pos);
