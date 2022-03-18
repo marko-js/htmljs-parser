@@ -322,7 +322,7 @@ function canCharCodeBeFollowedByDivision(code: number) {
 
 function escapeOperator(str: string) {
   if (/^[A-Z]+$/i.test(str)) {
-    return "\\b" + escapeNonAlphaNumeric(str) + "\\b";
+    return "\\b" + escapeNonAlphaNumeric(str) + "(?=\\s+[^=/,;:>])";
   }
   if (str === "/") {
     return "\\/(?:\\b|\\s)"; //make sure this isn't a comment
