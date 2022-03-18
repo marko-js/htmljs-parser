@@ -1,7 +1,74 @@
 1╭─ var a = 'foo' instanceof String
- │  │   │ │ │                      ├─ closeTag(var)
- │  │   │ │ │                      ╰─ openTagEnd(var)
  │  │   │ │ ╰─ attrValue.value "'foo' instanceof String"
  │  │   │ ╰─ attrValue "= 'foo' instanceof String"
  │  │   ╰─ attrName
  ╰─ ╰─ tagName "var"
+2╭─ 
+ ╰─ ╰─ openTagEnd(var)
+3╭─ tag a = 'foo' instanceof = String
+ │  │   │ │ │     │          │ ╰─ attrValue.value "String"
+ │  │   │ │ │     │          ╰─ attrValue "= String"
+ │  │   │ │ │     ╰─ attrName "instanceof"
+ │  │   │ │ ╰─ attrValue.value "'foo'"
+ │  │   │ ╰─ attrValue "= 'foo'"
+ │  │   ╰─ attrName
+ │  ├─ closeTag(var)
+ ╰─ ╰─ tagName "tag"
+4╭─ tag a = 'foo' instanceof := String
+ │  │   │ │ │     │          │  ╰─ attrValue:bound.value "String"
+ │  │   │ │ │     │          ╰─ attrValue:bound ":= String"
+ │  │   │ │ │     ╰─ attrName "instanceof"
+ │  │   │ │ ╰─ attrValue.value "'foo'"
+ │  │   │ ╰─ attrValue "= 'foo'"
+ │  │   ╰─ attrName
+ │  ├─ closeTag(tag)
+ │  ├─ openTagEnd(tag)
+ ╰─ ╰─ tagName "tag"
+5╭─ tag a = 'foo' instanceof= String
+ │  │   │ │ │     │         │ ╰─ attrValue.value "String"
+ │  │   │ │ │     │         ╰─ attrValue "= String"
+ │  │   │ │ │     ╰─ attrName "instanceof"
+ │  │   │ │ ╰─ attrValue.value "'foo'"
+ │  │   │ ╰─ attrValue "= 'foo'"
+ │  │   ╰─ attrName
+ │  ├─ closeTag(tag)
+ │  ├─ openTagEnd(tag)
+ ╰─ ╰─ tagName "tag"
+6╭─ tag a = 'foo' instanceof;
+ │  │   │ │ │     ╰─ attrName "instanceof"
+ │  │   │ │ ╰─ attrValue.value "'foo'"
+ │  │   │ ╰─ attrValue "= 'foo'"
+ │  │   ╰─ attrName
+ │  ├─ closeTag(tag)
+ │  ├─ openTagEnd(tag)
+ ╰─ ╰─ tagName "tag"
+7╭─ 
+ ╰─ ╰─ openTagEnd(tag)
+8╭─ tag a = 'foo' instanceof, b
+ │  │   │ │ │     │           ╰─ attrName
+ │  │   │ │ │     ╰─ attrName "instanceof"
+ │  │   │ │ ╰─ attrValue.value "'foo'"
+ │  │   │ ╰─ attrValue "= 'foo'"
+ │  │   ╰─ attrName
+ │  ├─ closeTag(tag)
+ ╰─ ╰─ tagName "tag"
+9╭─ 
+ ╰─ ╰─ openTagEnd(tag)
+10╭─ <tag a = 'foo' instanceof></tag>
+  │  ││   │ │ │     │         ││ ╰─ closeTag(tag).value "tag"
+  │  ││   │ │ │     │         │╰─ closeTag(tag) "</tag>"
+  │  ││   │ │ │     │         ╰─ openTagEnd(tag)
+  │  ││   │ │ │     ╰─ attrName "instanceof"
+  │  ││   │ │ ╰─ attrValue.value "'foo'"
+  │  ││   │ ╰─ attrValue "= 'foo'"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "tag"
+  ╰─ ╰─ closeTag(tag)
+11╭─ <tag a = 'foo' instanceof/>
+  │   │   │ │ │     │         │ ╰─ closeTag(tag)
+  │   │   │ │ │     │         ╰─ openTagEnd(tag) "/>"
+  │   │   │ │ │     ╰─ attrName "instanceof"
+  │   │   │ │ ╰─ attrValue.value "'foo'"
+  │   │   │ ╰─ attrValue "= 'foo'"
+  │   │   ╰─ attrName
+  ╰─  ╰─ tagName "tag"
