@@ -19,7 +19,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
     }[][] = Array.from({ length: lines.length }, () => []);
     const addRange = (label: string, range: Range) => {
       const pos = parser.positionAt(range.start);
-      partsByLine[pos.line - 1].push({
+      partsByLine[pos.line].push({
         label,
         range,
         pos,
@@ -152,7 +152,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       if (len) {
         const padding = " ".repeat(linePrefix.length - 3);
         parts.sort((a, b) => {
-          const delta = (a.pos.column || 1) - (b.pos.column || 1);
+          const delta = (a.pos.character || 1) - (b.pos.character || 1);
           return delta === 0 ? b.range.start - a.range.start : delta;
         });
 
@@ -161,7 +161,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
 
         for (let i = 0; i < len; i++) {
           const part = parts[i];
-          const col = part.pos.column || 1;
+          const col = part.pos.character || 1;
           const delta = col - lastCol;
 
           if (delta > 0) {
@@ -185,13 +185,15 @@ for (const entry of fs.readdirSync(FIXTURES)) {
             }
           }
 
-          if (prevPart && (prevPart.pos.column || 1) === (pos.column || 1)) {
+          const column = pos.character || 1;
+
+          if (prevPart && (prevPart.pos.character || 1) === column) {
             label = `├${label}`;
           } else {
             label = `╰${label}`;
           }
 
-          label = `${columns.slice(0, (pos.column || 1) - 1)}${label}`;
+          label = `${columns.slice(0, column - 1)}${label}`;
           result += `\n${padding + (prevPart ? `│  ${label}` : `╰─ ${label}`)}`;
         }
       }
