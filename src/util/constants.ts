@@ -43,18 +43,32 @@ export const enum BODY_MODE {
   PARSED_TEXT, // Body of a tag is treated as text, but placeholders will be parsed
 }
 
+// Same format as https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#position
 export interface Position {
+  /**
+   * Line position in a document (zero-based).
+   */
   line: number;
-  column: number;
+  /**
+   * Character offset on a line in a document (zero-based).
+   */
+  character: number;
 }
 
+// Same format as https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#range
 export interface Location {
   start: Position;
   end: Position;
 }
 
 export interface Range {
+  /**
+   * The start characters offset from the beginning of the document (zero-based).
+   */
   start: number;
+  /**
+   * The end characters offset from the beginning of the document (zero-based).
+   */
   end: number;
 }
 
