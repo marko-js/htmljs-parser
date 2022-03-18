@@ -93,14 +93,14 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       if (code === CODE.COLON) {
         ensureAttrName(this, attr);
         attr.bound = true;
-        this.skip(2); // skip :=
+        this.pos += 2; // skip :=
         this.consumeWhitespace();
       } else if (code === CODE.PERIOD) {
         attr.spread = true;
-        this.skip(3); // skip ...
+        this.pos += 3; // skip ...
       } else {
         ensureAttrName(this, attr);
-        this.skip(1); // skip =
+        this.pos++; // skip =
         this.consumeWhitespace();
       }
 
@@ -111,21 +111,21 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         ? CONCISE_VALUE_TERMINATORS
         : HTML_VALUE_TERMINATORS;
 
-      this.rewind(1);
+      this.pos--;
     } else if (code === CODE.OPEN_PAREN) {
       ensureAttrName(this, attr);
       attr.stage = ATTR_STAGE.ARGUMENT;
-      this.skip(1); // skip (
+      this.pos++; // skip (
       this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_PAREN;
-      this.rewind(1);
+      this.pos--;
     } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
       ensureAttrName(this, attr);
       attr.stage = ATTR_STAGE.BLOCK;
-      this.skip(1); // skip {
+      this.pos++; // skip {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = false;
       expr.terminator = CODE.CLOSE_CURLY_BRACE;
-      this.rewind(1);
+      this.pos--;
     } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
       attr.stage = ATTR_STAGE.NAME;
       const expr = this.enterState(STATE.EXPRESSION);
@@ -134,7 +134,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       expr.terminator = this.isConcise
         ? CONCISE_NAME_TERMINATORS
         : HTML_NAME_TERMINATORS;
-      this.rewind(1);
+      this.pos--;
     } else {
       this.exitState();
     }
@@ -184,7 +184,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         }
 
         const start = child.start - 1; // include (
-        const end = this.skip(1); // include )
+        const end = ++this.pos; // include )
         const value = {
           start: child.start,
           end: child.end,
@@ -210,7 +210,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       case ATTR_STAGE.BLOCK: {
         const params = attr.args as Ranges.Value;
         const start = params.start;
-        const end = this.skip(1); // include }
+        const end = ++this.pos; // include }
         this.handlers.onAttrMethod?.({
           start,
           end,

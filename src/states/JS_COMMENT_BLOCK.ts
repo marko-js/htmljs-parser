@@ -21,7 +21,7 @@ export const JS_COMMENT_BLOCK: StateDefinition = {
       code === CODE.ASTERISK &&
       this.lookAtCharCodeAhead(1) === CODE.FORWARD_SLASH
     ) {
-      this.skip(2); // skip */
+      this.pos += 2; // skip */
       this.exitState();
     }
   },

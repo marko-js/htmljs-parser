@@ -148,14 +148,6 @@ export class Parser {
     return this.data.charCodeAt(startPos + offset);
   }
 
-  rewind(offset: number) {
-    return (this.pos -= offset);
-  }
-
-  skip(offset: number) {
-    return (this.pos += offset);
-  }
-
   startText() {
     if (this.textPos === -1) {
       this.textPos = this.pos;
@@ -272,11 +264,11 @@ export class Parser {
         switch (code) {
           case CODE.CARRIAGE_RETURN:
           case CODE.NEWLINE:
-            this.skip(ahead);
+            this.pos += ahead;
             return true;
         }
       } else {
-        this.skip(ahead);
+        this.pos += ahead;
         return false;
       }
 
@@ -296,7 +288,7 @@ export class Parser {
     ) {
       ahead++;
     }
-    this.skip(ahead);
+    this.pos += ahead;
   }
 
   parse(data: string, filename: string) {
