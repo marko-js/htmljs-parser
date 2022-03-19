@@ -1,0 +1,22 @@
+1╭─ a=x * y
+ │  ││╰─ attrValue.value "x * y"
+ │  │├─ attrValue "=x * y"
+ │  │╰─ attrName
+ ╰─ ╰─ tagName
+2╭─ b=x ** y
+ │  ││╰─ attrValue.value "x ** y"
+ │  │├─ attrValue "=x ** y"
+ │  │╰─ attrName
+ │  ├─ closeTag(a)
+ │  ├─ openTagEnd(a)
+ ╰─ ╰─ tagName
+3╭─ c=x &&
+ │  ││╰─ attrValue.value "x &&\ny"
+ │  │├─ attrValue "=x &&\ny"
+ │  │╰─ attrName
+ │  ├─ closeTag(b)
+ │  ├─ openTagEnd(b)
+ ╰─ ╰─ tagName
+4╭─ y
+ │   ├─ closeTag(c)
+ ╰─  ╰─ openTagEnd(c)
