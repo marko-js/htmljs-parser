@@ -224,28 +224,28 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 
 function buildOperatorPattern(isConcise: boolean) {
   const binary =
-    "[*%<&^|?:]" + // Any of these characters can always continue an expression
-    "|=[=>]" + // We only continue after an equals if it is => or ==
+    "[!*%<&^|?:]+" + // Any of these characters can always continue an expression
+    "|=[=>]+" + // We only continue after an equals if it is => or ==
     "|/(?:\\b|\\s)" + // We only continue after a forward slash if it isn't //, /* or />
     "|\\.(?=\\s)" + // We only continue after a period if it's followed by a space
     "|\\bin(?:stanceof)(?=\\s+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
   const unary =
-    "!" +
-    "|a(?:sync|wait)" +
+    "\\b(?:" +
+    "a(?:sync|wait)" +
     "|class" +
     "|function" +
     "|new" +
     "|typeof" +
-    "|void";
+    "|void" +
+    ")\\b";
   const lookAheadPattern =
     "\\s*(?:" +
     binary +
-    "|\\+" + // any number of plus signs are ok.
-    `|-${isConcise ? "[^-]" : ""}` + // in concise mode only consume minus signs if not --
-    `|>${isConcise ? "" : "[>=]"}` + // in html mode only consume closing angle brackets if it is >= or >>
+    "|\\++" + // any number of plus signs are ok.
+    `|-${isConcise ? "[^-]" : "+"}` + // in concise mode only consume minus signs if not --
+    `|>+${isConcise ? "" : "[>=]"}` + // in html mode only consume closing angle brackets if it is >= or >>
     ")\\s*" +
     `|\\s+(?=[${isConcise ? "" : "["}{(])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
-
   const lookBehindPattern = `(?<=${unary}|${binary}|[^-]-|[^+]\\+)`;
   return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "y");
 }
