@@ -40,30 +40,9 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   char(code, expression) {
     if (!expression.groupStack.length) {
       if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
-        if (expression.skipOperators) {
+        if (!checkForOperators(this, expression)) {
           this.exitState();
-        } else {
-          const pattern = this.isConcise
-            ? conciseOperatorPattern
-            : htmlOperatorPattern;
-          pattern.lastIndex = this.pos;
-          const matches = pattern.exec(this.data);
-
-          if (matches) {
-            const [match] = matches;
-            if (match.length === 0) {
-              // We matched a look behind.
-              this.consumeWhitespace();
-              this.pos--;
-            } else {
-              // We matched a look ahead.
-              this.pos += match.length - 1;
-            }
-          } else {
-            this.exitState();
-          }
         }
-
         return;
       }
 
@@ -224,11 +203,15 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 
 function buildOperatorPattern(isConcise: boolean) {
   const binary =
-    "[!*%<&^|?:]+" + // Any of these characters can always continue an expression
-    "|=[=>]+" + // We only continue after an equals if it is => or ==
-    "|/(?:\\b|\\s)" + // We only continue after a forward slash if it isn't //, /* or />
-    "|\\.(?=\\s)" + // We only continue after a period if it's followed by a space
-    "|\\bin(?:stanceof)(?=\\s+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
+    "[!~*%&^|?:]+" + // Any of these characters can always continue an expression
+    "|(?<=[!=<>&^~|/*?%+-])=|=(?=[!=<>&^~|/*?%+-])" + // Match equality and multi char assignment operators w/o matching equals by itself
+    "|(?<!\\+)\\s*\\+(?:\\s*\\+\\s*\\+)*\\s*(?!\\+)" + // We only match an odd number of plus's
+    `|(?<!-)${isConcise ? "-" : "\\s*-(?:\\s*-\\s*-)*\\s*"}(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
+    `|(?<![/*])/(?![/*${isConcise ? "" : ">"}])` + // We only continue after a forward slash if it isn't //, /* (or /> in html mode)
+    `|(?<!${isConcise ? "^\\s*|" : ""}\\.)\\.(?!\\.)` + // We only continue after a dot if it isn't on newline in concise mode or a ...
+    `|<${isConcise ? "{2,}|(?<!^\\s*)<" : "+"}` + // In concise mode we can't match a single < at the beginning of the line.
+    `|>${isConcise ? "+" : "{2,}"}` + // in html mode only consume closing angle brackets if it is >>
+    "|\\bin(?:stanceof)?(?=\\s+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
   const unary =
     "\\b(?:" +
     "a(?:sync|wait)" +
@@ -239,15 +222,37 @@ function buildOperatorPattern(isConcise: boolean) {
     "|void" +
     ")\\b";
   const lookAheadPattern =
-    "\\s*(?:" +
-    binary +
-    "|\\++" + // any number of plus signs are ok.
-    `|-${isConcise ? "[^-]" : "+"}` + // in concise mode only consume minus signs if not --
-    `|>+${isConcise ? "" : "[>=]"}` + // in html mode only consume closing angle brackets if it is >= or >>
-    ")\\s*" +
-    `|\\s+(?=[${isConcise ? "" : "["}{(])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
-  const lookBehindPattern = `(?<=${unary}|${binary}|[^-]-|[^+]\\+)`;
-  return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "y");
+    "\\s*(?:" + binary + ")\\s*" + `|\\s+(?=[${isConcise ? "" : "["}{(])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
+  const lookBehindPattern = `(?<=${unary}|${binary})`;
+  return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "ym");
+}
+
+function checkForOperators(parser: Parser, expression: ExpressionMeta) {
+  if (expression.skipOperators) {
+    return false;
+  }
+
+  const pattern = parser.isConcise
+    ? conciseOperatorPattern
+    : htmlOperatorPattern;
+  pattern.lastIndex = parser.pos;
+  const matches = pattern.exec(parser.data);
+
+  if (matches) {
+    const [match] = matches;
+    if (match.length === 0) {
+      // We matched a look behind.
+      parser.consumeWhitespace();
+      parser.pos--;
+    } else {
+      // We matched a look ahead.
+      parser.pos += match.length - 1;
+    }
+  } else {
+    return false;
+  }
+
+  return true;
 }
 
 function checkForTerminators(
