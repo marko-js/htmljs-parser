@@ -1,3 +1,6 @@
 {
-  "branches": ["+([0-9])?(.{+([0-9]),x}).x", "main", "next"]
+  "branches": [
+    { "name": "main", "channel": "latest" },
+    { "name": "next", "channel": "next", "prerelease": true }
+  ]
 }
