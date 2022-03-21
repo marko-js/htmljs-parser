@@ -34,7 +34,7 @@ export class Parser {
   public data!: string;
   public activeState!: StateDefinition;
   public activeRange!: Meta;
-  public forward!: boolean;
+  public forward!: number;
   public activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
   public activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
   public indent!: string; // Used to build the indent for the current concise line
@@ -73,7 +73,7 @@ export class Parser {
     const { activeRange, activeState } = this;
     const parent = (this.activeRange = activeRange.parent);
     this.activeState = parent.state;
-    this.forward = false;
+    this.forward = 0;
     activeRange.end = this.pos;
     activeState.exit.call(this, activeRange);
     this.activeState.return.call(this, activeRange, parent);
@@ -285,7 +285,8 @@ export class Parser {
     this.data = data;
     this.indent = "";
     this.textPos = -1;
-    this.forward = this.isConcise = true;
+    this.forward = 1;
+    this.isConcise = true;
     this.beginMixedMode = this.endingMixedModeAtEOL = false;
     this.lines = this.activeTag = this.activeAttr = undefined;
 
@@ -298,31 +299,28 @@ export class Parser {
 
     while (this.pos < maxPos) {
       const code = data.charCodeAt(this.pos);
-      let skip = 1;
 
       if (code === CODE.NEWLINE) {
+        this.forward = 1;
         this.activeState.eol.call(this, 1, this.activeRange);
       } else if (
         code === CODE.CARRIAGE_RETURN &&
         data.charCodeAt(this.pos + 1) === CODE.NEWLINE
       ) {
+        this.forward = 2;
         this.activeState.eol.call(this, 2, this.activeRange);
-        skip = 2;
       } else {
+        this.forward = 1;
         this.activeState.char.call(this, code, this.activeRange);
       }
 
-      if (this.forward) {
-        this.pos += skip;
-      } else {
-        this.forward = true;
-      }
+      this.pos += this.forward;
     }
 
     while (this.pos === this.maxPos) {
-      this.forward = true;
+      this.forward = 1;
       this.activeState.eof.call(this, this.activeRange);
-      if (this.forward) break;
+      if (this.forward !== 0) break;
     }
   }
 }
