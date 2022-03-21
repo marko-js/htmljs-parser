@@ -118,7 +118,7 @@ function handleDelimitedBlockEOL(
     parser.startText();
     parser.pos += indent.length;
     // We stay in the same state since we are still parsing a multiline, delimited HTML block
-  } else if (indent && !parser.onlyWhitespaceRemainsOnLine()) {
+  } else if (indent && !parser.onlyWhitespaceRemainsOnLine(newLineLength)) {
     // the next line does not have enough indentation
     // so unless it is blank (whitespace only),
     // we will end the block
