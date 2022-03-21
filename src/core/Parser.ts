@@ -298,6 +298,7 @@ export class Parser {
 
     while (this.pos < maxPos) {
       const code = data.charCodeAt(this.pos);
+      let skip = 1;
 
       if (code === CODE.NEWLINE) {
         this.activeState.eol.call(this, 1, this.activeRange);
@@ -306,13 +307,13 @@ export class Parser {
         data.charCodeAt(this.pos + 1) === CODE.NEWLINE
       ) {
         this.activeState.eol.call(this, 2, this.activeRange);
-        this.pos++;
+        skip = 2;
       } else {
         this.activeState.char.call(this, code, this.activeRange);
       }
 
       if (this.forward) {
-        this.pos++;
+        this.pos += skip;
       } else {
         this.forward = true;
       }

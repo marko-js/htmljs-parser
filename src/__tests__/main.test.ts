@@ -17,7 +17,17 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       pos: Position;
       label: string;
     }[][] = Array.from({ length: lines.length }, () => []);
-    const addRange = (label: string, range: Range) => {
+    // we'll remove windows newlines for the purposes of snapshots.
+    const read = (range: Range) => parser.read(range).replace(/\r/g, "");
+    const addRange = (label: string, inputRange: Range) => {
+      // we'll normalize windows newline positions for the snapshots.
+      const range =
+        src.charAt(inputRange.start) === "\r"
+          ? {
+              start: inputRange.start + 1,
+              end: inputRange.end,
+            }
+          : inputRange;
       const pos = parser.positionAt(range.start);
       partsByLine[pos.line].push({
         label,
@@ -100,13 +110,10 @@ for (const entry of fs.readdirSync(FIXTURES)) {
         addValueRange("attrSpread", range);
       },
       onOpenTagEnd(range) {
-        addRange(
-          `openTagEnd(${parser.read(tagStack[tagStack.length - 1])})`,
-          range
-        );
+        addRange(`openTagEnd(${read(tagStack[tagStack.length - 1])})`, range);
       },
       onCloseTag(range) {
-        const label = `closeTag(${parser.read(tagStack.pop()!)})`;
+        const label = `closeTag(${read(tagStack.pop()!)})`;
         if (range.value) {
           addValueRange(label, range as Ranges.Value);
         } else {
@@ -134,7 +141,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       if (line === 0) {
         result += `${
           linePrefix +
-          parser.read({
+          read({
             start: 0,
             end: lines[1],
           })
@@ -142,7 +149,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       } else {
         result += `\n${
           linePrefix +
-          parser.read({
+          read({
             start: lines[line] + 1,
             end: lines[line + 1],
           })
@@ -177,11 +184,9 @@ for (const entry of fs.readdirSync(FIXTURES)) {
           let label = `─ ${part.label}`;
 
           if (range.end > range.start) {
-            const txt = parser.read(part.range);
+            const txt = read(part.range);
             if (txt.length > 1 || /\s/.test(txt)) {
-              label += ` ${JSON.stringify(
-                parser.read(part.range).replace(/\r\n/g, "\n")
-              )}`;
+              label += ` ${JSON.stringify(txt)}`;
             }
           }
 
