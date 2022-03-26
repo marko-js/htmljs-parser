@@ -133,7 +133,8 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   eol(_, expression) {
     if (
       !expression.groupStack.length &&
-      (expression.terminatedByWhitespace || expression.terminatedByEOL)
+      (expression.terminatedByWhitespace || expression.terminatedByEOL) &&
+      !checkForOperators(this, expression)
     ) {
       this.exitState();
     }
@@ -206,7 +207,7 @@ function buildOperatorPattern(isConcise: boolean) {
     "[!~*%&^|?:]+" + // Any of these characters can always continue an expression
     "|(?<=[!=<>&^~|/*?%+-])=|=(?=[!=<>&^~|/*?%+-])" + // Match equality and multi char assignment operators w/o matching equals by itself
     "|(?<!\\+)\\s*\\+(?:\\s*\\+\\s*\\+)*\\s*(?!\\+)" + // We only match an odd number of plus's
-    `|(?<!-)${isConcise ? "-" : "\\s*-(?:\\s*-\\s*-)*\\s*"}(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
+    `|(?<!^\\s*|-)-${isConcise ? "" : "(?:\\s*-\\s*-)*\\s*"}(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
     `|(?<![/*])/(?![/*${isConcise ? "" : ">"}])` + // We only continue after a forward slash if it isn't //, /* (or /> in html mode)
     `|(?<!${isConcise ? "^\\s*|" : ""}\\.)\\.(?!\\.)` + // We only continue after a dot if it isn't on newline in concise mode or a ...
     `|<${isConcise ? "{2,}|(?<!^\\s*)<" : "+"}` + // In concise mode we can't match a single < at the beginning of the line.

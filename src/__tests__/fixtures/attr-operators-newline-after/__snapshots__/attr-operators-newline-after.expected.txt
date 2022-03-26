@@ -1,0 +1,366 @@
+1╭─ a=x!
+ │  ││╰─ attrValue.value "x!\ny"
+ │  │├─ attrValue "=x!\ny"
+ │  │╰─ attrName
+ ╰─ ╰─ tagName
+2├─ y
+3╭─ a=x*
+ │  ││╰─ attrValue.value "x*\ny"
+ │  │├─ attrValue "=x*\ny"
+ │  │╰─ attrName
+ │  ├─ closeTag(a)
+ │  ├─ openTagEnd(a)
+ ╰─ ╰─ tagName
+4├─ y
+5╭─ a=x**
+ │  ││╰─ attrValue.value "x**\ny"
+ │  │├─ attrValue "=x**\ny"
+ │  │╰─ attrName
+ │  ├─ closeTag(a)
+ │  ├─ openTagEnd(a)
+ ╰─ ╰─ tagName
+6├─ y
+7╭─ a=x%
+ │  ││╰─ attrValue.value "x%\ny"
+ │  │├─ attrValue "=x%\ny"
+ │  │╰─ attrName
+ │  ├─ closeTag(a)
+ │  ├─ openTagEnd(a)
+ ╰─ ╰─ tagName
+8├─ y
+9╭─ a=x&
+ │  ││╰─ attrValue.value "x&\ny"
+ │  │├─ attrValue "=x&\ny"
+ │  │╰─ attrName
+ │  ├─ closeTag(a)
+ │  ├─ openTagEnd(a)
+ ╰─ ╰─ tagName
+10├─ y
+11╭─ a=x&&
+  │  ││╰─ attrValue.value "x&&\ny"
+  │  │├─ attrValue "=x&&\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+12├─ y
+13╭─ a=x^
+  │  ││╰─ attrValue.value "x^\ny"
+  │  │├─ attrValue "=x^\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+14├─ y
+15╭─ a=x~
+  │  ││╰─ attrValue.value "x~\ny"
+  │  │├─ attrValue "=x~\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+16├─ y
+17╭─ a=x|
+  │  ││╰─ attrValue.value "x|\ny"
+  │  │├─ attrValue "=x|\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+18├─ y
+19╭─ a=x||
+  │  ││╰─ attrValue.value "x||\ny"
+  │  │├─ attrValue "=x||\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+20├─ y
+21╭─ a=x??
+  │  ││╰─ attrValue.value "x??\ny"
+  │  │├─ attrValue "=x??\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+22├─ y
+23╭─ a=x?
+  │  ││╰─ attrValue.value "x?\ny:\nz"
+  │  │├─ attrValue "=x?\ny:\nz"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+24├─ y:
+25├─ z
+26╭─ a=x==
+  │  ││╰─ attrValue.value "x==\ny"
+  │  │├─ attrValue "=x==\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+27├─ y
+28╭─ a=x===
+  │  ││╰─ attrValue.value "x===\ny"
+  │  │├─ attrValue "=x===\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+29├─ y
+30╭─ a=x!=
+  │  ││╰─ attrValue.value "x!=\ny"
+  │  │├─ attrValue "=x!=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+31├─ y
+32╭─ a=x!==
+  │  ││╰─ attrValue.value "x!==\ny"
+  │  │├─ attrValue "=x!==\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+33├─ y
+34╭─ a=x<=
+  │  ││╰─ attrValue.value "x<=\ny"
+  │  │├─ attrValue "=x<=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+35├─ y
+36╭─ a=x>=
+  │  ││╰─ attrValue.value "x>=\ny"
+  │  │├─ attrValue "=x>=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+37├─ y
+38╭─ a=x&=
+  │  ││╰─ attrValue.value "x&=\ny"
+  │  │├─ attrValue "=x&=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+39├─ y
+40╭─ a=x&&=
+  │  ││╰─ attrValue.value "x&&=\ny"
+  │  │├─ attrValue "=x&&=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+41├─ y
+42╭─ a=x|=
+  │  ││╰─ attrValue.value "x|=\ny"
+  │  │├─ attrValue "=x|=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+43├─ y
+44╭─ a=x||=
+  │  ││╰─ attrValue.value "x||=\ny"
+  │  │├─ attrValue "=x||=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+45├─ y
+46╭─ a=x^=
+  │  ││╰─ attrValue.value "x^=\ny"
+  │  │├─ attrValue "=x^=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+47├─ y
+48╭─ a=x~=
+  │  ││╰─ attrValue.value "x~=\ny"
+  │  │├─ attrValue "=x~=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+49├─ y
+50╭─ a=x>>=
+  │  ││╰─ attrValue.value "x>>=\ny"
+  │  │├─ attrValue "=x>>=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+51├─ y
+52╭─ a=x>>>=
+  │  ││╰─ attrValue.value "x>>>=\ny"
+  │  │├─ attrValue "=x>>>=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+53├─ y
+54╭─ a=x-=
+  │  ││╰─ attrValue.value "x-=\ny"
+  │  │├─ attrValue "=x-=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+55├─ y
+56╭─ a=x/=
+  │  ││╰─ attrValue.value "x/=\ny"
+  │  │├─ attrValue "=x/=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+57├─ y
+58╭─ a=x*=
+  │  ││╰─ attrValue.value "x*=\ny"
+  │  │├─ attrValue "=x*=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+59├─ y
+60╭─ a=x**=
+  │  ││╰─ attrValue.value "x**=\ny"
+  │  │├─ attrValue "=x**=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+61├─ y
+62╭─ a=x%=
+  │  ││╰─ attrValue.value "x%=\ny"
+  │  │├─ attrValue "=x%=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+63├─ y
+64╭─ a=x+=
+  │  ││╰─ attrValue.value "x+=\ny"
+  │  │├─ attrValue "=x+=\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+65├─ y
+66╭─ a=x.
+  │  ││╰─ attrValue.value "x.\ny"
+  │  │├─ attrValue "=x.\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+67├─ y
+68╭─ a=x++
+  │  ││╰─ attrValue.value "x++\n+y"
+  │  │├─ attrValue "=x++\n+y"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+69├─ +y
+70╭─ a=x+
+  │  ││╰─ attrValue.value "x+\n++y"
+  │  │├─ attrValue "=x+\n++y"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+71├─ ++y
+72╭─ a=x>
+  │  ││╰─ attrValue.value "x>\ny"
+  │  │├─ attrValue "=x>\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+73├─ y
+74╭─ a=x>>
+  │  ││╰─ attrValue.value "x>>\ny"
+  │  │├─ attrValue "=x>>\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+75├─ y
+76╭─ a=x>>>
+  │  ││╰─ attrValue.value "x>>>\ny"
+  │  │├─ attrValue "=x>>>\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+77├─ y
+78╭─ a=x
+  │  ││╰─ attrValue.value "x\n(y)"
+  │  │├─ attrValue "=x\n(y)"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+79├─ (y)
+80╭─ a=x
+  │  ││╰─ attrValue.value "x\n{y}"
+  │  │├─ attrValue "=x\n{y}"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+81├─ {y}
+82╭─ <a=x
+  │  │││╰─ attrValue.value "x\n[y]"
+  │  ││├─ attrValue "=x\n[y]"
+  │  ││╰─ attrName
+  │  │╰─ tagName
+  │  ├─ closeTag(a)
+  ╰─ ╰─ openTagEnd(a)
+83╭─ [y]/>
+  ╰─    ╰─ openTagEnd(a) "/>"
+84╭─ a=x
+  │  ││╰─ attrValue.value "x\n=>\ny"
+  │  │├─ attrValue "=x\n=>\ny"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  ╰─ ╰─ tagName
+85├─ =>
+86╭─ y z
+  ╰─   ╰─ attrName
+87╭─ a=x=>
+  │  ││╰─ attrValue.value "x=>\n(y)"
+  │  │├─ attrValue "=x=>\n(y)"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+88╭─ (y) z
+  ╰─     ╰─ attrName
+89╭─ a=x=>
+  │  ││╰─ attrValue.value "x=>\n{y}"
+  │  │├─ attrValue "=x=>\n{y}"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+90╭─ {y} z
+  ╰─     ╰─ attrName
+91╭─ a=(x)
+  │  ││╰─ attrValue.value "(x)\n{y}"
+  │  │├─ attrValue "=(x)\n{y}"
+  │  │╰─ attrName
+  │  ├─ closeTag(a)
+  │  ├─ openTagEnd(a)
+  ╰─ ╰─ tagName
+92╭─ {y} z
+  │      │├─ closeTag(a)
+  │      │╰─ openTagEnd(a)
+  ╰─     ╰─ attrName
