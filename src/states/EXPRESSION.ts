@@ -133,10 +133,13 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   eol(_, expression) {
     if (
       !expression.groupStack.length &&
-      (expression.terminatedByWhitespace || expression.terminatedByEOL) &&
-      !checkForOperators(this, expression)
+      (expression.terminatedByWhitespace || expression.terminatedByEOL)
     ) {
-      this.exitState();
+      if (checkForOperators(this, expression)) {
+        this.forward = 1;
+      } else {
+        this.exitState();
+      }
     }
   },
 
@@ -147,7 +150,6 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
     ) {
       this.exitState();
     } else {
-      // TODO: refactor to avoid using parentState
       const { parent } = expression;
 
       switch (parent.state) {
