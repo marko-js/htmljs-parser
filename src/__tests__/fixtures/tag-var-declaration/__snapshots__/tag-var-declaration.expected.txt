@@ -77,9 +77,21 @@
   │   │  ╰─ tagVar "/ref"
   ╰─  ╰─ tagName "div"
 18╭─ <div/ref />
-  │  ││  ││   │ ╰─ closeTag(div)
   │  ││  ││   ╰─ openTagEnd(div) "/>"
   │  ││  │╰─ tagVar.value "ref"
   │  ││  ╰─ tagVar "/ref"
   │  │╰─ tagName "div"
+  ╰─ ╰─ closeTag(div)
+19╭─ 
+  ╰─ ╰─ closeTag(div)
+20╭─ <div#ab.cd/ref/>
+  │   │  ││ ││ ││  ╰─ openTagEnd(div) "/>"
+  │   │  ││ ││ │╰─ tagVar.value "ref"
+  │   │  ││ ││ ╰─ tagVar "/ref"
+  │   │  ││ │╰─ tagShorthandClass.quasis[0] "cd"
+  │   │  ││ ╰─ tagShorthandClass ".cd"
+  │   │  │╰─ tagShorthandId.quasis[0] "ab"
+  │   │  ╰─ tagShorthandId "#ab"
+  ╰─  ╰─ tagName "div"
+21╭─ 
   ╰─ ╰─ closeTag(div)
