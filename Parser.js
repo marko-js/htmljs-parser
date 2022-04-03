@@ -2657,13 +2657,20 @@ class Parser extends BaseParser {
 
             char(ch, code) {
                 var shorthand = currentPart;
-                if (!isConcise) {
-                    if (code === CODE_CLOSE_ANGLE_BRACKET || code === CODE_FORWARD_SLASH) {
-                        currentOpenTag.tagNameEnd = parser.pos;
-                        endTagNameShorthand();
-                        parser.rewind(1);
-                        return;
+                if (code === CODE_CLOSE_ANGLE_BRACKET && !isConcise) {
+                    currentOpenTag.tagNameEnd = parser.pos;
+                    endTagNameShorthand();
+                    parser.rewind(1);
+                    return;
+                } else if (code === CODE_FORWARD_SLASH) {
+                    currentOpenTag.tagNameEnd = parser.pos;
+                    endTagNameShorthand();
+                    parser.rewind(1);
+
+                    if (parser.lookAtCharCodeAhead(2) !== CODE_CLOSE_ANGLE_BRACKET) {
+                        parser.enterState(STATE_TAG_VAR);
                     }
+                    return;
                 }
 
                 if (isWhitespaceCode(code)) {
