@@ -63,7 +63,7 @@
   "scripts": {
     "bench": "npm run build && node -r esbuild-register ./src/__tests__/bench",
     "build": "tsc -b && node -r esbuild-register build",
-    "ci:test": "nyc npm run mocha -- --forbid-pending --forbid-only",
+    "ci:test": "nyc npm run mocha -- --forbid-only",
     "format": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write && (fixpack || true)",
     "lint": "tsc -b && npm run lint:eslint && npm run lint:prettier -- -l && fixpack",
     "lint:eslint": "eslint -f visualstudio .",
