@@ -5,6 +5,7 @@ import {
   StateDefinition,
   Parser,
   Meta,
+  ErrorCode,
 } from "../internal";
 
 export interface ExpressionMeta extends Meta {
@@ -105,7 +106,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         if (!expression.groupStack.length) {
           return this.emitError(
             expression,
-            "INVALID_EXPRESSION",
+            ErrorCode.INVALID_EXPRESSION,
             'Mismatched group. A closing "' +
               String.fromCharCode(code) +
               '" character was found but it is not matched with a corresponding opening character.'
@@ -116,7 +117,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         if (expectedCode !== code) {
           return this.emitError(
             expression,
-            "INVALID_EXPRESSION",
+            ErrorCode.INVALID_EXPRESSION,
             'Mismatched group. A "' +
               String.fromCharCode(code) +
               '" character was found when "' +
@@ -160,7 +161,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           if (!attr.spread && !attr.name) {
             return this.emitError(
               expression,
-              "MALFORMED_OPEN_TAG",
+              ErrorCode.MALFORMED_OPEN_TAG,
               'EOF reached while parsing attribute name for the "' +
                 this.read(this.activeTag!.tagName) +
                 '" tag'
@@ -169,7 +170,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 
           return this.emitError(
             expression,
-            "MALFORMED_OPEN_TAG",
+            ErrorCode.MALFORMED_OPEN_TAG,
             `EOF reached while parsing attribute value for the ${
               attr.spread
                 ? "..."
@@ -183,21 +184,21 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         case STATE.TAG_NAME:
           return this.emitError(
             expression,
-            "MALFORMED_OPEN_TAG",
+            ErrorCode.MALFORMED_OPEN_TAG,
             "EOF reached while parsing tag name"
           );
 
         case STATE.PLACEHOLDER:
           return this.emitError(
             expression,
-            "MALFORMED_PLACEHOLDER",
+            ErrorCode.MALFORMED_PLACEHOLDER,
             "EOF reached while parsing placeholder"
           );
       }
 
       return this.emitError(
         expression,
-        "INVALID_EXPRESSION",
+        ErrorCode.INVALID_EXPRESSION,
         "EOF reached while parsing expression"
       );
     }

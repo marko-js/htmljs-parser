@@ -1,5 +1,5 @@
 import { CODE, type Parser } from "../internal";
-import type { Location, Position, Range } from "./constants";
+import { ErrorCode, Location, Position, Range } from "./constants";
 
 export function isWhitespaceCode(code: number) {
   // For all practical purposes, the space character (32) and all the
@@ -65,7 +65,7 @@ export function htmlEOF(this: Parser) {
       // NOTE: We have already closed tags that are open tag only or self-closed
       return this.emitError(
         this.activeTag,
-        "MISSING_END_TAG",
+        ErrorCode.MISSING_END_TAG,
         'Missing ending "' + this.read(this.activeTag.tagName) + '" tag'
       );
     }

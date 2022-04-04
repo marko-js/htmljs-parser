@@ -1,4 +1,4 @@
-import { CODE, Parser, StateDefinition, Range } from "../internal";
+import { CODE, Parser, StateDefinition, Range, ErrorCode } from "../internal";
 
 // We enter STATE.DECLARATION after we encounter a "<?"
 // while in the STATE.HTML_CONTENT.
@@ -34,7 +34,7 @@ export const DECLARATION: StateDefinition = {
   eof(declaration) {
     this.emitError(
       declaration,
-      "MALFORMED_DECLARATION",
+      ErrorCode.MALFORMED_DECLARATION,
       "EOF reached while parsing declaration"
     );
   },

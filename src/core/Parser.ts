@@ -8,6 +8,7 @@ import {
   getLines,
   getLoc,
   getPos,
+  ErrorCode,
 } from "../internal";
 
 export interface Meta extends Range {
@@ -169,7 +170,7 @@ export class Parser {
     content.indent = this.indent;
   }
 
-  emitError(range: number | Range, code: string, message: string) {
+  emitError(range: number | Range, code: ErrorCode, message: string) {
     let start, end;
 
     if (typeof range === "number") {
