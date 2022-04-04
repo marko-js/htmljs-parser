@@ -3,7 +3,7 @@
  │  │      │     ││    │ ╰─ closeTag(strong).value "strong"
  │  │      │     ││    ╰─ closeTag(strong) "</strong>"
  │  │      │     │╰─ text "Frank"
- │  │      │     ╰─ openTagEnd(strong)
+ │  │      │     ╰─ openTagEnd
  │  │      ╰─ tagName "strong"
  ╰─ ╰─ text "\nHello "
 3╭─ Line 2

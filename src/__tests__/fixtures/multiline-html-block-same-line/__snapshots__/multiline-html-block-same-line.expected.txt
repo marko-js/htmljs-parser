@@ -1,12 +1,12 @@
 1╭─ div --
- │  │   ╰─ openTagEnd(div)
+ │  │   ╰─ openTagEnd
  ╰─ ╰─ tagName "div"
 2╭─     Hello World
  ╰─ ╰─ text "\n    Hello World\n    Hello Again\n"
 3├─     Hello Again
 4├─     --
 5╭─     span --
- │      │    ╰─ openTagEnd(span)
+ │      │    ╰─ openTagEnd
  ╰─     ╰─ tagName "span"
 6╭─          Goodbye
  ╰─ ╰─ text "\n         Goodbye\n"

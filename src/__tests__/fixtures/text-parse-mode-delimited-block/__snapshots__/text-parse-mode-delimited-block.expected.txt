@@ -2,16 +2,16 @@
  ╰─ ╰─ tagName "div"
 2╭─     span
  │  │   ╰─ tagName "span"
- ╰─ ╰─ openTagEnd(div)
+ ╰─ ╰─ openTagEnd
 3╭─         ---
- ╰─ ╰─ openTagEnd(span)
+ ╰─ ╰─ openTagEnd
 4╭─         Test
  ╰─ ╰─ text "\n        Test\n        "
 5╭─         <b>Hello World</b>
  │           │││          │ ╰─ closeTag(b).value
  │           │││          ╰─ closeTag(b) "</b>"
  │           ││╰─ text "Hello World"
- │           │╰─ openTagEnd(b)
+ │           │╰─ openTagEnd
  ╰─          ╰─ tagName
 6╭─         ---
  │  │          ├─ closeTag(div)

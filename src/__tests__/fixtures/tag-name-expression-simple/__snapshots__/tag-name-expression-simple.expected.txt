@@ -1,5 +1,5 @@
 1╭─ <${foo}>
- │   │     ╰─ openTagEnd(${foo})
+ │   │     ╰─ openTagEnd
  │   ├─ tagName.expressions[0] "${foo}"
  │   ├─ tagName.quasis[0]
  ╰─  ╰─ tagName "${foo}"

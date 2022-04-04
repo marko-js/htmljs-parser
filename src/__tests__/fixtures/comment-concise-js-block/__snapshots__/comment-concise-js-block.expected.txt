@@ -2,7 +2,7 @@
  ╰─ ╰─ tagName
 2╭─   /*
  │  │ ╰─ comment "/*\n  This is a\n  multiline comment\n  */"
- ╰─ ╰─ openTagEnd(p)
+ ╰─ ╰─ openTagEnd
 3╭─   This is a
  ╰─ ╰─ comment.value "\n  This is a\n  multiline comment\n  "
 4├─   multiline comment

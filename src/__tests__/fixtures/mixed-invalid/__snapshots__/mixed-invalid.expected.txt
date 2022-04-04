@@ -4,12 +4,12 @@
  │  │   ╰─ attrName "colors"
  ╰─ ╰─ tagName "var"
 2╭─ <div>
- │  ││  ╰─ openTagEnd(div)
+ │  ││  ╰─ openTagEnd
  │  │╰─ tagName "div"
  │  ├─ closeTag(var)
- ╰─ ╰─ openTagEnd(var)
+ ╰─ ╰─ openTagEnd
 3╭─     <span class="foo">
- │  │    │    │    ││    ╰─ openTagEnd(span)
+ │  │    │    │    ││    ╰─ openTagEnd
  │  │    │    │    │╰─ attrValue.value "\"foo\""
  │  │    │    │    ╰─ attrValue "=\"foo\""
  │  │    │    ╰─ attrName "class"
@@ -23,7 +23,7 @@
  ╰─         ╰─ closeTag(span) "</span>"
 6╭─ </div> <b>This is not
  │  │ │   │ ││╰─ text "This is not\n    allowed"
- │  │ │   │ │╰─ openTagEnd(b)
+ │  │ │   │ │╰─ openTagEnd
  │  │ │   │ ╰─ tagName
  │  │ │   ╰─ text " "
  │  │ ╰─ closeTag(div).value "div"
@@ -42,6 +42,6 @@
  │  │    │   ││   │ ╰─ closeTag(span).value "span"
  │  │    │   ││   ╰─ closeTag(span) "</span>"
  │  │    │   │╰─ text "Test"
- │  │    │   ╰─ openTagEnd(span)
+ │  │    │   ╰─ openTagEnd
  │  │    ╰─ tagName "span"
- ╰─ ╰─ openTagEnd(p)
+ ╰─ ╰─ openTagEnd

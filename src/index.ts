@@ -1,7 +1,7 @@
-import { type Handlers, type Range, Parser } from "./internal";
+import { type ParserOptions, type Range, Parser } from "./internal";
 export {
-  OpenTagEnding,
-  type Handlers,
+  TagType,
+  type ParserOptions as Handlers,
   type Position,
   type Location,
   type Ranges,
@@ -11,7 +11,7 @@ export {
 /**
  * Creates a new Marko parser.
  */
-export function createParser(handlers: Handlers) {
+export function createParser(handlers: ParserOptions) {
   // Expose a subset of the parser api.
   const parser = new Parser(handlers);
 

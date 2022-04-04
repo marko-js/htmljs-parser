@@ -1,7 +1,7 @@
 1╭─ <div foo = 1, +2 = true></div>
  │   │   │   │ │  │  │ │   ││ ╰─ closeTag(div).value "div"
  │   │   │   │ │  │  │ │   │╰─ closeTag(div) "</div>"
- │   │   │   │ │  │  │ │   ╰─ openTagEnd(div)
+ │   │   │   │ │  │  │ │   ╰─ openTagEnd
  │   │   │   │ │  │  │ ╰─ attrValue.value "true"
  │   │   │   │ │  │  ╰─ attrValue "= true"
  │   │   │   │ │  ╰─ attrName "+2"

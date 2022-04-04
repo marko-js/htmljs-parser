@@ -1,7 +1,7 @@
 1╭─ <a data=123 data=abc></a>
  │   │ │   ││   │   ││  ││ ╰─ closeTag(a).value
  │   │ │   ││   │   ││  │╰─ closeTag(a) "</a>"
- │   │ │   ││   │   ││  ╰─ openTagEnd(a)
+ │   │ │   ││   │   ││  ╰─ openTagEnd
  │   │ │   ││   │   │╰─ attrValue.value "abc"
  │   │ │   ││   │   ╰─ attrValue "=abc"
  │   │ │   ││   ╰─ attrName "data"

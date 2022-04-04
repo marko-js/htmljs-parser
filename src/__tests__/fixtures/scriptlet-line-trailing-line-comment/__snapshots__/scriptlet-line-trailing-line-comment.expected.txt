@@ -3,7 +3,7 @@
  ╰─  ╰─ scriptlet " var str = '' // a string"
 2├─ 
 3╭─ <div>
- │   │  ╰─ openTagEnd(div)
+ │   │  ╰─ openTagEnd
  ╰─  ╰─ tagName "div"
 4╭─   Hello
  ╰─ ╰─ text "\n  Hello\n"

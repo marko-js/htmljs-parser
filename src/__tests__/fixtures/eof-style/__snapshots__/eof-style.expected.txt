@@ -1,6 +1,6 @@
 1╭─ <style a=b>/* block comment within <style> */"string within \"<style>\""'string within \'<style>\''
  │  ││     ││││╰─ text "/* block comment within <style> */\"string within \\\"<style>\\\"\"'string within \\'<style>\\''"
- │  ││     │││╰─ openTagEnd(style)
+ │  ││     │││╰─ openTagEnd
  │  ││     ││╰─ attrValue.value
  │  ││     │╰─ attrValue "=b"
  │  ││     ╰─ attrName

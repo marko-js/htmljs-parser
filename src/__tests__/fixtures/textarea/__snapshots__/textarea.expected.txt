@@ -1,9 +1,9 @@
 1╭─ textarea -- Hello
  │  │        │  ╰─ text "Hello"
- │  │        ╰─ openTagEnd(textarea)
+ │  │        ╰─ openTagEnd
  ╰─ ╰─ tagName "textarea"
 2╭─ p
  │  │├─ closeTag(p)
- │  │╰─ openTagEnd(p)
+ │  │╰─ openTagEnd
  │  ├─ closeTag(textarea)
  ╰─ ╰─ tagName

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import snap from "mocha-snap";
-import { getLines } from "../internal";
+import { getLines, TagType } from "../internal";
 import { createParser, Position, Ranges, Range } from "..";
 
 const FIXTURES = path.join(__dirname, "fixtures");
@@ -74,8 +74,41 @@ for (const entry of fs.readdirSync(FIXTURES)) {
         addValueRange("comment", range);
       },
       onTagName(range) {
-        tagStack.push(range);
         addTemplateRange("tagName", range);
+
+        if (range.expressions.length === 0) {
+          switch (parser.read(range)) {
+            case "area":
+            case "base":
+            case "br":
+            case "col":
+            case "hr":
+            case "embed":
+            case "img":
+            case "input":
+            case "link":
+            case "meta":
+            case "param":
+            case "source":
+            case "track":
+            case "wbr":
+              return TagType.void;
+            case "script":
+            case "style":
+            case "textarea":
+            case "html-comment":
+              tagStack.push(range);
+              return TagType.text;
+            case "import":
+            case "export":
+            case "static":
+            case "class":
+              return TagType.statement;
+          }
+        }
+
+        tagStack.push(range);
+        return TagType.html;
       },
       onTagShorthandId(range) {
         addTemplateRange("tagShorthandId", range);
@@ -110,7 +143,8 @@ for (const entry of fs.readdirSync(FIXTURES)) {
         addValueRange("attrSpread", range);
       },
       onOpenTagEnd(range) {
-        addRange(`openTagEnd(${read(tagStack[tagStack.length - 1])})`, range);
+        if (range.selfClosed) tagStack.pop();
+        addRange(`openTagEnd${range.selfClosed ? ":selfClosed" : ""}`, range);
       },
       onCloseTag(range) {
         const label = `closeTag(${read(tagStack.pop()!)})`;

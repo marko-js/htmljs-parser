@@ -1,9 +1,9 @@
 1╭─ test
  ╰─ ╰─ tagName "test"
 2╭─     <foo>
- │  │    │  ╰─ openTagEnd(foo)
+ │  │    │  ╰─ openTagEnd
  │  │    ╰─ tagName "foo"
- ╰─ ╰─ openTagEnd(test)
+ ╰─ ╰─ openTagEnd
 3╭─     <![CDATA[[if lt IE 9]><div><![endif]]]>
  │  │   │        ╰─ cdata.value "[if lt IE 9]><div><![endif]"
  │  │   ╰─ cdata "<![CDATA[[if lt IE 9]><div><![endif]]]>"

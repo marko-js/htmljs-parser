@@ -16,7 +16,7 @@ export const DTD: StateDefinition = {
   },
 
   exit(documentType) {
-    this.handlers.onDoctype?.({
+    this.options.onDoctype?.({
       start: documentType.start,
       end: documentType.end,
       value: {

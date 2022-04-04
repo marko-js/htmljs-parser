@@ -2,6 +2,6 @@
  │                 │             │││   │ ╰─ closeTag(b).value
  │                 │             │││   ╰─ closeTag(b) "</b>"
  │                 │             ││╰─ text "bold"
- │                 │             │╰─ openTagEnd(b)
+ │                 │             │╰─ openTagEnd
  │                 │             ╰─ tagName
  ╰─                ╰─ text " some html - "

@@ -1,26 +1,26 @@
 1╭─ span; // Hello World
  │  │    ││ ╰─ comment.value " Hello World"
  │  │    │╰─ comment "// Hello World"
- │  │    ╰─ openTagEnd(span)
+ │  │    ╰─ openTagEnd
  ╰─ ╰─ tagName "span"
 2├─ 
 3╭─ span; /* Hello World */
  │  │    ││ ╰─ comment.value " Hello World "
  │  │    │╰─ comment "/* Hello World */"
- │  │    ╰─ openTagEnd(span)
+ │  │    ╰─ openTagEnd
  │  ├─ closeTag(span)
  ╰─ ╰─ tagName "span"
 4├─ 
 5╭─ span; <!-- Hello World -->
  │  │    ││   ╰─ comment.value " Hello World "
  │  │    │╰─ comment "<!-- Hello World -->"
- │  │    ╰─ openTagEnd(span)
+ │  │    ╰─ openTagEnd
  │  ├─ closeTag(span)
  ╰─ ╰─ tagName "span"
 6├─ 
 7╭─ span; Hello World
  │  │    │╰─ error(INVALID_CODE_AFTER_SEMICOLON:A semicolon indicates the end of a line. Only comments may follow it.)
- │  │    ╰─ openTagEnd(span)
+ │  │    ╰─ openTagEnd
  │  ├─ closeTag(span)
  ╰─ ╰─ tagName "span"
 8╰─     -- Bar

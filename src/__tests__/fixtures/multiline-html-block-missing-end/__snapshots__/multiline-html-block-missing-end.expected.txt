@@ -1,13 +1,13 @@
 1╭─ div
  ╰─ ╰─ tagName "div"
 2╭─     --
- ╰─ ╰─ openTagEnd(div)
+ ╰─ ╰─ openTagEnd
 3╭─     Hello World
  ╰─ ╰─ text "\n    Hello World\n    Hello Again\n"
 4├─     Hello Again
 5├─ 
 6╭─ script --
- │  │      ╰─ openTagEnd(script)
+ │  │      ╰─ openTagEnd
  │  ├─ closeTag(div)
  ╰─ ╰─ tagName "script"
 7╭─     console.log('foo');

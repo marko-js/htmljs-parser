@@ -1,7 +1,7 @@
 1╭─ <${myTagName}#foo></>
  │   │           ││  ││ ╰─ closeTag(${myTagName}).value
  │   │           ││  │╰─ closeTag(${myTagName}) "</>"
- │   │           ││  ╰─ openTagEnd(${myTagName})
+ │   │           ││  ╰─ openTagEnd
  │   │           │├─ tagShorthandId.quasis[0] "foo"
  │   │           │╰─ tagName.quasis[1]
  │   │           ╰─ tagShorthandId "#foo"

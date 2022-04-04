@@ -1,6 +1,6 @@
 1╭─ <script a=b>// line comment within <script>
  │  ││      ││││╰─ text "// line comment within <script>\n/* block comment within <script> */\"string within \\\"<script>\\\"\"'string within \\'<script>\\''"
- │  ││      │││╰─ openTagEnd(script)
+ │  ││      │││╰─ openTagEnd
  │  ││      ││╰─ attrValue.value
  │  ││      │╰─ attrValue "=b"
  │  ││      ╰─ attrName

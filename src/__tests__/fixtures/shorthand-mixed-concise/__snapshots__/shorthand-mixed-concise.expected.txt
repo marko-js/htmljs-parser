@@ -1,6 +1,6 @@
 1╭─ #foo -- Hello
  │  ││   │  ╰─ text "Hello"
- │  ││   ╰─ openTagEnd()
+ │  ││   ╰─ openTagEnd
  │  │╰─ tagShorthandId.quasis[0] "foo"
  │  ├─ tagShorthandId "#foo"
  ╰─ ╰─ tagName
@@ -19,20 +19,20 @@
  │  ││  ╰─ tagShorthandClass ".baz"
  │  │╰─ tagShorthandClass.quasis[0] "bar"
  │  ├─ closeTag()
- │  ├─ openTagEnd()
+ │  ├─ openTagEnd
  │  ├─ tagShorthandClass ".bar"
  ╰─ ╰─ tagName
 4╭─ div.foo
  │  │  │╰─ tagShorthandClass.quasis[0] "foo"
  │  │  ╰─ tagShorthandClass ".foo"
  │  ├─ closeTag()
- │  ├─ openTagEnd()
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "div"
 5╭─ span.foo
  │  │   ││  ├─ closeTag(span)
- │  │   ││  ╰─ openTagEnd(span)
+ │  │   ││  ╰─ openTagEnd
  │  │   │╰─ tagShorthandClass.quasis[0] "foo"
  │  │   ╰─ tagShorthandClass ".foo"
  │  ├─ closeTag(div)
- │  ├─ openTagEnd(div)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "span"

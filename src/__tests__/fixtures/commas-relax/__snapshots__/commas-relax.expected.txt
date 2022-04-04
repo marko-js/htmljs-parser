@@ -3,9 +3,7 @@
 2├─   hello: true
 3├─ };
 4╭─ 
- ╰─ ╰─ openTagEnd(static)
+ ╰─ ╰─ openTagEnd
 5╭─ import mod, { b as bar } from "./bar"
- │  │                                    ├─ closeTag(import)
- │  │                                    ╰─ openTagEnd(import)
- │  ├─ closeTag(static)
+ │  │                                    ╰─ openTagEnd
  ╰─ ╰─ tagName "import"

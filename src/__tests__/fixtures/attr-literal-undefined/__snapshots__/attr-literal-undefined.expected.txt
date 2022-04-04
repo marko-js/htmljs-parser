@@ -1,7 +1,7 @@
 1╭─ <div data=undefined></div>
  │   │   │   ││        ││ ╰─ closeTag(div).value "div"
  │   │   │   ││        │╰─ closeTag(div) "</div>"
- │   │   │   ││        ╰─ openTagEnd(div)
+ │   │   │   ││        ╰─ openTagEnd
  │   │   │   │╰─ attrValue.value "undefined"
  │   │   │   ╰─ attrValue "=undefined"
  │   │   ╰─ attrName "data"

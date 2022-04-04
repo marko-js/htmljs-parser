@@ -5,7 +5,7 @@
 4╭─ p
  ╰─ ╰─ tagName
 5╭─     --
- ╰─ ╰─ openTagEnd(p)
+ ╰─ ╰─ openTagEnd
 6╭─     This is text that spans multiple lines.
  ╰─ ╰─ text "\n    This is text that spans multiple lines.\n\n    "
 7├─ 
@@ -13,7 +13,7 @@
  │       │     ││                                             │ ╰─ closeTag(strong).value "strong"
  │       │     ││                                             ╰─ closeTag(strong) "</strong>"
  │       │     │╰─ text "You can throw in some HTML markup if you want!"
- │       │     ╰─ openTagEnd(strong)
+ │       │     ╰─ openTagEnd
  ╰─      ╰─ tagName "strong"
 9╭─     --
  ╰─ ╰─ text "\n"
@@ -21,7 +21,7 @@
   │  ├─ closeTag(p)
   ╰─ ╰─ tagName
 11╭─     -----
-  ╰─ ╰─ openTagEnd(p)
+  ╰─ ╰─ openTagEnd
 12╭─     If you really want to you can change the block delimiter for the following
   ╰─ ╰─ text "\n    If you really want to you can change the block delimiter for the following\n    reasons:\n    - Avoid accidentally ending a block\n    - To improve readability\n"
 13├─     reasons:
@@ -30,7 +30,7 @@
 16├─     -----
 17╭─ i -- This text will be in italics
   │  │ │  ╰─ text "This text will be in italics"
-  │  │ ╰─ openTagEnd(i)
+  │  │ ╰─ openTagEnd
   │  ├─ closeTag(p)
   ╰─ ╰─ tagName
 18╭─ b
@@ -38,7 +38,7 @@
   ╰─ ╰─ tagName
 19╭─     -- This text will be bold
   │  │      ╰─ text "This text will be bold"
-  ╰─ ╰─ openTagEnd(b)
+  ╰─ ╰─ openTagEnd
 20╭─     -- This is okay too
   ╰─        ╰─ text "This is okay too"
 21╭─ app-hello
@@ -49,7 +49,7 @@
   │  │                  │             │││   │ ╰─ closeTag(b).value
   │  │                  │             │││   ╰─ closeTag(b) "</b>"
   │  │                  │             ││╰─ text "bold"
-  │  │                  │             │╰─ openTagEnd(b)
+  │  │                  │             │╰─ openTagEnd
   │  │                  │             ╰─ tagName
   │  │                  ╰─ text " some html - "
-  ╰─ ╰─ openTagEnd(app-hello)
+  ╰─ ╰─ openTagEnd

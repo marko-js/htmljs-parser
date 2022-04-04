@@ -2,12 +2,12 @@
  ╰─ ╰─ tagName "foo"
 2╭─ bar
  │  ├─ closeTag(foo)
- │  ├─ openTagEnd(foo)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "bar"
 3╭─ 
- ╰─ ╰─ openTagEnd(bar)
+ ╰─ ╰─ openTagEnd
 4╭─ baz
  │  │  ├─ closeTag(baz)
- │  │  ╰─ openTagEnd(baz)
+ │  │  ╰─ openTagEnd
  │  ├─ closeTag(bar)
  ╰─ ╰─ tagName "baz"
