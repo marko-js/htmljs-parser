@@ -1,6 +1,6 @@
 1╭─ #foo
  │  ││  ├─ closeTag()
- │  ││  ╰─ openTagEnd()
+ │  ││  ╰─ openTagEnd
  │  │╰─ tagShorthandId.quasis[0] "foo"
  │  ├─ tagShorthandId "#foo"
  ╰─ ╰─ tagName

@@ -1,6 +1,5 @@
 1╭─ <foo a="1", b="2" c="3" />
- │   │   │││    │││   │││   │ ╰─ closeTag(foo)
- │   │   │││    │││   │││   ╰─ openTagEnd(foo) "/>"
+ │   │   │││    │││   │││   ╰─ openTagEnd:selfClosed "/>"
  │   │   │││    │││   ││╰─ attrValue.value "\"3\""
  │   │   │││    │││   │╰─ attrValue "=\"3\""
  │   │   │││    │││   ╰─ attrName

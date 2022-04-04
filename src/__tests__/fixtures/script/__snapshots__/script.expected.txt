@@ -1,6 +1,6 @@
 1╭─ <script>// line comment within <script>
  │   │     │╰─ text "// line comment within <script>\n/* block comment within <script> */\"string within \\\"<script>\\\"\"'string within \\'<script>\\''"
- │   │     ╰─ openTagEnd(script)
+ │   │     ╰─ openTagEnd
  ╰─  ╰─ tagName "script"
 2╭─ /* block comment within <script> */"string within \"<script>\""'string within \'<script>\''</script>
  │                                                                                             │ ╰─ closeTag(script).value "script"

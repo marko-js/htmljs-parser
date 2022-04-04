@@ -7,12 +7,12 @@
  │  │   │        │             ╰─ text " This is after CDATA"
  │  │   │        ╰─ cdata.value "Hello World"
  │  │   ╰─ cdata "<![CDATA[Hello World]]>"
- ╰─ ╰─ openTagEnd(p)
+ ╰─ ╰─ openTagEnd
 3╭─ div class="bar" -- <![CDATA[Hello World]]>
  │  │   │    ││     │  │        │             ╰─ closeTag(div)
  │  │   │    ││     │  │        ╰─ cdata.value "Hello World"
  │  │   │    ││     │  ╰─ cdata "<![CDATA[Hello World]]>"
- │  │   │    ││     ╰─ openTagEnd(div)
+ │  │   │    ││     ╰─ openTagEnd
  │  │   │    │╰─ attrValue.value "\"bar\""
  │  │   │    ╰─ attrValue "=\"bar\""
  │  │   ╰─ attrName "class"

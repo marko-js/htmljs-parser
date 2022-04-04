@@ -1,6 +1,5 @@
 1╭─ <var foo='bar'/>
- │   │   │  ││    │ ╰─ closeTag(var)
- │   │   │  ││    ╰─ openTagEnd(var) "/>"
+ │   │   │  ││    ╰─ openTagEnd:selfClosed "/>"
  │   │   │  │╰─ attrValue.value "'bar'"
  │   │   │  ╰─ attrValue "='bar'"
  │   │   ╰─ attrName "foo"

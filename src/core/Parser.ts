@@ -1,10 +1,10 @@
 import {
-  BODY_MODE,
+  TagType,
   CODE,
   STATE,
   isWhitespaceCode,
   Range,
-  Handlers,
+  ParserOptions as Options,
   getLines,
   getLoc,
   getPos,
@@ -44,8 +44,8 @@ export class Parser {
   public textPos!: number; // Used to buffer text that is found within the body of a tag
   public lines: undefined | number[]; // Keeps track of line indexes to provide line/column info.
 
-  constructor(public handlers: Handlers) {
-    this.handlers = handlers;
+  constructor(public options: Options) {
+    this.options = options;
   }
 
   read(range: Range) {
@@ -146,7 +146,7 @@ export class Parser {
   endText() {
     const start = this.textPos;
     if (start !== -1) {
-      this.handlers.onText?.({ start, end: this.pos });
+      this.options.onText?.({ start, end: this.pos });
       this.textPos = -1;
     }
   }
@@ -159,7 +159,7 @@ export class Parser {
    */
   beginHtmlBlock(delimiter: string | undefined, singleLine: boolean) {
     const content = this.enterState(
-      this.activeTag?.bodyMode === BODY_MODE.PARSED_TEXT
+      this.activeTag?.type === TagType.text
         ? STATE.PARSED_TEXT_CONTENT
         : STATE.HTML_CONTENT
     );
@@ -179,7 +179,7 @@ export class Parser {
       end = range.end;
     }
 
-    this.handlers.onError?.({
+    this.options.onError?.({
       start,
       end,
       code,
@@ -193,7 +193,7 @@ export class Parser {
     const { beginMixedMode, parentTag } = this.activeTag!;
     if (beginMixedMode) this.endingMixedModeAtEOL = true;
     this.activeTag = parentTag;
-    this.handlers.onCloseTag?.({
+    this.options.onCloseTag?.({
       start,
       end,
       value,

@@ -17,7 +17,7 @@ export const HTML_COMMENT: StateDefinition = {
   },
 
   exit(comment) {
-    this.handlers.onComment?.({
+    this.options.onComment?.({
       start: comment.start,
       end: comment.end,
       value: {

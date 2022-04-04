@@ -8,8 +8,8 @@
 2╭─     span.bar
  │  │   │   ││  ├─ closeTag(div)
  │  │   │   ││  ├─ closeTag(span)
- │  │   │   ││  ╰─ openTagEnd(span)
+ │  │   │   ││  ╰─ openTagEnd
  │  │   │   │╰─ tagShorthandClass.quasis[0] "bar"
  │  │   │   ╰─ tagShorthandClass ".bar"
  │  │   ╰─ tagName "span"
- ╰─ ╰─ openTagEnd(div)
+ ╰─ ╰─ openTagEnd

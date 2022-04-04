@@ -1,5 +1,5 @@
 1╭─ <custom name="Hello $!{name}!">
- │   │      │   ││                ╰─ openTagEnd(custom)
+ │   │      │   ││                ╰─ openTagEnd
  │   │      │   │╰─ attrValue.value "\"Hello $!{name}!\""
  │   │      │   ╰─ attrValue "=\"Hello $!{name}!\""
  │   │      ╰─ attrName "name"

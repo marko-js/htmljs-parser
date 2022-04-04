@@ -3,7 +3,7 @@
 2╭─   // This is a single line comment
  │  │ │ ╰─ comment.value " This is a single line comment"
  │  │ ╰─ comment "// This is a single line comment"
- ╰─ ╰─ openTagEnd(div)
+ ╰─ ╰─ openTagEnd
 3╭─   -- This is the body of the div tag
  │       │                              ╰─ closeTag(div)
  ╰─      ╰─ text "This is the body of the div tag"

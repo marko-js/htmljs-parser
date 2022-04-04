@@ -1,5 +1,5 @@
 1╭─ <div foo='\"hello\"'>
- │   │   │  ││          ╰─ openTagEnd(div)
+ │   │   │  ││          ╰─ openTagEnd
  │   │   │  │╰─ attrValue.value "'\\\"hello\\\"'"
  │   │   │  ╰─ attrValue "='\\\"hello\\\"'"
  │   │   ╰─ attrName "foo"

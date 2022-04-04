@@ -2,7 +2,7 @@
  │   │      │   ││               ││   │ ╰─ closeTag(custom).value "custom"
  │   │      │   ││               ││   ╰─ closeTag(custom) "</custom>"
  │   │      │   ││               │╰─ text "TEST"
- │   │      │   ││               ╰─ openTagEnd(custom)
+ │   │      │   ││               ╰─ openTagEnd
  │   │      │   │╰─ attrValue.value "\"Hello ${name}!\""
  │   │      │   ╰─ attrValue "=\"Hello ${name}!\""
  │   │      ╰─ attrName "name"

@@ -2,5 +2,5 @@
  │   │││          │ ╰─ closeTag(a).value
  │   │││          ╰─ closeTag(a) "</a>"
  │   ││╰─ text "1 < > <> 2<"
- │   │╰─ openTagEnd(a)
+ │   │╰─ openTagEnd
  ╰─  ╰─ tagName

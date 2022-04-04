@@ -2,7 +2,7 @@
  │   │ │││    ││   │ ╰─ closeTag(a).value
  │   │ │││    ││   ╰─ closeTag(a) "</a>"
  │   │ │││    │╰─ text "test"
- │   │ │││    ╰─ openTagEnd(a)
+ │   │ │││    ╰─ openTagEnd
  │   │ ││╰─ attrValue.value "(1>2)"
  │   │ │╰─ attrValue "=(1>2)"
  │   │ ╰─ attrName

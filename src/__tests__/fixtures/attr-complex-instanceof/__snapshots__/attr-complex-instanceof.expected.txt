@@ -4,7 +4,7 @@
  │  │   ╰─ attrName
  ╰─ ╰─ tagName "var"
 2╭─ 
- ╰─ ╰─ openTagEnd(var)
+ ╰─ ╰─ openTagEnd
 3╭─ tag a = 'foo' instanceof = String
  │  │   │ │ │     │          │ ╰─ attrValue.value "String"
  │  │   │ │ │     │          ╰─ attrValue "= String"
@@ -22,7 +22,7 @@
  │  │   │ ╰─ attrValue "= 'foo'"
  │  │   ╰─ attrName
  │  ├─ closeTag(tag)
- │  ├─ openTagEnd(tag)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
 5╭─ tag a = 'foo' instanceof= String
  │  │   │ │ │     │         │ ╰─ attrValue.value "String"
@@ -32,7 +32,7 @@
  │  │   │ ╰─ attrValue "= 'foo'"
  │  │   ╰─ attrName
  │  ├─ closeTag(tag)
- │  ├─ openTagEnd(tag)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
 6╭─ tag a = 'foo' instanceof;
  │  │   │ │ │     ╰─ attrName "instanceof"
@@ -40,10 +40,10 @@
  │  │   │ ╰─ attrValue "= 'foo'"
  │  │   ╰─ attrName
  │  ├─ closeTag(tag)
- │  ├─ openTagEnd(tag)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
 7╭─ 
- ╰─ ╰─ openTagEnd(tag)
+ ╰─ ╰─ openTagEnd
 8╭─ tag a = 'foo' instanceof, b
  │  │   │ │ │     │           ╰─ attrName
  │  │   │ │ │     ╰─ attrName "instanceof"
@@ -53,11 +53,11 @@
  │  ├─ closeTag(tag)
  ╰─ ╰─ tagName "tag"
 9╭─ 
- ╰─ ╰─ openTagEnd(tag)
+ ╰─ ╰─ openTagEnd
 10╭─ <tag a = 'foo' instanceof></tag>
   │  ││   │ │ │     │         ││ ╰─ closeTag(tag).value "tag"
   │  ││   │ │ │     │         │╰─ closeTag(tag) "</tag>"
-  │  ││   │ │ │     │         ╰─ openTagEnd(tag)
+  │  ││   │ │ │     │         ╰─ openTagEnd
   │  ││   │ │ │     ╰─ attrName "instanceof"
   │  ││   │ │ ╰─ attrValue.value "'foo'"
   │  ││   │ ╰─ attrValue "= 'foo'"
@@ -65,8 +65,7 @@
   │  │╰─ tagName "tag"
   ╰─ ╰─ closeTag(tag)
 11╭─ <tag a = 'foo' instanceof/>
-  │   │   │ │ │     │         │ ╰─ closeTag(tag)
-  │   │   │ │ │     │         ╰─ openTagEnd(tag) "/>"
+  │   │   │ │ │     │         ╰─ openTagEnd:selfClosed "/>"
   │   │   │ │ │     ╰─ attrName "instanceof"
   │   │   │ │ ╰─ attrValue.value "'foo'"
   │   │   │ ╰─ attrValue "= 'foo'"

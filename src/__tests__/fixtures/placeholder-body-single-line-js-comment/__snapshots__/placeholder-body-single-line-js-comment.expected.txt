@@ -1,6 +1,6 @@
 1╭─ <script>// Copyright ${date}
  │   │     │╰─ text "// Copyright ${date}\n"
- │   │     ╰─ openTagEnd(script)
+ │   │     ╰─ openTagEnd
  ╰─  ╰─ tagName "script"
 2╭─ </script>
  │  │ ╰─ closeTag(script).value "script"

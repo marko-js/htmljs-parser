@@ -1,6 +1,5 @@
 1╭─ <a=test,b=2/>
- │   │││    ││││ ╰─ closeTag(a)
- │   │││    │││╰─ openTagEnd(a) "/>"
+ │   │││    │││╰─ openTagEnd:selfClosed "/>"
  │   │││    ││╰─ attrValue.value
  │   │││    │╰─ attrValue "=2"
  │   │││    ╰─ attrName

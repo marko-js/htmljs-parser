@@ -3,6 +3,6 @@
  │   │     ││                                    │        ╰─ closeTag(script) "</script>"
  │   │     ││                                    ╰─ text "</div>');"
  │   │     │╰─ text "console.log('<div>Hello "
- │   │     ╰─ openTagEnd(script)
+ │   │     ╰─ openTagEnd
  ╰─  ╰─ tagName "script"
 2╰─ 

@@ -1,8 +1,8 @@
 1╭─ <span>
- │   │   ╰─ openTagEnd(span)
+ │   │   ╰─ openTagEnd
  ╰─  ╰─ tagName "span"
 2╭─     <div.color/>
- │  │    │  ││    ╰─ openTagEnd(div) "/>"
+ │  │    │  ││    ╰─ openTagEnd:selfClosed "/>"
  │  │    │  │╰─ tagShorthandClass.quasis[0] "color"
  │  │    │  ╰─ tagShorthandClass ".color"
  │  │    ╰─ tagName "div"
@@ -10,5 +10,4 @@
 3╭─ </span>
  │  │ ╰─ closeTag(span).value "span"
  │  ├─ text "\n"
- │  ├─ closeTag(div)
  ╰─ ╰─ closeTag(span) "</span>"

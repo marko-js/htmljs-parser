@@ -2,7 +2,7 @@
  │   │ ││ │  ││   │ ╰─ closeTag(a).value
  │   │ ││ │  ││   ╰─ closeTag(a) "</a>"
  │   │ ││ │  │╰─ text "test"
- │   │ ││ │  ╰─ openTagEnd(a)
+ │   │ ││ │  ╰─ openTagEnd
  │   │ ││ ╰─ attrValue:bound.value "foo"
  │   │ │╰─ attrValue:bound ":=foo"
  │   │ ╰─ attrName
@@ -11,7 +11,7 @@
  │   │ │ │  │  ││   │ ╰─ closeTag(a).value
  │   │ │ │  │  ││   ╰─ closeTag(a) "</a>"
  │   │ │ │  │  │╰─ text "test"
- │   │ │ │  │  ╰─ openTagEnd(a)
+ │   │ │ │  │  ╰─ openTagEnd
  │   │ │ │  ╰─ attrValue:bound.value "foo"
  │   │ │ ╰─ attrValue:bound ":= foo"
  │   │ ╰─ attrName
@@ -20,7 +20,7 @@
  │   ││ │  ││   │ ╰─ closeTag(a).value
  │   ││ │  ││   ╰─ closeTag(a) "</a>"
  │   ││ │  │╰─ text "test"
- │   ││ │  ╰─ openTagEnd(a)
+ │   ││ │  ╰─ openTagEnd
  │   ││ ╰─ attrValue:bound.value "foo"
  │   │├─ attrValue:bound ":=foo"
  │   │╰─ attrName
@@ -29,7 +29,7 @@
  │   │ │  │  ││   │ ╰─ closeTag(a).value
  │   │ │  │  ││   ╰─ closeTag(a) "</a>"
  │   │ │  │  │╰─ text "test"
- │   │ │  │  ╰─ openTagEnd(a)
+ │   │ │  │  ╰─ openTagEnd
  │   │ │  ╰─ attrValue:bound.value "foo"
  │   │ ├─ attrValue:bound ":= foo"
  │   │ ╰─ attrName
@@ -38,7 +38,7 @@
  │   │││  │ │  ││   │ ╰─ closeTag(a).value
  │   │││  │ │  ││   ╰─ closeTag(a) "</a>"
  │   │││  │ │  │╰─ text "test"
- │   │││  │ │  ╰─ openTagEnd(a)
+ │   │││  │ │  ╰─ openTagEnd
  │   │││  │ ╰─ attrValue:bound.value "foo"
  │   │││  ├─ attrValue:bound ":=foo"
  │   │││  ╰─ attrName
@@ -49,7 +49,7 @@
  │   │││   │  │  ││   │ ╰─ closeTag(a).value
  │   │││   │  │  ││   ╰─ closeTag(a) "</a>"
  │   │││   │  │  │╰─ text "test"
- │   │││   │  │  ╰─ openTagEnd(a)
+ │   │││   │  │  ╰─ openTagEnd
  │   │││   │  ╰─ attrValue:bound.value "foo"
  │   │││   ├─ attrValue:bound ":= foo"
  │   │││   ╰─ attrName

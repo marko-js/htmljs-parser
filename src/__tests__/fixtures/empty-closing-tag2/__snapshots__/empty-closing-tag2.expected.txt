@@ -1,10 +1,10 @@
 1╭─ <ul.features>
- │   │ ││       ╰─ openTagEnd(ul)
+ │   │ ││       ╰─ openTagEnd
  │   │ │╰─ tagShorthandClass.quasis[0] "features"
  │   │ ╰─ tagShorthandClass ".features"
  ╰─  ╰─ tagName "ul"
 2╭─     <li for(feature in [])>
- │  │    │  │  ││             ╰─ openTagEnd(li)
+ │  │    │  │  ││             ╰─ openTagEnd
  │  │    │  │  │╰─ attrArgs.value "feature in []"
  │  │    │  │  ╰─ attrArgs "(feature in [])"
  │  │    │  ╰─ attrName "for"

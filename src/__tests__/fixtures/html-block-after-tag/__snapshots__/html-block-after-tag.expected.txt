@@ -3,8 +3,8 @@
  │  │    │  │      │││   │ ╰─ closeTag(b).value
  │  │    │  │      │││   ╰─ closeTag(b) "</b>"
  │  │    │  │      ││╰─ text "test"
- │  │    │  │      │╰─ openTagEnd(b)
+ │  │    │  │      │╰─ openTagEnd
  │  │    │  │      ╰─ tagName
  │  │    │  ╰─ text "Hello "
- │  │    ╰─ openTagEnd(span)
+ │  │    ╰─ openTagEnd
  ╰─ ╰─ tagName "span"

@@ -1,5 +1,5 @@
 1╭─ <div if (x > y)>
- │   │   │  ││     ╰─ openTagEnd(div)
+ │   │   │  ││     ╰─ openTagEnd
  │   │   │  │╰─ attrArgs.value "x > y"
  │   │   │  ╰─ attrArgs "(x > y)"
  │   │   ╰─ attrName "if"

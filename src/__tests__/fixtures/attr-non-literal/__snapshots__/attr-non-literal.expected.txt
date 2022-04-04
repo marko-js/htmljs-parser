@@ -1,7 +1,7 @@
 1╭─ <div data=('a') a=a+b b='foo'+'bar' template-string=`foo`></div>
  │   │   │   ││     │││   │││           │              ││    ││ ╰─ closeTag(div).value "div"
  │   │   │   ││     │││   │││           │              ││    │╰─ closeTag(div) "</div>"
- │   │   │   ││     │││   │││           │              ││    ╰─ openTagEnd(div)
+ │   │   │   ││     │││   │││           │              ││    ╰─ openTagEnd
  │   │   │   ││     │││   │││           │              │╰─ attrValue.value "`foo`"
  │   │   │   ││     │││   │││           │              ╰─ attrValue "=`foo`"
  │   │   │   ││     │││   │││           ╰─ attrName "template-string"
@@ -17,7 +17,7 @@
  ╰─  ╰─ tagName "div"
 2╭─ span test='123'"abc"
  │  │    │   ││         ├─ closeTag(span)
- │  │    │   ││         ╰─ openTagEnd(span)
+ │  │    │   ││         ╰─ openTagEnd
  │  │    │   │╰─ attrValue.value "'123'\"abc\""
  │  │    │   ╰─ attrValue "='123'\"abc\""
  │  │    ╰─ attrName "test"

@@ -1,10 +1,10 @@
 1╭─ <div>
- │   │  ╰─ openTagEnd(div)
+ │   │  ╰─ openTagEnd
  ╰─  ╰─ tagName "div"
 2╭─     Hello World
  ╰─ ╰─ text "\n    Hello World\n    "
 3╭─     <span>
- │       │   ╰─ openTagEnd(span)
+ │       │   ╰─ openTagEnd
  ╰─      ╰─ tagName "span"
 4╭─         Hello Universe
  ╰─ ╰─ text "\n        Hello Universe\n    "

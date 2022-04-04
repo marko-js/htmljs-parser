@@ -15,4 +15,4 @@
 4╭─   -- This is the body of the a tag
  │  │    │                            ╰─ closeTag(a)
  │  │    ╰─ text "This is the body of the a tag"
- ╰─ ╰─ openTagEnd(a)
+ ╰─ ╰─ openTagEnd
