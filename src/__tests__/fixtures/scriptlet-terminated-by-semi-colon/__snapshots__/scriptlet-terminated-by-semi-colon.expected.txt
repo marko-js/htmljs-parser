@@ -1,0 +1,26 @@
+1╭─ <div>
+ │   │  ╰─ openTagEnd
+ ╰─  ╰─ tagName "div"
+2╭─   $ let i = 10;
+ │  │ │ ╰─ scriptlet.value "let i = 10;"
+ │  │ ╰─ scriptlet "$ let i = 10;"
+ ╰─ ╰─ text "\n  "
+3╭─   <while(i--)>
+ │  │  │    ││   ╰─ openTagEnd
+ │  │  │    │╰─ tagArgs.value "i--"
+ │  │  │    ╰─ tagArgs "(i--)"
+ │  │  ╰─ tagName "while"
+ ╰─ ╰─ text "\n  "
+4╭─     <test/>
+ │  │    │   ╰─ openTagEnd:selfClosed "/>"
+ │  │    ╰─ tagName "test"
+ ╰─ ╰─ text "\n    "
+5╭─   </while>
+ │  │ │ ╰─ closeTag(while).value "while"
+ │  │ ╰─ closeTag(while) "</while>"
+ ╰─ ╰─ text "\n  "
+6╭─ </div>
+ │  │ ╰─ closeTag(div).value "div"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTag(div) "</div>"
+7╰─ 

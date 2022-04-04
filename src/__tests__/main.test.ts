@@ -7,6 +7,11 @@ import { createParser, Position, Ranges, Range } from "..";
 const FIXTURES = path.join(__dirname, "fixtures");
 
 for (const entry of fs.readdirSync(FIXTURES)) {
+  if (entry.endsWith(".skip")) {
+    it.skip(entry.slice(0, -".skip".length));
+    continue;
+  }
+
   it(entry, async () => {
     const dir = path.join(FIXTURES, entry);
     const filename = path.join(dir, "input.marko");
