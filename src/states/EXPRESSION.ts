@@ -135,11 +135,13 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       !expression.groupStack.length &&
       (expression.terminatedByWhitespace || expression.terminatedByEOL)
     ) {
-      if (checkForOperators(this, expression)) {
-        this.forward = 1;
-      } else {
-        this.exitState();
-      }
+      this.exitState();
+
+      // TODO: eventually it'd be good to allow multi line expressions.
+      // This currently has a number of edge cases and likely can only be solved by
+      // converting the expression state to avoid the look ahead/behind regexp pattern and instead
+      // check characters as is goes.
+      // if (checkForOperators(this, expression)) this.forward = 1;
     }
   },
 
