@@ -1,4 +1,4 @@
-import { CODE, StateDefinition, Meta } from "../internal";
+import { CODE, StateDefinition, Meta, ErrorCode } from "../internal";
 
 interface RegExpMeta extends Meta {
   isInCharSet: boolean;
@@ -34,7 +34,7 @@ export const REGULAR_EXPRESSION: StateDefinition<RegExpMeta> = {
   eol(_, regExp) {
     this.emitError(
       regExp,
-      "INVALID_REGULAR_EXPRESSION",
+      ErrorCode.INVALID_REGULAR_EXPRESSION,
       "EOL reached while parsing regular expression"
     );
   },
@@ -42,7 +42,7 @@ export const REGULAR_EXPRESSION: StateDefinition<RegExpMeta> = {
   eof(regExp) {
     this.emitError(
       regExp,
-      "INVALID_REGULAR_EXPRESSION",
+      ErrorCode.INVALID_REGULAR_EXPRESSION,
       "EOF reached while parsing regular expression"
     );
   },

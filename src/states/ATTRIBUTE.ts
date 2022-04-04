@@ -7,6 +7,7 @@ import {
   Parser,
   Ranges,
   Meta,
+  ErrorCode,
 } from "../internal";
 
 const enum ATTR_STAGE {
@@ -152,7 +153,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
     } else {
       this.emitError(
         attr,
-        "MALFORMED_OPEN_TAG",
+        ErrorCode.MALFORMED_OPEN_TAG,
         'EOF reached while parsing attribute "' +
           (attr.name ? this.read(attr.name) : "default") +
           '" for the "' +
@@ -177,7 +178,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         if (attr.args) {
           this.emitError(
             child,
-            "ILLEGAL_ATTRIBUTE_ARGUMENT",
+            ErrorCode.INVALID_ATTRIBUTE_ARGUMENT,
             "An attribute can only have one set of arguments"
           );
           return;
@@ -232,7 +233,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         if (child.start === child.end) {
           return this.emitError(
             child,
-            "ILLEGAL_ATTRIBUTE_VALUE",
+            ErrorCode.INVALID_ATTRIBUTE_VALUE,
             "Missing value for attribute"
           );
         }

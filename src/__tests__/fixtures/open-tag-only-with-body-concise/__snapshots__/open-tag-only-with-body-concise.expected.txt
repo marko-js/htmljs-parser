@@ -4,5 +4,5 @@
  │  │   ╰─ attrName "src"
  ╰─ ╰─ tagName "img"
 2╭─     This is not allowed!
- │  │   ╰─ error(BAD_INDENTATION:Line has extra indentation at the beginning)
+ │  │   ╰─ error(INVALID_INDENTATION:Line has extra indentation at the beginning)
  ╰─ ╰─ openTagEnd

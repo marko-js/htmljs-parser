@@ -78,7 +78,7 @@ export namespace Ranges {
   }
 
   export interface Error extends Range {
-    code: string;
+    code: ErrorCode;
     message: string;
   }
 
@@ -110,6 +110,35 @@ export namespace Ranges {
   export interface CloseTag extends Range {
     value: Range | undefined;
   }
+}
+
+export enum ErrorCode {
+  EXTRA_CLOSING_TAG,
+  INVALID_ATTRIBUTE_ARGUMENT,
+  INVALID_ATTRIBUTE_NAME,
+  INVALID_ATTRIBUTE_VALUE,
+  INVALID_CHARACTER,
+  INVALID_CODE_AFTER_SEMICOLON,
+  INVALID_EXPRESSION,
+  INVALID_INDENTATION,
+  INVALID_LINE_START,
+  INVALID_REGULAR_EXPRESSION,
+  INVALID_STRING,
+  INVALID_TAG_ARGUMENT,
+  INVALID_TAG_SHORTHAND,
+  INVALID_TEMPLATE_STRING,
+  MALFORMED_CDATA,
+  MALFORMED_CLOSE_TAG,
+  MALFORMED_COMMENT,
+  MALFORMED_DECLARATION,
+  MALFORMED_DOCUMENT_TYPE,
+  MALFORMED_OPEN_TAG,
+  MALFORMED_PLACEHOLDER,
+  MISMATCHED_CLOSING_TAG,
+  MISSING_END_TAG,
+  MISSING_TAG_VARIABLE,
+  RESERVED_TAG_NAME,
+  ROOT_TAG_ONLY,
 }
 
 export const enum TagType {

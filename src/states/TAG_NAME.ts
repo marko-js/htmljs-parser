@@ -6,6 +6,7 @@ import {
   Ranges,
   Meta,
   TagType,
+  ErrorCode,
 } from "../internal";
 
 export interface TagNameMeta extends Meta, Ranges.Template {
@@ -38,7 +39,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         if (this.activeTag!.hasShorthandId) {
           return this.emitError(
             tagName,
-            "INVALID_TAG_SHORTHAND",
+            ErrorCode.INVALID_TAG_SHORTHAND,
             "Multiple shorthand ID parts are not allowed on the same tag"
           );
         }
@@ -77,7 +78,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
             if (!tag.concise) {
               return this.emitError(
                 tagName,
-                "RESERVED_TAG_NAME",
+                ErrorCode.RESERVED_TAG_NAME,
                 `The "${this.read(
                   tagName
                 )}" tag is reserved and cannot be used as an HTML tag.`
@@ -87,7 +88,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
             if (tag.parentTag) {
               return this.emitError(
                 tagName,
-                "ROOT_TAG_ONLY",
+                ErrorCode.ROOT_TAG_ONLY,
                 `"${this.read(
                   tagName
                 )}" can only be used at the root of the template.`
@@ -146,7 +147,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
     if (child.start === child.end) {
       this.emitError(
         child,
-        "PLACEHOLDER_EXPRESSION_REQUIRED",
+        ErrorCode.MALFORMED_PLACEHOLDER,
         "Invalid placeholder, the expression cannot be missing"
       );
     }

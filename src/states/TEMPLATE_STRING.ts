@@ -1,4 +1,4 @@
-import { CODE, STATE, StateDefinition } from "../internal";
+import { CODE, ErrorCode, STATE, StateDefinition } from "../internal";
 
 export const TEMPLATE_STRING: StateDefinition = {
   name: "TEMPLATE_STRING",
@@ -36,7 +36,7 @@ export const TEMPLATE_STRING: StateDefinition = {
   eof(templateString) {
     this.emitError(
       templateString,
-      "INVALID_TEMPLATE_STRING",
+      ErrorCode.INVALID_TEMPLATE_STRING,
       "EOF reached while parsing template string expression"
     );
   },
@@ -47,7 +47,7 @@ export const TEMPLATE_STRING: StateDefinition = {
     if (child.start === child.end) {
       this.emitError(
         child,
-        "PLACEHOLDER_EXPRESSION_REQUIRED",
+        ErrorCode.MALFORMED_PLACEHOLDER,
         "Invalid placeholder, the expression cannot be missing"
       );
     }

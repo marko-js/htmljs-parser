@@ -6,6 +6,7 @@ import {
   Ranges,
   Meta,
   TagType,
+  ErrorCode,
 } from "../internal";
 
 const enum TAG_STAGE {
@@ -117,7 +118,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       if (tag.stage === TAG_STAGE.ATTR_GROUP) {
         this.emitError(
           tag,
-          "MALFORMED_OPEN_TAG",
+          ErrorCode.MALFORMED_OPEN_TAG,
           'EOF reached while within an attribute group (e.g. "[ ... ]").'
         );
         return;
@@ -131,7 +132,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       // since the end '>' was not found.
       this.emitError(
         tag,
-        "MALFORMED_OPEN_TAG",
+        ErrorCode.MALFORMED_OPEN_TAG,
         "EOF reached while parsing open tag"
       );
     }
@@ -168,7 +169,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
 
           this.emitError(
             this.pos,
-            "INVALID_CODE_AFTER_SEMICOLON",
+            ErrorCode.INVALID_CODE_AFTER_SEMICOLON,
             "A semicolon indicates the end of a line. Only comments may follow it."
           );
         }
@@ -180,7 +181,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         if (this.lookAtCharCodeAhead(1) !== CODE.HTML_BLOCK_DELIMITER) {
           this.emitError(
             tag,
-            "MALFORMED_OPEN_TAG",
+            ErrorCode.MALFORMED_OPEN_TAG,
             '"-" not allowed as first character of attribute name'
           );
           return;
@@ -189,7 +190,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         if (tag.stage === TAG_STAGE.ATTR_GROUP) {
           this.emitError(
             this.pos,
-            "MALFORMED_OPEN_TAG",
+            ErrorCode.MALFORMED_OPEN_TAG,
             "Attribute group was not properly ended"
           );
           return;
@@ -229,7 +230,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         if (tag.stage === TAG_STAGE.ATTR_GROUP) {
           this.emitError(
             this.pos,
-            "MALFORMED_OPEN_TAG",
+            ErrorCode.MALFORMED_OPEN_TAG,
             'Unexpected "[" character within open tag.'
           );
           return;
@@ -241,7 +242,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         if (tag.stage !== TAG_STAGE.ATTR_GROUP) {
           this.emitError(
             this.pos,
-            "MALFORMED_OPEN_TAG",
+            ErrorCode.MALFORMED_OPEN_TAG,
             'Unexpected "]" character within open tag.'
           );
           return;
@@ -267,7 +268,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     if (code === CODE.OPEN_ANGLE_BRACKET) {
       return this.emitError(
         this.pos,
-        "ILLEGAL_ATTRIBUTE_NAME",
+        ErrorCode.INVALID_ATTRIBUTE_NAME,
         'Invalid attribute name. Attribute name cannot begin with the "<" character.'
       );
     }
@@ -302,7 +303,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       if (tag.hasArgs) {
         this.emitError(
           this.pos,
-          "ILLEGAL_TAG_ARGUMENT",
+          ErrorCode.INVALID_TAG_ARGUMENT,
           "A tag can only have one argument"
         );
         return;
@@ -344,7 +345,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             if (child.start === child.end) {
               return this.emitError(
                 child,
-                "MISSING_TAG_VARIABLE",
+                ErrorCode.MISSING_TAG_VARIABLE,
                 "A slash was found that was not followed by a variable name or lhs expression"
               );
             }
