@@ -1,5 +1,5 @@
 1╭─ <div>
- │   │  ╰─ openTagEnd(div)
+ │   │  ╰─ openTagEnd
  ╰─  ╰─ tagName "div"
 2╭─     Hello
  ╰─ ╰─ text "\n    Hello\n    "

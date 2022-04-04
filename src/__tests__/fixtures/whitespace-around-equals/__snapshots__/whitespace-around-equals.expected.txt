@@ -1,7 +1,7 @@
 1╭─ <div foo = bar></div>
  │   │   │   │ │  ││ ╰─ closeTag(div).value "div"
  │   │   │   │ │  │╰─ closeTag(div) "</div>"
- │   │   │   │ │  ╰─ openTagEnd(div)
+ │   │   │   │ │  ╰─ openTagEnd
  │   │   │   │ ╰─ attrValue.value "bar"
  │   │   │   ╰─ attrValue "= bar"
  │   │   ╰─ attrName "foo"

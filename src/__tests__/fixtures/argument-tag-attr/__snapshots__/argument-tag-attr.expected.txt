@@ -1,7 +1,7 @@
 1╭─ <for(var i = 0; i < 10; i++) if(x > y)></for>
  │   │  ││                       │ ││     ││ ╰─ closeTag(for).value "for"
  │   │  ││                       │ ││     │╰─ closeTag(for) "</for>"
- │   │  ││                       │ ││     ╰─ openTagEnd(for)
+ │   │  ││                       │ ││     ╰─ openTagEnd
  │   │  ││                       │ │╰─ attrArgs.value "x > y"
  │   │  ││                       │ ╰─ attrArgs "(x > y)"
  │   │  ││                       ╰─ attrName "if"

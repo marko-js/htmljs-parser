@@ -10,7 +10,7 @@
  │  │   │ ╰─ attrValue "= (x) => { console.log(\"y\") }"
  │  │   ╰─ attrName
  │  ├─ closeTag(tag)
- │  ├─ openTagEnd(tag)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
 3╭─ tag a = x => { console.log("y") } b
  │  │   │ │ │                         ╰─ attrName
@@ -18,7 +18,7 @@
  │  │   │ ╰─ attrValue "= x => { console.log(\"y\") }"
  │  │   ╰─ attrName
  │  ├─ closeTag(tag)
- │  ├─ openTagEnd(tag)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
 4╭─ tag a = async x => { console.log("y") } b
  │  │   │ │ │                               ╰─ attrName
@@ -26,15 +26,15 @@
  │  │   │ ╰─ attrValue "= async x => { console.log(\"y\") }"
  │  │   ╰─ attrName
  │  ├─ closeTag(tag)
- │  ├─ openTagEnd(tag)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
 5╭─ tag a = async function (x) { console.log("y") } b
  │  │   │ │ │                                       │├─ closeTag(tag)
- │  │   │ │ │                                       │╰─ openTagEnd(tag)
+ │  │   │ │ │                                       │╰─ openTagEnd
  │  │   │ │ │                                       ╰─ attrName
  │  │   │ │ ╰─ attrValue.value "async function (x) { console.log(\"y\") }"
  │  │   │ ╰─ attrValue "= async function (x) { console.log(\"y\") }"
  │  │   ╰─ attrName
  │  ├─ closeTag(tag)
- │  ├─ openTagEnd(tag)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"

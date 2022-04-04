@@ -3,5 +3,5 @@
  │   │     ││                  │  ╰─ closeTag(script) "</script>"
  │   │     ││                  ╰─ text "!\")"
  │   │     │╰─ text "alert(\"Hello "
- │   │     ╰─ openTagEnd(script)
+ │   │     ╰─ openTagEnd
  ╰─  ╰─ tagName "script"

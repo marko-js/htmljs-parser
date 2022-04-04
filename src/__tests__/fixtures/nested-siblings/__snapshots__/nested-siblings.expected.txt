@@ -8,14 +8,14 @@
  │  │   │    │    ╰─ attrValue "=\"bar\""
  │  │   │    ╰─ attrName "class"
  │  │   ╰─ tagName "span"
- ╰─ ╰─ openTagEnd(div)
+ ╰─ ╰─ openTagEnd
 3╭─     span class="baz"
  │  │   │    │    ││    ├─ closeTag(div)
  │  │   │    │    ││    ├─ closeTag(span)
- │  │   │    │    ││    ╰─ openTagEnd(span)
+ │  │   │    │    ││    ╰─ openTagEnd
  │  │   │    │    │╰─ attrValue.value "\"baz\""
  │  │   │    │    ╰─ attrValue "=\"baz\""
  │  │   │    ╰─ attrName "class"
  │  │   ╰─ tagName "span"
  │  ├─ closeTag(span)
- ╰─ ╰─ openTagEnd(span)
+ ╰─ ╰─ openTagEnd

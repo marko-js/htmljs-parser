@@ -8,17 +8,17 @@
  │  │   │          ╰─ attrValue "='home'"
  │  │   ╰─ attrName "currentPage"
  │  ├─ closeTag(var)
- │  ├─ openTagEnd(var)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "var"
 3╭─ 
- ╰─ ╰─ openTagEnd(var)
+ ╰─ ╰─ openTagEnd
 4╭─ <!DOCTYPE html>
  │  │ ╰─ doctype.value "DOCTYPE html"
  │  ├─ closeTag(var)
  ╰─ ╰─ doctype "<!DOCTYPE html>"
 5╭─ html lang="en"
  │  │    │   ││   ├─ closeTag(html)
- │  │    │   ││   ╰─ openTagEnd(html)
+ │  │    │   ││   ╰─ openTagEnd
  │  │    │   │╰─ attrValue.value "\"en\""
  │  │    │   ╰─ attrValue "=\"en\""
  │  │    ╰─ attrName "lang"

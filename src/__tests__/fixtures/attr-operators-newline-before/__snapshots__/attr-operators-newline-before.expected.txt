@@ -9,7 +9,7 @@
  │  │├─ attrValue "=x\n*y"
  │  │╰─ attrName
  │  ├─ closeTag(a)
- │  ├─ openTagEnd(a)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName
 4├─ *y
 5╭─ a=x
@@ -17,7 +17,7 @@
  │  │├─ attrValue "=x\n**y"
  │  │╰─ attrName
  │  ├─ closeTag(a)
- │  ├─ openTagEnd(a)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName
 6├─ **y
 7╭─ a=x
@@ -25,7 +25,7 @@
  │  │├─ attrValue "=x\n%y"
  │  │╰─ attrName
  │  ├─ closeTag(a)
- │  ├─ openTagEnd(a)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName
 8├─ %y
 9╭─ a=x
@@ -33,7 +33,7 @@
  │  │├─ attrValue "=x\n&y"
  │  │╰─ attrName
  │  ├─ closeTag(a)
- │  ├─ openTagEnd(a)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName
 10├─ &y
 11╭─ a=x
@@ -41,7 +41,7 @@
   │  │├─ attrValue "=x\n&&y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 12├─ &&y
 13╭─ a=x
@@ -49,7 +49,7 @@
   │  │├─ attrValue "=x\n^y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 14├─ ^y
 15╭─ a=x
@@ -57,7 +57,7 @@
   │  │├─ attrValue "=x\n~y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 16├─ ~y
 17╭─ a=x
@@ -65,7 +65,7 @@
   │  │├─ attrValue "=x\n|y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 18├─ |y
 19╭─ a=x
@@ -73,7 +73,7 @@
   │  │├─ attrValue "=x\n||y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 20├─ ||y
 21╭─ a=x
@@ -81,7 +81,7 @@
   │  │├─ attrValue "=x\n??y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 22├─ ??y
 23╭─ a=x
@@ -89,7 +89,7 @@
   │  │├─ attrValue "=x\n?y\n:z"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 24├─ ?y
 25├─ :z
@@ -98,7 +98,7 @@
   │  │├─ attrValue "=x\n==y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 27├─ ==y
 28╭─ a=x
@@ -106,7 +106,7 @@
   │  │├─ attrValue "=x\n===y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 29├─ ===y
 30╭─ a=x
@@ -114,7 +114,7 @@
   │  │├─ attrValue "=x\n!=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 31├─ !=y
 32╭─ a=x
@@ -122,7 +122,7 @@
   │  │├─ attrValue "=x\n!==y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 33├─ !==y
 34╭─ a=x
@@ -130,7 +130,7 @@
   │  │├─ attrValue "=x\n>=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 35├─ >=y
 36╭─ a=x
@@ -138,7 +138,7 @@
   │  │├─ attrValue "=x\n&=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 37├─ &=y
 38╭─ a=x
@@ -146,7 +146,7 @@
   │  │├─ attrValue "=x\n&&=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 39├─ &&=y
 40╭─ a=x
@@ -154,7 +154,7 @@
   │  │├─ attrValue "=x\n|=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 41├─ |=y
 42╭─ a=x
@@ -162,7 +162,7 @@
   │  │├─ attrValue "=x\n||=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 43├─ ||=y
 44╭─ a=x
@@ -170,7 +170,7 @@
   │  │├─ attrValue "=x\n^=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 45├─ ^=y
 46╭─ a=x
@@ -178,7 +178,7 @@
   │  │├─ attrValue "=x\n~=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 47├─ ~=y
 48╭─ a=x
@@ -186,7 +186,7 @@
   │  │├─ attrValue "=x\n>>=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 49├─ >>=y
 50╭─ a=x
@@ -194,7 +194,7 @@
   │  │├─ attrValue "=x\n>>>=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 51├─ >>>=y
 52╭─ a=x
@@ -202,7 +202,7 @@
   │  │├─ attrValue "=x\n/=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 53├─ /=y
 54╭─ a=x
@@ -210,7 +210,7 @@
   │  │├─ attrValue "=x\n*=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 55├─ *=y
 56╭─ a=x
@@ -218,7 +218,7 @@
   │  │├─ attrValue "=x\n**=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 57├─ **=y
 58╭─ a=x
@@ -226,7 +226,7 @@
   │  │├─ attrValue "=x\n%=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 59├─ %=y
 60╭─ a=x
@@ -234,7 +234,7 @@
   │  │├─ attrValue "=x\n+=y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 61├─ +=y
 62╭─ <a=x
@@ -243,14 +243,13 @@
   │  ││╰─ attrName
   │  │╰─ tagName
   │  ├─ closeTag(a)
-  ╰─ ╰─ openTagEnd(a)
+  ╰─ ╰─ openTagEnd
 63╭─ .y/>
-  ╰─   ╰─ openTagEnd(a) "/>"
+  ╰─   ╰─ openTagEnd:selfClosed "/>"
 64╭─ a=x
   │  ││╰─ attrValue.value "x\n+y"
   │  │├─ attrValue "=x\n+y"
   │  │╰─ attrName
-  │  ├─ closeTag(a)
   ╰─ ╰─ tagName
 65├─ +y
 66╭─ a=x
@@ -258,7 +257,7 @@
   │  │├─ attrValue "=x\n>y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 67├─ >y
 68╭─ a=x
@@ -266,7 +265,7 @@
   │  │├─ attrValue "=x\n>>y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 69├─ >>y
 70╭─ a=x
@@ -274,7 +273,7 @@
   │  │├─ attrValue "=x\n>>>y"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 71├─ >>>y
 72╭─ <a=x
@@ -283,32 +282,30 @@
   │  ││╰─ attrName
   │  │╰─ tagName
   │  ├─ closeTag(a)
-  ╰─ ╰─ openTagEnd(a)
+  ╰─ ╰─ openTagEnd
 73╭─ >y</>
   │  │││ ╰─ closeTag(a).value
   │  ││╰─ closeTag(a) "</>"
   │  │╰─ text
-  ╰─ ╰─ openTagEnd(a)
+  ╰─ ╰─ openTagEnd
 74╭─ <a=x
   │   ││╰─ attrValue.value "x\n>>y"
   │   │├─ attrValue "=x\n>>y"
   │   │╰─ attrName
   ╰─  ╰─ tagName
 75╭─ >>y/>
-  ╰─    ╰─ openTagEnd(a) "/>"
+  ╰─    ╰─ openTagEnd:selfClosed "/>"
 76╭─ <a=x
-  │  │││╰─ attrValue.value "x\n>>>y"
-  │  ││├─ attrValue "=x\n>>>y"
-  │  ││╰─ attrName
-  │  │╰─ tagName
-  ╰─ ╰─ closeTag(a)
+  │   ││╰─ attrValue.value "x\n>>>y"
+  │   │├─ attrValue "=x\n>>>y"
+  │   │╰─ attrName
+  ╰─  ╰─ tagName
 77╭─ >>>y/>
-  ╰─     ╰─ openTagEnd(a) "/>"
+  ╰─     ╰─ openTagEnd:selfClosed "/>"
 78╭─ a=x
   │  ││╰─ attrValue.value "x\n=>y"
   │  │├─ attrValue "=x\n=>y"
   │  │╰─ attrName
-  │  ├─ closeTag(a)
   ╰─ ╰─ tagName
 79╭─ =>y z
   ╰─     ╰─ attrName
@@ -317,7 +314,7 @@
   │  │├─ attrValue "=x\n=>\n(y)"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 81├─ =>
 82╭─ (y) z
@@ -327,7 +324,7 @@
   │  │├─ attrValue "=x\n=>\n{y}"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 84├─ =>
 85╭─ {y} z
@@ -337,9 +334,9 @@
   │  │├─ attrValue "=(x)\n{y}"
   │  │╰─ attrName
   │  ├─ closeTag(a)
-  │  ├─ openTagEnd(a)
+  │  ├─ openTagEnd
   ╰─ ╰─ tagName
 87╭─ {y} z
   │      │├─ closeTag(a)
-  │      │╰─ openTagEnd(a)
+  │      │╰─ openTagEnd
   ╰─     ╰─ attrName

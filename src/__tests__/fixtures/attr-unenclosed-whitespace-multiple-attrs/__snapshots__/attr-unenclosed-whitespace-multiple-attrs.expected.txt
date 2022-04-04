@@ -1,7 +1,7 @@
 1╭─ <test a = 123 + 456 b = 789></test>
  │   │    │ │ │         │ │ │  ││ ╰─ closeTag(test).value "test"
  │   │    │ │ │         │ │ │  │╰─ closeTag(test) "</test>"
- │   │    │ │ │         │ │ │  ╰─ openTagEnd(test)
+ │   │    │ │ │         │ │ │  ╰─ openTagEnd
  │   │    │ │ │         │ │ ╰─ attrValue.value "789"
  │   │    │ │ │         │ ╰─ attrValue "= 789"
  │   │    │ │ │         ╰─ attrName
@@ -12,7 +12,7 @@
 2╭─ <test a = 123 b = 456 + 789></test>
  │   │    │ │ │   │ │ │        ││ ╰─ closeTag(test).value "test"
  │   │    │ │ │   │ │ │        │╰─ closeTag(test) "</test>"
- │   │    │ │ │   │ │ │        ╰─ openTagEnd(test)
+ │   │    │ │ │   │ │ │        ╰─ openTagEnd
  │   │    │ │ │   │ │ ╰─ attrValue.value "456 + 789"
  │   │    │ │ │   │ ╰─ attrValue "= 456 + 789"
  │   │    │ │ │   ╰─ attrName

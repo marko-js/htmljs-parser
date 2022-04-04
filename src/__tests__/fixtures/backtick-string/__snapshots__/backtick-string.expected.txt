@@ -6,4 +6,4 @@
 2╭─     ${foo}!`></hello>
  │              ││ ╰─ closeTag(hello).value "hello"
  │              │╰─ closeTag(hello) "</hello>"
- ╰─             ╰─ openTagEnd(hello)
+ ╰─             ╰─ openTagEnd

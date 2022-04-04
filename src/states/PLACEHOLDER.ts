@@ -17,7 +17,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
   },
 
   exit(placeholder) {
-    this.handlers.onPlaceholder?.({
+    this.options.onPlaceholder?.({
       start: placeholder.start,
       end: placeholder.end,
       escape: placeholder.escape,

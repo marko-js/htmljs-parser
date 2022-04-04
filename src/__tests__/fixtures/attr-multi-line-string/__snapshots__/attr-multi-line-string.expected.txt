@@ -7,4 +7,4 @@
 3╭─ 124"></div>
  │      ││ ╰─ closeTag(div).value "div"
  │      │╰─ closeTag(div) "</div>"
- ╰─     ╰─ openTagEnd(div)
+ ╰─     ╰─ openTagEnd

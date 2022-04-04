@@ -1,8 +1,8 @@
 1╭─ <li>
- │   │ ╰─ openTagEnd(li)
+ │   │ ╰─ openTagEnd
  ╰─  ╰─ tagName "li"
 2╭─     <a.nav-link class=(id === currentPage && 'active') href=href>
- │  │    │││        │    ││                                │   ││   ╰─ openTagEnd(a)
+ │  │    │││        │    ││                                │   ││   ╰─ openTagEnd
  │  │    │││        │    ││                                │   │╰─ attrValue.value "href"
  │  │    │││        │    ││                                │   ╰─ attrValue "=href"
  │  │    │││        │    ││                                ╰─ attrName "href"

@@ -4,5 +4,5 @@
  │  │   ╰─ attrName "isString"
  ╰─ ╰─ tagName "var"
 2╭─ 
- │  ├─ openTagEnd(var)
+ │  ├─ openTagEnd
  ╰─ ╰─ closeTag(var)

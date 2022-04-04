@@ -2,7 +2,7 @@
  ╰─ ╰─ tagName
 2╭─     -- Paragraph: Line 1
  │  │      ╰─ text "Paragraph: Line 1"
- ╰─ ╰─ openTagEnd(p)
+ ╰─ ╰─ openTagEnd
 3╭─     -- Paragraph: Line 2
  ╰─        ╰─ text "Paragraph: Line 2"
 4╭─ -- Root: Line 1

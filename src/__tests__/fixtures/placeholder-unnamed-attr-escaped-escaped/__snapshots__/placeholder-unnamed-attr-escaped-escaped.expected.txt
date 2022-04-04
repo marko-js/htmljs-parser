@@ -1,7 +1,7 @@
 1╭─ <div class="foo" \\${myCustomAttrs}></div>
  │   │   │    ││     │                 ││ ╰─ closeTag(div).value "div"
  │   │   │    ││     │                 │╰─ closeTag(div) "</div>"
- │   │   │    ││     │                 ╰─ openTagEnd(div)
+ │   │   │    ││     │                 ╰─ openTagEnd
  │   │   │    ││     ╰─ attrName "\\\\${myCustomAttrs}"
  │   │   │    │╰─ attrValue.value "\"foo\""
  │   │   │    ╰─ attrValue "=\"foo\""

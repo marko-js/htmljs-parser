@@ -3,33 +3,14 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  OpenTagEnding,
   Ranges,
   Meta,
+  TagType,
 } from "../internal";
 
 export interface TagNameMeta extends Meta, Ranges.Template {
   shorthandCode?: CODE.NUMBER_SIGN | CODE.PERIOD;
 }
-
-const VOID_TAGS = [
-  "area",
-  "base",
-  "br",
-  "col",
-  "hr",
-  "embed",
-  "img",
-  "input",
-  "link",
-  "meta",
-  "param",
-  "source",
-  "track",
-  "wbr",
-];
-
-const CODE_TAGS = ["import", "export", "static", "class"];
 
 // We enter STATE.TAG_NAME after we encounter a "<"
 // followed by a non-special character
@@ -63,7 +44,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         }
 
         this.activeTag!.hasShorthandId = true;
-        this.handlers.onTagShorthandId?.({
+        this.options.onTagShorthandId?.({
           start,
           end,
           quasis,
@@ -71,7 +52,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         });
         break;
       case CODE.PERIOD:
-        this.handlers.onTagShorthandClass?.({
+        this.options.onTagShorthandClass?.({
           start,
           end,
           quasis,
@@ -80,12 +61,19 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         break;
       default: {
         const tag = this.activeTag!;
+        const tagType = this.options.onTagName?.({
+          start,
+          end,
+          quasis,
+          expressions,
+          concise: this.isConcise,
+        });
         tag.tagName = tagName;
 
-        if (tagName.expressions.length === 0) {
-          if (this.matchAnyAtPos(tagName, VOID_TAGS)) {
-            tag.ending |= OpenTagEnding.void;
-          } else if (this.matchAnyAtPos(tagName, CODE_TAGS)) {
+        if (tagType) {
+          tag.type = tagType;
+
+          if (tagType === TagType.statement) {
             if (!tag.concise) {
               return this.emitError(
                 tagName,
@@ -106,18 +94,9 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
               );
             }
 
-            tag.ending |= OpenTagEnding.code;
             this.enterState(STATE.EXPRESSION).terminatedByEOL = true;
           }
         }
-
-        this.handlers.onTagName?.({
-          start,
-          end,
-          quasis,
-          expressions,
-          concise: this.isConcise,
-        });
 
         break;
       }

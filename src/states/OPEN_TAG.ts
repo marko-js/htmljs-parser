@@ -3,10 +3,9 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  BODY_MODE,
-  OpenTagEnding,
   Ranges,
   Meta,
+  TagType,
 } from "../internal";
 
 const enum TAG_STAGE {
@@ -18,7 +17,7 @@ const enum TAG_STAGE {
 }
 
 export interface OpenTagMeta extends Meta {
-  bodyMode: BODY_MODE;
+  type: TagType;
   stage: TAG_STAGE;
   concise: boolean;
   beginMixedMode?: boolean;
@@ -27,12 +26,11 @@ export interface OpenTagMeta extends Meta {
   hasArgs: boolean;
   hasAttrs: boolean;
   hasShorthandId: boolean;
-  ending: OpenTagEnding;
+  selfClosed: boolean;
   indent: string;
   nestedIndent: string | undefined;
   parentTag: OpenTagMeta | undefined;
 }
-const PARSED_TEXT_TAGS = ["script", "style", "textarea", "html-comment"];
 const CONCISE_TAG_VAR_TERMINATORS = [
   CODE.SEMICOLON,
   CODE.OPEN_PAREN,
@@ -56,6 +54,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   enter(parent, start) {
     const tag = (this.activeTag = {
       state: OPEN_TAG as StateDefinition,
+      type: TagType.html,
       parent,
       start,
       end: start,
@@ -66,11 +65,10 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       hasShorthandId: false,
       hasArgs: false,
       hasAttrs: false,
+      selfClosed: false,
       shorthandEnd: -1,
       tagName: undefined!,
-      ending: OpenTagEnding.tag,
       concise: this.isConcise,
-      bodyMode: BODY_MODE.HTML,
       beginMixedMode: this.beginMixedMode || this.endingMixedModeAtEOL,
     });
 
@@ -81,27 +79,29 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   },
 
   exit(tag) {
-    const { tagName, ending } = tag;
+    const { selfClosed } = tag;
 
-    this.handlers.onOpenTagEnd?.({
-      start:
-        this.pos - (this.isConcise ? 0 : ending & OpenTagEnding.self ? 2 : 1),
+    this.options.onOpenTagEnd?.({
+      start: this.pos - (this.isConcise ? 0 : selfClosed ? 2 : 1),
       end: this.pos,
-      ending,
+      selfClosed,
     });
 
-    if (!this.isConcise && ending !== OpenTagEnding.tag) {
-      this.closeTag(this.pos, this.pos, undefined);
-    } else if (
-      tagName.expressions.length === 0 &&
-      this.matchAnyAtPos(tagName, PARSED_TEXT_TAGS)
-    ) {
-      tag.bodyMode = BODY_MODE.PARSED_TEXT;
-      if (this.isConcise) {
-        this.enterState(STATE.CONCISE_HTML_CONTENT);
-      } else {
-        this.enterState(STATE.PARSED_TEXT_CONTENT);
+    switch (selfClosed ? TagType.void : tag.type) {
+      case TagType.void:
+      case TagType.statement: {
+        // Close the tag, but don't also emit the onCloseTag event.
+        if (tag.beginMixedMode) this.endingMixedModeAtEOL = true;
+        this.activeTag = tag.parentTag;
+        break;
       }
+      case TagType.text:
+        if (this.isConcise) {
+          this.enterState(STATE.CONCISE_HTML_CONTENT);
+        } else {
+          this.enterState(STATE.PARSED_TEXT_CONTENT);
+        }
+        break;
     }
   },
 
@@ -258,7 +258,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       code === CODE.FORWARD_SLASH &&
       this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET
     ) {
-      tag.ending |= OpenTagEnding.self;
+      tag.selfClosed = true;
       this.pos += 2; // skip />
       this.exitState();
       return;
@@ -349,7 +349,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               );
             }
 
-            this.handlers.onTagVar?.({
+            this.options.onTagVar?.({
               start: child.start - 1, // include /,
               end: child.end,
               value: {
@@ -375,7 +375,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               this.pos--;
             } else {
               tag.hasArgs = true;
-              this.handlers.onTagArgs?.({
+              this.options.onTagArgs?.({
                 start,
                 end,
                 value,
@@ -385,7 +385,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           }
           case TAG_STAGE.PARAMS: {
             const end = ++this.pos; // include closing |
-            this.handlers.onTagParams?.({
+            this.options.onTagParams?.({
               start: child.start - 1, // include leading |
               end,
               value: {

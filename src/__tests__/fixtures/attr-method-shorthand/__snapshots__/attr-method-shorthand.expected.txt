@@ -9,9 +9,8 @@
 2├─   console.log("hello"); 
 3├─   event.preventDefault();
 4╭─ }/>
- ╰─  ╰─ openTagEnd(foo) "/>"
-5╭─ 
- ╰─ ╰─ closeTag(foo)
+ ╰─  ╰─ openTagEnd:selfClosed "/>"
+5├─ 
 6╭─ <foo onclick (event) { 
  │   │   │       ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
  │   │   │       ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
@@ -23,9 +22,8 @@
 7├─   console.log("hello"); 
 8├─   event.preventDefault();
 9╭─ }/>
- ╰─  ╰─ openTagEnd(foo) "/>"
-10╭─ 
-  ╰─ ╰─ closeTag(foo)
+ ╰─  ╰─ openTagEnd:selfClosed "/>"
+10├─ 
 11╭─ <foo(event) { 
   │   │  ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
   │   │  ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
@@ -37,9 +35,8 @@
 12├─   console.log("hello"); 
 13├─   event.preventDefault();
 14╭─ }/>
-  ╰─  ╰─ openTagEnd(foo) "/>"
-15╭─ 
-  ╰─ ╰─ closeTag(foo)
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+15├─ 
 16╭─ <foo (event) { 
   │   │   ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
   │   │   ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
@@ -51,9 +48,8 @@
 17├─   console.log("hello"); 
 18├─   event.preventDefault();
 19╭─ }/>
-  ╰─  ╰─ openTagEnd(foo) "/>"
-20╭─ 
-  ╰─ ╰─ closeTag(foo)
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+20├─ 
 21╭─ foo onclick(event) { 
   │  │   │      ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
   │  │   │      ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
@@ -66,7 +62,7 @@
 23├─   event.preventDefault();
 24├─ }
 25╭─ 
-  ╰─ ╰─ openTagEnd(foo)
+  ╰─ ╰─ openTagEnd
 26╭─ foo onclick (event) { 
   │  │   │       ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
   │  │   │       ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
@@ -80,7 +76,7 @@
 28├─   event.preventDefault();
 29├─ }
 30╭─ 
-  ╰─ ╰─ openTagEnd(foo)
+  ╰─ ╰─ openTagEnd
 31╭─ foo(event) { 
   │  │  ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
   │  │  ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
@@ -94,7 +90,7 @@
 33├─   event.preventDefault();
 34├─ }
 35╭─ 
-  ╰─ ╰─ openTagEnd(foo)
+  ╰─ ╰─ openTagEnd
 36╭─ foo (event) { 
   │  │   ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
   │  │   ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
@@ -108,4 +104,4 @@
 38├─   event.preventDefault();
 39╭─ }
   │   ├─ closeTag(foo)
-  ╰─  ╰─ openTagEnd(foo)
+  ╰─  ╰─ openTagEnd

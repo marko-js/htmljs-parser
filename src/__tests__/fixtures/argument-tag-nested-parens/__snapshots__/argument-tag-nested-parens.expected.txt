@@ -1,6 +1,6 @@
 1╭─ ---
 2╭─ <if(notEmpty(data.colors))>
- │  ││ ││                     ╰─ openTagEnd(if)
+ │  ││ ││                     ╰─ openTagEnd
  │  ││ │╰─ tagArgs.value "notEmpty(data.colors)"
  │  ││ ╰─ tagArgs "(notEmpty(data.colors))"
  │  │╰─ tagName "if"

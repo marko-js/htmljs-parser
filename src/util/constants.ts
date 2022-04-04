@@ -38,11 +38,6 @@ export const enum CODE {
   TAB = 9,
 }
 
-export const enum BODY_MODE {
-  HTML,
-  PARSED_TEXT, // Body of a tag is treated as text, but placeholders will be parsed
-}
-
 // Same format as https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#position
 export interface Position {
   /**
@@ -109,7 +104,7 @@ export namespace Ranges {
   }
 
   export interface OpenTagEnd extends Range {
-    ending: OpenTagEnding;
+    selfClosed: boolean;
   }
 
   export interface CloseTag extends Range {
@@ -117,14 +112,14 @@ export namespace Ranges {
   }
 }
 
-export const enum OpenTagEnding {
-  tag = 0,
-  self = 1 << 0,
-  void = 1 << 1,
-  code = 1 << 2,
+export const enum TagType {
+  html,
+  text,
+  void,
+  statement,
 }
 
-export interface Handlers {
+export interface ParserOptions {
   onError?(data: Ranges.Error): void;
   onText?(data: Range): void;
   onComment?(data: Ranges.Value): void;
@@ -133,7 +128,7 @@ export interface Handlers {
   onDoctype?(data: Ranges.Value): void;
   onScriptlet?(data: Ranges.Scriptlet): void;
   onPlaceholder?(data: Ranges.Placeholder): void;
-  onTagName?(data: Ranges.TagName): void;
+  onTagName?(data: Ranges.TagName): TagType | void;
   onTagShorthandId?(data: Ranges.Template): void;
   onTagShorthandClass?(data: Ranges.Template): void;
   onTagVar?(data: Ranges.Value): void;

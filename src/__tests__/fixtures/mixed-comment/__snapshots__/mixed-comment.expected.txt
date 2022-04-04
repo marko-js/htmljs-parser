@@ -5,7 +5,7 @@
  ╰─ ╰─ tagName
 2╭─     <!--
  │  │   ╰─ comment "<!--\n    A multiline HTML comment\n    should be okay\n    -->"
- ╰─ ╰─ openTagEnd(p)
+ ╰─ ╰─ openTagEnd
 3╭─     A multiline HTML comment
  ╰─ ╰─ comment.value "\n    A multiline HTML comment\n    should be okay\n    "
 4├─     should be okay
@@ -14,7 +14,7 @@
  │  │   │    ││     │  │   │        ╰─ closeTag(div)
  │  │   │    ││     │  │   ╰─ comment.value " test "
  │  │   │    ││     │  ╰─ comment "<!-- test -->"
- │  │   │    ││     ╰─ openTagEnd(div)
+ │  │   │    ││     ╰─ openTagEnd
  │  │   │    │╰─ attrValue.value "\"bar\""
  │  │   │    ╰─ attrValue "=\"bar\""
  │  │   ╰─ attrName "class"

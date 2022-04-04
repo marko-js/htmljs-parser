@@ -3,5 +3,5 @@
  │   │  ││           │╰─ closeTag(div) "</div>"
  │   │  ││           ╰─ text
  │   │  │╰─ text "Hello "
- │   │  ╰─ openTagEnd(div)
+ │   │  ╰─ openTagEnd
  ╰─  ╰─ tagName "div"

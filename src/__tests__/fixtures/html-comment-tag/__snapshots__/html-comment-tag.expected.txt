@@ -1,5 +1,5 @@
 1╭─ <div>
- │   │  ╰─ openTagEnd(div)
+ │   │  ╰─ openTagEnd
  ╰─  ╰─ tagName "div"
 2╭─   <!--123-->
  │  │ │   ╰─ comment.value "123"
@@ -9,7 +9,7 @@
  │  │  │           ││  │ ╰─ closeTag(html-comment).value "html-comment"
  │  │  │           ││  ╰─ closeTag(html-comment) "</html-comment>"
  │  │  │           │╰─ text "abc"
- │  │  │           ╰─ openTagEnd(html-comment)
+ │  │  │           ╰─ openTagEnd
  │  │  ╰─ tagName "html-comment"
  ╰─ ╰─ text "\n  "
 4╭─   <!--[if lt IE 9]><script src="..."></script><![endif]-->
@@ -20,7 +20,7 @@
  │  │  │           ││                                                │ ╰─ closeTag(html-comment).value "html-comment"
  │  │  │           ││                                                ╰─ closeTag(html-comment) "</html-comment>"
  │  │  │           │╰─ text "[if lt IE 9]><script src=\"...\"></script><![endif]"
- │  │  │           ╰─ openTagEnd(html-comment)
+ │  │  │           ╰─ openTagEnd
  │  │  ╰─ tagName "html-comment"
  ╰─ ╰─ text "\n  "
 6╭─ </div>

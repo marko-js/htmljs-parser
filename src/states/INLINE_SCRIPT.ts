@@ -23,7 +23,7 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
   },
 
   exit(inlineScript) {
-    this.handlers.onScriptlet?.({
+    this.options.onScriptlet?.({
       start: inlineScript.start,
       end: inlineScript.end,
       block: inlineScript.block,

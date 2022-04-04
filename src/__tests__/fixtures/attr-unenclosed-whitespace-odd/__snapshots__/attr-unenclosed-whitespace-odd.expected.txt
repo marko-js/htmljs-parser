@@ -1,7 +1,7 @@
 1╭─ <div foo = 1+ 2, bar = x /y></div>
  │   │   │   │ │     │   │ │   ││ ╰─ closeTag(div).value "div"
  │   │   │   │ │     │   │ │   │╰─ closeTag(div) "</div>"
- │   │   │   │ │     │   │ │   ╰─ openTagEnd(div)
+ │   │   │   │ │     │   │ │   ╰─ openTagEnd
  │   │   │   │ │     │   │ ╰─ attrValue.value "x /y"
  │   │   │   │ │     │   ╰─ attrValue "= x /y"
  │   │   │   │ │     ╰─ attrName "bar"

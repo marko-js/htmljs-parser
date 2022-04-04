@@ -6,9 +6,9 @@
 2╭─     span class="bar"
  │  │   │    │    ││    ├─ closeTag(div)
  │  │   │    │    ││    ├─ closeTag(span)
- │  │   │    │    ││    ╰─ openTagEnd(span)
+ │  │   │    │    ││    ╰─ openTagEnd
  │  │   │    │    │╰─ attrValue.value "\"bar\""
  │  │   │    │    ╰─ attrValue "=\"bar\""
  │  │   │    ╰─ attrName "class"
  │  │   ╰─ tagName "span"
- ╰─ ╰─ openTagEnd(div)
+ ╰─ ╰─ openTagEnd

@@ -8,12 +8,12 @@
  ╰─ ╰─ tagName "html"
 3╭─   body
  │  │ ╰─ tagName "body"
- ╰─ ╰─ openTagEnd(html)
+ ╰─ ╰─ openTagEnd
 4╭─     h1 -- Title
  │  │   │  │  ╰─ text "Title"
- │  │   │  ╰─ openTagEnd(h1)
+ │  │   │  ╰─ openTagEnd
  │  │   ╰─ tagName "h1"
- ╰─ ╰─ openTagEnd(body)
+ ╰─ ╰─ openTagEnd
 5╭─     script
  │  │   ╰─ tagName "script"
  ╰─ ╰─ closeTag(h1)
@@ -22,4 +22,4 @@
  │  │        │               ├─ closeTag(body)
  │  │        │               ╰─ closeTag(script)
  │  │        ╰─ text "var a = 'marko';"
- ╰─ ╰─ openTagEnd(script)
+ ╰─ ╰─ openTagEnd

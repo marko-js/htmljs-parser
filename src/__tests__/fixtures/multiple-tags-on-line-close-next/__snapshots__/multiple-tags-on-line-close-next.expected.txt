@@ -1,9 +1,9 @@
 1╭─ <span></span><div>
- │   │   ││ │     │  ╰─ openTagEnd(div)
+ │   │   ││ │     │  ╰─ openTagEnd
  │   │   ││ │     ╰─ tagName "div"
  │   │   ││ ╰─ closeTag(span).value "span"
  │   │   │╰─ closeTag(span) "</span>"
- │   │   ╰─ openTagEnd(span)
+ │   │   ╰─ openTagEnd
  ╰─  ╰─ tagName "span"
 2╭─ </div>
  │  │ ╰─ closeTag(div).value "div"
