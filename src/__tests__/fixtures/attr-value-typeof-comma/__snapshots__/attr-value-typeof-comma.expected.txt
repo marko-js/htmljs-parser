@@ -7,5 +7,5 @@
  │  │   ╰─ attrName "foo"
  ╰─ ╰─ tagName "var"
 2╭─ 
- │  ├─ openTagEnd(var)
+ │  ├─ openTagEnd
  ╰─ ╰─ closeTag(var)

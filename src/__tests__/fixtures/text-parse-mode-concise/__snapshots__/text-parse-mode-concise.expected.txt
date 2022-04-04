@@ -2,9 +2,9 @@
  ╰─ ╰─ tagName "div"
 2╭─     span
  │  │   ╰─ tagName "span"
- ╰─ ╰─ openTagEnd(div)
+ ╰─ ╰─ openTagEnd
 3╭─         -- Hello World
  │  │          │          ├─ closeTag(div)
  │  │          │          ╰─ closeTag(span)
  │  │          ╰─ text "Hello World"
- ╰─ ╰─ openTagEnd(span)
+ ╰─ ╰─ openTagEnd

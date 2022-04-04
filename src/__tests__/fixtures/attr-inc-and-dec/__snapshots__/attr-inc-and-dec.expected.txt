@@ -8,7 +8,7 @@
  ╰─ ╰─ tagName
 2╭─ a foo=++a bar=--b
  │  │ │  ││   │  ││  ├─ closeTag(a)
- │  │ │  ││   │  ││  ╰─ openTagEnd(a)
+ │  │ │  ││   │  ││  ╰─ openTagEnd
  │  │ │  ││   │  │╰─ attrValue.value "--b"
  │  │ │  ││   │  ╰─ attrValue "=--b"
  │  │ │  ││   ╰─ attrName "bar"
@@ -16,5 +16,5 @@
  │  │ │  ╰─ attrValue "=++a"
  │  │ ╰─ attrName "foo"
  │  ├─ closeTag(a)
- │  ├─ openTagEnd(a)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName

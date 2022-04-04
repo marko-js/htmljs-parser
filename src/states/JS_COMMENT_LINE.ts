@@ -1,4 +1,4 @@
-import { BODY_MODE, CODE, STATE, StateDefinition } from "../internal";
+import { CODE, STATE, StateDefinition, TagType } from "../internal";
 
 // We enter STATE.JS_COMMENT_LINE after we encounter a "//" sequence
 // when parsing JavaScript code.
@@ -21,7 +21,7 @@ export const JS_COMMENT_LINE: StateDefinition = {
     if (
       !this.isConcise &&
       code === CODE.OPEN_ANGLE_BRACKET &&
-      this.activeTag?.bodyMode === BODY_MODE.PARSED_TEXT
+      this.activeTag?.type === TagType.text
     ) {
       // First, see if we need to see if we reached the closing tag
       // eg: <script>//foo</script>

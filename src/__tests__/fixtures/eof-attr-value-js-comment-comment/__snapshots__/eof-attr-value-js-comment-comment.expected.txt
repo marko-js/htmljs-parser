@@ -4,5 +4,5 @@
  │   ││ │ │        ╰─ attrName "something"
  │   ││ │ ╰─ attrName "selected"
  │   ││ ╰─ tagName
- │   │╰─ openTagEnd(a)
+ │   │╰─ openTagEnd
  ╰─  ╰─ tagName

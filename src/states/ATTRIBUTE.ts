@@ -170,7 +170,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           end: child.end,
         };
 
-        this.handlers.onAttrName?.(attr.name);
+        this.options.onAttrName?.(attr.name);
         break;
       }
       case ATTR_STAGE.ARGUMENT: {
@@ -198,7 +198,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           };
         } else {
           attr.args = true;
-          this.handlers.onAttrArgs?.({
+          this.options.onAttrArgs?.({
             start,
             end,
             value,
@@ -211,7 +211,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         const params = attr.args as Ranges.Value;
         const start = params.start;
         const end = ++this.pos; // include }
-        this.handlers.onAttrMethod?.({
+        this.options.onAttrMethod?.({
           start,
           end,
           params,
@@ -238,7 +238,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         }
 
         if (attr.spread) {
-          this.handlers.onAttrSpread?.({
+          this.options.onAttrSpread?.({
             start: attr.valueStart,
             end: child.end,
             value: {
@@ -247,7 +247,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
             },
           });
         } else {
-          this.handlers.onAttrValue?.({
+          this.options.onAttrValue?.({
             start: attr.valueStart,
             end: child.end,
             bound: attr.bound,
@@ -267,7 +267,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
 
 function ensureAttrName(parser: Parser, attr: AttrMeta) {
   if (!attr.name) {
-    parser.handlers.onAttrName?.({
+    parser.options.onAttrName?.({
       start: attr.start,
       end: attr.start,
     });

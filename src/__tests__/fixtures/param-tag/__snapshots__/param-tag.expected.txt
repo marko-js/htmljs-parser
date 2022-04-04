@@ -1,7 +1,7 @@
 1╭─ <for|x, y, { destrucure=default }| of=array></for>
  │   │  ││                             │ ││    ││ ╰─ closeTag(for).value "for"
  │   │  ││                             │ ││    │╰─ closeTag(for) "</for>"
- │   │  ││                             │ ││    ╰─ openTagEnd(for)
+ │   │  ││                             │ ││    ╰─ openTagEnd
  │   │  ││                             │ │╰─ attrValue.value "array"
  │   │  ││                             │ ╰─ attrValue "=array"
  │   │  ││                             ╰─ attrName "of"

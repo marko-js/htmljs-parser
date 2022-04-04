@@ -1,5 +1,5 @@
 1╭─ <script>
- │   │     ╰─ openTagEnd(script)
+ │   │     ╰─ openTagEnd
  ╰─  ╰─ tagName "script"
 2╭─ \${test}
  │  │╰─ text "${test}\n\\"

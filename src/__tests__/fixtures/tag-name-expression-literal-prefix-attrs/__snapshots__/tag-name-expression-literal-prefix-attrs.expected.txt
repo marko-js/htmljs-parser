@@ -1,5 +1,5 @@
 1╭─ <foo-${bar} hello="world">
- │   │   │      │    ││      ╰─ openTagEnd(foo-${bar})
+ │   │   │      │    ││      ╰─ openTagEnd
  │   │   │      │    │╰─ attrValue.value "\"world\""
  │   │   │      │    ╰─ attrValue "=\"world\""
  │   │   │      ├─ attrName "hello"

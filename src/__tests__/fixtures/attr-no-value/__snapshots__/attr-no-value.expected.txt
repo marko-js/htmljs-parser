@@ -2,6 +2,6 @@
  │   │ │││   │ ╰─ closeTag(a).value
  │   │ │││   ╰─ closeTag(a) "</a>"
  │   │ ││╰─ text "test"
- │   │ │╰─ openTagEnd(a)
+ │   │ │╰─ openTagEnd
  │   │ ╰─ attrName
  ╰─  ╰─ tagName

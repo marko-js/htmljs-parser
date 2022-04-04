@@ -7,4 +7,4 @@
 3╭─ }"></custom>
  │    ││ ╰─ closeTag(custom).value "custom"
  │    │╰─ closeTag(custom) "</custom>"
- ╰─   ╰─ openTagEnd(custom)
+ ╰─   ╰─ openTagEnd

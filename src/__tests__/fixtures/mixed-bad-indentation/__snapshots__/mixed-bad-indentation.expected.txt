@@ -4,8 +4,8 @@
  │  │    │││    │ ╰─ closeTag(b).value
  │  │    │││    ╰─ closeTag(b) "</b>"
  │  │    ││╰─ text "Hello"
- │  │    │╰─ openTagEnd(b)
+ │  │    │╰─ openTagEnd
  │  │    ╰─ tagName
- ╰─ ╰─ openTagEnd(p)
+ ╰─ ╰─ openTagEnd
 3╭─         BAD
  ╰─         ╰─ error(BAD_INDENTATION:Line indentation does match indentation of previous line)

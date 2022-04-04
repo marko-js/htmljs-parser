@@ -1,5 +1,5 @@
 1╭─ <foo/var|param|>
- │   │  ││  ││     ╰─ openTagEnd(foo)
+ │   │  ││  ││     ╰─ openTagEnd
  │   │  ││  │╰─ tagParams.value "param"
  │   │  ││  ╰─ tagParams "|param|"
  │   │  │╰─ tagVar.value "var"

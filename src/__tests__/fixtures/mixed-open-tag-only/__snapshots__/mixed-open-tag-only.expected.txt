@@ -4,25 +4,23 @@
  │  │   ╰─ attrName "colors"
  ╰─ ╰─ tagName "var"
 2╭─ <img src="marko.png">
- │  ││   │  ││          ╰─ openTagEnd(img)
+ │  ││   │  ││          ╰─ openTagEnd
  │  ││   │  │╰─ attrValue.value "\"marko.png\""
  │  ││   │  ╰─ attrValue "=\"marko.png\""
  │  ││   ╰─ attrName "src"
  │  │╰─ tagName "img"
  │  ├─ closeTag(var)
- ╰─ ╰─ openTagEnd(var)
+ ╰─ ╰─ openTagEnd
 3╭─ img src="marko2.png"
  │  │   │  │╰─ attrValue.value "\"marko2.png\""
  │  │   │  ╰─ attrValue "=\"marko2.png\""
  │  │   ╰─ attrName "src"
- │  ├─ closeTag(img)
  ╰─ ╰─ tagName "img"
 4╭─ div class="foo"
  │  │   │    ││    ├─ closeTag(div)
- │  │   │    ││    ╰─ openTagEnd(div)
+ │  │   │    ││    ╰─ openTagEnd
  │  │   │    │╰─ attrValue.value "\"foo\""
  │  │   │    ╰─ attrValue "=\"foo\""
  │  │   ╰─ attrName "class"
- │  ├─ closeTag(img)
- │  ├─ openTagEnd(img)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "div"

@@ -14,7 +14,7 @@ export const CDATA: StateDefinition = {
   },
 
   exit(cdata) {
-    this.handlers.onCDATA?.({
+    this.options.onCDATA?.({
       start: cdata.start,
       end: cdata.end,
       value: {

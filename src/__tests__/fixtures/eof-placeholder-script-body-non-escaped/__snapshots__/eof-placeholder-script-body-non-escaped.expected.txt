@@ -1,5 +1,5 @@
 1╭─ <script>Hello $!{abc
  │   │     ││        ╰─ error(MALFORMED_PLACEHOLDER:EOF reached while parsing placeholder)
  │   │     │╰─ text "Hello "
- │   │     ╰─ openTagEnd(script)
+ │   │     ╰─ openTagEnd
  ╰─  ╰─ tagName "script"

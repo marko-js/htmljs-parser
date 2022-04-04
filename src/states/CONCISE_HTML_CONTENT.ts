@@ -3,8 +3,7 @@ import {
   STATE,
   isWhitespaceCode,
   StateDefinition,
-  BODY_MODE,
-  OpenTagEnding,
+  TagType,
   htmlEOF,
 } from "../internal";
 
@@ -48,19 +47,8 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       }
 
       if (parentTag) {
-        if (parentTag.ending !== OpenTagEnding.tag) {
-          this.emitError(
-            this.pos,
-            "INVALID_BODY",
-            `The "${this.read(
-              parentTag.tagName
-            )}" tag does not allow nested body content`
-          );
-          return;
-        }
-
         if (
-          parentTag.bodyMode === BODY_MODE.PARSED_TEXT &&
+          parentTag.type === TagType.text &&
           code !== CODE.HTML_BLOCK_DELIMITER
         ) {
           this.emitError(
@@ -146,7 +134,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
     switch (child.state) {
       case STATE.JS_COMMENT_LINE:
-        this.handlers.onComment?.({
+        this.options.onComment?.({
           start: child.start,
           end: child.end,
           value: {
@@ -156,7 +144,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         });
         break;
       case STATE.JS_COMMENT_BLOCK: {
-        this.handlers.onComment?.({
+        this.options.onComment?.({
           start: child.start,
           end: child.end,
           value: {

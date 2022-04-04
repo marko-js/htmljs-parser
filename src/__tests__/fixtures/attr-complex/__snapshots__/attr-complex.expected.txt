@@ -2,7 +2,7 @@
  │   │ │││       │ ││ │                          ││   │ ╰─ closeTag(a).value
  │   │ │││       │ ││ │                          ││   ╰─ closeTag(a) "</a>"
  │   │ │││       │ ││ │                          │╰─ text "test"
- │   │ │││       │ ││ │                          ╰─ openTagEnd(a)
+ │   │ │││       │ ││ │                          ╰─ openTagEnd
  │   │ │││       │ ││ ╰─ attrValue.value "d=(a + (1/2) /* comment */)"
  │   │ │││       │ │╰─ attrValue "= d=(a + (1/2) /* comment */)"
  │   │ │││       │ ╰─ attrName

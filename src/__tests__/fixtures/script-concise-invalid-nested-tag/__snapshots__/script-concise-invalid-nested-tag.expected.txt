@@ -2,5 +2,5 @@
  ╰─ ╰─ tagName "script"
 2╭─     p - This is not allowed
  │  │   ╰─ error(ILLEGAL_LINE_START:A line within a tag that only allows text content must begin with a "-" character)
- ╰─ ╰─ openTagEnd(script)
+ ╰─ ╰─ openTagEnd
 3╰─ div

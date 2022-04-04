@@ -1,20 +1,18 @@
 1╭─ <for(x in y)></for>
  │   │  ││      ││ ╰─ closeTag(for).value "for"
  │   │  ││      │╰─ closeTag(for) "</for>"
- │   │  ││      ╰─ openTagEnd(for)
+ │   │  ││      ╰─ openTagEnd
  │   │  │╰─ tagArgs.value "x in y"
  │   │  ╰─ tagArgs "(x in y)"
  ╰─  ╰─ tagName "for"
 2╭─ <ab('c')/>
- │   │ ││   ╰─ openTagEnd(ab) "/>"
+ │   │ ││   ╰─ openTagEnd:selfClosed "/>"
  │   │ │╰─ tagArgs.value "'c'"
  │   │ ╰─ tagArgs "('c')"
  ╰─  ╰─ tagName "ab"
 3╭─ <a('b')/>
- │  ││││   ╰─ openTagEnd(a) "/>"
- │  │││╰─ tagArgs.value "'b'"
- │  ││╰─ tagArgs "('b')"
- │  │╰─ tagName
- ╰─ ╰─ closeTag(ab)
-4╭─ 
- ╰─ ╰─ closeTag(a)
+ │   │││   ╰─ openTagEnd:selfClosed "/>"
+ │   ││╰─ tagArgs.value "'b'"
+ │   │╰─ tagArgs "('b')"
+ ╰─  ╰─ tagName
+4╰─ 

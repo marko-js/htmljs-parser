@@ -1,6 +1,5 @@
 1╭─ <${test} foo=123/>
- │   │       │  ││  │ ╰─ closeTag(${test})
- │   │       │  ││  ╰─ openTagEnd(${test}) "/>"
+ │   │       │  ││  ╰─ openTagEnd:selfClosed "/>"
  │   │       │  │╰─ attrValue.value "123"
  │   │       │  ╰─ attrValue "=123"
  │   │       ├─ attrName "foo"

@@ -2,24 +2,24 @@
  ╰─ ╰─ tagName
 2╭─     b
  │  │   ╰─ tagName
- ╰─ ╰─ openTagEnd(a)
+ ╰─ ╰─ openTagEnd
 3╭─         c
  │  │       ╰─ tagName
- ╰─ ╰─ openTagEnd(b)
+ ╰─ ╰─ openTagEnd
 4╭─         c2
  │  │       ╰─ tagName "c2"
  │  ├─ closeTag(c)
- ╰─ ╰─ openTagEnd(c)
+ ╰─ ╰─ openTagEnd
 5╭─     b2
  │  │   ╰─ tagName "b2"
  │  ├─ closeTag(b)
  │  ├─ closeTag(c2)
- ╰─ ╰─ openTagEnd(c2)
+ ╰─ ╰─ openTagEnd
 6╭─ a2
  │  ├─ closeTag(a)
  │  ├─ closeTag(b2)
- │  ├─ openTagEnd(b2)
+ │  ├─ openTagEnd
  ╰─ ╰─ tagName "a2"
 7╭─ 
- │  ├─ openTagEnd(a2)
+ │  ├─ openTagEnd
  ╰─ ╰─ closeTag(a2)

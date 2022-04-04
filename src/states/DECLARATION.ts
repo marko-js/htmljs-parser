@@ -49,7 +49,7 @@ function exitDeclaration(
 ) {
   parser.pos += closeOffset;
   parser.exitState();
-  parser.handlers.onDeclaration?.({
+  parser.options.onDeclaration?.({
     start: declaration.start,
     end: declaration.end,
     value: {

@@ -15,6 +15,5 @@
 8╭─   not-preserve-attr-a
  ╰─   ╰─ attrName "not-preserve-attr-a"
 9╭─ />
- ╰─ ╰─ openTagEnd(custom-tag) "/>"
-10╭─ 
-  ╰─ ╰─ closeTag(custom-tag)
+ ╰─ ╰─ openTagEnd:selfClosed "/>"
+10╰─ 

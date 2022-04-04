@@ -1,5 +1,5 @@
 1╭─ <div>
- │   │  ╰─ openTagEnd(div)
+ │   │  ╰─ openTagEnd
  ╰─  ╰─ tagName "div"
 2╭─     BEFORE<![CDATA[<within><!-- just text -->]]>AFTER
  │  │         │        │                            ╰─ text "AFTER\n"
