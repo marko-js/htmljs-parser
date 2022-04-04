@@ -1,4 +1,4 @@
-import { CODE, StateDefinition } from "../internal";
+import { CODE, ErrorCode, StateDefinition } from "../internal";
 
 // We enter STATE.DTD after we encounter a "<!" while in the STATE.HTML_CONTENT.
 // We leave STATE.DTD if we see a ">".
@@ -38,7 +38,7 @@ export const DTD: StateDefinition = {
   eof(documentType) {
     this.emitError(
       documentType,
-      "MALFORMED_DOCUMENT_TYPE",
+      ErrorCode.MALFORMED_DOCUMENT_TYPE,
       "EOF reached while parsing document type"
     );
   },

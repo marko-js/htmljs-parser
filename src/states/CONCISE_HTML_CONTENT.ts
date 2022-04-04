@@ -5,6 +5,7 @@ import {
   StateDefinition,
   TagType,
   htmlEOF,
+  ErrorCode,
 } from "../internal";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
@@ -40,7 +41,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       if (!parentTag && curIndent) {
         this.emitError(
           this.pos,
-          "BAD_INDENTATION",
+          ErrorCode.INVALID_INDENTATION,
           "Line has extra indentation at the beginning"
         );
         return;
@@ -53,7 +54,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         ) {
           this.emitError(
             this.pos,
-            "ILLEGAL_LINE_START",
+            ErrorCode.INVALID_LINE_START,
             'A line within a tag that only allows text content must begin with a "-" character'
           );
           return;
@@ -64,7 +65,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
         } else if (parentTag.nestedIndent !== this.indent) {
           this.emitError(
             this.pos,
-            "BAD_INDENTATION",
+            ErrorCode.INVALID_INDENTATION,
             "Line indentation does match indentation of previous line"
           );
           return;
@@ -91,7 +92,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           } else {
             this.emitError(
               this.pos,
-              "ILLEGAL_LINE_START",
+              ErrorCode.INVALID_LINE_START,
               'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43'
             );
           }
@@ -110,7 +111,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
             default:
               this.emitError(
                 this.pos,
-                "ILLEGAL_LINE_START",
+                ErrorCode.INVALID_LINE_START,
                 'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment'
               );
               return;
@@ -158,7 +159,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           // after the ending "*/" sequence
           this.emitError(
             this.pos,
-            "INVALID_CHARACTER",
+            ErrorCode.INVALID_CHARACTER,
             "In concise mode a javascript comment block can only be followed by whitespace characters and a newline."
           );
         }

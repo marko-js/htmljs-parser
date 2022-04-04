@@ -1,4 +1,11 @@
-import { CODE, Parser, STATE, StateDefinition, Meta } from "../internal";
+import {
+  CODE,
+  Parser,
+  STATE,
+  StateDefinition,
+  Meta,
+  ErrorCode,
+} from "../internal";
 
 interface PlaceholderMeta extends Meta {
   escape: boolean;
@@ -38,7 +45,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
     if (child.start === child.end) {
       this.emitError(
         child,
-        "PLACEHOLDER_EXPRESSION_REQUIRED",
+        ErrorCode.MALFORMED_PLACEHOLDER,
         "Invalid placeholder, the expression cannot be missing"
       );
     }

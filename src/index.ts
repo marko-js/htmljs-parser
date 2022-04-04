@@ -1,6 +1,7 @@
 import { type ParserOptions, type Range, Parser } from "./internal";
 export {
   TagType,
+  ErrorCode,
   type ParserOptions as Handlers,
   type Position,
   type Location,
