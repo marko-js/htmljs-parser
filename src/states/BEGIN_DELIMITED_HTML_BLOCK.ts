@@ -5,6 +5,7 @@ import {
   STATE,
   htmlEOF,
   Meta,
+  ErrorCode,
 } from "../internal";
 
 export interface DelimitedHTMLBlockMeta extends Meta {
@@ -106,7 +107,7 @@ function handleDelimitedBlockEOL(
     } else {
       parser.emitError(
         parser.pos,
-        "INVALID_CHARACTER",
+        ErrorCode.INVALID_CHARACTER,
         "A concise mode closing block delimiter can only be followed by whitespace."
       );
     }

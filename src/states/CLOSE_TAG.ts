@@ -1,4 +1,4 @@
-import { CODE, StateDefinition, Parser, Range } from "../internal";
+import { CODE, StateDefinition, Parser, Range, ErrorCode } from "../internal";
 
 // We enter STATE.CLOSE_TAG after we see "</"
 export const CLOSE_TAG: StateDefinition = {
@@ -30,7 +30,7 @@ export const CLOSE_TAG: StateDefinition = {
   eof(closeTag) {
     this.emitError(
       closeTag,
-      "MALFORMED_CLOSE_TAG",
+      ErrorCode.MALFORMED_CLOSE_TAG,
       "EOF reached while parsing closing tag"
     );
   },
@@ -86,7 +86,7 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
   if (!activeTag) {
     parser.emitError(
       closeTag!,
-      "EXTRA_CLOSING_TAG",
+      ErrorCode.EXTRA_CLOSING_TAG,
       'The closing "' +
         parser.read({ start: closeTagNameStart, end: closeTagNameEnd }) +
         '" tag was not expected'
@@ -118,7 +118,7 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
       ) {
         parser.emitError(
           closeTag,
-          "MISMATCHED_CLOSING_TAG",
+          ErrorCode.MISMATCHED_CLOSING_TAG,
           'The closing "' +
             parser.read(closeTagNamePos) +
             '" tag does not match the corresponding opening "' +

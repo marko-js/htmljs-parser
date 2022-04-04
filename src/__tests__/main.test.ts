@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import snap from "mocha-snap";
-import { getLines, TagType } from "../internal";
+import { ErrorCode, getLines, TagType } from "../internal";
 import { createParser, Position, Ranges, Range } from "..";
 
 const FIXTURES = path.join(__dirname, "fixtures");
@@ -61,7 +61,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
     const tagStack: Ranges.TagName[] = [];
     const parser = createParser({
       onError(range) {
-        addRange(`error(${range.code}:${range.message})`, range);
+        addRange(`error(${ErrorCode[range.code]}:${range.message})`, range);
       },
       onText(range) {
         addRange("text", range);

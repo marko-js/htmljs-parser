@@ -1,5 +1,5 @@
 1╭─ <div for(var i = 0; i < 10; i++) (nonsense!)></div>
- │   │   │  ││                        ╰─ error(ILLEGAL_ATTRIBUTE_ARGUMENT:An attribute can only have one set of arguments) "nonsense!"
+ │   │   │  ││                        ╰─ error(INVALID_ATTRIBUTE_ARGUMENT:An attribute can only have one set of arguments) "nonsense!"
  │   │   │  │╰─ attrArgs.value "var i = 0; i < 10; i++"
  │   │   │  ╰─ attrArgs "(var i = 0; i < 10; i++)"
  │   │   ╰─ attrName "for"

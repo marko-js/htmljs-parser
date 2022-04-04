@@ -1,5 +1,5 @@
 1╭─ <for(var i = 0; i < 10; i++) (nonsense!)></for>
- │   │  ││                       ╰─ error(ILLEGAL_TAG_ARGUMENT:A tag can only have one argument)
+ │   │  ││                       ╰─ error(INVALID_TAG_ARGUMENT:A tag can only have one argument)
  │   │  │╰─ tagArgs.value "var i = 0; i < 10; i++"
  │   │  ╰─ tagArgs "(var i = 0; i < 10; i++)"
  ╰─  ╰─ tagName "for"
