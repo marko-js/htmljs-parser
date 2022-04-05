@@ -1,6 +1,6 @@
 1╭─ <foo-${bar}-baz>
- │   │   │      │  ╰─ openTagEnd
- │   │   │      ╰─ tagName.quasis[1] "baz"
+ │   │   │     │   ╰─ openTagEnd
+ │   │   │     ╰─ tagName.quasis[1] "-baz"
  │   │   ╰─ tagName.expressions[0] "${bar}"
  │   ├─ tagName.quasis[0] "foo-"
  ╰─  ╰─ tagName "foo-${bar}-baz"

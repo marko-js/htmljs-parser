@@ -1,10 +1,10 @@
 1╭─ ${test} foo=123
- │  │       │  ││  ├─ closeTag(${test})
- │  │       │  ││  ╰─ openTagEnd
- │  │       │  │╰─ attrValue.value "123"
- │  │       │  ╰─ attrValue "=123"
- │  │       ├─ attrName "foo"
- │  │       ╰─ tagName.quasis[1]
+ │  │      ││  ││  ├─ closeTag(${test})
+ │  │      ││  ││  ╰─ openTagEnd
+ │  │      ││  │╰─ attrValue.value "123"
+ │  │      ││  ╰─ attrValue "=123"
+ │  │      │╰─ attrName "foo"
+ │  │      ╰─ tagName.quasis[1]
  │  ├─ tagName.expressions[0] "${test}"
  │  ├─ tagName.quasis[0]
  ╰─ ╰─ tagName "${test}"

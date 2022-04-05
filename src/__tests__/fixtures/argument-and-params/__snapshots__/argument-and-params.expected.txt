@@ -1,16 +1,16 @@
 1╭─ <${x}(y)/>
  │   │   ││ ╰─ openTagEnd:selfClosed "/>"
- │   │   │├─ tagArgs.value
- │   │   │╰─ tagName.quasis[1]
- │   │   ╰─ tagArgs "(y)"
+ │   │   │╰─ tagArgs.value
+ │   │   ├─ tagArgs "(y)"
+ │   │   ╰─ tagName.quasis[1]
  │   ├─ tagName.expressions[0] "${x}"
  │   ├─ tagName.quasis[0]
  ╰─  ╰─ tagName "${x}"
 2╭─ <${x}|y|/>
  │   │   ││ ╰─ openTagEnd:selfClosed "/>"
- │   │   │├─ tagParams.value
- │   │   │╰─ tagName.quasis[1]
- │   │   ╰─ tagParams "|y|"
+ │   │   │╰─ tagParams.value
+ │   │   ├─ tagParams "|y|"
+ │   │   ╰─ tagName.quasis[1]
  │   ├─ tagName.expressions[0] "${x}"
  │   ├─ tagName.quasis[0]
  ╰─  ╰─ tagName "${x}"
