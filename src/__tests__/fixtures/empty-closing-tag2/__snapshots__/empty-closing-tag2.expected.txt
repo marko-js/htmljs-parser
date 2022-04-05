@@ -11,6 +11,8 @@
  │  │    ╰─ tagName "li"
  ╰─ ╰─ text "\n    "
 3╭─         ${feature}
+ │  │       │ ╰─ placeholder:escape.value "feature"
+ │  │       ╰─ placeholder:escape "${feature}"
  ╰─ ╰─ text "\n        "
 4╭─     </li>
  │  │   │ ╰─ closeTag(li).value "li"

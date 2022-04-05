@@ -5,7 +5,9 @@
  │   │      ╰─ attrName "name"
  ╰─  ╰─ tagName "custom"
 2╭─     Hello $!{name}!
- │  │                 ╰─ text "!\n"
+ │  │         │  │    ╰─ text "!\n"
+ │  │         │  ╰─ placeholder.value "name"
+ │  │         ╰─ placeholder "$!{name}"
  ╰─ ╰─ text "\n    Hello "
 3╭─ </custom>
  │  │ ╰─ closeTag(custom).value "custom"

@@ -1,1 +1,3 @@
-1╰─ -- $!{"Hello ${data.name}!"}
+1╭─ -- $!{"Hello ${data.name}!"}
+ │     │  ╰─ placeholder.value "\"Hello ${data.name}!\""
+ ╰─    ╰─ placeholder "$!{\"Hello ${data.name}!\"}"

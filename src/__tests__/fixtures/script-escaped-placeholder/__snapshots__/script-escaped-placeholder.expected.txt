@@ -4,7 +4,9 @@
 2╭─ \${test}
  │  │╰─ text "${test}\n\\"
  ╰─ ╰─ text "\n"
-3├─ \\${test}
+3╭─ \\${test}
+ │    │ ╰─ placeholder:escape.value "test"
+ ╰─   ╰─ placeholder:escape "${test}"
 4╭─ </script>
  │  │ ╰─ closeTag(script).value "script"
  │  ├─ text "\n"
