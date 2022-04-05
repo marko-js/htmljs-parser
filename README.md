@@ -1,591 +1,397 @@
-# htmljs-parser
+<h1 align="center">
+  <!-- Logo -->
+  <br/>
+  htmljs-parser
+  <br/>
 
-HTML parsers written according to the HTML spec will interpret all
-attribute values as strings which makes it challenging to properly
-describe a value's type (boolean, string, number, array, etc.)
-or to provide a complex JavaScript expression as a value.
-The ability to describe JavaScript expressions within attributes
-is important for HTML-based template compilers.
+  <!-- Format -->
+  <a href="https://github.com/prettier/prettier">
+    <img src="https://img.shields.io/badge/styled_with-prettier-ff69b4.svg" alt="Styled with prettier"/>
+  </a>
+  <!-- CI -->
+  <a href="https://github.com/marko-js/htmljs-parser/actions/workflows/ci.yml">
+    <img src="https://github.com/marko-js/htmljs-parser/actions/workflows/ci.yml/badge.svg" alt="Build status"/>
+  </a>
+  <!-- Coverage -->
+  <a href="https://codecov.io/gh/marko-js/htmljs-parser">
+    <img src="https://codecov.io/gh/marko-js/htmljs-parser/branch/main/graph/badge.svg?token=Sv8ePs16ix" alt="Code Coverage"/>
+  </a>
+  <!-- NPM Version -->
+  <a href="https://npmjs.org/package/htmljs-parser">
+    <img src="https://img.shields.io/npm/v/htmljs-parser.svg" alt="NPM version"/>
+  </a>
+  <!-- Downloads -->
+  <a href="https://npmjs.org/package/htmljs-parser">
+    <img src="https://img.shields.io/npm/dm/htmljs-parser.svg" alt="Downloads"/>
+  </a>
+</h1>
 
-For example, consider a HTML-based template that wishes to
-support a custom tag named `<say-hello>` that supports an
-attribute named `message` that can be a string literal or a JavaScript expression.
-
-Ideally, the template compiler should be able to handle any of the following:
-
-```html
-<say-hello message="Hello world!" />
-<say-hello message=("Hello " + personName + "!") />
-<say-hello message="Hello ${personName}!" />
-```
-
-This parser extends the HTML grammar to add these important features:
-
-- JavaScript expressions as attribute values
-
-```html
-<say-hello message=("Hello " + personName) count=2+2 large=true />
-```
-
-- Placeholders in the content of an element
-
-```html
-<div>Hello ${personName}</div>
-```
-
-- Placeholders within attribute value strings
-
-```html
-<div data-message="Hello ${personName}!"></div>
-```
-
-- JavaScript flow-control statements within HTML elements
-
-```html
-<div for(a in b) />
-<div if(a === b) />
-```
-
-- JavaScript flow-control statements as elements
-
-```html
-<for (a in b)> <if (a in b)></if></for>
-```
+An HTML parser with super powers used by [Marko](https://markojs.com/docs/syntax/).
 
 # Installation
 
-```bash
+```console
 npm install htmljs-parser
 ```
 
-# Usage
+# Creating A Parser
+
+First we must create a parser instance and pass it some handlers for the various parse events shown below.
+
+Each parse event is called a `Range` and is an object with start and end properties which are zero-based offsets from the beginning of th parsed code.
+
+Additional meta data and nested ranges are exposed on some events shown below.
+
+You can get the raw string from any range using `parser.read(range)`.
 
 ```javascript
-var parser = require("htmljs-parser").createParser({
-  onText: function (event) {
-    // Text within an HTML element
-    var value = event.value;
+import { createParser, ErrorCode, TagType } from "htmljs-parser";
+
+const parser = createParser({
+  /**
+   * Called when the parser encounters an error.
+   *
+   * @example
+   * 1╭─ <a><b
+   *  ╰─     ╰─ error(code: 19, message: "EOF reached while parsing open tag")
+   */
+  onError(range) {
+    range.code; // An error code id. You can see the list of error codes in ErrorCode imported above.
+    range.message; // A human readable (hopefully) error message.
   },
 
-  onPlaceholder: function (event) {
-    //  ${<value>]} // escape = true
-    // $!{<value>]} // escape = false
-    var value = event.value; // String
-    var escaped = event.escaped; // boolean
-    var withinBody = event.withinBody; // boolean
-    var withinAttribute = event.withinAttribute; // boolean
-    var withinOpenTag = event.withinOpenTag; // boolean
-    var pos = event.pos; // Integer
+  /**
+   * Called when some static text is parsed within some body content.
+   *
+   * @example
+   * 1╭─ <div>Hi</div>
+   *  ╰─      ╰─ text "Hi"
+   */
+  onText(range) {},
+
+  /**
+   * Called after parsing a placeholder within body content.
+   *
+   * @example
+   * 1╭─ <div>${hello} $!{world}</div>
+   *  │       │ │      │  ╰─ placeholder.value "world"
+   *  │       │ │      ╰─ placeholder "$!{world}"
+   *  │       │ ╰─ placeholder:escape.value "hello"
+   *  ╰─      ╰─ placeholder:escape "${hello}"
+   */
+  onPlaceholder(range) {
+    range.escape; // true for ${} placeholders and false for $!{} placeholders.
+    range.value; // Another range that includes only the placeholder value itself without the wrapping braces.
   },
 
-  onString: function (event) {
-    // Text within ""
-    var value = event.value; // String
-    var pos = event.pos; // Integer
+  /**
+   * Called when we find a comment at the root of the document or within a tags contents.
+   * It will not be fired for comments within expressions, such as attribute values.
+   *
+   * @example
+   * 1╭─ <!-- hi -->
+   *  │  │   ╰─ comment.value " hi "
+   *  ╰─ ╰─ comment "<!-- hi -->"
+   * 2╭─ // hi
+   *  │  │ ╰─ comment.value " hi"
+   *  ╰─ ╰─ comment "// hi"
+   */
+  onComment(range) {
+    range.value; // Another range that only includes the contents of the comment.
   },
 
-  onCDATA: function (event) {
-    // <![CDATA[<value>]]>
-    var value = event.value; // String
-    var pos = event.pos; // Integer
+  /**
+   * Called after parsing a CDATA section.
+   * // https://developer.mozilla.org/en-US/docs/Web/API/CDATASection
+   *
+   * @example
+   * 1╭─ <![CDATA[hi]]>
+   *  │  │        ╰─ cdata.value "hi"
+   *  ╰─ ╰─ cdata "<![CDATA[hi]]>"
+   */
+  onCDATA(range) {
+    range.value; // Another range that only includes the contents of the CDATA.
   },
 
-  onOpenTag: function (event) {
-    var tagName = event.tagName; // String
-    var attributes = event.attributes; // Array
-    var argument = event.argument; // Object
-    var pos = event.pos; // Integer
+  /**
+   * Called after parsing a DocType comment.
+   * https://developer.mozilla.org/en-US/docs/Web/API/DocumentType
+   *
+   * @example
+   * 1╭─ <!DOCTYPE html>
+   *  │  │ ╰─ doctype.value "DOCTYPE html"
+   *  ╰─ ╰─ doctype "<!DOCTYPE html>"
+   */
+  onDoctype(range) {
+    range.value; // Another range that only includes the contents of the DocType.
   },
 
-  onCloseTag: function (event) {
-    // close tag
-    var tagName = event.tagName; // String
-    var pos = event.pos; // Integer
+  /**
+   * Called after parsing an XML declaration.
+   * https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction#xml_declaration
+   *
+   * @example
+   * 1╭─ <?xml version="1.0" encoding="UTF-8"?>
+   *  │  │ ╰─ declaration.value "xml version=\"1.0\" encoding=\"UTF-8\""
+   *  ╰─ ╰─ declaration "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+   */
+  onDeclaration(range) {
+    range.value; // Another range that only includes the contents of the declaration.
   },
 
-  onDocumentType: function (event) {
-    // Document Type/DTD
-    // <!<value>>
-    // Example: <!DOCTYPE html>
-    var value = event.value; // String
-    var pos = event.pos; // Integer
+  /**
+   * Called after parsing a scriptlet (new line followed by a $).
+   *
+   * @example
+   * 1╭─ $ foo();
+   *  │   │╰─ scriptlet.value "foo();"
+   *  ╰─  ╰─ scriptlet " foo();"
+   * 2╭─ $ { bar(); }
+   *  │   │ ╰─ scriptlet:block.value " bar(); "
+   *  ╰─  ╰─ scriptlet:block " { bar(); }"
+   */
+  onScriptlet(range) {
+    range.block; // true if the scriptlet was contained within braces.
+    range.value; // Another range that includes only the value itself without the leading $ or surrounding braces (if applicable).
   },
 
-  onDeclaration: function (event) {
-    // Declaration
-    // <?<value>?>
-    // Example: <?xml version="1.0" encoding="UTF-8" ?>
-    var value = event.value; // String
-    var pos = event.pos; // Integer
+  /**
+   * Called when a tag name, which can include placeholders, has been parsed.
+   *
+   * @example
+   * 1╭─ <div/>
+   *  ╰─  ╰─ tagName "div"
+   * 2╭─ <hello-${test}-again/>
+   *  │   │     │      ╰─ tagName.quasis[1] "-again"
+   *  │   │     ╰─ tagName.expressions[0] "${test}"
+   *  │   ├─ tagName.quasis[0] "hello-"
+   *  ╰─  ╰─ tagName "hello-${test}-again"
+   */
+  onTagName(range) {
+    range.concise; // true if this tag is a concise mode tag.
+    range.quasis; // An array of ranges that indicate the string literal parts of the tag name.
+    range.expressions; // A list of placeholder ranges (similar to whats emitted via onPlaceholder).
+
+    // Return a different tag type enum value to enter a different parse mode.
+    // Below is approximately what Marko uses:
+    switch (parser.read(range)) {
+      case "area":
+      case "base":
+      case "br":
+      case "col":
+      case "embed":
+      case "hr":
+      case "img":
+      case "input":
+      case "link":
+      case "meta":
+      case "param":
+      case "source":
+      case "track":
+      case "wbr":
+        // TagType.void makes this a void element (cannot have children).
+        return TagType.void;
+      case "html-comment":
+      case "script":
+      case "style":
+      case "textarea":
+        // TagType.text makes the child content text only (with placeholders).
+        return TagType.text;
+      case "class":
+      case "export":
+      case "import":
+      case "static":
+        // TagType.statement makes this a statement tag where the content following the tag name will be parsed as script code until we reach a new line, eg for `import x from "y"`).
+        return TagType.statement;
+    }
+
+    // TagType.html is the default which allows child content as html with placeholders.
+    return TagType.html;
   },
 
-  onComment: function (event) {
-    // Text within XML comment
-    var value = event.value; // String
-    var pos = event.pos; // Integer
+  /**
+   * Called when a shorthand id, which can include placeholders, has been parsed.
+   *
+   * @example
+   * 1╭─ <div#hello-${test}-again/>
+   *  │      ││     │       ╰─ tagShorthandId.quasis[1] "-again"
+   *  │      ││     ╰─ tagShorthandId.expressions[0] "${test}"
+   *  │      │╰─ tagShorthandId.quasis[0] "hello-"
+   *  ╰─     ╰─ tagShorthandId "#hello-${test}-again"
+   */
+  onTagShorthandId(range) {
+    range.quasis; // An array of ranges that indicate the string literal parts of the shorthand id name.
+    range.expressions; // A list of placeholder ranges (similar to whats emitted via onPlaceholder).
   },
 
-  onScriptlet: function (event) {
-    // Text within <% %>
-    var value = event.value; // String
-    var pos = event.pos; // Integer
+  /**
+   * Called when a shorthand class name, which can include placeholders, has been parsed.
+   * Note there can be multiple of these.
+   *
+   * @example
+   * 1╭─ <div.hello-${test}-again/>
+   *  │      ││     │       ╰─ tagShorthandClassName.quasis[1] "-again"
+   *  │      ││     ╰─ tagShorthandClassName.expressions[0] "${test}"
+   *  │      │╰─ tagShorthandClassName.quasis[0] "hello-"
+   *  ╰─     ╰─ tagShorthandClassName "#hello-${test}-again"
+   */
+  onTagShorthandClass(range) {
+    range.quasis; // An array of ranges that indicate the string literal parts of the shorthand id name.
+    range.expressions; // A list of placeholder ranges (similar to whats emitted via onPlaceholder).
   },
 
-  onError: function (event) {
-    // Error
-    var message = event.message; // String
-    var code = event.code; // String
-    var pos = event.pos; // Integer
+  /**
+   * Called after a tag variable has been parsed.
+   *
+   * @example
+   * 1╭─ <div/el/>
+   *  │      │╰─ tagVar.value "el"
+   *  ╰─     ╰─ tagVar "/el"
+   */
+  onTagVar(range) {
+    range.value; // Another range that includes only the tag var itself and not the leading slash.
+  },
+
+  /**
+   * Called after tag arguments have been parsed.
+   *
+   * @example
+   * 1╭─ <if(x)>
+   *  │     │╰─ tagArgs.value "x"
+   *  ╰─    ╰─ tagArgs "(x)"
+   */
+  onTagArgs(range) {
+    range.value; // Another range that includes only the args themselves and not the outer parenthesis.
+  },
+
+  /**
+   * Called after tag parameters have been parsed.
+   *
+   * @example
+   * 1╭─ <for|item| of=list>
+   *  │      │╰─ tagParams.value "item"
+   *  ╰─     ╰─ tagParams "|item|"
+   */
+  onTagParams(range) {
+    range.value; // Another range that includes only the params themselves and not the outer pipes.
+  },
+
+  /**
+   * Called after an attribute name as been parsed.
+   * Note this may be followed by the related AttrArgs, AttrValue or AttrMethod. It can also be directly followed by another AttrName, AttrSpread or the OpenTagEnd if this is a boolean attribute.
+   *
+   * @example
+   * 1╭─ <div class="hi">
+   *  ╰─      ╰─ attrName "class"
+   */
+  onAttrName(range) {},
+
+  /**
+   * Called after attr arguments have been parsed.
+   *
+   * @example
+   * 1╭─ <div if(x)>
+   *  │         │╰─ attrArgs.value "x"
+   *  ╰─        ╰─ attrArgs "(x)"
+   */
+  onAttrArgs(range) {
+    range.value; // Another range that includes only the args themselves and not the outer parenthesis.
+  },
+
+  /**
+   * Called after an attr value has been parsed.
+   *
+   * @example
+   * 1╭─ <input name="hi" value:=x>
+   *  │             ││         │ ╰─ attrValue:bound.value
+   *  │             ││         ╰─ attrValue:bound ":=x"
+   *  │             │╰─ attrValue.value "\"hi\""
+   *  ╰─            ╰─ attrValue "=\"hi\""
+   */
+  onAttrValue(range) {
+    range.bound; // true if the attribute value was preceded by :=.
+    range.value; // Another range that includes only the value itself without the leading = or :=.
+  },
+
+  /**
+   * Called after an attribute method shorthand has been parsed.
+   *
+   * @example
+   * 1╭─ <div onClick(ev) { foo(); }>
+   *  │              ││   │╰─ attrMethod.body.value " foo(); "
+   *  │              ││   ╰─ attrMethod.body "{ foo(); }"
+   *  │              │╰─ attrMethod.params.value "ev"
+   *  │              ├─ attrMethod.params "(ev)"
+   *  ╰─             ╰─ attrMethod "(ev) { foo(); }"
+   */
+  onAttrMethod(range) {
+    range.params; // Another range which includes the params for the method.
+    range.params.value; // Another range which includes the method params without outer parenthesis.
+
+    range.body; // Another range which includes the entire body block.
+    range.body.value; // Another range which includes the body block without outer braces.
+  },
+
+  /**
+   * Called after we've parsed a spread attribute.
+   *
+   * @example
+   * 1╭─ <div ...attrs>
+   *  │       │  ╰─ attrSpread.value "attrs"
+   *  ╰─      ╰─ attrSpread "...attrs"
+   */
+  onAttrSpread(range) {
+    range.value; // Another range that includes only the value itself without the leading ...
+  },
+
+  /**
+   * Called once we've completed parsing the open tag.
+   *
+   * @example
+   * 1╭─ <div><span/></div>
+   *  │      │     ╰─ openTagEnd:selfClosed "/>"
+   *  ╰─     ╰─ openTagEnd ">"
+   */
+  onOpenTagEnd(range) {
+    range.selfClosed; // true if this tag was self closed (onCloseTag would not be called if so).
+  },
+
+  /**
+   * Called once the closing tag (or in concise mode an outdent or eof) is parsed.
+   * Note this is not called for selfClosed, void or statement tags.
+   *
+   * @example
+   * 1╭─ <div><span/></div>
+   *  │              │ ╰─ closeTag(div).value "div"
+   *  ╰─             ╰─ closeTag(div) "</div>"
+   */
+  onCloseTag(range) {
+    range.value; // The raw content of the closing tag (undefined in concise mode).
   },
 });
-
-parser.parse(str);
 ```
 
-## Content Parsing Modes
-
-The parser, by default, will look for HTML tags within content. This behavior
-might not be desirable for certain tags, so the parser allows the parsing mode
-to be changed (usually in response to an `onOpenTag` event).
-
-There are three content parsing modes:
-
-- **HTML Content (DEFAULT):**
-  The parser will look for any HTML tag and content placeholders while in
-  this mode and parse opening and closing tags accordingly.
-
-- **Parsed Text Content**: The parser will look for the closing tag that matches
-  the current open tag as well as content placeholders but all other content
-  will be interpreted as text.
-
-- **Static Text Content**: The parser will look for the closing tag that matches
-  the current open tag but all other content will be interpreted as raw text.
+Finally after setting up the parser with it's handlers, it's time to pass in some source code to parse.
 
 ```javascript
-var htmljs = require('htmljs-parser');
-var parser = htmljs.createParser({
-    onOpenTag: function(event) {
-        // open tag
-        switch(event.tagName) {
-            case 'textarea':
-                //fall through
-            case 'script':
-                //fall through
-            case 'style':
-                // parse the content within these tags but only
-                // look for placeholders and the closing tag.
-                parser.enterParsedTextContentState();
-                break;
-            case 'dummy'
-                // treat content within <dummy>...</dummy> as raw
-                // text and ignore other tags and placeholders
-                parser.enterStaticTextContentState();
-                break;
-            default:
-                // The parser will switch to HTML content parsing mode
-                // if the parsing mode is not explicitly changed by
-                // "onOpenTag" function.
-        }
-    }
-});
-
-parser.parse(str);
+parser.parse("<div></div>");
 ```
 
-## Parsing Events
+# Parser Helpers
 
-The `htmljs-parser` is an event-based parser which means that it will emit
-events as it is parsing the document. Events are emitted via calls
-to `on<eventname>` function which are supplied as properties in the options
-via call to `require('htmljs-parser').createParser(options)`.
-
-### onOpenTag
-
-The `onOpenTag` function will be called each time an opening tag is
-encountered.
-
-**EXAMPLE: Simple tag**
-
-INPUT:
-
-```html
-<div></div>
-```
-
-OUTPUT EVENT:
+The parser instance provides a few helpers to make it easier to work with the parsed content.
 
 ```javascript
-{
-    type: 'openTag',
-    tagName: 'div',
-    attributes: []
-}
+// Pass any range object into this method to get the raw string from the source for the range.
+parser.read(range);
+
+// Given an zero based offset within the source code, returns a position object that contains line and column properties.
+parser.positionAt(offset);
+
+// Given a range object returns a location object with start and end properties which are each position objects as returned from the "positionAt" api.
+parser.locationAt(range);
 ```
 
-**EXAMPLE: Tag with literal attribute values**
+# Code of Conduct
 
-INPUT:
-
-```html
-<div class="demo" disabled="false" data-number="123"></div>
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'openTag',
-    tagName: 'div',
-    attributes: [
-        {
-            name: 'class',
-            value: '"demo"'
-        },
-        {
-            name: 'disabled',
-            value: 'false'
-        },
-        {
-            name: 'data-number',
-            value: '123'
-        }
-    ]
-}
-```
-
-**EXAMPLE: Tag with expression attribute**
-
-INPUT:
-
-```html
-<say-something message=("Hello "+data.name)/>
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'openTag',
-    tagName: 'div',
-    attributes: [
-        {
-            name: 'message',
-            value: '"Hello "+data.name'
-        }
-    ]
-}
-```
-
-**EXAMPLE: Tag with an argument**
-
-INPUT:
-
-```html
-<for(var i="0;" i < 10; i++)></for(var>
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'openTag',
-    tagName: 'for',
-    argument: {
-        value: 'var i = 0; i < 10; i++',
-        pos: ... // Integer
-    },
-    attributes: []
-}
-```
-
-**EXAMPLE: Attribute with an argument**
-
-INPUT:
-
-```html
-<div if(x>y)></div>
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'openTag',
-    tagName: 'div',
-    attributes: [
-        {
-            name: 'if',
-            argument: {
-                value: 'x > y',
-                pos: ... // Integer
-            }
-        }
-    ]
-}
-```
-
-### onCloseTag
-
-The `onCloseTag` function will be called each time a closing tag is
-encountered.
-
-**EXAMPLE: Simple close tag**
-
-INPUT:
-
-```html
-</div>
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'closeTag',
-    tagName: 'div'
-}
-```
-
-### onText
-
-The `onText` function will be called each time within an element
-when textual data is encountered.
-
-**NOTE:** Text within `<![CDATA[` `]]>` will be emitted via call
-to `onCDATA`.
-
-**EXAMPLE**
-
-In the following example code, the `TEXT` sequences will be emitted as
-text events.
-
-INPUT:
-
-```html
-Simple text
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'text',
-    value: 'Simple text'
-}
-```
-
-### onCDATA
-
-The `onCDATA` function will be called when text within `<![CDATA[` `]]>`
-is encountered.
-
-**EXAMPLE:**
-
-INPUT:
-
-```html
-<![CDATA[This is text]]>
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'cdata',
-    value: 'This is text'
-}
-```
-
-### onPlaceholder
-
-The `onPlaceholder` function will be called each time a placeholder
-is encountered.
-
-If the placeholder starts with the `$!{` sequence then `event.escape`
-will be `false`.
-
-If the placeholder starts with the `${` sequence then `event.escape` will be
-`true`.
-
-Text within `<![CDATA[` `]]>` and `<!--` `-->` will not be parsed so you
-cannot use placeholders for these blocks of code.
-
-**EXAMPLE:**
-
-INPUT:
-
-```html
-${"This is an escaped placeholder"} $!{"This is a non-escaped placeholder"}
-```
-
-OUTPUT EVENTS
-
-```html
-${name}
-```
-
-```javascript
-{
-    type: 'placeholder',
-    value: 'name',
-    escape: true
-}
-```
-
----
-
-```html
-$!{name}
-```
-
-```javascript
-{
-    type: 'placeholder',
-    value: 'name',
-    escape: true
-}
-```
-
-**NOTE:**
-The `escape` flag is merely informational. The application code is responsible
-for interpreting this flag to properly escape the expression.
-
-Here's an example of modifying the expression based on the `event.escape` flag:
-
-```javascript
-onPlaceholder: function(event) {
-    if (event.escape) {
-        event.value = 'escapeXml(' + event.value + ')';
-    }
-}
-```
-
-### onDocumentType
-
-The `onDocumentType` function will be called when the document type declaration
-is encountered _anywhere_ in the content.
-
-**EXAMPLE:**
-
-INPUT:
-
-```html
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'documentType',
-    value: 'DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN"'
-}
-```
-
-### onDeclaration
-
-The `onDeclaration` function will be called when an XML declaration
-is encountered _anywhere_ in the content.
-
-**EXAMPLE:**
-
-INPUT:
-
-```html
-<?xml version="1.0" encoding="UTF-8"?>
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'declaration',
-    value: 'xml version="1.0" encoding="UTF-8"'
-}
-```
-
-### onComment
-
-The `onComment` function will be called when text within `<!--` `-->`
-is encountered.
-
-**EXAMPLE:**
-
-INPUT:
-
-```html
-<!--This is a comment-->
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'comment',
-    value: 'This is a comment'
-}
-```
-
-### onScriptlet
-
-The `onScriptlet` function will be called when text within `<%` `%>`
-is encountered.
-
-**EXAMPLE:**
-
-INPUT:
-
-```html
-<% console.log("Hello World!"); %>
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'scriptlet',
-    value: ' console.log("Hello World!"); '
-}
-```
-
-### onError
-
-The `onError` function will be called when malformed content is detected.
-The most common cause for an error is due to reaching the end of the
-input while still parsing an open tag, close tag, XML comment, CDATA section,
-DTD, XML declaration, or placeholder.
-
-Possible error codes:
-
-- `MISSING_END_TAG`
-- `MISSING_END_DELIMITER`
-- `MALFORMED_OPEN_TAG`
-- `MALFORMED_CLOSE_TAG`
-- `MALFORMED_CDATA`
-- `MALFORMED_PLACEHOLDER`
-- `MALFORMED_DOCUMENT_TYPE`
-- `MALFORMED_DECLARATION`
-- `MALFORMED_COMMENT`
-- `EXTRA_CLOSING_TAG`
-- `MISMATCHED_CLOSING_TAG`
-- ...
-
-**EXAMPLE:**
-
-INPUT:
-
-```html
-<a href="
-```
-
-OUTPUT EVENT:
-
-```javascript
-{
-    type: 'error',
-    code: 'MALFORMED_OPEN_TAG',
-    message: 'EOF reached while parsing open tag.',
-    pos: 0,
-    endPos: 9
-}
-```
+This project adheres to the [eBay Code of Conduct](./.github/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
