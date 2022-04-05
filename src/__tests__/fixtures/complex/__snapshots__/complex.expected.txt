@@ -45,11 +45,13 @@
   │  ├─ closeTag(b)
   ╰─ ╰─ tagName "app-hello"
 22╭─     -- ${data.name} some html - <b>bold</b>
-  │  │                  │             │││   │ │ ╰─ closeTag(app-hello)
-  │  │                  │             │││   │ ╰─ closeTag(b).value
-  │  │                  │             │││   ╰─ closeTag(b) "</b>"
-  │  │                  │             ││╰─ text "bold"
-  │  │                  │             │╰─ openTagEnd
-  │  │                  │             ╰─ tagName
-  │  │                  ╰─ text " some html - "
+  │  │      │ │         │             │││   │ │ ╰─ closeTag(app-hello)
+  │  │      │ │         │             │││   │ ╰─ closeTag(b).value
+  │  │      │ │         │             │││   ╰─ closeTag(b) "</b>"
+  │  │      │ │         │             ││╰─ text "bold"
+  │  │      │ │         │             │╰─ openTagEnd
+  │  │      │ │         │             ╰─ tagName
+  │  │      │ │         ╰─ text " some html - "
+  │  │      │ ╰─ placeholder:escape.value "data.name"
+  │  │      ╰─ placeholder:escape "${data.name}"
   ╰─ ╰─ openTagEnd

@@ -16,7 +16,9 @@
  │  │    ╰─ tagName "span"
  ╰─ ╰─ text "\n    "
 4╭─         Hello ${data.name}!
- │  │                         ╰─ text "!\n        "
+ │  │             │ │         ╰─ text "!\n        "
+ │  │             │ ╰─ placeholder:escape.value "data.name"
+ │  │             ╰─ placeholder:escape "${data.name}"
  ╰─ ╰─ text "\n        Hello "
 5╭─         </span>
  │          │ ╰─ closeTag(span).value "span"

@@ -6,6 +6,8 @@
  │   │  ╰─ tagVar "/var"
  ╰─  ╰─ tagName "foo"
 2╭─   Hello ${param}
+ │  │       │ ╰─ placeholder:escape.value "param"
+ │  │       ╰─ placeholder:escape "${param}"
  ╰─ ╰─ text "\n  Hello "
 3╭─ </foo>
  │  │ ╰─ closeTag(foo).value "foo"
