@@ -155,7 +155,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
     const { quasis, expressions } = tagName;
     const start = child.start - 2; // include ${
     const end = ++this.pos; // include }
-    const nextStart = end + 1;
+    const nextStart = end;
     expressions.push({
       start,
       end,

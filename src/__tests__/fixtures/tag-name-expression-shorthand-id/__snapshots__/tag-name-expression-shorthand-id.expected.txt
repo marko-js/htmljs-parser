@@ -2,9 +2,9 @@
  │   │           ││  ││ ╰─ closeTag(${myTagName}).value
  │   │           ││  │╰─ closeTag(${myTagName}) "</>"
  │   │           ││  ╰─ openTagEnd
- │   │           │├─ tagShorthandId.quasis[0] "foo"
- │   │           │╰─ tagName.quasis[1]
- │   │           ╰─ tagShorthandId "#foo"
+ │   │           │╰─ tagShorthandId.quasis[0] "foo"
+ │   │           ├─ tagShorthandId "#foo"
+ │   │           ╰─ tagName.quasis[1]
  │   ├─ tagName.expressions[0] "${myTagName}"
  │   ├─ tagName.quasis[0]
  ╰─  ╰─ tagName "${myTagName}"
