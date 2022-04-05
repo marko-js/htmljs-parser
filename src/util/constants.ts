@@ -151,12 +151,12 @@ export const enum TagType {
 export interface ParserOptions {
   onError?(data: Ranges.Error): void;
   onText?(data: Range): void;
+  onPlaceholder?(data: Ranges.Placeholder): void;
   onComment?(data: Ranges.Value): void;
   onCDATA?(data: Ranges.Value): void;
   onDeclaration?(data: Ranges.Value): void;
   onDoctype?(data: Ranges.Value): void;
   onScriptlet?(data: Ranges.Scriptlet): void;
-  onPlaceholder?(data: Ranges.Placeholder): void;
   onTagName?(data: Ranges.TagName): TagType | void;
   onTagShorthandId?(data: Ranges.Template): void;
   onTagShorthandClass?(data: Ranges.Template): void;
