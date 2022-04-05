@@ -1,8 +1,8 @@
 1╭─ <${foo}/someVar>
  │   │     ││      ╰─ openTagEnd
- │   │     │├─ tagVar.value "someVar"
- │   │     │╰─ tagName.quasis[1]
- │   │     ╰─ tagVar "/someVar"
+ │   │     │╰─ tagVar.value "someVar"
+ │   │     ├─ tagVar "/someVar"
+ │   │     ╰─ tagName.quasis[1]
  │   ├─ tagName.expressions[0] "${foo}"
  │   ├─ tagName.quasis[0]
  ╰─  ╰─ tagName "${foo}"
