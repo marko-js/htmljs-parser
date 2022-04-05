@@ -32,8 +32,8 @@ export function createParser(handlers: ParserOptions) {
     /**
      * Given a offset in the current source code, returns a Position object with line & character information.
      */
-    positionAt(index: number) {
-      return parser.positionAt(index);
+    positionAt(offset: number) {
+      return parser.positionAt(offset);
     },
     /**
      * Given a offset range in the current source code, returns a Location object with a start & end position information.
