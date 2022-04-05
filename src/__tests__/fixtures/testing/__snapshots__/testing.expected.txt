@@ -1,0 +1,7 @@
+1╭─ <div.hello-${world}-again/>
+ │   │  ││     │       │     ╰─ openTagEnd:selfClosed "/>"
+ │   │  ││     │       ╰─ tagShorthandClass.quasis[1] "-again"
+ │   │  ││     ╰─ tagShorthandClass.expressions[0] "${world}"
+ │   │  │╰─ tagShorthandClass.quasis[0] "hello-"
+ │   │  ╰─ tagShorthandClass ".hello-${world}-again"
+ ╰─  ╰─ tagName "div"

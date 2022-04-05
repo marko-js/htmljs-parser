@@ -1,7 +1,7 @@
 1╭─ span.${data.foo}
- │  │   ││          │╰─ tagShorthandClass.quasis[1]
  │  │   ││          ├─ closeTag(span)
- │  │   ││          ╰─ openTagEnd
+ │  │   ││          ├─ openTagEnd
+ │  │   ││          ╰─ tagShorthandClass.quasis[1]
  │  │   │├─ tagShorthandClass.expressions[0] "${data.foo}"
  │  │   │╰─ tagShorthandClass.quasis[0]
  │  │   ╰─ tagShorthandClass ".${data.foo}"

@@ -1,9 +1,9 @@
 1╭─ <foo-${bar} hello="world">
- │   │   │      │    ││      ╰─ openTagEnd
- │   │   │      │    │╰─ attrValue.value "\"world\""
- │   │   │      │    ╰─ attrValue "=\"world\""
- │   │   │      ├─ attrName "hello"
- │   │   │      ╰─ tagName.quasis[1]
+ │   │   │     ││    ││      ╰─ openTagEnd
+ │   │   │     ││    │╰─ attrValue.value "\"world\""
+ │   │   │     ││    ╰─ attrValue "=\"world\""
+ │   │   │     │╰─ attrName "hello"
+ │   │   │     ╰─ tagName.quasis[1]
  │   │   ╰─ tagName.expressions[0] "${bar}"
  │   ├─ tagName.quasis[0] "foo-"
  ╰─  ╰─ tagName "foo-${bar}"

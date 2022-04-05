@@ -1,7 +1,7 @@
 1╭─ .bar${data.foo}
- │  ││  │          │╰─ tagShorthandClass.quasis[1]
  │  ││  │          ├─ closeTag()
- │  ││  │          ╰─ openTagEnd
+ │  ││  │          ├─ openTagEnd
+ │  ││  │          ╰─ tagShorthandClass.quasis[1]
  │  ││  ╰─ tagShorthandClass.expressions[0] "${data.foo}"
  │  │╰─ tagShorthandClass.quasis[0] "bar"
  │  ├─ tagShorthandClass ".bar${data.foo}"
