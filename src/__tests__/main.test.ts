@@ -66,6 +66,9 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       onText(range) {
         addRange("text", range);
       },
+      onPlaceholder(range) {
+        addValueRange(`placeholder${range.escape ? ":escape" : ""}`, range);
+      },
       onCDATA(range) {
         addValueRange("cdata", range);
       },

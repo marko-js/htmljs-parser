@@ -31,6 +31,8 @@
  │   │╰─ openTagEnd
  ╰─  ╰─ tagName
 8╭─     \\${test}
+ │  │     │ ╰─ placeholder:escape.value "test"
+ │  │     ╰─ placeholder:escape "${test}"
  ╰─ ╰─ text "\n    \\"
 9╭─ </b>
  │  │ ╰─ closeTag(b).value
@@ -49,6 +51,8 @@
   │   │╰─ openTagEnd
   ╰─  ╰─ tagName
 14╭─     \\$!{test}
+  │  │     │  ╰─ placeholder.value "test"
+  │  │     ╰─ placeholder "$!{test}"
   ╰─ ╰─ text "\n    \\"
 15╭─ </d>
   │  │ ╰─ closeTag(d).value
