@@ -136,8 +136,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       !expression.groupStack.length &&
       (expression.terminatedByWhitespace || expression.terminatedByEOL)
     ) {
-      if (checkForOperators(this, expression)) this.forward = 1;
-      else this.exitState();
+      this.exitState();
     }
   },
 
@@ -204,18 +203,18 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 
 function buildOperatorPattern(isConcise: boolean) {
   const binary =
-    "[!~*%&^|?:]+" + // Any of these characters can always continue an expression
+    "[!~*%&^|?:<]+" + // Any of these characters can always continue an expression
     "|(?<=[!=<>&^~|/*?%+-])=|=(?=[!=<>&^~|/*?%+-])" + // Match equality and multi char assignment operators w/o matching equals by itself
-    "|(?<!\\+)\\s*\\+(?:\\s*\\+\\s*\\+)*\\s*(?!\\+)" + // We only match an odd number of plus's
-    `|(?<!^\\s*|-)-${isConcise ? "" : "(?:\\s*-\\s*-)*\\s*"}(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
+    "|(?<!\\+)[ \\t]*\\+(?:[ \\t]*\\+[ \\t]*\\+)*[ \\t]*(?!\\+)" + // We only match an odd number of plus's
+    `|(?<!-)-${isConcise ? "" : "(?:[ \\t]*-[ \\t]*-)*[ \\t]*"}(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
     `|(?<![/*])/(?![/*${isConcise ? "" : ">"}])` + // We only continue after a forward slash if it isn't //, /* (or /> in html mode)
-    `|(?<!${isConcise ? "^\\s*|" : ""}\\.)\\.(?!\\.)` + // We only continue after a dot if it isn't on newline in concise mode or a ...
-    `|<${isConcise ? "{2,}|(?<!^\\s*)<" : "+"}` + // In concise mode we can't match a single < at the beginning of the line.
+    `|(?<!\\.)\\.(?!\\.)` + // We only continue after a dot if it isn't on newline in concise mode or a ...
     `|>${isConcise ? "+" : "{2,}"}` + // in html mode only consume closing angle brackets if it is >>
-    "|\\bin(?:stanceof)?(?=\\s+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
+    "|\\b(?:in(?:stanceof)?|as|extends)(?=[ \\t]+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
   const unary =
     "\\b(?:" +
     "a(?:sync|wait)" +
+    "|keyof" +
     "|class" +
     "|function" +
     "|new" +
@@ -223,7 +222,7 @@ function buildOperatorPattern(isConcise: boolean) {
     "|void" +
     ")\\b";
   const lookAheadPattern =
-    "\\s*(?:" + binary + ")\\s*" + `|\\s+(?=[${isConcise ? "" : "["}{(])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
+    "[ \\t]*(?:" + binary + ")[ \\t]*" + `|[ \\t]+(?=[{(])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
   const lookBehindPattern = `(?<=${unary}|${binary})`;
   return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "ym");
 }
