@@ -2,7 +2,6 @@
   "name": "htmljs-parser",
   "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
   "version": "2.11.3",
-  "author": "Phillip Gates-Idem <phillip.idem@gmail.com>",
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
