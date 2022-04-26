@@ -3,6 +3,8 @@
   "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
   "version": "3.3.0",
   "devDependencies": {
+    "@changesets/changelog-github": "^0.4.4",
+    "@changesets/cli": "^2.22.0",
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
     "@types/benchmark": "^2.1.1",
@@ -26,7 +28,6 @@
     "mocha-snap": "^4.3.0",
     "nyc": "^15.1.0",
     "prettier": "^2.6.2",
-    "semantic-release": "^19.0.2",
     "typescript": "^4.6.3"
   },
   "exports": {
@@ -70,11 +71,12 @@
     "mocha": "cross-env NODE_ENV=test mocha \"./src/**/__tests__/*.test.ts\"",
     "prepare": "husky install",
     "prepublishOnly": "npm run build",
-    "release": "semantic-release",
+    "publish": "npm run build && changeset publish",
     "report": "open ./coverage/lcov-report/index.html",
     "test": "npm run mocha -- --watch",
     "test:inspect": "npm test -- --inspect",
-    "test:update": "npm run mocha -- --update"
+    "test:update": "npm run mocha -- --update",
+    "version": "changeset version"
   },
   "types": "dist/index.d.ts"
 }
