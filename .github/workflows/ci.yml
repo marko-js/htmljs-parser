@@ -48,7 +48,7 @@ jobs:
     needs: [lint, test]
     steps:
       - name: Check releasable
-        if: ${{ github.repository == 'marko-js/htmljs-parser' && github.ref == 'refs/heads/next' && github.event_name == 'push' }}
+        if: ${{ github.repository == 'marko-js/htmljs-parser' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next') }}
         run: exit 0
       - name: Checkout code
         uses: actions/checkout@v2
