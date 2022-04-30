@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 3.3.2
+
+### Patch Changes
+
+- [#99](https://github.com/marko-js/htmljs-parser/pull/99) [`b1a3008`](https://github.com/marko-js/htmljs-parser/commit/b1a300874e9b67972a5a0f82855d083109fd3361) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix expression continuations containing equals not consuming enough characters
+
 ## 3.3.1
 
 ### Patch Changes
