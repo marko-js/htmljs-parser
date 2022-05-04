@@ -33,51 +33,81 @@
  │   │  ╰─ tagVar "/foo"
  ╰─  ╰─ tagName "let"
 7╭─ <let/foo + 1/>
- │   │  ││   │ │╰─ openTagEnd:selfClosed "/>"
- │   │  ││   │ ╰─ attrName
- │   │  ││   ╰─ attrName
- │   │  │╰─ tagVar.value "foo"
- │   │  ╰─ tagVar "/foo"
+ │   │  ││      ╰─ openTagEnd:selfClosed "/>"
+ │   │  │╰─ tagVar.value "foo + 1"
+ │   │  ╰─ tagVar "/foo + 1"
  ╰─  ╰─ tagName "let"
-8╭─ <let/{ x, y }/>
- │   │  ││       ╰─ openTagEnd:selfClosed "/>"
- │   │  │╰─ tagVar.value "{ x, y }"
- │   │  ╰─ tagVar "/{ x, y }"
+8╭─ <let/foo:string/>
+ │   │  ││         ╰─ openTagEnd:selfClosed "/>"
+ │   │  │╰─ tagVar.value "foo:string"
+ │   │  ╰─ tagVar "/foo:string"
  ╰─  ╰─ tagName "let"
-9├─ 
-10╭─ <button/loginButton>
+9╭─ <let/foo : string/>
+ │   │  ││           ╰─ openTagEnd:selfClosed "/>"
+ │   │  │╰─ tagVar.value "foo : string"
+ │   │  ╰─ tagVar "/foo : string"
+ ╰─  ╰─ tagName "let"
+10╭─ <let/foo: typeof bar extends y ? a : b x=2/>
+  │   │  ││                                 │││╰─ openTagEnd:selfClosed "/>"
+  │   │  ││                                 ││╰─ attrValue.value
+  │   │  ││                                 │╰─ attrValue "=2"
+  │   │  ││                                 ╰─ attrName
+  │   │  │╰─ tagVar.value "foo: typeof bar extends y ? a : b"
+  │   │  ╰─ tagVar "/foo: typeof bar extends y ? a : b"
+  ╰─  ╰─ tagName "let"
+11╭─ <let/{ x, y }/>
+  │   │  ││       ╰─ openTagEnd:selfClosed "/>"
+  │   │  │╰─ tagVar.value "{ x, y }"
+  │   │  ╰─ tagVar "/{ x, y }"
+  ╰─  ╰─ tagName "let"
+12├─ 
+13╭─ <const/fn:any() {
+  │   │    ││     ││ ╰─ attrMethod.body "{\n  console.log(\"hi\");\n}"
+  │   │    ││     │╰─ attrMethod.params.value
+  │   │    ││     ├─ attrMethod.params "()"
+  │   │    ││     ├─ attrMethod "() {\n  console.log(\"hi\");\n}"
+  │   │    ││     ╰─ attrName
+  │   │    │╰─ tagVar.value "fn:any"
+  │   │    ╰─ tagVar "/fn:any"
+  ╰─  ╰─ tagName "const"
+14╭─   console.log("hi");
+  ╰─ ╰─ attrMethod.body.value "\n  console.log(\"hi\");\n"
+15╭─ }/>
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+16├─ 
+17╭─ <button/loginButton>
   │   │     ││          ╰─ openTagEnd
   │   │     │╰─ tagVar.value "loginButton"
   │   │     ╰─ tagVar "/loginButton"
   ╰─  ╰─ tagName "button"
-11╭─   login
+18╭─   login
   ╰─ ╰─ text "\n  login\n"
-12╭─ </>
+19╭─ </>
   │  │ ╰─ closeTag(button).value
   ╰─ ╰─ closeTag(button) "</>"
-13╭─ <button/loginButton >
+20╭─ <button/loginButton >
   │   │     ││           ╰─ openTagEnd
   │   │     │╰─ tagVar.value "loginButton"
   │   │     ╰─ tagVar "/loginButton"
   ╰─  ╰─ tagName "button"
-14╭─   login
+21╭─   login
   ╰─ ╰─ text "\n  login\n"
-15╭─ </>
+22╭─ </>
   │  │ ╰─ closeTag(button).value
   ╰─ ╰─ closeTag(button) "</>"
-16├─ 
-17╭─ <div/ref/>
+23├─ 
+24╭─ <div/ref/>
   │   │  ││  ╰─ openTagEnd:selfClosed "/>"
   │   │  │╰─ tagVar.value "ref"
   │   │  ╰─ tagVar "/ref"
   ╰─  ╰─ tagName "div"
-18╭─ <div/ref />
+25╭─ <div/ref />
   │   │  ││   ╰─ openTagEnd:selfClosed "/>"
   │   │  │╰─ tagVar.value "ref"
   │   │  ╰─ tagVar "/ref"
   ╰─  ╰─ tagName "div"
-19├─ 
-20╭─ <div#ab.cd/ref/>
+26├─ 
+27╭─ <div#ab.cd/ref/>
   │   │  ││ ││ ││  ╰─ openTagEnd:selfClosed "/>"
   │   │  ││ ││ │╰─ tagVar.value "ref"
   │   │  ││ ││ ╰─ tagVar "/ref"
@@ -86,4 +116,4 @@
   │   │  │╰─ tagShorthandId.quasis[0] "ab"
   │   │  ╰─ tagShorthandId "#ab"
   ╰─  ╰─ tagName "div"
-21╰─ 
+28╰─ 

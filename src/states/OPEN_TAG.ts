@@ -292,8 +292,16 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     } else if (code === CODE.FORWARD_SLASH && !tag.hasAttrs) {
       tag.stage = TAG_STAGE.VAR;
       this.pos++; // skip /
+
+      if (isWhitespaceCode(this.lookAtCharCodeAhead(0))) {
+        return this.emitError(
+          this.pos,
+          ErrorCode.MISSING_TAG_VARIABLE,
+          "A slash was found that was not followed by a variable name or lhs expression"
+        );
+      }
+
       const expr = this.enterState(STATE.EXPRESSION);
-      expr.skipOperators = true;
       expr.terminatedByWhitespace = true;
       expr.terminator = this.isConcise
         ? CONCISE_TAG_VAR_TERMINATORS
