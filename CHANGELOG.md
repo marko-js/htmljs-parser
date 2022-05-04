@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 3.3.3
+
+### Patch Changes
+
+- [#101](https://github.com/marko-js/htmljs-parser/pull/101) [`9034f55`](https://github.com/marko-js/htmljs-parser/commit/9034f559ce8f7ca4746cd58b7750a3ba7865cabb) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Parse tag variable type as an continuable expression.
+
 ## 3.3.2
 
 ### Patch Changes
