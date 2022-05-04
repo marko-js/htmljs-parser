@@ -203,8 +203,9 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 
 function buildOperatorPattern(isConcise: boolean) {
   const binary =
-    "(?:[!~*%&^|?:<]+=*)+" + // Any of these characters can always continue an expression
-    "|[>/+-=]+=|=>" + // Match equality and multi char assignment operators w/o matching equals by itself
+    "(?:[!~*%&^|?<]+=*)+" + // Any of these characters can always continue an expression
+    "|:+(?!=)" + // Match a colon without matching a bound attribute
+    "|[>/+=-]+=|=>" + // Match equality and multi char assignment operators w/o matching equals by itself
     "|(?<!\\+)[ \\t]*\\+(?:[ \\t]*\\+[ \\t]*\\+)*[ \\t]*(?!\\+)" + // We only match an odd number of plus's
     `|(?<!-)-${isConcise ? "" : "(?:[ \\t]*-[ \\t]*-)*[ \\t]*"}(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
     `|(?<![/*])/(?![/*${isConcise ? "" : ">"}])` + // We only continue after a forward slash if it isn't //, /* (or /> in html mode)
