@@ -258,11 +258,14 @@ function checkForOperators(parser: Parser, expression: ExpressionMeta) {
     if (match.length === 0) {
       // We matched a look behind.
       parser.consumeWhitespace();
-      parser.pos--;
     } else {
       // We matched a look ahead.
-      parser.pos += match.length - 1;
+      parser.pos += match.length;
     }
+
+    // After this point we should be on the character we want to process next
+    // so we don't want to move forward and miss that character.
+    parser.forward = 0;
   } else {
     return false;
   }

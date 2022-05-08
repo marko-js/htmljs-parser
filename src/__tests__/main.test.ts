@@ -16,6 +16,8 @@ for (const entry of fs.readdirSync(FIXTURES)) {
     const dir = path.join(FIXTURES, entry);
     const filename = path.join(dir, "input.marko");
     const src = await fs.promises.readFile(filename, "utf-8");
+    // Use this if you want to psuedo test on windows locally.
+    // const src = (await fs.promises.readFile(filename, "utf-8")).replace(/\n/g, "\r\n");
     const lines = getLines(src);
     const partsByLine: {
       range: Range;
