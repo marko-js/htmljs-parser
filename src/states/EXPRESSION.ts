@@ -213,7 +213,7 @@ function buildOperatorPattern(isConcise: boolean) {
     `|>${isConcise ? "+" : "{2,}"}` + // in html mode only consume closing angle brackets if it is >>
     "|\\b(?:in(?:stanceof)?|as|extends)(?=[ \\t]+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
   const unary =
-    "\\b(?:" +
+    "\\b(?<![.]\\s*)(?:" +
     "a(?:sync|wait)" +
     "|keyof" +
     "|class" +
