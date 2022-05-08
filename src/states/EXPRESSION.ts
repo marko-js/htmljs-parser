@@ -8,6 +8,12 @@ import {
   ErrorCode,
 } from "../internal";
 
+const enum PatternType {
+  HTML_ATTRS,
+  CONCISE_ATTRS,
+  CONCISE_ATTRS_GROUP,
+}
+
 export interface ExpressionMeta extends Meta {
   groupStack: number[];
   terminator: number | (number | number[])[];
@@ -16,8 +22,9 @@ export interface ExpressionMeta extends Meta {
   terminatedByWhitespace: boolean;
 }
 
-const conciseOperatorPattern = buildOperatorPattern(true);
-const htmlOperatorPattern = buildOperatorPattern(false);
+const htmlAttrsPattern = buildPattern(PatternType.HTML_ATTRS);
+const conciseAttrsPattern = buildPattern(PatternType.CONCISE_ATTRS);
+const conciseAttrsGroupPattern = buildPattern(PatternType.CONCISE_ATTRS_GROUP);
 
 export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   name: "EXPRESSION",
@@ -134,7 +141,8 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   eol(_, expression) {
     if (
       !expression.groupStack.length &&
-      (expression.terminatedByWhitespace || expression.terminatedByEOL)
+      (expression.terminatedByEOL || expression.terminatedByWhitespace) &&
+      !checkForOperators(this, expression)
     ) {
       this.exitState();
     }
@@ -201,17 +209,20 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   return() {},
 };
 
-function buildOperatorPattern(isConcise: boolean) {
+function buildPattern(type: PatternType) {
+  const space = type === PatternType.CONCISE_ATTRS ? "[ \\t]" : "\\s";
   const binary =
     "(?:[!~*%&^|?<]+=*)+" + // Any of these characters can always continue an expression
     "|:+(?!=)" + // Match a colon without matching a bound attribute
     "|[>/+=-]+=|=>" + // Match equality and multi char assignment operators w/o matching equals by itself
-    "|(?<!\\+)[ \\t]*\\+(?:[ \\t]*\\+[ \\t]*\\+)*[ \\t]*(?!\\+)" + // We only match an odd number of plus's
-    `|(?<!-)-${isConcise ? "" : "(?:[ \\t]*-[ \\t]*-)*[ \\t]*"}(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
-    `|(?<![/*])/(?![/*${isConcise ? "" : ">"}])` + // We only continue after a forward slash if it isn't //, /* (or /> in html mode)
-    `|(?<!\\.)\\.(?!\\.)` + // We only continue after a dot if it isn't on newline in concise mode or a ...
-    `|>${isConcise ? "+" : "{2,}"}` + // in html mode only consume closing angle brackets if it is >>
-    "|\\b(?:in(?:stanceof)?|as|extends)(?=[ \\t]+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
+    `|(?<!\\+)[ \\t]*\\+(?:\\s*\\+\\s*\\+)*\\s*(?!\\+)` + // We only match an odd number of plus's
+    `|(?<!-)-${
+      type === PatternType.CONCISE_ATTRS ? "" : "(?:\\s*-\\s*-)*\\s*"
+    }(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
+    `|(?<![/*])/(?![/*${type === PatternType.HTML_ATTRS ? ">" : ""}])` + // We only continue after a forward slash if it isn't //, /* (or /> in html mode)
+    `|(?<!\\.)\\.(?!\\.)` + // We only continue after a dot if it isn't a ...
+    `|>${type === PatternType.HTML_ATTRS ? "{2,}" : "+"}` + // in html mode only consume closing angle brackets if it is >>
+    "|[ \\t]+(?:in(?:stanceof)?|as|extends)(?=[ \\t]+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
   const unary =
     "\\b(?<![.]\\s*)(?:" +
     "a(?:sync|wait)" +
@@ -222,8 +233,7 @@ function buildOperatorPattern(isConcise: boolean) {
     "|typeof" +
     "|void" +
     ")\\b";
-  const lookAheadPattern =
-    "[ \\t]*(?:" + binary + ")[ \\t]*" + `|[ \\t]+(?=[{(])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
+  const lookAheadPattern = `${space}*(?:${binary})\\s*|${space}+(?=[{(])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
   const lookBehindPattern = `(?<=${unary}|${binary})`;
   return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "ym");
 }
@@ -233,10 +243,13 @@ function checkForOperators(parser: Parser, expression: ExpressionMeta) {
     return false;
   }
 
-  const pattern =
-    parser.isConcise || expression.terminatedByEOL
-      ? conciseOperatorPattern
-      : htmlOperatorPattern;
+  const pattern = parser.isConcise
+    ? parser.activeTag?.stage === STATE.TAG_STAGE.ATTR_GROUP
+      ? conciseAttrsGroupPattern
+      : conciseAttrsPattern
+    : expression.terminatedByEOL
+    ? conciseAttrsPattern
+    : htmlAttrsPattern;
   pattern.lastIndex = parser.pos;
   const matches = pattern.exec(parser.data);
 
