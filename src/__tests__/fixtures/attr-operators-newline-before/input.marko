@@ -1,0 +1,118 @@
+// newline continuations only work for html mode or enclosed concice attr groups.
+// here we sanity check that is the case.
+a=x
+.b
+
+<a=x
+.y a/>
+<a=x
+! y a/>
+<a=x
+* y a/>
+<a=x
+/ y a/>
+<a=x
+** y a/>
+<a=x
+% y a/>
+<a=x
+& y a/>
+<a=x
+&& y a/>
+<a=x
+^ y a/>
+<a=x
+~ y a/>
+<a=x
+| y a/>
+<a=x
+|| y a/>
+<a=x
+?? y a/>
+<a=x
+? y
+: z a/>
+<a=x
+== y a/>
+<a=x
+=== y a/>
+<a=x
+!= y a/>
+<a=x
+!== y a/>
+<a=x
+<= y a/>
+<a=x
+>= y a/>
+<a=x
+&= y a/>
+<a=x
+&&= y a/>
+<a=x
+|= y a/>
+<a=x
+||= y a/>
+<a=x
+^= y a/>
+<a=x
+~= y a/>
+<a=x
+>>= y a/>
+<a=x
+>>>= y a/>
+<a=x
+-= y a/>
+<a=x
+/= y a/>
+<a=x
+*= y a/>
+<a=x
+**= y a/>
+<a=x
+%= y a/>
+<a=x
++= y a/>
+<a=x ++
++ y a/>
+<a=x +
+++ y a/>
+<a=x
+>>y a/>
+<a=x
+>>> y a/>
+<a=x
+( y ) a/>
+<a=x
+{ y } a/>
+<a=x
+=>
+y a/>
+<a=x
+=>
+( y ) a/>
+<a=x
+=>
+{ y } a/>
+<a=( x )
+{ y } a/>
+<a= (x)
+=>
+{ console.log("y") } a/>
+<a= async
+x
+=>
+{ console.log("y") }
+a/>
+<a= function
+(x)
+{ console.log("y") }
+a/>
+<a= x
+=>
+{ console.log("y") }
+a/>
+<a= async
+function
+(x)
+{ console.log("y") }
+a/>

@@ -9,7 +9,7 @@ import {
   ErrorCode,
 } from "../internal";
 
-const enum TAG_STAGE {
+export const enum TAG_STAGE {
   UNKNOWN,
   VAR,
   ARGUMENT,
