@@ -2,5 +2,5 @@
   "extension": ["js", "ts"],
   "enable-source-maps": true,
   "watchFiles": ["src/**/*.ts", "src/**/*.marko"],
-  "require": ["esbuild-register", "mocha-snap"]
+  "require": ["tsx", "mocha-snap"]
 }
