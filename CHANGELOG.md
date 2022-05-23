@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 3.3.5
+
+### Patch Changes
+
+- [#108](https://github.com/marko-js/htmljs-parser/pull/108) [`8a988f4`](https://github.com/marko-js/htmljs-parser/commit/8a988f48e976f7ad68494a059973176ecfd43462) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix issue where parser would sometimes not consume enough characters and cause a bracket mismatch
+
 ## 3.3.4
 
 ### Patch Changes

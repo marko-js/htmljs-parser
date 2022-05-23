@@ -1,7 +1,7 @@
 {
   "name": "htmljs-parser",
   "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
-  "version": "3.3.4",
+  "version": "3.3.5",
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.4",
     "@changesets/cli": "^2.22.0",
