@@ -287,11 +287,12 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       // ignore whitespace within element...
     } else if (code === CODE.COMMA) {
       this.pos++; // skip ,
+      this.forward = 0;
       this.consumeWhitespace();
-      this.pos--;
     } else if (code === CODE.FORWARD_SLASH && !tag.hasAttrs) {
       tag.stage = TAG_STAGE.VAR;
       this.pos++; // skip /
+      this.forward = 0;
 
       if (isWhitespaceCode(this.lookAtCharCodeAhead(0))) {
         return this.emitError(
@@ -306,7 +307,6 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       expr.terminator = this.isConcise
         ? CONCISE_TAG_VAR_TERMINATORS
         : HTML_TAG_VAR_TERMINATORS;
-      this.pos--;
     } else if (code === CODE.OPEN_PAREN && !tag.hasAttrs) {
       if (tag.hasArgs) {
         this.emitError(
@@ -318,26 +318,26 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       }
       tag.stage = TAG_STAGE.ARGUMENT;
       this.pos++; // skip (
+      this.forward = 0;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
       expr.terminator = CODE.CLOSE_PAREN;
-      this.pos--;
     } else if (code === CODE.PIPE && !tag.hasAttrs) {
       tag.stage = TAG_STAGE.PARAMS;
       this.pos++; // skip |
+      this.forward = 0;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
       expr.terminator = CODE.PIPE;
-      this.pos--;
     } else {
+      this.forward = 0;
+
       if (tag.tagName) {
         this.enterState(STATE.ATTRIBUTE);
         tag.hasAttrs = true;
       } else {
         this.enterState(STATE.TAG_NAME);
       }
-
-      this.pos--;
     }
   },
 
@@ -381,7 +381,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               attr.start = start;
               attr.args = { start, end, value };
               tag.hasAttrs = true;
-              this.pos--;
+              this.forward = 0;
             } else {
               tag.hasArgs = true;
               this.options.onTagArgs?.({

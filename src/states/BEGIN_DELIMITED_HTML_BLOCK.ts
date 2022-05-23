@@ -39,8 +39,8 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
         const startPos = this.pos;
         if (!this.consumeWhitespaceOnLine()) {
           this.pos = startPos + 1;
+          this.forward = 0;
           this.beginHtmlBlock(undefined, true);
-          this.pos--;
         }
       }
     },

@@ -93,8 +93,8 @@ export function checkForPlaceholder(parser: Parser, code: number) {
       parser.endText();
       parser.enterState(PLACEHOLDER).escape = escape;
       parser.pos += escape ? 2 : 3; // skip ${ or $!{
+      parser.forward = 0;
       parser.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_CURLY_BRACE;
-      parser.pos--;
       return true;
     }
   }

@@ -38,17 +38,17 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
   eof() {},
 
   char(code, inlineScript) {
+    this.forward = 0;
+
     if (code === CODE.OPEN_CURLY_BRACE) {
       inlineScript.block = true;
       this.pos++; // skip {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminator = CODE.CLOSE_CURLY_BRACE;
       expr.skipOperators = true;
-      this.pos--;
     } else {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByEOL = true;
-      this.pos--;
     }
   },
 
