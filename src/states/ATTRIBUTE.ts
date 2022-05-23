@@ -90,6 +90,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       (code === CODE.PERIOD && this.lookAheadFor(".."))
     ) {
       attr.valueStart = this.pos;
+      this.forward = 0;
 
       if (code === CODE.COLON) {
         ensureAttrName(this, attr);
@@ -111,31 +112,29 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       expr.terminator = this.isConcise
         ? CONCISE_VALUE_TERMINATORS
         : HTML_VALUE_TERMINATORS;
-
-      this.pos--;
     } else if (code === CODE.OPEN_PAREN) {
       ensureAttrName(this, attr);
       attr.stage = ATTR_STAGE.ARGUMENT;
       this.pos++; // skip (
+      this.forward = 0;
       this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_PAREN;
-      this.pos--;
     } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
       ensureAttrName(this, attr);
       attr.stage = ATTR_STAGE.BLOCK;
       this.pos++; // skip {
+      this.forward = 0;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = false;
       expr.terminator = CODE.CLOSE_CURLY_BRACE;
-      this.pos--;
     } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
       attr.stage = ATTR_STAGE.NAME;
+      this.forward = 0;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
       expr.skipOperators = true;
       expr.terminator = this.isConcise
         ? CONCISE_NAME_TERMINATORS
         : HTML_NAME_TERMINATORS;
-      this.pos--;
     } else {
       this.exitState();
     }

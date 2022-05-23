@@ -119,7 +119,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       }
 
       this.enterState(STATE.OPEN_TAG);
-      this.pos--; // START_TAG_NAME expects to start at the first character
+      this.forward = 0; // START_TAG_NAME expects to start at the first character
     }
   },
 

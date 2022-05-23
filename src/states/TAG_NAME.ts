@@ -110,8 +110,8 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
       this.pos += 2; // skip ${
+      this.forward = 0;
       this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_CURLY_BRACE;
-      this.pos--;
     } else if (
       isWhitespaceCode(code) ||
       code === CODE.EQUAL ||
