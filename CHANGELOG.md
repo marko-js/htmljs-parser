@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 3.3.6
+
+### Patch Changes
+
+- [#110](https://github.com/marko-js/htmljs-parser/pull/110) [`281750a`](https://github.com/marko-js/htmljs-parser/commit/281750ab71f7415b765ddb5440477f293746fafa) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Rename publish script to release in order to avoid a double publish in the CI
+
 ## 3.3.5
 
 ### Patch Changes
