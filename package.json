@@ -68,7 +68,7 @@
     "lint:prettier": "prettier \"./**/*{.ts,.js,.json,.md,.yml,rc}\"",
     "mocha": "cross-env NODE_ENV=test mocha \"./src/**/__tests__/*.test.ts\"",
     "prepare": "husky install",
-    "publish": "npm run build && changeset publish",
+    "release": "npm run build && changeset publish",
     "report": "open ./coverage/lcov-report/index.html",
     "test": "npm run mocha -- --watch",
     "test:inspect": "npm test -- --inspect",
