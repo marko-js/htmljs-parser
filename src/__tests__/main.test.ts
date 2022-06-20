@@ -35,7 +35,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
               end: inputRange.end,
             }
           : inputRange;
-      const pos = parser.positionAt(range.start);
+      const pos = positionAt(range.start);
       partsByLine[pos.line].push({
         label,
         range,
@@ -59,6 +59,14 @@ for (const entry of fs.readdirSync(FIXTURES)) {
           addRange(`${label}.expressions[${i}]`, range.expressions[i]);
         }
       }
+    };
+    const positionAt = (offset: number): Position => {
+      if (offset && lines.includes(offset + 1)) {
+        // Normalize lines to their first char.
+        return parser.positionAt(offset + 1);
+      }
+
+      return parser.positionAt(offset);
     };
     const tagStack: Ranges.TagName[] = [];
     const parser = createParser({
@@ -187,15 +195,15 @@ for (const entry of fs.readdirSync(FIXTURES)) {
           linePrefix +
           read({
             start: 0,
-            end: lines[1],
+            end: lines.length > 1 ? lines[1] - 1 : src.length,
           })
         }`;
       } else {
         result += `\n${
           linePrefix +
           read({
-            start: lines[line] + 1,
-            end: lines[line + 1],
+            start: lines[line],
+            end: lines.length > line + 1 ? lines[line + 1] - 1 : src.length,
           })
         }`;
       }
@@ -203,7 +211,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       if (len) {
         const padding = " ".repeat(linePrefix.length - 3);
         parts.sort((a, b) => {
-          const delta = (a.pos.character || 1) - (b.pos.character || 1);
+          const delta = a.pos.character - b.pos.character;
           return delta === 0 ? b.range.start - a.range.start : delta;
         });
 
@@ -212,7 +220,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
 
         for (let i = 0; i < len; i++) {
           const part = parts[i];
-          const col = part.pos.character || 1;
+          const col = part.pos.character + 1;
           const delta = col - lastCol;
 
           if (delta > 0) {
@@ -234,15 +242,15 @@ for (const entry of fs.readdirSync(FIXTURES)) {
             }
           }
 
-          const column = pos.character || 1;
+          const column = pos.character;
 
-          if (prevPart && (prevPart.pos.character || 1) === column) {
+          if (prevPart && prevPart.pos.character === column) {
             label = `├${label}`;
           } else {
             label = `╰${label}`;
           }
 
-          label = `${columns.slice(0, column - 1)}${label}`;
+          label = `${columns.slice(0, column)}${label}`;
           result += `\n${padding + (prevPart ? `│  ${label}` : `╰─ ${label}`)}`;
         }
       }

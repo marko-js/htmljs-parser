@@ -41,10 +41,10 @@ export function getPos(
 }
 
 export function getLines(src: string) {
-  const lines = [-1];
+  const lines = [0];
   for (let i = 0; i < src.length; i++) {
     if (src.charCodeAt(i) === CODE.NEWLINE) {
-      lines.push(i);
+      lines.push(i + 1);
     }
   }
 
