@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 4.0.0
+
+### Major Changes
+
+- [#112](https://github.com/marko-js/htmljs-parser/pull/112) [`2ad4628`](https://github.com/marko-js/htmljs-parser/commit/2ad462818eca5985f89c497b1f2efe2945a48730) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Switch character position offsets for newlines to be to similar to vscode. Previously the newline was counted as the first character of the line, now it is the last character of the previous line.
+
 ## 3.3.6
 
 ### Patch Changes
