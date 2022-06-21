@@ -1,11 +1,13 @@
 1╭─ <div if (x > y)>
- │   │   │  ││     ╰─ openTagEnd
- │   │   │  │╰─ attrArgs.value "x > y"
- │   │   │  ╰─ attrArgs "(x > y)"
- │   │   ╰─ attrName "if"
- ╰─  ╰─ tagName "div"
+ │  ││   │  ││     ╰─ openTagEnd
+ │  ││   │  │╰─ attrArgs.value "x > y"
+ │  ││   │  ╰─ attrArgs "(x > y)"
+ │  ││   ╰─ attrName "if"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
 2╭─ </div>
- │  │ ╰─ closeTag(div).value "div"
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(div) "</div>"
+ ╰─ ╰─ closeTagStart "</"
 3╰─ 

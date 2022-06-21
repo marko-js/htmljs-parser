@@ -9,12 +9,12 @@
  │  │   ╰─ cdata "<![CDATA[Hello World]]>"
  ╰─ ╰─ openTagEnd
 3╭─ div class="bar" -- <![CDATA[Hello World]]>
- │  │   │    ││     │  │        │             ╰─ closeTag(div)
+ │  │   │    ││     │  │        │             ╰─ closeTagEnd(div)
  │  │   │    ││     │  │        ╰─ cdata.value "Hello World"
  │  │   │    ││     │  ╰─ cdata "<![CDATA[Hello World]]>"
  │  │   │    ││     ╰─ openTagEnd
  │  │   │    │╰─ attrValue.value "\"bar\""
  │  │   │    ╰─ attrValue "=\"bar\""
  │  │   ╰─ attrName "class"
- │  ├─ closeTag(p)
+ │  ├─ closeTagEnd(p)
  ╰─ ╰─ tagName "div"

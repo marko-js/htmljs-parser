@@ -1,60 +1,70 @@
 1╭─ <foo a="\${test" b="\\${test}" c="\$!{test" d="\\$!{test}">
- │   │   │││         │││           │││          │││           ╰─ openTagEnd
- │   │   │││         │││           │││          ││╰─ attrValue.value "\"\\\\$!{test}\""
- │   │   │││         │││           │││          │╰─ attrValue "=\"\\\\$!{test}\""
- │   │   │││         │││           │││          ╰─ attrName
- │   │   │││         │││           ││╰─ attrValue.value "\"\\$!{test\""
- │   │   │││         │││           │╰─ attrValue "=\"\\$!{test\""
- │   │   │││         │││           ╰─ attrName
- │   │   │││         ││╰─ attrValue.value "\"\\\\${test}\""
- │   │   │││         │╰─ attrValue "=\"\\\\${test}\""
- │   │   │││         ╰─ attrName
- │   │   ││╰─ attrValue.value "\"\\${test\""
- │   │   │╰─ attrValue "=\"\\${test\""
- │   │   ╰─ attrName
- ╰─  ╰─ tagName "foo"
+ │  ││   │││         │││           │││          │││           ╰─ openTagEnd
+ │  ││   │││         │││           │││          ││╰─ attrValue.value "\"\\\\$!{test}\""
+ │  ││   │││         │││           │││          │╰─ attrValue "=\"\\\\$!{test}\""
+ │  ││   │││         │││           │││          ╰─ attrName
+ │  ││   │││         │││           ││╰─ attrValue.value "\"\\$!{test\""
+ │  ││   │││         │││           │╰─ attrValue "=\"\\$!{test\""
+ │  ││   │││         │││           ╰─ attrName
+ │  ││   │││         ││╰─ attrValue.value "\"\\\\${test}\""
+ │  ││   │││         │╰─ attrValue "=\"\\\\${test}\""
+ │  ││   │││         ╰─ attrName
+ │  ││   ││╰─ attrValue.value "\"\\${test\""
+ │  ││   │╰─ attrValue "=\"\\${test\""
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
 2╭─ 
  ╰─ ╰─ text "\n\n"
 3╭─ </foo>
- │  │ ╰─ closeTag(foo).value "foo"
- ╰─ ╰─ closeTag(foo) "</foo>"
+ │  │ │  ╰─ closeTagEnd(foo)
+ │  │ ╰─ closeTagName "foo"
+ ╰─ ╰─ closeTagStart "</"
 4╭─ <a>
- │   │╰─ openTagEnd
- ╰─  ╰─ tagName
+ │  ││╰─ openTagEnd
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
 5╭─     \${test
  │  │    ╰─ text "${test\n"
  ╰─ ╰─ text "\n    "
 6╭─ </a>
- │  │ ╰─ closeTag(a).value
- ╰─ ╰─ closeTag(a) "</a>"
+ │  │ │╰─ closeTagEnd(a)
+ │  │ ╰─ closeTagName
+ ╰─ ╰─ closeTagStart "</"
 7╭─ <b>
- │   │╰─ openTagEnd
- ╰─  ╰─ tagName
+ │  ││╰─ openTagEnd
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
 8╭─     \\${test}
  │  │     │ ╰─ placeholder:escape.value "test"
  │  │     ╰─ placeholder:escape "${test}"
  ╰─ ╰─ text "\n    \\"
 9╭─ </b>
- │  │ ╰─ closeTag(b).value
+ │  │ │╰─ closeTagEnd(b)
+ │  │ ╰─ closeTagName
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(b) "</b>"
+ ╰─ ╰─ closeTagStart "</"
 10╭─ <c>
-  │   │╰─ openTagEnd
-  ╰─  ╰─ tagName
+  │  ││╰─ openTagEnd
+  │  │╰─ tagName
+  ╰─ ╰─ openTagStart
 11╭─     \$!{test
   │  │    ╰─ text "$!{test\n"
   ╰─ ╰─ text "\n    "
 12╭─ </c>
-  │  │ ╰─ closeTag(c).value
-  ╰─ ╰─ closeTag(c) "</c>"
+  │  │ │╰─ closeTagEnd(c)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
 13╭─ <d>
-  │   │╰─ openTagEnd
-  ╰─  ╰─ tagName
+  │  ││╰─ openTagEnd
+  │  │╰─ tagName
+  ╰─ ╰─ openTagStart
 14╭─     \\$!{test}
   │  │     │  ╰─ placeholder.value "test"
   │  │     ╰─ placeholder "$!{test}"
   ╰─ ╰─ text "\n    \\"
 15╭─ </d>
-  │  │ ╰─ closeTag(d).value
+  │  │ │╰─ closeTagEnd(d)
+  │  │ ╰─ closeTagName
   │  ├─ text "\n"
-  ╰─ ╰─ closeTag(d) "</d>"
+  ╰─ ╰─ closeTagStart "</"

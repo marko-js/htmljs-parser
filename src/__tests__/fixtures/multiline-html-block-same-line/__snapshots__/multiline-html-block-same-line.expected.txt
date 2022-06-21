@@ -11,5 +11,5 @@
 6╭─          Goodbye
  ╰─ ╰─ text "\n         Goodbye\n"
 7╭─          --
- │             ├─ closeTag(div)
- ╰─            ╰─ closeTag(span)
+ │             ├─ closeTagEnd(div)
+ ╰─            ╰─ closeTagEnd(span)

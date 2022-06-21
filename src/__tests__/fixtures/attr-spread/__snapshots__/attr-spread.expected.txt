@@ -1,39 +1,44 @@
 1╭─ <span ...a/>
- │   │    │  │╰─ openTagEnd:selfClosed "/>"
- │   │    │  ╰─ attrSpread.value
- │   │    ╰─ attrSpread "...a"
- ╰─  ╰─ tagName "span"
+ │  ││    │  │╰─ openTagEnd:selfClosed "/>"
+ │  ││    │  ╰─ attrSpread.value
+ │  ││    ╰─ attrSpread "...a"
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
 2╭─ <span a ...b/>
- │   │    │ │  │╰─ openTagEnd:selfClosed "/>"
- │   │    │ │  ╰─ attrSpread.value
- │   │    │ ╰─ attrSpread "...b"
- │   │    ╰─ attrName
- ╰─  ╰─ tagName "span"
+ │  ││    │ │  │╰─ openTagEnd:selfClosed "/>"
+ │  ││    │ │  ╰─ attrSpread.value
+ │  ││    │ ╰─ attrSpread "...b"
+ │  ││    ╰─ attrName
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
 3╭─ <span a ...b ...c/>
- │   │    │ │  │ │  │╰─ openTagEnd:selfClosed "/>"
- │   │    │ │  │ │  ╰─ attrSpread.value
- │   │    │ │  │ ╰─ attrSpread "...c"
- │   │    │ │  ╰─ attrSpread.value
- │   │    │ ╰─ attrSpread "...b"
- │   │    ╰─ attrName
- ╰─  ╰─ tagName "span"
+ │  ││    │ │  │ │  │╰─ openTagEnd:selfClosed "/>"
+ │  ││    │ │  │ │  ╰─ attrSpread.value
+ │  ││    │ │  │ ╰─ attrSpread "...c"
+ │  ││    │ │  ╰─ attrSpread.value
+ │  ││    │ ╰─ attrSpread "...b"
+ │  ││    ╰─ attrName
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
 4╭─ <span a ...b c ...d/>
- │   │    │ │  │ │ │  │╰─ openTagEnd:selfClosed "/>"
- │   │    │ │  │ │ │  ╰─ attrSpread.value
- │   │    │ │  │ │ ╰─ attrSpread "...d"
- │   │    │ │  │ ╰─ attrName
- │   │    │ │  ╰─ attrSpread.value
- │   │    │ ╰─ attrSpread "...b"
- │   │    ╰─ attrName
- ╰─  ╰─ tagName "span"
+ │  ││    │ │  │ │ │  │╰─ openTagEnd:selfClosed "/>"
+ │  ││    │ │  │ │ │  ╰─ attrSpread.value
+ │  ││    │ │  │ │ ╰─ attrSpread "...d"
+ │  ││    │ │  │ ╰─ attrName
+ │  ││    │ │  ╰─ attrSpread.value
+ │  ││    │ ╰─ attrSpread "...b"
+ │  ││    ╰─ attrName
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
 5╭─ <span a ...b c ...d e/>
- │   │    │ │  │ │ │  │ │╰─ openTagEnd:selfClosed "/>"
- │   │    │ │  │ │ │  │ ╰─ attrName
- │   │    │ │  │ │ │  ╰─ attrSpread.value
- │   │    │ │  │ │ ╰─ attrSpread "...d"
- │   │    │ │  │ ╰─ attrName
- │   │    │ │  ╰─ attrSpread.value
- │   │    │ ╰─ attrSpread "...b"
- │   │    ╰─ attrName
- ╰─  ╰─ tagName "span"
+ │  ││    │ │  │ │ │  │ │╰─ openTagEnd:selfClosed "/>"
+ │  ││    │ │  │ │ │  │ ╰─ attrName
+ │  ││    │ │  │ │ │  ╰─ attrSpread.value
+ │  ││    │ │  │ │ ╰─ attrSpread "...d"
+ │  ││    │ │  │ ╰─ attrName
+ │  ││    │ │  ╰─ attrSpread.value
+ │  ││    │ ╰─ attrSpread "...b"
+ │  ││    ╰─ attrName
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
 6╰─ 

@@ -1,119 +1,137 @@
 1╭─ <${foo}/someVar>
- │   │     ││      ╰─ openTagEnd
- │   │     │╰─ tagVar.value "someVar"
- │   │     ├─ tagVar "/someVar"
- │   │     ╰─ tagName.quasis[1]
- │   ├─ tagName.expressions[0] "${foo}"
- │   ├─ tagName.quasis[0]
- ╰─  ╰─ tagName "${foo}"
+ │  ││     ││      ╰─ openTagEnd
+ │  ││     │╰─ tagVar.value "someVar"
+ │  ││     ├─ tagVar "/someVar"
+ │  ││     ╰─ tagName.quasis[1]
+ │  │├─ tagName.expressions[0] "${foo}"
+ │  │├─ tagName.quasis[0]
+ │  │╰─ tagName "${foo}"
+ ╰─ ╰─ openTagStart
 2╭─ </>
- │  │ ╰─ closeTag(${foo}).value
+ │  │ ├─ closeTagEnd(${foo})
+ │  │ ╰─ closeTagName
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(${foo}) "</>"
+ ╰─ ╰─ closeTagStart "</"
 3├─ 
 4╭─ <let/foo/>
- │   │  ││  ╰─ openTagEnd:selfClosed "/>"
- │   │  │╰─ tagVar.value "foo"
- │   │  ╰─ tagVar "/foo"
- ╰─  ╰─ tagName "let"
+ │  ││  ││  ╰─ openTagEnd:selfClosed "/>"
+ │  ││  │╰─ tagVar.value "foo"
+ │  ││  ╰─ tagVar "/foo"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
 5╭─ <let/foo=1/>
- │   │  ││  ││╰─ openTagEnd:selfClosed "/>"
- │   │  ││  │╰─ attrValue.value
- │   │  ││  ├─ attrValue "=1"
- │   │  ││  ╰─ attrName
- │   │  │╰─ tagVar.value "foo"
- │   │  ╰─ tagVar "/foo"
- ╰─  ╰─ tagName "let"
+ │  ││  ││  ││╰─ openTagEnd:selfClosed "/>"
+ │  ││  ││  │╰─ attrValue.value
+ │  ││  ││  ├─ attrValue "=1"
+ │  ││  ││  ╰─ attrName
+ │  ││  │╰─ tagVar.value "foo"
+ │  ││  ╰─ tagVar "/foo"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
 6╭─ <let/foo = 1/>
- │   │  ││   │ │╰─ openTagEnd:selfClosed "/>"
- │   │  ││   │ ╰─ attrValue.value
- │   │  ││   ├─ attrValue "= 1"
- │   │  ││   ╰─ attrName
- │   │  │╰─ tagVar.value "foo"
- │   │  ╰─ tagVar "/foo"
- ╰─  ╰─ tagName "let"
+ │  ││  ││   │ │╰─ openTagEnd:selfClosed "/>"
+ │  ││  ││   │ ╰─ attrValue.value
+ │  ││  ││   ├─ attrValue "= 1"
+ │  ││  ││   ╰─ attrName
+ │  ││  │╰─ tagVar.value "foo"
+ │  ││  ╰─ tagVar "/foo"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
 7╭─ <let/foo + 1/>
- │   │  ││      ╰─ openTagEnd:selfClosed "/>"
- │   │  │╰─ tagVar.value "foo + 1"
- │   │  ╰─ tagVar "/foo + 1"
- ╰─  ╰─ tagName "let"
+ │  ││  ││      ╰─ openTagEnd:selfClosed "/>"
+ │  ││  │╰─ tagVar.value "foo + 1"
+ │  ││  ╰─ tagVar "/foo + 1"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
 8╭─ <let/foo:string/>
- │   │  ││         ╰─ openTagEnd:selfClosed "/>"
- │   │  │╰─ tagVar.value "foo:string"
- │   │  ╰─ tagVar "/foo:string"
- ╰─  ╰─ tagName "let"
+ │  ││  ││         ╰─ openTagEnd:selfClosed "/>"
+ │  ││  │╰─ tagVar.value "foo:string"
+ │  ││  ╰─ tagVar "/foo:string"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
 9╭─ <let/foo : string/>
- │   │  ││           ╰─ openTagEnd:selfClosed "/>"
- │   │  │╰─ tagVar.value "foo : string"
- │   │  ╰─ tagVar "/foo : string"
- ╰─  ╰─ tagName "let"
+ │  ││  ││           ╰─ openTagEnd:selfClosed "/>"
+ │  ││  │╰─ tagVar.value "foo : string"
+ │  ││  ╰─ tagVar "/foo : string"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
 10╭─ <let/foo: typeof bar extends y ? a : b x=2/>
-  │   │  ││                                 │││╰─ openTagEnd:selfClosed "/>"
-  │   │  ││                                 ││╰─ attrValue.value
-  │   │  ││                                 │╰─ attrValue "=2"
-  │   │  ││                                 ╰─ attrName
-  │   │  │╰─ tagVar.value "foo: typeof bar extends y ? a : b"
-  │   │  ╰─ tagVar "/foo: typeof bar extends y ? a : b"
-  ╰─  ╰─ tagName "let"
+  │  ││  ││                                 │││╰─ openTagEnd:selfClosed "/>"
+  │  ││  ││                                 ││╰─ attrValue.value
+  │  ││  ││                                 │╰─ attrValue "=2"
+  │  ││  ││                                 ╰─ attrName
+  │  ││  │╰─ tagVar.value "foo: typeof bar extends y ? a : b"
+  │  ││  ╰─ tagVar "/foo: typeof bar extends y ? a : b"
+  │  │╰─ tagName "let"
+  ╰─ ╰─ openTagStart
 11╭─ <let/{ x, y }/>
-  │   │  ││       ╰─ openTagEnd:selfClosed "/>"
-  │   │  │╰─ tagVar.value "{ x, y }"
-  │   │  ╰─ tagVar "/{ x, y }"
-  ╰─  ╰─ tagName "let"
+  │  ││  ││       ╰─ openTagEnd:selfClosed "/>"
+  │  ││  │╰─ tagVar.value "{ x, y }"
+  │  ││  ╰─ tagVar "/{ x, y }"
+  │  │╰─ tagName "let"
+  ╰─ ╰─ openTagStart
 12├─ 
 13╭─ <const/fn:any() {
-  │   │    ││     ││ ╰─ attrMethod.body "{\n  console.log(\"hi\");\n}"
-  │   │    ││     │╰─ attrMethod.params.value
-  │   │    ││     ├─ attrMethod.params "()"
-  │   │    ││     ├─ attrMethod "() {\n  console.log(\"hi\");\n}"
-  │   │    ││     ╰─ attrName
-  │   │    │╰─ tagVar.value "fn:any"
-  │   │    ╰─ tagVar "/fn:any"
-  ╰─  ╰─ tagName "const"
+  │  ││    ││     ││ ╰─ attrMethod.body "{\n  console.log(\"hi\");\n}"
+  │  ││    ││     │╰─ attrMethod.params.value
+  │  ││    ││     ├─ attrMethod.params "()"
+  │  ││    ││     ├─ attrMethod "() {\n  console.log(\"hi\");\n}"
+  │  ││    ││     ╰─ attrName
+  │  ││    │╰─ tagVar.value "fn:any"
+  │  ││    ╰─ tagVar "/fn:any"
+  │  │╰─ tagName "const"
+  ╰─ ╰─ openTagStart
 14╭─   console.log("hi");
   ╰─ ╰─ attrMethod.body.value "\n  console.log(\"hi\");\n"
 15╭─ }/>
   ╰─  ╰─ openTagEnd:selfClosed "/>"
 16├─ 
 17╭─ <button/loginButton>
-  │   │     ││          ╰─ openTagEnd
-  │   │     │╰─ tagVar.value "loginButton"
-  │   │     ╰─ tagVar "/loginButton"
-  ╰─  ╰─ tagName "button"
+  │  ││     ││          ╰─ openTagEnd
+  │  ││     │╰─ tagVar.value "loginButton"
+  │  ││     ╰─ tagVar "/loginButton"
+  │  │╰─ tagName "button"
+  ╰─ ╰─ openTagStart
 18╭─   login
   ╰─ ╰─ text "\n  login\n"
 19╭─ </>
-  │  │ ╰─ closeTag(button).value
-  ╰─ ╰─ closeTag(button) "</>"
+  │  │ ├─ closeTagEnd(button)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
 20╭─ <button/loginButton >
-  │   │     ││           ╰─ openTagEnd
-  │   │     │╰─ tagVar.value "loginButton"
-  │   │     ╰─ tagVar "/loginButton"
-  ╰─  ╰─ tagName "button"
+  │  ││     ││           ╰─ openTagEnd
+  │  ││     │╰─ tagVar.value "loginButton"
+  │  ││     ╰─ tagVar "/loginButton"
+  │  │╰─ tagName "button"
+  ╰─ ╰─ openTagStart
 21╭─   login
   ╰─ ╰─ text "\n  login\n"
 22╭─ </>
-  │  │ ╰─ closeTag(button).value
-  ╰─ ╰─ closeTag(button) "</>"
+  │  │ ├─ closeTagEnd(button)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
 23├─ 
 24╭─ <div/ref/>
-  │   │  ││  ╰─ openTagEnd:selfClosed "/>"
-  │   │  │╰─ tagVar.value "ref"
-  │   │  ╰─ tagVar "/ref"
-  ╰─  ╰─ tagName "div"
+  │  ││  ││  ╰─ openTagEnd:selfClosed "/>"
+  │  ││  │╰─ tagVar.value "ref"
+  │  ││  ╰─ tagVar "/ref"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
 25╭─ <div/ref />
-  │   │  ││   ╰─ openTagEnd:selfClosed "/>"
-  │   │  │╰─ tagVar.value "ref"
-  │   │  ╰─ tagVar "/ref"
-  ╰─  ╰─ tagName "div"
+  │  ││  ││   ╰─ openTagEnd:selfClosed "/>"
+  │  ││  │╰─ tagVar.value "ref"
+  │  ││  ╰─ tagVar "/ref"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
 26├─ 
 27╭─ <div#ab.cd/ref/>
-  │   │  ││ ││ ││  ╰─ openTagEnd:selfClosed "/>"
-  │   │  ││ ││ │╰─ tagVar.value "ref"
-  │   │  ││ ││ ╰─ tagVar "/ref"
-  │   │  ││ │╰─ tagShorthandClass.quasis[0] "cd"
-  │   │  ││ ╰─ tagShorthandClass ".cd"
-  │   │  │╰─ tagShorthandId.quasis[0] "ab"
-  │   │  ╰─ tagShorthandId "#ab"
-  ╰─  ╰─ tagName "div"
+  │  ││  ││ ││ ││  ╰─ openTagEnd:selfClosed "/>"
+  │  ││  ││ ││ │╰─ tagVar.value "ref"
+  │  ││  ││ ││ ╰─ tagVar "/ref"
+  │  ││  ││ │╰─ tagShorthandClass.quasis[0] "cd"
+  │  ││  ││ ╰─ tagShorthandClass ".cd"
+  │  ││  │╰─ tagShorthandId.quasis[0] "ab"
+  │  ││  ╰─ tagShorthandId "#ab"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
 28╰─ 

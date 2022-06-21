@@ -1,8 +1,10 @@
 1╭─ <hello message=`${`hi ${name}`}!`></hello>
- │   │     │      ││                 ││ ╰─ closeTag(hello).value "hello"
- │   │     │      ││                 │╰─ closeTag(hello) "</hello>"
- │   │     │      ││                 ╰─ openTagEnd
- │   │     │      │╰─ attrValue.value "`${`hi ${name}`}!`"
- │   │     │      ╰─ attrValue "=`${`hi ${name}`}!`"
- │   │     ╰─ attrName "message"
- ╰─  ╰─ tagName "hello"
+ │  ││     │      ││                 ││ │    ╰─ closeTagEnd(hello)
+ │  ││     │      ││                 ││ ╰─ closeTagName "hello"
+ │  ││     │      ││                 │╰─ closeTagStart "</"
+ │  ││     │      ││                 ╰─ openTagEnd
+ │  ││     │      │╰─ attrValue.value "`${`hi ${name}`}!`"
+ │  ││     │      ╰─ attrValue "=`${`hi ${name}`}!`"
+ │  ││     ╰─ attrName "message"
+ │  │╰─ tagName "hello"
+ ╰─ ╰─ openTagStart

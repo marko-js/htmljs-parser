@@ -1,10 +1,12 @@
 1╭─ <a data={
- │   │ │   │╰─ attrValue.value "{\n    \"a\": \"{b}\"\n}"
- │   │ │   ╰─ attrValue "={\n    \"a\": \"{b}\"\n}"
- │   │ ╰─ attrName "data"
- ╰─  ╰─ tagName
+ │  ││ │   │╰─ attrValue.value "{\n    \"a\": \"{b}\"\n}"
+ │  ││ │   ╰─ attrValue "={\n    \"a\": \"{b}\"\n}"
+ │  ││ ╰─ attrName "data"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
 2├─     "a": "{b}"
 3╭─ }></a>
- │   ││ ╰─ closeTag(a).value
- │   │╰─ closeTag(a) "</a>"
+ │   ││ │╰─ closeTagEnd(a)
+ │   ││ ╰─ closeTagName
+ │   │╰─ closeTagStart "</"
  ╰─  ╰─ openTagEnd

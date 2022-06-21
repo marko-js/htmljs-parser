@@ -1,10 +1,12 @@
 1╭─ span -- Hello <b>test</b>
- │  │    │  │      │││   │ │ ╰─ closeTag(span)
- │  │    │  │      │││   │ ╰─ closeTag(b).value
- │  │    │  │      │││   ╰─ closeTag(b) "</b>"
- │  │    │  │      ││╰─ text "test"
- │  │    │  │      │╰─ openTagEnd
- │  │    │  │      ╰─ tagName
+ │  │    │  │     ││││   │ ││╰─ closeTagEnd(span)
+ │  │    │  │     ││││   │ │╰─ closeTagEnd(b)
+ │  │    │  │     ││││   │ ╰─ closeTagName
+ │  │    │  │     ││││   ╰─ closeTagStart "</"
+ │  │    │  │     │││╰─ text "test"
+ │  │    │  │     ││╰─ openTagEnd
+ │  │    │  │     │╰─ tagName
+ │  │    │  │     ╰─ openTagStart
  │  │    │  ╰─ text "Hello "
  │  │    ╰─ openTagEnd
  ╰─ ╰─ tagName "span"

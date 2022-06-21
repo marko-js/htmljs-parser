@@ -5,4 +5,5 @@
  │  ││     │╰─ attrValue "=b"
  │  ││     ╰─ attrName
  │  │╰─ tagName "style"
- ╰─ ╰─ error(MISSING_END_TAG:Missing ending "style" tag) "<style a=b>"
+ │  ├─ error(MISSING_END_TAG:Missing ending "style" tag) "<style a=b>"
+ ╰─ ╰─ openTagStart

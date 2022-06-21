@@ -62,6 +62,10 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       } else if (nextCode === CODE.FORWARD_SLASH) {
         // something like:
         // </html>
+        this.options.onCloseTagStart?.({
+          start: this.pos,
+          end: this.pos + 2,
+        });
         this.enterState(STATE.CLOSE_TAG);
         this.pos++; // skip /
       } else if (
@@ -76,6 +80,10 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
         // We'll treat this left angle bracket as text
         this.startText();
       } else {
+        this.options.onOpenTagStart?.({
+          start: this.pos,
+          end: this.pos + 1,
+        });
         this.enterState(STATE.OPEN_TAG);
       }
     } else if (

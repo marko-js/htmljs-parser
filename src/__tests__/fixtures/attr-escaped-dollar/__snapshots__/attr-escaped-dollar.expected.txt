@@ -1,8 +1,10 @@
 1╭─ <span data-foo="\$name"></span>
- │   │    │       ││       ││ ╰─ closeTag(span).value "span"
- │   │    │       ││       │╰─ closeTag(span) "</span>"
- │   │    │       ││       ╰─ openTagEnd
- │   │    │       │╰─ attrValue.value "\"\\$name\""
- │   │    │       ╰─ attrValue "=\"\\$name\""
- │   │    ╰─ attrName "data-foo"
- ╰─  ╰─ tagName "span"
+ │  ││    │       ││       ││ │   ╰─ closeTagEnd(span)
+ │  ││    │       ││       ││ ╰─ closeTagName "span"
+ │  ││    │       ││       │╰─ closeTagStart "</"
+ │  ││    │       ││       ╰─ openTagEnd
+ │  ││    │       │╰─ attrValue.value "\"\\$name\""
+ │  ││    │       ╰─ attrValue "=\"\\$name\""
+ │  ││    ╰─ attrName "data-foo"
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart

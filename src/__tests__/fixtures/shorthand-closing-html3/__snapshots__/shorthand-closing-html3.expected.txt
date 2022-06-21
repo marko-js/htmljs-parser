@@ -1,9 +1,11 @@
 1╭─ <#foo>
- │   ││  ╰─ openTagEnd
- │   │╰─ tagShorthandId.quasis[0] "foo"
- │   ├─ tagShorthandId "#foo"
- ╰─  ╰─ tagName
+ │  │││  ╰─ openTagEnd
+ │  ││╰─ tagShorthandId.quasis[0] "foo"
+ │  │├─ tagShorthandId "#foo"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
 2╭─ </>
- │  │ ╰─ closeTag().value
+ │  │ ├─ closeTagEnd()
+ │  │ ╰─ closeTagName
  │  ├─ text "\n"
- ╰─ ╰─ closeTag() "</>"
+ ╰─ ╰─ closeTagStart "</"

@@ -4,11 +4,11 @@
  │  │   ╰─ attrName "pageTitle"
  ╰─ ╰─ tagName "var"
 2╭─ var pageTitle = "hi";
- │  │   │         │ │    ├─ closeTag(var)
+ │  │   │         │ │    ├─ closeTagEnd(var)
  │  │   │         │ │    ╰─ openTagEnd
  │  │   │         │ ╰─ attrValue.value "\"hi\""
  │  │   │         ╰─ attrValue "= \"hi\""
  │  │   ╰─ attrName "pageTitle"
- │  ├─ closeTag(var)
+ │  ├─ closeTagEnd(var)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "var"

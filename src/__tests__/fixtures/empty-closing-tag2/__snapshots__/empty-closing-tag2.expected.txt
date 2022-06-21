@@ -1,24 +1,28 @@
 1╭─ <ul.features>
- │   │ ││       ╰─ openTagEnd
- │   │ │╰─ tagShorthandClass.quasis[0] "features"
- │   │ ╰─ tagShorthandClass ".features"
- ╰─  ╰─ tagName "ul"
+ │  ││ ││       ╰─ openTagEnd
+ │  ││ │╰─ tagShorthandClass.quasis[0] "features"
+ │  ││ ╰─ tagShorthandClass ".features"
+ │  │╰─ tagName "ul"
+ ╰─ ╰─ openTagStart
 2╭─     <li for(feature in [])>
- │  │    │  │  ││             ╰─ openTagEnd
- │  │    │  │  │╰─ attrArgs.value "feature in []"
- │  │    │  │  ╰─ attrArgs "(feature in [])"
- │  │    │  ╰─ attrName "for"
- │  │    ╰─ tagName "li"
+ │  │   ││  │  ││             ╰─ openTagEnd
+ │  │   ││  │  │╰─ attrArgs.value "feature in []"
+ │  │   ││  │  ╰─ attrArgs "(feature in [])"
+ │  │   ││  ╰─ attrName "for"
+ │  │   │╰─ tagName "li"
+ │  │   ╰─ openTagStart
  ╰─ ╰─ text "\n    "
 3╭─         ${feature}
  │  │       │ ╰─ placeholder:escape.value "feature"
  │  │       ╰─ placeholder:escape "${feature}"
  ╰─ ╰─ text "\n        "
 4╭─     </li>
- │  │   │ ╰─ closeTag(li).value "li"
- │  │   ╰─ closeTag(li) "</li>"
+ │  │   │ │ ╰─ closeTagEnd(li)
+ │  │   │ ╰─ closeTagName "li"
+ │  │   ╰─ closeTagStart "</"
  ╰─ ╰─ text "\n    "
 5╭─ </>
- │  │ ╰─ closeTag(ul).value
+ │  │ ├─ closeTagEnd(ul)
+ │  │ ╰─ closeTagName
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(ul) "</>"
+ ╰─ ╰─ closeTagStart "</"

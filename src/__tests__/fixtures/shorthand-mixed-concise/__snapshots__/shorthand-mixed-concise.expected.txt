@@ -11,28 +11,28 @@
  │  ││  │╰─ tagShorthandClass.quasis[0] "bar"
  │  ││  ╰─ tagShorthandClass ".bar"
  │  │╰─ tagShorthandId.quasis[0] "foo"
- │  ├─ closeTag()
+ │  ├─ closeTagEnd()
  │  ├─ tagShorthandId "#foo"
  ╰─ ╰─ tagName
 3╭─ .bar.baz
  │  ││  │╰─ tagShorthandClass.quasis[0] "baz"
  │  ││  ╰─ tagShorthandClass ".baz"
  │  │╰─ tagShorthandClass.quasis[0] "bar"
- │  ├─ closeTag()
+ │  ├─ closeTagEnd()
  │  ├─ openTagEnd
  │  ├─ tagShorthandClass ".bar"
  ╰─ ╰─ tagName
 4╭─ div.foo
  │  │  │╰─ tagShorthandClass.quasis[0] "foo"
  │  │  ╰─ tagShorthandClass ".foo"
- │  ├─ closeTag()
+ │  ├─ closeTagEnd()
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "div"
 5╭─ span.foo
- │  │   ││  ├─ closeTag(span)
+ │  │   ││  ├─ closeTagEnd(span)
  │  │   ││  ╰─ openTagEnd
  │  │   │╰─ tagShorthandClass.quasis[0] "foo"
  │  │   ╰─ tagShorthandClass ".foo"
- │  ├─ closeTag(div)
+ │  ├─ closeTagEnd(div)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "span"

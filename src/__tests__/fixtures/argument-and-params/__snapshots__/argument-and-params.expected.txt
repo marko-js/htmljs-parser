@@ -1,44 +1,50 @@
 1╭─ <${x}(y)/>
- │   │   ││ ╰─ openTagEnd:selfClosed "/>"
- │   │   │╰─ tagArgs.value
- │   │   ├─ tagArgs "(y)"
- │   │   ╰─ tagName.quasis[1]
- │   ├─ tagName.expressions[0] "${x}"
- │   ├─ tagName.quasis[0]
- ╰─  ╰─ tagName "${x}"
+ │  ││   ││ ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │╰─ tagArgs.value
+ │  ││   ├─ tagArgs "(y)"
+ │  ││   ╰─ tagName.quasis[1]
+ │  │├─ tagName.expressions[0] "${x}"
+ │  │├─ tagName.quasis[0]
+ │  │╰─ tagName "${x}"
+ ╰─ ╰─ openTagStart
 2╭─ <${x}|y|/>
- │   │   ││ ╰─ openTagEnd:selfClosed "/>"
- │   │   │╰─ tagParams.value
- │   │   ├─ tagParams "|y|"
- │   │   ╰─ tagName.quasis[1]
- │   ├─ tagName.expressions[0] "${x}"
- │   ├─ tagName.quasis[0]
- ╰─  ╰─ tagName "${x}"
+ │  ││   ││ ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │╰─ tagParams.value
+ │  ││   ├─ tagParams "|y|"
+ │  ││   ╰─ tagName.quasis[1]
+ │  │├─ tagName.expressions[0] "${x}"
+ │  │├─ tagName.quasis[0]
+ │  │╰─ tagName "${x}"
+ ╰─ ╰─ openTagStart
 3╭─ <tag.x(y)/>
- │   │  ││││ ╰─ openTagEnd:selfClosed "/>"
- │   │  │││╰─ tagArgs.value
- │   │  ││╰─ tagArgs "(y)"
- │   │  │╰─ tagShorthandClass.quasis[0]
- │   │  ╰─ tagShorthandClass ".x"
- ╰─  ╰─ tagName "tag"
+ │  ││  ││││ ╰─ openTagEnd:selfClosed "/>"
+ │  ││  │││╰─ tagArgs.value
+ │  ││  ││╰─ tagArgs "(y)"
+ │  ││  │╰─ tagShorthandClass.quasis[0]
+ │  ││  ╰─ tagShorthandClass ".x"
+ │  │╰─ tagName "tag"
+ ╰─ ╰─ openTagStart
 4╭─ <tag.x|y|/>
- │   │  ││││ ╰─ openTagEnd:selfClosed "/>"
- │   │  │││╰─ tagParams.value
- │   │  ││╰─ tagParams "|y|"
- │   │  │╰─ tagShorthandClass.quasis[0]
- │   │  ╰─ tagShorthandClass ".x"
- ╰─  ╰─ tagName "tag"
+ │  ││  ││││ ╰─ openTagEnd:selfClosed "/>"
+ │  ││  │││╰─ tagParams.value
+ │  ││  ││╰─ tagParams "|y|"
+ │  ││  │╰─ tagShorthandClass.quasis[0]
+ │  ││  ╰─ tagShorthandClass ".x"
+ │  │╰─ tagName "tag"
+ ╰─ ╰─ openTagStart
 5╭─ <tag#x(y)/>
- │   │  ││││ ╰─ openTagEnd:selfClosed "/>"
- │   │  │││╰─ tagArgs.value
- │   │  ││╰─ tagArgs "(y)"
- │   │  │╰─ tagShorthandId.quasis[0]
- │   │  ╰─ tagShorthandId "#x"
- ╰─  ╰─ tagName "tag"
+ │  ││  ││││ ╰─ openTagEnd:selfClosed "/>"
+ │  ││  │││╰─ tagArgs.value
+ │  ││  ││╰─ tagArgs "(y)"
+ │  ││  │╰─ tagShorthandId.quasis[0]
+ │  ││  ╰─ tagShorthandId "#x"
+ │  │╰─ tagName "tag"
+ ╰─ ╰─ openTagStart
 6╭─ <tag#x|y|/>
- │   │  ││││ ╰─ openTagEnd:selfClosed "/>"
- │   │  │││╰─ tagParams.value
- │   │  ││╰─ tagParams "|y|"
- │   │  │╰─ tagShorthandId.quasis[0]
- │   │  ╰─ tagShorthandId "#x"
- ╰─  ╰─ tagName "tag"
+ │  ││  ││││ ╰─ openTagEnd:selfClosed "/>"
+ │  ││  │││╰─ tagParams.value
+ │  ││  ││╰─ tagParams "|y|"
+ │  ││  │╰─ tagShorthandId.quasis[0]
+ │  ││  ╰─ tagShorthandId "#x"
+ │  │╰─ tagName "tag"
+ ╰─ ╰─ openTagStart

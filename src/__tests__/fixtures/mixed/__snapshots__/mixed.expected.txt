@@ -6,14 +6,16 @@
 2╭─ <div>
  │  ││  ╰─ openTagEnd
  │  │╰─ tagName "div"
- │  ├─ closeTag(var)
- ╰─ ╰─ openTagEnd
+ │  ├─ closeTagEnd(var)
+ │  ├─ openTagEnd
+ ╰─ ╰─ openTagStart
 3╭─     <span class="foo">
- │  │    │    │    ││    ╰─ openTagEnd
- │  │    │    │    │╰─ attrValue.value "\"foo\""
- │  │    │    │    ╰─ attrValue "=\"foo\""
- │  │    │    ╰─ attrName "class"
- │  │    ╰─ tagName "span"
+ │  │   ││    │    ││    ╰─ openTagEnd
+ │  │   ││    │    │╰─ attrValue.value "\"foo\""
+ │  │   ││    │    ╰─ attrValue "=\"foo\""
+ │  │   ││    ╰─ attrName "class"
+ │  │   │╰─ tagName "span"
+ │  │   ╰─ openTagStart
  ╰─ ╰─ text "\n    "
 4╭─         Hello ${data.name}!
  │  │             │ │         ╰─ text "!\n        "
@@ -21,28 +23,34 @@
  │  │             ╰─ placeholder:escape "${data.name}"
  ╰─ ╰─ text "\n        Hello "
 5╭─         </span>
- │          │ ╰─ closeTag(span).value "span"
- ╰─         ╰─ closeTag(span) "</span>"
+ │          │ │   ╰─ closeTagEnd(span)
+ │          │ ╰─ closeTagName "span"
+ ╰─         ╰─ closeTagStart "</"
 6╭─ </div> <b>This is after the span</b>
- │  │ │   │ │││                     │ ╰─ closeTag(b).value
- │  │ │   │ │││                     ╰─ closeTag(b) "</b>"
- │  │ │   │ ││╰─ text "This is after the span"
- │  │ │   │ │╰─ openTagEnd
- │  │ │   │ ╰─ tagName
- │  │ │   ╰─ text " "
- │  │ ╰─ closeTag(div).value "div"
+ │  │ │  ││││││                     │ │╰─ closeTagEnd(b)
+ │  │ │  ││││││                     │ ╰─ closeTagName
+ │  │ │  ││││││                     ╰─ closeTagStart "</"
+ │  │ │  │││││╰─ text "This is after the span"
+ │  │ │  ││││╰─ openTagEnd
+ │  │ │  │││╰─ tagName
+ │  │ │  ││╰─ openTagStart
+ │  │ │  │╰─ text " "
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(div) "</div>"
+ ╰─ ╰─ closeTagStart "</"
 7╭─ p class="foo"
  │  │ │    │╰─ attrValue.value "\"foo\""
  │  │ │    ╰─ attrValue "=\"foo\""
  │  │ ╰─ attrName "class"
  ╰─ ╰─ tagName
 8╭─     <span>Test</span>
- │  │    │   ││   │ │    ╰─ closeTag(p)
- │  │    │   ││   │ ╰─ closeTag(span).value "span"
- │  │    │   ││   ╰─ closeTag(span) "</span>"
- │  │    │   │╰─ text "Test"
- │  │    │   ╰─ openTagEnd
- │  │    ╰─ tagName "span"
+ │  │   ││   ││   │ │   │╰─ closeTagEnd(p)
+ │  │   ││   ││   │ │   ╰─ closeTagEnd(span)
+ │  │   ││   ││   │ ╰─ closeTagName "span"
+ │  │   ││   ││   ╰─ closeTagStart "</"
+ │  │   ││   │╰─ text "Test"
+ │  │   ││   ╰─ openTagEnd
+ │  │   │╰─ tagName "span"
+ │  │   ╰─ openTagStart
  ╰─ ╰─ openTagEnd

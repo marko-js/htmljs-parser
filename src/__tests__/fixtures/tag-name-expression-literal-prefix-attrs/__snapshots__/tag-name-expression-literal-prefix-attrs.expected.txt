@@ -1,13 +1,15 @@
 1╭─ <foo-${bar} hello="world">
- │   │   │     ││    ││      ╰─ openTagEnd
- │   │   │     ││    │╰─ attrValue.value "\"world\""
- │   │   │     ││    ╰─ attrValue "=\"world\""
- │   │   │     │╰─ attrName "hello"
- │   │   │     ╰─ tagName.quasis[1]
- │   │   ╰─ tagName.expressions[0] "${bar}"
- │   ├─ tagName.quasis[0] "foo-"
- ╰─  ╰─ tagName "foo-${bar}"
+ │  ││   │     ││    ││      ╰─ openTagEnd
+ │  ││   │     ││    │╰─ attrValue.value "\"world\""
+ │  ││   │     ││    ╰─ attrValue "=\"world\""
+ │  ││   │     │╰─ attrName "hello"
+ │  ││   │     ╰─ tagName.quasis[1]
+ │  ││   ╰─ tagName.expressions[0] "${bar}"
+ │  │├─ tagName.quasis[0] "foo-"
+ │  │╰─ tagName "foo-${bar}"
+ ╰─ ╰─ openTagStart
 2╭─ </>
- │  │ ╰─ closeTag(foo-${bar}).value
+ │  │ ├─ closeTagEnd(foo-${bar})
+ │  │ ╰─ closeTagName
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(foo-${bar}) "</>"
+ ╰─ ╰─ closeTagStart "</"

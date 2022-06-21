@@ -1,7 +1,8 @@
 1╭─ <img src="foo.png"/>
- │   │   │  ││        ╰─ openTagEnd:selfClosed "/>"
- │   │   │  │╰─ attrValue.value "\"foo.png\""
- │   │   │  ╰─ attrValue "=\"foo.png\""
- │   │   ╰─ attrName "src"
- ╰─  ╰─ tagName "img"
+ │  ││   │  ││        ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │  │╰─ attrValue.value "\"foo.png\""
+ │  ││   │  ╰─ attrValue "=\"foo.png\""
+ │  ││   ╰─ attrName "src"
+ │  │╰─ tagName "img"
+ ╰─ ╰─ openTagStart
 2╰─ 

@@ -10,15 +10,17 @@
  ╰─ ╰─ text "\n    This is text that spans multiple lines.\n\n    "
 7├─ 
 8╭─     <strong>You can throw in some HTML markup if you want!</strong>
- │       │     ││                                             │ ╰─ closeTag(strong).value "strong"
- │       │     ││                                             ╰─ closeTag(strong) "</strong>"
- │       │     │╰─ text "You can throw in some HTML markup if you want!"
- │       │     ╰─ openTagEnd
- ╰─      ╰─ tagName "strong"
+ │      ││     ││                                             │ │     ╰─ closeTagEnd(strong)
+ │      ││     ││                                             │ ╰─ closeTagName "strong"
+ │      ││     ││                                             ╰─ closeTagStart "</"
+ │      ││     │╰─ text "You can throw in some HTML markup if you want!"
+ │      ││     ╰─ openTagEnd
+ │      │╰─ tagName "strong"
+ ╰─     ╰─ openTagStart
 9╭─     --
  ╰─ ╰─ text "\n"
 10╭─ p
-  │  ├─ closeTag(p)
+  │  ├─ closeTagEnd(p)
   ╰─ ╰─ tagName
 11╭─     -----
   ╰─ ╰─ openTagEnd
@@ -31,10 +33,10 @@
 17╭─ i -- This text will be in italics
   │  │ │  ╰─ text "This text will be in italics"
   │  │ ╰─ openTagEnd
-  │  ├─ closeTag(p)
+  │  ├─ closeTagEnd(p)
   ╰─ ╰─ tagName
 18╭─ b
-  │  ├─ closeTag(i)
+  │  ├─ closeTagEnd(i)
   ╰─ ╰─ tagName
 19╭─     -- This text will be bold
   │  │      ╰─ text "This text will be bold"
@@ -42,15 +44,17 @@
 20╭─     -- This is okay too
   ╰─        ╰─ text "This is okay too"
 21╭─ app-hello
-  │  ├─ closeTag(b)
+  │  ├─ closeTagEnd(b)
   ╰─ ╰─ tagName "app-hello"
 22╭─     -- ${data.name} some html - <b>bold</b>
-  │  │      │ │         │             │││   │ │ ╰─ closeTag(app-hello)
-  │  │      │ │         │             │││   │ ╰─ closeTag(b).value
-  │  │      │ │         │             │││   ╰─ closeTag(b) "</b>"
-  │  │      │ │         │             ││╰─ text "bold"
-  │  │      │ │         │             │╰─ openTagEnd
-  │  │      │ │         │             ╰─ tagName
+  │  │      │ │         │            ││││   │ ││╰─ closeTagEnd(app-hello)
+  │  │      │ │         │            ││││   │ │╰─ closeTagEnd(b)
+  │  │      │ │         │            ││││   │ ╰─ closeTagName
+  │  │      │ │         │            ││││   ╰─ closeTagStart "</"
+  │  │      │ │         │            │││╰─ text "bold"
+  │  │      │ │         │            ││╰─ openTagEnd
+  │  │      │ │         │            │╰─ tagName
+  │  │      │ │         │            ╰─ openTagStart
   │  │      │ │         ╰─ text " some html - "
   │  │      │ ╰─ placeholder:escape.value "data.name"
   │  │      ╰─ placeholder:escape "${data.name}"

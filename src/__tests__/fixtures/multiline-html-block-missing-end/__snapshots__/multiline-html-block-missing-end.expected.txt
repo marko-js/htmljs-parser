@@ -8,14 +8,14 @@
 5├─ 
 6╭─ script --
  │  │      ╰─ openTagEnd
- │  ├─ closeTag(div)
+ │  ├─ closeTagEnd(div)
  ╰─ ╰─ tagName "script"
 7╭─     console.log('foo');
  ╰─ ╰─ text "\n    console.log('foo');\n    alert('bar');\n"
 8├─     alert('bar');
 9├─ 
 10╭─ --
-  ╰─ ╰─ closeTag(script)
+  ╰─ ╰─ closeTagEnd(script)
 11╭─ Multi-line text
   ╰─ ╰─ text "\nMulti-line text\nReached EOF"
 12╰─ Reached EOF

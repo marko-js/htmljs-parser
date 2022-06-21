@@ -1,7 +1,8 @@
 1╭─ <html-comment><![CDATA[[if lt IE 9]><div><![endif]]]></html-comment>
- │   │           ││        │                             │ ╰─ closeTag(html-comment).value "html-comment"
- │   │           ││        │                             ╰─ closeTag(html-comment) "</html-comment>"
- │   │           ││        ╰─ cdata.value "[if lt IE 9]><div><![endif]"
- │   │           │╰─ cdata "<![CDATA[[if lt IE 9]><div><![endif]]]>"
- │   │           ╰─ openTagEnd
- ╰─  ╰─ tagName "html-comment"
+ │  ││           ││        │                               │           ╰─ closeTagEnd(html-comment)
+ │  ││           ││        │                               ╰─ closeTagName "html-comment"
+ │  ││           ││        ╰─ cdata.value "[if lt IE 9]><div><![endif]"
+ │  ││           │╰─ cdata "<![CDATA[[if lt IE 9]><div><![endif]]]>"
+ │  ││           ╰─ openTagEnd
+ │  │╰─ tagName "html-comment"
+ ╰─ ╰─ openTagStart

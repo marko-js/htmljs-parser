@@ -1,11 +1,13 @@
 1╭─ <a data=123 data=abc></a>
- │   │ │   ││   │   ││  ││ ╰─ closeTag(a).value
- │   │ │   ││   │   ││  │╰─ closeTag(a) "</a>"
- │   │ │   ││   │   ││  ╰─ openTagEnd
- │   │ │   ││   │   │╰─ attrValue.value "abc"
- │   │ │   ││   │   ╰─ attrValue "=abc"
- │   │ │   ││   ╰─ attrName "data"
- │   │ │   │╰─ attrValue.value "123"
- │   │ │   ╰─ attrValue "=123"
- │   │ ╰─ attrName "data"
- ╰─  ╰─ tagName
+ │  ││ │   ││   │   ││  ││ │╰─ closeTagEnd(a)
+ │  ││ │   ││   │   ││  ││ ╰─ closeTagName
+ │  ││ │   ││   │   ││  │╰─ closeTagStart "</"
+ │  ││ │   ││   │   ││  ╰─ openTagEnd
+ │  ││ │   ││   │   │╰─ attrValue.value "abc"
+ │  ││ │   ││   │   ╰─ attrValue "=abc"
+ │  ││ │   ││   ╰─ attrName "data"
+ │  ││ │   │╰─ attrValue.value "123"
+ │  ││ │   ╰─ attrValue "=123"
+ │  ││ ╰─ attrName "data"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

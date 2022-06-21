@@ -4,7 +4,7 @@
  │  │   ╰─ tagName "span"
  ╰─ ╰─ openTagEnd
 3╭─         -- Hello World
- │  │          │          ├─ closeTag(div)
- │  │          │          ╰─ closeTag(span)
+ │  │          │          ├─ closeTagEnd(div)
+ │  │          │          ╰─ closeTagEnd(span)
  │  │          ╰─ text "Hello World"
  ╰─ ╰─ openTagEnd

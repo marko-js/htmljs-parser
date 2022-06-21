@@ -1,14 +1,16 @@
 1╭─ <custom name="Hello $!{name}!">
- │   │      │   ││                ╰─ openTagEnd
- │   │      │   │╰─ attrValue.value "\"Hello $!{name}!\""
- │   │      │   ╰─ attrValue "=\"Hello $!{name}!\""
- │   │      ╰─ attrName "name"
- ╰─  ╰─ tagName "custom"
+ │  ││      │   ││                ╰─ openTagEnd
+ │  ││      │   │╰─ attrValue.value "\"Hello $!{name}!\""
+ │  ││      │   ╰─ attrValue "=\"Hello $!{name}!\""
+ │  ││      ╰─ attrName "name"
+ │  │╰─ tagName "custom"
+ ╰─ ╰─ openTagStart
 2╭─     Hello $!{name}!
  │  │         │  │    ╰─ text "!\n"
  │  │         │  ╰─ placeholder.value "name"
  │  │         ╰─ placeholder "$!{name}"
  ╰─ ╰─ text "\n    Hello "
 3╭─ </custom>
- │  │ ╰─ closeTag(custom).value "custom"
- ╰─ ╰─ closeTag(custom) "</custom>"
+ │  │ │     ╰─ closeTagEnd(custom)
+ │  │ ╰─ closeTagName "custom"
+ ╰─ ╰─ closeTagStart "</"

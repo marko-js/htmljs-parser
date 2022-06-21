@@ -1,8 +1,10 @@
 1╭─ <div data=false></div>
- │   │   │   ││    ││ ╰─ closeTag(div).value "div"
- │   │   │   ││    │╰─ closeTag(div) "</div>"
- │   │   │   ││    ╰─ openTagEnd
- │   │   │   │╰─ attrValue.value "false"
- │   │   │   ╰─ attrValue "=false"
- │   │   ╰─ attrName "data"
- ╰─  ╰─ tagName "div"
+ │  ││   │   ││    ││ │  ╰─ closeTagEnd(div)
+ │  ││   │   ││    ││ ╰─ closeTagName "div"
+ │  ││   │   ││    │╰─ closeTagStart "</"
+ │  ││   │   ││    ╰─ openTagEnd
+ │  ││   │   │╰─ attrValue.value "false"
+ │  ││   │   ╰─ attrValue "=false"
+ │  ││   ╰─ attrName "data"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

@@ -1,8 +1,10 @@
 1╭─ <div data=undefined></div>
- │   │   │   ││        ││ ╰─ closeTag(div).value "div"
- │   │   │   ││        │╰─ closeTag(div) "</div>"
- │   │   │   ││        ╰─ openTagEnd
- │   │   │   │╰─ attrValue.value "undefined"
- │   │   │   ╰─ attrValue "=undefined"
- │   │   ╰─ attrName "data"
- ╰─  ╰─ tagName "div"
+ │  ││   │   ││        ││ │  ╰─ closeTagEnd(div)
+ │  ││   │   ││        ││ ╰─ closeTagName "div"
+ │  ││   │   ││        │╰─ closeTagStart "</"
+ │  ││   │   ││        ╰─ openTagEnd
+ │  ││   │   │╰─ attrValue.value "undefined"
+ │  ││   │   ╰─ attrValue "=undefined"
+ │  ││   ╰─ attrName "data"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

@@ -1,9 +1,10 @@
 1╭─ <script>alert("Hello ${xyz}!")</script>
- │   │     ││            │ │   │  │ ╰─ closeTag(script).value "script"
- │   │     ││            │ │   │  ╰─ closeTag(script) "</script>"
- │   │     ││            │ │   ╰─ text "!\")"
- │   │     ││            │ ╰─ placeholder:escape.value "xyz"
- │   │     ││            ╰─ placeholder:escape "${xyz}"
- │   │     │╰─ text "alert(\"Hello "
- │   │     ╰─ openTagEnd
- ╰─  ╰─ tagName "script"
+ │  ││     ││            │ │   │    │     ╰─ closeTagEnd(script)
+ │  ││     ││            │ │   │    ╰─ closeTagName "script"
+ │  ││     ││            │ │   ╰─ text "!\")"
+ │  ││     ││            │ ╰─ placeholder:escape.value "xyz"
+ │  ││     ││            ╰─ placeholder:escape "${xyz}"
+ │  ││     │╰─ text "alert(\"Hello "
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart

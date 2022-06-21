@@ -1,5 +1,5 @@
 1╭─ var foo = 5 - data
- │  │   │   │ │       ├─ closeTag(var)
+ │  │   │   │ │       ├─ closeTagEnd(var)
  │  │   │   │ │       ╰─ openTagEnd
  │  │   │   │ ╰─ attrValue.value "5 - data"
  │  │   │   ╰─ attrValue "= 5 - data"

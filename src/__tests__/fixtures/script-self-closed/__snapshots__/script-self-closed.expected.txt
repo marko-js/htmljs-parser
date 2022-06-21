@@ -1,18 +1,22 @@
 1╭─ <head>
- │   │   ╰─ openTagEnd
- ╰─  ╰─ tagName "head"
+ │  ││   ╰─ openTagEnd
+ │  │╰─ tagName "head"
+ ╰─ ╰─ openTagStart
 2╭─     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"/>
- │  │    │      │  ││                                                                    ╰─ openTagEnd:selfClosed "/>"
- │  │    │      │  │╰─ attrValue.value "\"http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js\""
- │  │    │      │  ╰─ attrValue "=\"http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js\""
- │  │    │      ╰─ attrName "src"
- │  │    ╰─ tagName "script"
+ │  │   ││      │  ││                                                                    ╰─ openTagEnd:selfClosed "/>"
+ │  │   ││      │  │╰─ attrValue.value "\"http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js\""
+ │  │   ││      │  ╰─ attrValue "=\"http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js\""
+ │  │   ││      ╰─ attrName "src"
+ │  │   │╰─ tagName "script"
+ │  │   ╰─ openTagStart
  ╰─ ╰─ text "\n    "
 3╭─     <lasso-head />
- │  │    │          ╰─ openTagEnd:selfClosed "/>"
- │  │    ╰─ tagName "lasso-head"
+ │  │   ││          ╰─ openTagEnd:selfClosed "/>"
+ │  │   │╰─ tagName "lasso-head"
+ │  │   ╰─ openTagStart
  ╰─ ╰─ text "\n    "
 4╭─ </head>
- │  │ ╰─ closeTag(head).value "head"
+ │  │ │   ╰─ closeTagEnd(head)
+ │  │ ╰─ closeTagName "head"
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(head) "</head>"
+ ╰─ ╰─ closeTagStart "</"

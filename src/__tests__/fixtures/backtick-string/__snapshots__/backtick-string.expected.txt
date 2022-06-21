@@ -1,9 +1,11 @@
 1╭─ <hello message=`Hello
- │   │     │      │╰─ attrValue.value "`Hello\n    ${foo}!`"
- │   │     │      ╰─ attrValue "=`Hello\n    ${foo}!`"
- │   │     ╰─ attrName "message"
- ╰─  ╰─ tagName "hello"
+ │  ││     │      │╰─ attrValue.value "`Hello\n    ${foo}!`"
+ │  ││     │      ╰─ attrValue "=`Hello\n    ${foo}!`"
+ │  ││     ╰─ attrName "message"
+ │  │╰─ tagName "hello"
+ ╰─ ╰─ openTagStart
 2╭─     ${foo}!`></hello>
- │              ││ ╰─ closeTag(hello).value "hello"
- │              │╰─ closeTag(hello) "</hello>"
+ │              ││ │    ╰─ closeTagEnd(hello)
+ │              ││ ╰─ closeTagName "hello"
+ │              │╰─ closeTagStart "</"
  ╰─             ╰─ openTagEnd

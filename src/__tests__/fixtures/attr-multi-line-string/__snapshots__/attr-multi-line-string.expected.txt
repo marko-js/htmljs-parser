@@ -1,10 +1,12 @@
 1╭─ <div data="
- │   │   │   │╰─ attrValue.value "\"\nabc\n124\""
- │   │   │   ╰─ attrValue "=\"\nabc\n124\""
- │   │   ╰─ attrName "data"
- ╰─  ╰─ tagName "div"
+ │  ││   │   │╰─ attrValue.value "\"\nabc\n124\""
+ │  ││   │   ╰─ attrValue "=\"\nabc\n124\""
+ │  ││   ╰─ attrName "data"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
 2├─ abc
 3╭─ 124"></div>
- │      ││ ╰─ closeTag(div).value "div"
- │      │╰─ closeTag(div) "</div>"
+ │      ││ │  ╰─ closeTagEnd(div)
+ │      ││ ╰─ closeTagName "div"
+ │      │╰─ closeTagStart "</"
  ╰─     ╰─ openTagEnd

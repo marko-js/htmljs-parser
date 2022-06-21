@@ -1,15 +1,17 @@
 1╭─ test
  ╰─ ╰─ tagName "test"
 2╭─     <foo>
- │  │    │  ╰─ openTagEnd
- │  │    ╰─ tagName "foo"
+ │  │   ││  ╰─ openTagEnd
+ │  │   │╰─ tagName "foo"
+ │  │   ╰─ openTagStart
  ╰─ ╰─ openTagEnd
 3╭─     <![CDATA[[if lt IE 9]><div><![endif]]]>
  │  │   │        ╰─ cdata.value "[if lt IE 9]><div><![endif]"
  │  │   ╰─ cdata "<![CDATA[[if lt IE 9]><div><![endif]]]>"
  ╰─ ╰─ text "\n    "
 4╭─     </foo>
- │  │   │ │   ╰─ closeTag(test)
- │  │   │ ╰─ closeTag(foo).value "foo"
- │  │   ╰─ closeTag(foo) "</foo>"
+ │  │   │ │  │╰─ closeTagEnd(test)
+ │  │   │ │  ╰─ closeTagEnd(foo)
+ │  │   │ ╰─ closeTagName "foo"
+ │  │   ╰─ closeTagStart "</"
  ╰─ ╰─ text "\n    "

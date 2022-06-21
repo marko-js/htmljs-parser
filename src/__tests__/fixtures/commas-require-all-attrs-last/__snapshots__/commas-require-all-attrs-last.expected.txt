@@ -1,12 +1,13 @@
 1╭─ <foo a="1" b="2", c="3" />
- │   │   │││   │││    │││   ╰─ openTagEnd:selfClosed "/>"
- │   │   │││   │││    ││╰─ attrValue.value "\"3\""
- │   │   │││   │││    │╰─ attrValue "=\"3\""
- │   │   │││   │││    ╰─ attrName
- │   │   │││   ││╰─ attrValue.value "\"2\""
- │   │   │││   │╰─ attrValue "=\"2\""
- │   │   │││   ╰─ attrName
- │   │   ││╰─ attrValue.value "\"1\""
- │   │   │╰─ attrValue "=\"1\""
- │   │   ╰─ attrName
- ╰─  ╰─ tagName "foo"
+ │  ││   │││   │││    │││   ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │││   │││    ││╰─ attrValue.value "\"3\""
+ │  ││   │││   │││    │╰─ attrValue "=\"3\""
+ │  ││   │││   │││    ╰─ attrName
+ │  ││   │││   ││╰─ attrValue.value "\"2\""
+ │  ││   │││   │╰─ attrValue "=\"2\""
+ │  ││   │││   ╰─ attrName
+ │  ││   ││╰─ attrValue.value "\"1\""
+ │  ││   │╰─ attrValue "=\"1\""
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart

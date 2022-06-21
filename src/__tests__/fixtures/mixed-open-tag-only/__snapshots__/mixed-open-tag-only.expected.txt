@@ -9,15 +9,16 @@
  │  ││   │  ╰─ attrValue "=\"marko.png\""
  │  ││   ╰─ attrName "src"
  │  │╰─ tagName "img"
- │  ├─ closeTag(var)
- ╰─ ╰─ openTagEnd
+ │  ├─ closeTagEnd(var)
+ │  ├─ openTagEnd
+ ╰─ ╰─ openTagStart
 3╭─ img src="marko2.png"
  │  │   │  │╰─ attrValue.value "\"marko2.png\""
  │  │   │  ╰─ attrValue "=\"marko2.png\""
  │  │   ╰─ attrName "src"
  ╰─ ╰─ tagName "img"
 4╭─ div class="foo"
- │  │   │    ││    ├─ closeTag(div)
+ │  │   │    ││    ├─ closeTagEnd(div)
  │  │   │    ││    ╰─ openTagEnd
  │  │   │    │╰─ attrValue.value "\"foo\""
  │  │   │    ╰─ attrValue "=\"foo\""

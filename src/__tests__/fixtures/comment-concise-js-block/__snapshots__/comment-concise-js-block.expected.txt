@@ -8,5 +8,5 @@
 4├─   multiline comment
 5├─   */
 6╭─   -- This is the body of the p tag
- │       │                            ╰─ closeTag(p)
+ │       │                            ╰─ closeTagEnd(p)
  ╰─      ╰─ text "This is the body of the p tag"

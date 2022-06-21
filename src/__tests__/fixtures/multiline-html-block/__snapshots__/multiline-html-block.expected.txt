@@ -1,10 +1,12 @@
 1╭─ ---
 2╭─ Hello <strong>Frank</strong>
- │  │      │     ││    │ ╰─ closeTag(strong).value "strong"
- │  │      │     ││    ╰─ closeTag(strong) "</strong>"
- │  │      │     │╰─ text "Frank"
- │  │      │     ╰─ openTagEnd
- │  │      ╰─ tagName "strong"
+ │  │     ││     ││    │ │     ╰─ closeTagEnd(strong)
+ │  │     ││     ││    │ ╰─ closeTagName "strong"
+ │  │     ││     ││    ╰─ closeTagStart "</"
+ │  │     ││     │╰─ text "Frank"
+ │  │     ││     ╰─ openTagEnd
+ │  │     │╰─ tagName "strong"
+ │  │     ╰─ openTagStart
  ╰─ ╰─ text "\nHello "
 3╭─ Line 2
  ╰─ ╰─ text "\nLine 2\n"

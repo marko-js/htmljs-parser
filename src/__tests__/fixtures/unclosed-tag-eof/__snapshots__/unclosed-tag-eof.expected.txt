@@ -1,8 +1,10 @@
 1╭─ <div>
  │  ││  ╰─ openTagEnd
  │  │╰─ tagName "div"
- ╰─ ╰─ error(MISSING_END_TAG:Missing ending "div" tag) "<div>"
+ │  ├─ error(MISSING_END_TAG:Missing ending "div" tag) "<div>"
+ ╰─ ╰─ openTagStart
 2╭─   <span/>
- │  │  │   ╰─ openTagEnd:selfClosed "/>"
- │  │  ╰─ tagName "span"
+ │  │ ││   ╰─ openTagEnd:selfClosed "/>"
+ │  │ │╰─ tagName "span"
+ │  │ ╰─ openTagStart
  ╰─ ╰─ text "\n  "

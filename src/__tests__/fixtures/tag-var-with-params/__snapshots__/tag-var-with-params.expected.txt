@@ -1,15 +1,17 @@
 1╭─ <foo/var|param|>
- │   │  ││  ││     ╰─ openTagEnd
- │   │  ││  │╰─ tagParams.value "param"
- │   │  ││  ╰─ tagParams "|param|"
- │   │  │╰─ tagVar.value "var"
- │   │  ╰─ tagVar "/var"
- ╰─  ╰─ tagName "foo"
+ │  ││  ││  ││     ╰─ openTagEnd
+ │  ││  ││  │╰─ tagParams.value "param"
+ │  ││  ││  ╰─ tagParams "|param|"
+ │  ││  │╰─ tagVar.value "var"
+ │  ││  ╰─ tagVar "/var"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
 2╭─   Hello ${param}
  │  │       │ ╰─ placeholder:escape.value "param"
  │  │       ╰─ placeholder:escape "${param}"
  ╰─ ╰─ text "\n  Hello "
 3╭─ </foo>
- │  │ ╰─ closeTag(foo).value "foo"
+ │  │ │  ╰─ closeTagEnd(foo)
+ │  │ ╰─ closeTagName "foo"
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(foo) "</foo>"
+ ╰─ ╰─ closeTagStart "</"

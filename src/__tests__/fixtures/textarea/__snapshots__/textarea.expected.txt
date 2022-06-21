@@ -3,7 +3,7 @@
  │  │        ╰─ openTagEnd
  ╰─ ╰─ tagName "textarea"
 2╭─ p
- │  │├─ closeTag(p)
+ │  │├─ closeTagEnd(p)
  │  │╰─ openTagEnd
- │  ├─ closeTag(textarea)
+ │  ├─ closeTagEnd(textarea)
  ╰─ ╰─ tagName

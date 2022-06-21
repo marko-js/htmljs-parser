@@ -1,9 +1,10 @@
 1╭─ <a = test b = 2/>
- │   │ │ │    │ │ │╰─ openTagEnd:selfClosed "/>"
- │   │ │ │    │ │ ╰─ attrValue.value
- │   │ │ │    │ ╰─ attrValue "= 2"
- │   │ │ │    ╰─ attrName
- │   │ │ ╰─ attrValue.value "test"
- │   │ ├─ attrValue "= test"
- │   │ ╰─ attrName
- ╰─  ╰─ tagName
+ │  ││ │ │    │ │ │╰─ openTagEnd:selfClosed "/>"
+ │  ││ │ │    │ │ ╰─ attrValue.value
+ │  ││ │ │    │ ╰─ attrValue "= 2"
+ │  ││ │ │    ╰─ attrName
+ │  ││ │ ╰─ attrValue.value "test"
+ │  ││ ├─ attrValue "= test"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

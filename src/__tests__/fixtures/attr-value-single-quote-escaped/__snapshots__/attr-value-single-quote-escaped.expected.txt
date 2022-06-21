@@ -1,5 +1,5 @@
 1╭─ var decade = '1960\'s'
- │  │   │      │ │        ├─ closeTag(var)
+ │  │   │      │ │        ├─ closeTagEnd(var)
  │  │   │      │ │        ╰─ openTagEnd
  │  │   │      │ ╰─ attrValue.value "'1960\\'s'"
  │  │   │      ╰─ attrValue "= '1960\\'s'"

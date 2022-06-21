@@ -13,6 +13,6 @@
 7╭─         -- This is also body text of span
  ╰─            ╰─ text "This is also body text of span"
 8╭─     -- Hello Universe
- │  │      │             ╰─ closeTag(div)
+ │  │      │             ╰─ closeTagEnd(div)
  │  │      ╰─ text "Hello Universe"
- ╰─ ╰─ closeTag(span)
+ ╰─ ╰─ closeTagEnd(span)

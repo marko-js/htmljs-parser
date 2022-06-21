@@ -1,13 +1,16 @@
 1╭─ <span>
- │   │   ╰─ openTagEnd
- ╰─  ╰─ tagName "span"
+ │  ││   ╰─ openTagEnd
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
 2╭─     <div#foo/>
- │  │    │  ││  ╰─ openTagEnd:selfClosed "/>"
- │  │    │  │╰─ tagShorthandId.quasis[0] "foo"
- │  │    │  ╰─ tagShorthandId "#foo"
- │  │    ╰─ tagName "div"
+ │  │   ││  ││  ╰─ openTagEnd:selfClosed "/>"
+ │  │   ││  │╰─ tagShorthandId.quasis[0] "foo"
+ │  │   ││  ╰─ tagShorthandId "#foo"
+ │  │   │╰─ tagName "div"
+ │  │   ╰─ openTagStart
  ╰─ ╰─ text "\n    "
 3╭─ </span>
- │  │ ╰─ closeTag(span).value "span"
+ │  │ │   ╰─ closeTagEnd(span)
+ │  │ ╰─ closeTagName "span"
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(span) "</span>"
+ ╰─ ╰─ closeTagStart "</"

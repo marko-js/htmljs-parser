@@ -1,7 +1,8 @@
 1╭─ <script>// line comment within <script>
- │   │     │╰─ text "// line comment within <script>\n/* block comment within <script> */\"string within \\\"<script>\\\"\"'string within \\'<script>\\''"
- │   │     ╰─ openTagEnd
- ╰─  ╰─ tagName "script"
+ │  ││     │╰─ text "// line comment within <script>\n/* block comment within <script> */\"string within \\\"<script>\\\"\"'string within \\'<script>\\''"
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
 2╭─ /* block comment within <script> */"string within \"<script>\""'string within \'<script>\''</script>
- │                                                                                             │ ╰─ closeTag(script).value "script"
- ╰─                                                                                            ╰─ closeTag(script) "</script>"
+ │                                                                                               │     ╰─ closeTagEnd(script)
+ ╰─                                                                                              ╰─ closeTagName "script"

@@ -1,3 +1,4 @@
 1╭─ <a />
- │   │ ╰─ openTagEnd:selfClosed "/>"
- ╰─  ╰─ tagName
+ │  ││ ╰─ openTagEnd:selfClosed "/>"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

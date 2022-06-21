@@ -1,3 +1,4 @@
 1╭─ <${}/>
- ╰─    ╰─ error(MALFORMED_PLACEHOLDER:Invalid placeholder, the expression cannot be missing)
+ │  │  ╰─ error(MALFORMED_PLACEHOLDER:Invalid placeholder, the expression cannot be missing)
+ ╰─ ╰─ openTagStart
 2╰─ 

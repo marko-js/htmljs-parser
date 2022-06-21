@@ -1,6 +1,7 @@
 1╭─ <script>/* Copyright $!{date} */</script>
- │   │     ││                       │ ╰─ closeTag(script).value "script"
- │   │     ││                       ╰─ closeTag(script) "</script>"
- │   │     │╰─ text "/* Copyright $!{date} */"
- │   │     ╰─ openTagEnd
- ╰─  ╰─ tagName "script"
+ │  ││     ││                         │     ╰─ closeTagEnd(script)
+ │  ││     ││                         ╰─ closeTagName "script"
+ │  ││     │╰─ text "/* Copyright $!{date} */"
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart

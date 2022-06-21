@@ -8,12 +8,14 @@
 4╭─         Test
  ╰─ ╰─ text "\n        Test\n        "
 5╭─         <b>Hello World</b>
- │           │││          │ ╰─ closeTag(b).value
- │           │││          ╰─ closeTag(b) "</b>"
- │           ││╰─ text "Hello World"
- │           │╰─ openTagEnd
- ╰─          ╰─ tagName
+ │          ││││          │ │╰─ closeTagEnd(b)
+ │          ││││          │ ╰─ closeTagName
+ │          ││││          ╰─ closeTagStart "</"
+ │          │││╰─ text "Hello World"
+ │          ││╰─ openTagEnd
+ │          │╰─ tagName
+ ╰─         ╰─ openTagStart
 6╭─         ---
- │  │          ├─ closeTag(div)
- │  │          ╰─ closeTag(span)
+ │  │          ├─ closeTagEnd(div)
+ │  │          ╰─ closeTagEnd(span)
  ╰─ ╰─ text "\n"

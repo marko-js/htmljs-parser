@@ -56,7 +56,7 @@ export function htmlEOF(this: Parser) {
 
   while (this.activeTag) {
     if (this.activeTag.concise) {
-      this.closeTag(this.pos, this.pos, undefined);
+      this.closeTagEnd(this.pos, this.pos, undefined);
     } else {
       // We found an unclosed tag on the stack that is not for a concise tag. That means
       // there is a problem with the template because all open tags should have a closing

@@ -68,7 +68,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
 
       return parser.positionAt(offset);
     };
-    const tagStack: Ranges.TagName[] = [];
+    const tagStack: Ranges.OpenTagName[] = [];
     const parser = createParser({
       onError(range) {
         addRange(`error(${ErrorCode[range.code]}:${range.message})`, range);
@@ -91,7 +91,10 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       onComment(range) {
         addValueRange("comment", range);
       },
-      onTagName(range) {
+      onOpenTagStart(range) {
+        addRange("openTagStart", range);
+      },
+      onOpenTagName(range) {
         addTemplateRange("tagName", range);
 
         if (range.expressions.length === 0) {
@@ -164,13 +167,14 @@ for (const entry of fs.readdirSync(FIXTURES)) {
         if (range.selfClosed) tagStack.pop();
         addRange(`openTagEnd${range.selfClosed ? ":selfClosed" : ""}`, range);
       },
-      onCloseTag(range) {
-        const label = `closeTag(${read(tagStack.pop()!)})`;
-        if (range.value) {
-          addValueRange(label, range as Ranges.Value);
-        } else {
-          addRange(label, range);
-        }
+      onCloseTagStart(range) {
+        addRange("closeTagStart", range);
+      },
+      onCloseTagName(range) {
+        addRange("closeTagName", range);
+      },
+      onCloseTagEnd(range) {
+        addRange(`closeTagEnd(${read(tagStack.pop()!)})`, range);
       },
       onScriptlet(range) {
         addValueRange(range.block ? `scriptlet:block` : `scriptlet`, range);

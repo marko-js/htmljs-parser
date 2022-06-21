@@ -1,86 +1,93 @@
 1╭─ <foo onclick(event){}/>
- │   │   │      ││     ││╰─ openTagEnd:selfClosed "/>"
- │   │   │      ││     │╰─ attrMethod.body.value
- │   │   │      ││     ╰─ attrMethod.body "{}"
- │   │   │      │╰─ attrMethod.params.value "event"
- │   │   │      ├─ attrMethod.params "(event)"
- │   │   │      ╰─ attrMethod "(event){}"
- │   │   ╰─ attrName "onclick"
- ╰─  ╰─ tagName "foo"
+ │  ││   │      ││     ││╰─ openTagEnd:selfClosed "/>"
+ │  ││   │      ││     │╰─ attrMethod.body.value
+ │  ││   │      ││     ╰─ attrMethod.body "{}"
+ │  ││   │      │╰─ attrMethod.params.value "event"
+ │  ││   │      ├─ attrMethod.params "(event)"
+ │  ││   │      ╰─ attrMethod "(event){}"
+ │  ││   ╰─ attrName "onclick"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
 2├─ 
 3╭─ <foo onclick(event){ 
- │   │   │      ││     │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
- │   │   │      ││     ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
- │   │   │      │╰─ attrMethod.params.value "event"
- │   │   │      ├─ attrMethod.params "(event)"
- │   │   │      ╰─ attrMethod "(event){ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
- │   │   ╰─ attrName "onclick"
- ╰─  ╰─ tagName "foo"
+ │  ││   │      ││     │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
+ │  ││   │      ││     ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+ │  ││   │      │╰─ attrMethod.params.value "event"
+ │  ││   │      ├─ attrMethod.params "(event)"
+ │  ││   │      ╰─ attrMethod "(event){ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+ │  ││   ╰─ attrName "onclick"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
 4├─   console.log("hello"); 
 5├─   event.preventDefault();
 6╭─ }/>
  ╰─  ╰─ openTagEnd:selfClosed "/>"
 7├─ 
 8╭─ <foo onclick(event) { 
- │   │   │      ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
- │   │   │      ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
- │   │   │      │╰─ attrMethod.params.value "event"
- │   │   │      ├─ attrMethod.params "(event)"
- │   │   │      ╰─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
- │   │   ╰─ attrName "onclick"
- ╰─  ╰─ tagName "foo"
+ │  ││   │      ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
+ │  ││   │      ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+ │  ││   │      │╰─ attrMethod.params.value "event"
+ │  ││   │      ├─ attrMethod.params "(event)"
+ │  ││   │      ╰─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+ │  ││   ╰─ attrName "onclick"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
 9├─   console.log("hello"); 
 10├─   event.preventDefault();
 11╭─ }/>
   ╰─  ╰─ openTagEnd:selfClosed "/>"
 12├─ 
 13╭─ <foo onclick (event) { 
-  │   │   │       ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
-  │   │   │       ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
-  │   │   │       │╰─ attrMethod.params.value "event"
-  │   │   │       ├─ attrMethod.params "(event)"
-  │   │   │       ╰─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
-  │   │   ╰─ attrName "onclick"
-  ╰─  ╰─ tagName "foo"
+  │  ││   │       ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
+  │  ││   │       ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+  │  ││   │       │╰─ attrMethod.params.value "event"
+  │  ││   │       ├─ attrMethod.params "(event)"
+  │  ││   │       ╰─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+  │  ││   ╰─ attrName "onclick"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
 14├─   console.log("hello"); 
 15├─   event.preventDefault();
 16╭─ }/>
   ╰─  ╰─ openTagEnd:selfClosed "/>"
 17├─ 
 18╭─ <foo(event){ 
-  │   │  ││     │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
-  │   │  ││     ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
-  │   │  │╰─ attrMethod.params.value "event"
-  │   │  ├─ attrMethod.params "(event)"
-  │   │  ├─ attrMethod "(event){ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
-  │   │  ╰─ attrName
-  ╰─  ╰─ tagName "foo"
+  │  ││  ││     │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
+  │  ││  ││     ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+  │  ││  │╰─ attrMethod.params.value "event"
+  │  ││  ├─ attrMethod.params "(event)"
+  │  ││  ├─ attrMethod "(event){ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+  │  ││  ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
 19├─   console.log("hello"); 
 20├─   event.preventDefault();
 21╭─ }/>
   ╰─  ╰─ openTagEnd:selfClosed "/>"
 22├─ 
 23╭─ <foo(event) { 
-  │   │  ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
-  │   │  ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
-  │   │  │╰─ attrMethod.params.value "event"
-  │   │  ├─ attrMethod.params "(event)"
-  │   │  ├─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
-  │   │  ╰─ attrName
-  ╰─  ╰─ tagName "foo"
+  │  ││  ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
+  │  ││  ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+  │  ││  │╰─ attrMethod.params.value "event"
+  │  ││  ├─ attrMethod.params "(event)"
+  │  ││  ├─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+  │  ││  ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
 24├─   console.log("hello"); 
 25├─   event.preventDefault();
 26╭─ }/>
   ╰─  ╰─ openTagEnd:selfClosed "/>"
 27├─ 
 28╭─ <foo (event) { 
-  │   │   ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
-  │   │   ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
-  │   │   │╰─ attrMethod.params.value "event"
-  │   │   ├─ attrMethod.params "(event)"
-  │   │   ├─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
-  │   │   ╰─ attrName
-  ╰─  ╰─ tagName "foo"
+  │  ││   ││      │╰─ attrMethod.body.value " \n  console.log(\"hello\"); \n  event.preventDefault();\n"
+  │  ││   ││      ╰─ attrMethod.body "{ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+  │  ││   │╰─ attrMethod.params.value "event"
+  │  ││   ├─ attrMethod.params "(event)"
+  │  ││   ├─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
 29├─   console.log("hello"); 
 30├─   event.preventDefault();
 31╭─ }/>
@@ -106,7 +113,7 @@
   │  │   │      ├─ attrMethod.params "(event)"
   │  │   │      ╰─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
   │  │   ╰─ attrName "onclick"
-  │  ├─ closeTag(foo)
+  │  ├─ closeTagEnd(foo)
   ╰─ ╰─ tagName "foo"
 39├─   console.log("hello"); 
 40├─   event.preventDefault();
@@ -120,7 +127,7 @@
   │  │   │       ├─ attrMethod.params "(event)"
   │  │   │       ╰─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
   │  │   ╰─ attrName "onclick"
-  │  ├─ closeTag(foo)
+  │  ├─ closeTagEnd(foo)
   ╰─ ╰─ tagName "foo"
 44├─   console.log("hello"); 
 45├─   event.preventDefault();
@@ -134,7 +141,7 @@
   │  │  ├─ attrMethod.params "(event)"
   │  │  ├─ attrMethod "(event){ \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
   │  │  ╰─ attrName
-  │  ├─ closeTag(foo)
+  │  ├─ closeTagEnd(foo)
   ╰─ ╰─ tagName "foo"
 49├─   console.log("hello"); 
 50├─   event.preventDefault();
@@ -148,7 +155,7 @@
   │  │  ├─ attrMethod.params "(event)"
   │  │  ├─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
   │  │  ╰─ attrName
-  │  ├─ closeTag(foo)
+  │  ├─ closeTagEnd(foo)
   ╰─ ╰─ tagName "foo"
 54├─   console.log("hello"); 
 55├─   event.preventDefault();
@@ -162,10 +169,10 @@
   │  │   ├─ attrMethod.params "(event)"
   │  │   ├─ attrMethod "(event) { \n  console.log(\"hello\"); \n  event.preventDefault();\n}"
   │  │   ╰─ attrName
-  │  ├─ closeTag(foo)
+  │  ├─ closeTagEnd(foo)
   ╰─ ╰─ tagName "foo"
 59├─   console.log("hello"); 
 60├─   event.preventDefault();
 61╭─ }
-  │   ├─ closeTag(foo)
+  │   ├─ closeTagEnd(foo)
   ╰─  ╰─ openTagEnd

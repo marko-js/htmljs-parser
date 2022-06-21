@@ -6,8 +6,8 @@
  │  │   ╰─ attrName "class"
  ╰─ ╰─ tagName "div"
 2╭─     span.bar
- │  │   │   ││  ├─ closeTag(div)
- │  │   │   ││  ├─ closeTag(span)
+ │  │   │   ││  ├─ closeTagEnd(div)
+ │  │   │   ││  ├─ closeTagEnd(span)
  │  │   │   ││  ╰─ openTagEnd
  │  │   │   │╰─ tagShorthandClass.quasis[0] "bar"
  │  │   │   ╰─ tagShorthandClass ".bar"

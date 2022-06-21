@@ -9,7 +9,7 @@
 6╭─     -- This should be okay too
  ╰─        ╰─ text "This should be okay too"
 7╭─ div
- │  │  ├─ closeTag(div)
+ │  │  ├─ closeTagEnd(div)
  │  │  ╰─ openTagEnd
- │  ├─ closeTag(script)
+ │  ├─ closeTagEnd(script)
  ╰─ ╰─ tagName "div"

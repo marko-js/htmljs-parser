@@ -1,11 +1,13 @@
 1╭─ <div foo = 1+ 2, bar = x /y></div>
- │   │   │   │ │     │   │ │   ││ ╰─ closeTag(div).value "div"
- │   │   │   │ │     │   │ │   │╰─ closeTag(div) "</div>"
- │   │   │   │ │     │   │ │   ╰─ openTagEnd
- │   │   │   │ │     │   │ ╰─ attrValue.value "x /y"
- │   │   │   │ │     │   ╰─ attrValue "= x /y"
- │   │   │   │ │     ╰─ attrName "bar"
- │   │   │   │ ╰─ attrValue.value "1+ 2"
- │   │   │   ╰─ attrValue "= 1+ 2"
- │   │   ╰─ attrName "foo"
- ╰─  ╰─ tagName "div"
+ │  ││   │   │ │     │   │ │   ││ │  ╰─ closeTagEnd(div)
+ │  ││   │   │ │     │   │ │   ││ ╰─ closeTagName "div"
+ │  ││   │   │ │     │   │ │   │╰─ closeTagStart "</"
+ │  ││   │   │ │     │   │ │   ╰─ openTagEnd
+ │  ││   │   │ │     │   │ ╰─ attrValue.value "x /y"
+ │  ││   │   │ │     │   ╰─ attrValue "= x /y"
+ │  ││   │   │ │     ╰─ attrName "bar"
+ │  ││   │   │ ╰─ attrValue.value "1+ 2"
+ │  ││   │   ╰─ attrValue "= 1+ 2"
+ │  ││   ╰─ attrName "foo"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

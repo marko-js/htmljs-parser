@@ -1,5 +1,5 @@
 1╭─ ${test} foo=123
- │  │      ││  ││  ├─ closeTag(${test})
+ │  │      ││  ││  ├─ closeTagEnd(${test})
  │  │      ││  ││  ╰─ openTagEnd
  │  │      ││  │╰─ attrValue.value "123"
  │  │      ││  ╰─ attrValue "=123"

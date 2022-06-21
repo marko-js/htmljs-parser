@@ -1,5 +1,5 @@
 1╭─ tag $ var foo = 123;
- │  │   │ │   │   │ │   ├─ closeTag(tag)
+ │  │   │ │   │   │ │   ├─ closeTagEnd(tag)
  │  │   │ │   │   │ │   ╰─ openTagEnd
  │  │   │ │   │   │ ╰─ attrValue.value "123"
  │  │   │ │   │   ╰─ attrValue "= 123"

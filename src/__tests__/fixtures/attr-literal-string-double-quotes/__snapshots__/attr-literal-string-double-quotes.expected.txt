@@ -1,8 +1,10 @@
 1╭─ <div class="simple"></div>
- │   │   │    ││       ││ ╰─ closeTag(div).value "div"
- │   │   │    ││       │╰─ closeTag(div) "</div>"
- │   │   │    ││       ╰─ openTagEnd
- │   │   │    │╰─ attrValue.value "\"simple\""
- │   │   │    ╰─ attrValue "=\"simple\""
- │   │   ╰─ attrName "class"
- ╰─  ╰─ tagName "div"
+ │  ││   │    ││       ││ │  ╰─ closeTagEnd(div)
+ │  ││   │    ││       ││ ╰─ closeTagName "div"
+ │  ││   │    ││       │╰─ closeTagStart "</"
+ │  ││   │    ││       ╰─ openTagEnd
+ │  ││   │    │╰─ attrValue.value "\"simple\""
+ │  ││   │    ╰─ attrValue "=\"simple\""
+ │  ││   ╰─ attrName "class"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

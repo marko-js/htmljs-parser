@@ -8,18 +8,18 @@
  ╰─ ╰─ openTagEnd
 4╭─         c2
  │  │       ╰─ tagName "c2"
- │  ├─ closeTag(c)
+ │  ├─ closeTagEnd(c)
  ╰─ ╰─ openTagEnd
 5╭─     b2
  │  │   ╰─ tagName "b2"
- │  ├─ closeTag(b)
- │  ├─ closeTag(c2)
+ │  ├─ closeTagEnd(b)
+ │  ├─ closeTagEnd(c2)
  ╰─ ╰─ openTagEnd
 6╭─ a2
- │  ├─ closeTag(a)
- │  ├─ closeTag(b2)
+ │  ├─ closeTagEnd(a)
+ │  ├─ closeTagEnd(b2)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "a2"
 7╭─ 
  │  ├─ openTagEnd
- ╰─ ╰─ closeTag(a2)
+ ╰─ ╰─ closeTagEnd(a2)

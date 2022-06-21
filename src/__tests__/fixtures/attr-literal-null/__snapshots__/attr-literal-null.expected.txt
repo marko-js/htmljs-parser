@@ -1,8 +1,10 @@
 1╭─ <div data=null></div>
- │   │   │   ││   ││ ╰─ closeTag(div).value "div"
- │   │   │   ││   │╰─ closeTag(div) "</div>"
- │   │   │   ││   ╰─ openTagEnd
- │   │   │   │╰─ attrValue.value "null"
- │   │   │   ╰─ attrValue "=null"
- │   │   ╰─ attrName "data"
- ╰─  ╰─ tagName "div"
+ │  ││   │   ││   ││ │  ╰─ closeTagEnd(div)
+ │  ││   │   ││   ││ ╰─ closeTagName "div"
+ │  ││   │   ││   │╰─ closeTagStart "</"
+ │  ││   │   ││   ╰─ openTagEnd
+ │  ││   │   │╰─ attrValue.value "null"
+ │  ││   │   ╰─ attrValue "=null"
+ │  ││   ╰─ attrName "data"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

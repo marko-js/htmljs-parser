@@ -5,10 +5,12 @@
 3├─ */
 4├─ 
 5╭─ <div>
- │   │  ╰─ openTagEnd
- ╰─  ╰─ tagName "div"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
 6╭─   Hello
  ╰─ ╰─ text "\n  Hello\n"
 7╭─ </div>
- │  │ ╰─ closeTag(div).value "div"
- ╰─ ╰─ closeTag(div) "</div>"
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
+ ╰─ ╰─ closeTagStart "</"

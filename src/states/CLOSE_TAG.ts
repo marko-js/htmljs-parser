@@ -131,6 +131,6 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
     }
   }
 
-  parser.closeTag(closeTag.start, closeTag.end, closeTagNamePos);
+  parser.closeTagEnd(closeTagNameEnd, closeTag.end, closeTagNamePos);
   return true;
 }

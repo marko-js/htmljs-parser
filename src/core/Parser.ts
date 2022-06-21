@@ -190,15 +190,13 @@ export class Parser {
     this.pos = this.maxPos + 1;
   }
 
-  closeTag(start: number, end: number, value: Range | undefined) {
+  closeTagEnd(start: number, end: number, name: Range | undefined) {
     const { beginMixedMode, parentTag } = this.activeTag!;
     if (beginMixedMode) this.endingMixedModeAtEOL = true;
     this.activeTag = parentTag;
-    this.options.onCloseTag?.({
-      start,
-      end,
-      value,
-    });
+
+    if (name) this.options.onCloseTagName?.(name);
+    this.options.onCloseTagEnd?.({ start, end });
   }
 
   // --------------------------

@@ -1,9 +1,10 @@
 1╭─ <a foo="bar" baz="</a>"/>
- │   │ │  ││     │  ││     ╰─ openTagEnd:selfClosed "/>"
- │   │ │  ││     │  │╰─ attrValue.value "\"</a>\""
- │   │ │  ││     │  ╰─ attrValue "=\"</a>\""
- │   │ │  ││     ╰─ attrName "baz"
- │   │ │  │╰─ attrValue.value "\"bar\""
- │   │ │  ╰─ attrValue "=\"bar\""
- │   │ ╰─ attrName "foo"
- ╰─  ╰─ tagName
+ │  ││ │  ││     │  ││     ╰─ openTagEnd:selfClosed "/>"
+ │  ││ │  ││     │  │╰─ attrValue.value "\"</a>\""
+ │  ││ │  ││     │  ╰─ attrValue "=\"</a>\""
+ │  ││ │  ││     ╰─ attrName "baz"
+ │  ││ │  │╰─ attrValue.value "\"bar\""
+ │  ││ │  ╰─ attrValue "=\"bar\""
+ │  ││ ╰─ attrName "foo"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

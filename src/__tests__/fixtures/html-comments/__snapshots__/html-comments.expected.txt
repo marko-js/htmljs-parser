@@ -1,7 +1,9 @@
 1╭─ <a><!--<b></b>--></a>
- │   │││   │         │ ╰─ closeTag(a).value
- │   │││   │         ╰─ closeTag(a) "</a>"
- │   │││   ╰─ comment.value "<b></b>"
- │   ││╰─ comment "<!--<b></b>-->"
- │   │╰─ openTagEnd
- ╰─  ╰─ tagName
+ │  ││││   │         │ │╰─ closeTagEnd(a)
+ │  ││││   │         │ ╰─ closeTagName
+ │  ││││   │         ╰─ closeTagStart "</"
+ │  ││││   ╰─ comment.value "<b></b>"
+ │  │││╰─ comment "<!--<b></b>-->"
+ │  ││╰─ openTagEnd
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

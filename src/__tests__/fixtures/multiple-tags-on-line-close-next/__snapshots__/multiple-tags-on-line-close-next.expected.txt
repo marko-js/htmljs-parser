@@ -1,12 +1,16 @@
 1╭─ <span></span><div>
- │   │   ││ │     │  ╰─ openTagEnd
- │   │   ││ │     ╰─ tagName "div"
- │   │   ││ ╰─ closeTag(span).value "span"
- │   │   │╰─ closeTag(span) "</span>"
- │   │   ╰─ openTagEnd
- ╰─  ╰─ tagName "span"
+ │  ││   ││ │   │││  ╰─ openTagEnd
+ │  ││   ││ │   ││╰─ tagName "div"
+ │  ││   ││ │   │╰─ openTagStart
+ │  ││   ││ │   ╰─ closeTagEnd(span)
+ │  ││   ││ ╰─ closeTagName "span"
+ │  ││   │╰─ closeTagStart "</"
+ │  ││   ╰─ openTagEnd
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
 2╭─ </div>
- │  │ ╰─ closeTag(div).value "div"
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(div) "</div>"
+ ╰─ ╰─ closeTagStart "</"
 3╰─ 

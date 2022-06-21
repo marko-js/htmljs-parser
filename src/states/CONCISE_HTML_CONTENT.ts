@@ -34,7 +34,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       let parentTag = this.activeTag;
 
       while (parentTag && parentTag.indent.length >= curIndent) {
-        this.closeTag(indentStart, indentStart, undefined);
+        this.closeTagEnd(indentStart, indentStart, undefined);
         parentTag = this.activeTag;
       }
 
