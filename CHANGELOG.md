@@ -1,5 +1,13 @@
 # htmljs-parser
 
+## 5.0.0
+
+### Major Changes
+
+- [#114](https://github.com/marko-js/htmljs-parser/pull/114) [`14f3499`](https://github.com/marko-js/htmljs-parser/commit/14f3499cd96d45bad081823e95a2bfecb7ae1474) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Rename `onTagName` to `onOpenTagName`.
+  Add a new `onOpenTagStart` event (before `onOpenTagName`).
+  Split the `onCloseTag` event into three new events: `onClosetTagStart`, `onCloseTagName` & `onCloseTagEnd`).
+
 ## 4.0.0
 
 ### Major Changes
