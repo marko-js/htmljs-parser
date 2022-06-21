@@ -12,7 +12,7 @@
  │  │   │ │ ╰─ attrValue.value "'foo'"
  │  │   │ ╰─ attrValue "= 'foo'"
  │  │   ╰─ attrName
- │  ├─ closeTag(var)
+ │  ├─ closeTagEnd(var)
  ╰─ ╰─ tagName "tag"
 4╭─ tag a = 'foo' instanceof := String
  │  │   │ │ │     │          │  ╰─ attrValue:bound.value "String"
@@ -21,7 +21,7 @@
  │  │   │ │ ╰─ attrValue.value "'foo'"
  │  │   │ ╰─ attrValue "= 'foo'"
  │  │   ╰─ attrName
- │  ├─ closeTag(tag)
+ │  ├─ closeTagEnd(tag)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
 5╭─ tag a = 'foo' instanceof= String
@@ -31,7 +31,7 @@
  │  │   │ │ ╰─ attrValue.value "'foo'"
  │  │   │ ╰─ attrValue "= 'foo'"
  │  │   ╰─ attrName
- │  ├─ closeTag(tag)
+ │  ├─ closeTagEnd(tag)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
 6╭─ tag a = 'foo' instanceof;
@@ -39,7 +39,7 @@
  │  │   │ │ ╰─ attrValue.value "'foo'"
  │  │   │ ╰─ attrValue "= 'foo'"
  │  │   ╰─ attrName
- │  ├─ closeTag(tag)
+ │  ├─ closeTagEnd(tag)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
 7╭─ 
@@ -50,24 +50,27 @@
  │  │   │ │ ╰─ attrValue.value "'foo'"
  │  │   │ ╰─ attrValue "= 'foo'"
  │  │   ╰─ attrName
- │  ├─ closeTag(tag)
+ │  ├─ closeTagEnd(tag)
  ╰─ ╰─ tagName "tag"
 9╭─ 
  ╰─ ╰─ openTagEnd
 10╭─ <tag a = 'foo' instanceof></tag>
-  │  ││   │ │ │     │         ││ ╰─ closeTag(tag).value "tag"
-  │  ││   │ │ │     │         │╰─ closeTag(tag) "</tag>"
+  │  ││   │ │ │     │         ││ │  ╰─ closeTagEnd(tag)
+  │  ││   │ │ │     │         ││ ╰─ closeTagName "tag"
+  │  ││   │ │ │     │         │╰─ closeTagStart "</"
   │  ││   │ │ │     │         ╰─ openTagEnd
   │  ││   │ │ │     ╰─ attrName "instanceof"
   │  ││   │ │ ╰─ attrValue.value "'foo'"
   │  ││   │ ╰─ attrValue "= 'foo'"
   │  ││   ╰─ attrName
   │  │╰─ tagName "tag"
-  ╰─ ╰─ closeTag(tag)
+  │  ├─ closeTagEnd(tag)
+  ╰─ ╰─ openTagStart
 11╭─ <tag a = 'foo' instanceof/>
-  │   │   │ │ │     │         ╰─ openTagEnd:selfClosed "/>"
-  │   │   │ │ │     ╰─ attrName "instanceof"
-  │   │   │ │ ╰─ attrValue.value "'foo'"
-  │   │   │ ╰─ attrValue "= 'foo'"
-  │   │   ╰─ attrName
-  ╰─  ╰─ tagName "tag"
+  │  ││   │ │ │     │         ╰─ openTagEnd:selfClosed "/>"
+  │  ││   │ │ │     ╰─ attrName "instanceof"
+  │  ││   │ │ ╰─ attrValue.value "'foo'"
+  │  ││   │ ╰─ attrValue "= 'foo'"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "tag"
+  ╰─ ╰─ openTagStart

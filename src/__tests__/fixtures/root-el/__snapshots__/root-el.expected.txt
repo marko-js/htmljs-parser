@@ -1,5 +1,5 @@
 1╭─ var colors=['red', 'green', 'blue']
- │  │   │     ││                       ├─ closeTag(var)
+ │  │   │     ││                       ├─ closeTagEnd(var)
  │  │   │     ││                       ╰─ openTagEnd
  │  │   │     │╰─ attrValue.value "['red', 'green', 'blue']"
  │  │   │     ╰─ attrValue "=['red', 'green', 'blue']"

@@ -1,10 +1,11 @@
 1╭─ <script>console.log('<div>Hello ${input.name}</div>');</script>
- │   │     ││                       │ │          │        │ ╰─ closeTag(script).value "script"
- │   │     ││                       │ │          │        ╰─ closeTag(script) "</script>"
- │   │     ││                       │ │          ╰─ text "</div>');"
- │   │     ││                       │ ╰─ placeholder:escape.value "input.name"
- │   │     ││                       ╰─ placeholder:escape "${input.name}"
- │   │     │╰─ text "console.log('<div>Hello "
- │   │     ╰─ openTagEnd
- ╰─  ╰─ tagName "script"
+ │  ││     ││                       │ │          │          │     ╰─ closeTagEnd(script)
+ │  ││     ││                       │ │          │          ╰─ closeTagName "script"
+ │  ││     ││                       │ │          ╰─ text "</div>');"
+ │  ││     ││                       │ ╰─ placeholder:escape.value "input.name"
+ │  ││     ││                       ╰─ placeholder:escape "${input.name}"
+ │  ││     │╰─ text "console.log('<div>Hello "
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
 2╰─ 

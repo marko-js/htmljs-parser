@@ -13,6 +13,6 @@
 3╭─     class]
  ╰─     ╰─ attrName "class"
 4╭─   -- This is the body of the a tag
- │  │    │                            ╰─ closeTag(a)
+ │  │    │                            ╰─ closeTagEnd(a)
  │  │    ╰─ text "This is the body of the a tag"
  ╰─ ╰─ openTagEnd

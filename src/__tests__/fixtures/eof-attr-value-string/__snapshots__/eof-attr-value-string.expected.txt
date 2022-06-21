@@ -1,4 +1,5 @@
 1╭─ <a href="
- │   │ │    ╰─ error(INVALID_STRING:EOF reached while parsing string expression)
- │   │ ╰─ attrName "href"
- ╰─  ╰─ tagName
+ │  ││ │    ╰─ error(INVALID_STRING:EOF reached while parsing string expression)
+ │  ││ ╰─ attrName "href"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

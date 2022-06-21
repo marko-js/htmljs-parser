@@ -16,6 +16,6 @@
  │      │    ╰─ attrValue "=\"foo\""
  ╰─     ╰─ attrName "class"
 5╭─   -- This is the body of the a tag
- │  │    │                            ╰─ closeTag(a)
+ │  │    │                            ╰─ closeTagEnd(a)
  │  │    ╰─ text "This is the body of the a tag"
  ╰─ ╰─ openTagEnd

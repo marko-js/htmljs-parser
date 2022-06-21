@@ -4,7 +4,7 @@
  │  │   ╰─ attrName
  ╰─ ╰─ tagName "div"
 2╭─ div a=input.class Test extends Other { hello() {} }
- │  │   │││           │    │       │     │             ├─ closeTag(div)
+ │  │   │││           │    │       │     │             ├─ closeTagEnd(div)
  │  │   │││           │    │       │     │             ╰─ openTagEnd
  │  │   │││           │    │       │     ╰─ attrName "{ hello() {} }"
  │  │   │││           │    │       ╰─ attrName "Other"
@@ -13,6 +13,6 @@
  │  │   ││╰─ attrValue.value "input.class"
  │  │   │╰─ attrValue "=input.class"
  │  │   ╰─ attrName
- │  ├─ closeTag(div)
+ │  ├─ closeTagEnd(div)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "div"

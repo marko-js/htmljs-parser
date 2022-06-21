@@ -1,27 +1,31 @@
 1╭─ <li>
- │   │ ╰─ openTagEnd
- ╰─  ╰─ tagName "li"
+ │  ││ ╰─ openTagEnd
+ │  │╰─ tagName "li"
+ ╰─ ╰─ openTagStart
 2╭─     <a.nav-link class=(id === currentPage && 'active') href=href>
- │  │    │││        │    ││                                │   ││   ╰─ openTagEnd
- │  │    │││        │    ││                                │   │╰─ attrValue.value "href"
- │  │    │││        │    ││                                │   ╰─ attrValue "=href"
- │  │    │││        │    ││                                ╰─ attrName "href"
- │  │    │││        │    │╰─ attrValue.value "(id === currentPage && 'active')"
- │  │    │││        │    ╰─ attrValue "=(id === currentPage && 'active')"
- │  │    │││        ╰─ attrName "class"
- │  │    ││╰─ tagShorthandClass.quasis[0] "nav-link"
- │  │    │╰─ tagShorthandClass ".nav-link"
- │  │    ╰─ tagName
+ │  │   ││││        │    ││                                │   ││   ╰─ openTagEnd
+ │  │   ││││        │    ││                                │   │╰─ attrValue.value "href"
+ │  │   ││││        │    ││                                │   ╰─ attrValue "=href"
+ │  │   ││││        │    ││                                ╰─ attrName "href"
+ │  │   ││││        │    │╰─ attrValue.value "(id === currentPage && 'active')"
+ │  │   ││││        │    ╰─ attrValue "=(id === currentPage && 'active')"
+ │  │   ││││        ╰─ attrName "class"
+ │  │   │││╰─ tagShorthandClass.quasis[0] "nav-link"
+ │  │   ││╰─ tagShorthandClass ".nav-link"
+ │  │   │╰─ tagName
+ │  │   ╰─ openTagStart
  ╰─ ╰─ text "\n    "
 3╭─         ${title}
  │  │       │ ╰─ placeholder:escape.value "title"
  │  │       ╰─ placeholder:escape "${title}"
  ╰─ ╰─ text "\n        "
 4╭─     </a>
- │  │   │ ╰─ closeTag(a).value
- │  │   ╰─ closeTag(a) "</a>"
+ │  │   │ │╰─ closeTagEnd(a)
+ │  │   │ ╰─ closeTagName
+ │  │   ╰─ closeTagStart "</"
  ╰─ ╰─ text "\n    "
 5╭─ </li>
- │  │ ╰─ closeTag(li).value "li"
+ │  │ │ ╰─ closeTagEnd(li)
+ │  │ ╰─ closeTagName "li"
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(li) "</li>"
+ ╰─ ╰─ closeTagStart "</"

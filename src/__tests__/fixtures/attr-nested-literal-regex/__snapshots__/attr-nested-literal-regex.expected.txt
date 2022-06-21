@@ -1,6 +1,7 @@
 1╭─ <div hello=({ a: /[}]/ })/>
- │   │   │    ││             ╰─ openTagEnd:selfClosed "/>"
- │   │   │    │╰─ attrValue.value "({ a: /[}]/ })"
- │   │   │    ╰─ attrValue "=({ a: /[}]/ })"
- │   │   ╰─ attrName "hello"
- ╰─  ╰─ tagName "div"
+ │  ││   │    ││             ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "({ a: /[}]/ })"
+ │  ││   │    ╰─ attrValue "=({ a: /[}]/ })"
+ │  ││   ╰─ attrName "hello"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

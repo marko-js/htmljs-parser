@@ -1,10 +1,12 @@
 1╭─ <${foo}>
- │   │     ├─ openTagEnd
- │   │     ╰─ tagName.quasis[1]
- │   ├─ tagName.expressions[0] "${foo}"
- │   ├─ tagName.quasis[0]
- ╰─  ╰─ tagName "${foo}"
+ │  ││     ├─ openTagEnd
+ │  ││     ╰─ tagName.quasis[1]
+ │  │├─ tagName.expressions[0] "${foo}"
+ │  │├─ tagName.quasis[0]
+ │  │╰─ tagName "${foo}"
+ ╰─ ╰─ openTagStart
 2╭─ </${foo}>
- │  │ ╰─ closeTag(${foo}).value "${foo}"
+ │  │ │     ╰─ closeTagEnd(${foo})
+ │  │ ╰─ closeTagName "${foo}"
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(${foo}) "</${foo}>"
+ ╰─ ╰─ closeTagStart "</"

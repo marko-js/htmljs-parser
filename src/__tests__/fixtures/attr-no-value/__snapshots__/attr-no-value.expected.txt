@@ -1,7 +1,9 @@
 1╭─ <a b>test</a>
- │   │ │││   │ ╰─ closeTag(a).value
- │   │ │││   ╰─ closeTag(a) "</a>"
- │   │ ││╰─ text "test"
- │   │ │╰─ openTagEnd
- │   │ ╰─ attrName
- ╰─  ╰─ tagName
+ │  ││ │││   │ │╰─ closeTagEnd(a)
+ │  ││ │││   │ ╰─ closeTagName
+ │  ││ │││   ╰─ closeTagStart "</"
+ │  ││ ││╰─ text "test"
+ │  ││ │╰─ openTagEnd
+ │  ││ ╰─ attrName
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

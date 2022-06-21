@@ -4,5 +4,5 @@
  │  │      ╰─ text "Line 1"
  ╰─ ╰─ openTagEnd
 3╭─     -- Line 2
- │         │     ╰─ closeTag(p)
+ │         │     ╰─ closeTagEnd(p)
  ╰─        ╰─ text "Line 2"

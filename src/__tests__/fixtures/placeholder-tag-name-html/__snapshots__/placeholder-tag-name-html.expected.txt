@@ -1,9 +1,10 @@
 1╭─ <${test} foo=123/>
- │   │      ││  ││  ╰─ openTagEnd:selfClosed "/>"
- │   │      ││  │╰─ attrValue.value "123"
- │   │      ││  ╰─ attrValue "=123"
- │   │      │╰─ attrName "foo"
- │   │      ╰─ tagName.quasis[1]
- │   ├─ tagName.expressions[0] "${test}"
- │   ├─ tagName.quasis[0]
- ╰─  ╰─ tagName "${test}"
+ │  ││      ││  ││  ╰─ openTagEnd:selfClosed "/>"
+ │  ││      ││  │╰─ attrValue.value "123"
+ │  ││      ││  ╰─ attrValue "=123"
+ │  ││      │╰─ attrName "foo"
+ │  ││      ╰─ tagName.quasis[1]
+ │  │├─ tagName.expressions[0] "${test}"
+ │  │├─ tagName.quasis[0]
+ │  │╰─ tagName "${test}"
+ ╰─ ╰─ openTagStart

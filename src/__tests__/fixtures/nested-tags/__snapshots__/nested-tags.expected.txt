@@ -4,8 +4,8 @@
  │  │   ╰─ attrName "class"
  ╰─ ╰─ tagName "div"
 2╭─     span class="bar"
- │  │   │    │    ││    ├─ closeTag(div)
- │  │   │    │    ││    ├─ closeTag(span)
+ │  │   │    │    ││    ├─ closeTagEnd(div)
+ │  │   │    │    ││    ├─ closeTagEnd(span)
  │  │   │    │    ││    ╰─ openTagEnd
  │  │   │    │    │╰─ attrValue.value "\"bar\""
  │  │   │    │    ╰─ attrValue "=\"bar\""

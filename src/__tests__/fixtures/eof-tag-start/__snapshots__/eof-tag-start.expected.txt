@@ -1,5 +1,7 @@
 1╭─ <a><b
- │   │││╰─ tagName
- │   ││╰─ error(MALFORMED_OPEN_TAG:EOF reached while parsing open tag)
- │   │╰─ openTagEnd
- ╰─  ╰─ tagName
+ │  ││││╰─ tagName
+ │  │││├─ error(MALFORMED_OPEN_TAG:EOF reached while parsing open tag)
+ │  │││╰─ openTagStart
+ │  ││╰─ openTagEnd
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

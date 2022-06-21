@@ -7,6 +7,6 @@
  ╰─        ╰─ text "Paragraph: Line 2"
 4╭─ -- Root: Line 1
  │  │  ╰─ text "Root: Line 1"
- ╰─ ╰─ closeTag(p)
+ ╰─ ╰─ closeTagEnd(p)
 5╭─ -- Root: Line 2
  ╰─    ╰─ text "Root: Line 2"

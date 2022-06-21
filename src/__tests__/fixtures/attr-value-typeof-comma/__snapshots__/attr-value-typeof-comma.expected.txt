@@ -8,4 +8,4 @@
  ╰─ ╰─ tagName "var"
 2╭─ 
  │  ├─ openTagEnd
- ╰─ ╰─ closeTag(var)
+ ╰─ ╰─ closeTagEnd(var)

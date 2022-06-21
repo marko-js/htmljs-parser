@@ -62,12 +62,11 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
         break;
       default: {
         const tag = this.activeTag!;
-        const tagType = this.options.onTagName?.({
+        const tagType = this.options.onOpenTagName?.({
           start,
           end,
           quasis,
           expressions,
-          concise: this.isConcise,
         });
         tag.tagName = tagName;
 

@@ -1,58 +1,70 @@
 1╭─ <a x:=foo>test</a>
- │   │ ││ │  ││   │ ╰─ closeTag(a).value
- │   │ ││ │  ││   ╰─ closeTag(a) "</a>"
- │   │ ││ │  │╰─ text "test"
- │   │ ││ │  ╰─ openTagEnd
- │   │ ││ ╰─ attrValue:bound.value "foo"
- │   │ │╰─ attrValue:bound ":=foo"
- │   │ ╰─ attrName
- ╰─  ╰─ tagName
+ │  ││ ││ │  ││   │ │╰─ closeTagEnd(a)
+ │  ││ ││ │  ││   │ ╰─ closeTagName
+ │  ││ ││ │  ││   ╰─ closeTagStart "</"
+ │  ││ ││ │  │╰─ text "test"
+ │  ││ ││ │  ╰─ openTagEnd
+ │  ││ ││ ╰─ attrValue:bound.value "foo"
+ │  ││ │╰─ attrValue:bound ":=foo"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
 2╭─ <a x := foo>test</a>
- │   │ │ │  │  ││   │ ╰─ closeTag(a).value
- │   │ │ │  │  ││   ╰─ closeTag(a) "</a>"
- │   │ │ │  │  │╰─ text "test"
- │   │ │ │  │  ╰─ openTagEnd
- │   │ │ │  ╰─ attrValue:bound.value "foo"
- │   │ │ ╰─ attrValue:bound ":= foo"
- │   │ ╰─ attrName
- ╰─  ╰─ tagName
+ │  ││ │ │  │  ││   │ │╰─ closeTagEnd(a)
+ │  ││ │ │  │  ││   │ ╰─ closeTagName
+ │  ││ │ │  │  ││   ╰─ closeTagStart "</"
+ │  ││ │ │  │  │╰─ text "test"
+ │  ││ │ │  │  ╰─ openTagEnd
+ │  ││ │ │  ╰─ attrValue:bound.value "foo"
+ │  ││ │ ╰─ attrValue:bound ":= foo"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
 3╭─ <a:=foo>test</a>
- │   ││ │  ││   │ ╰─ closeTag(a).value
- │   ││ │  ││   ╰─ closeTag(a) "</a>"
- │   ││ │  │╰─ text "test"
- │   ││ │  ╰─ openTagEnd
- │   ││ ╰─ attrValue:bound.value "foo"
- │   │├─ attrValue:bound ":=foo"
- │   │╰─ attrName
- ╰─  ╰─ tagName
+ │  │││ │  ││   │ │╰─ closeTagEnd(a)
+ │  │││ │  ││   │ ╰─ closeTagName
+ │  │││ │  ││   ╰─ closeTagStart "</"
+ │  │││ │  │╰─ text "test"
+ │  │││ │  ╰─ openTagEnd
+ │  │││ ╰─ attrValue:bound.value "foo"
+ │  ││├─ attrValue:bound ":=foo"
+ │  ││╰─ attrName
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
 4╭─ <a := foo>test</a>
- │   │ │  │  ││   │ ╰─ closeTag(a).value
- │   │ │  │  ││   ╰─ closeTag(a) "</a>"
- │   │ │  │  │╰─ text "test"
- │   │ │  │  ╰─ openTagEnd
- │   │ │  ╰─ attrValue:bound.value "foo"
- │   │ ├─ attrValue:bound ":= foo"
- │   │ ╰─ attrName
- ╰─  ╰─ tagName
+ │  ││ │  │  ││   │ │╰─ closeTagEnd(a)
+ │  ││ │  │  ││   │ ╰─ closeTagName
+ │  ││ │  │  ││   ╰─ closeTagStart "</"
+ │  ││ │  │  │╰─ text "test"
+ │  ││ │  │  ╰─ openTagEnd
+ │  ││ │  ╰─ attrValue:bound.value "foo"
+ │  ││ ├─ attrValue:bound ":= foo"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
 5╭─ <a/bar:=foo>test</a>
- │   │││  │ │  ││   │ ╰─ closeTag(a).value
- │   │││  │ │  ││   ╰─ closeTag(a) "</a>"
- │   │││  │ │  │╰─ text "test"
- │   │││  │ │  ╰─ openTagEnd
- │   │││  │ ╰─ attrValue:bound.value "foo"
- │   │││  ├─ attrValue:bound ":=foo"
- │   │││  ╰─ attrName
- │   ││╰─ tagVar.value "bar"
- │   │╰─ tagVar "/bar"
- ╰─  ╰─ tagName
+ │  ││││  │ │  ││   │ │╰─ closeTagEnd(a)
+ │  ││││  │ │  ││   │ ╰─ closeTagName
+ │  ││││  │ │  ││   ╰─ closeTagStart "</"
+ │  ││││  │ │  │╰─ text "test"
+ │  ││││  │ │  ╰─ openTagEnd
+ │  ││││  │ ╰─ attrValue:bound.value "foo"
+ │  ││││  ├─ attrValue:bound ":=foo"
+ │  ││││  ╰─ attrName
+ │  │││╰─ tagVar.value "bar"
+ │  ││╰─ tagVar "/bar"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
 6╭─ <a/bar := foo>test</a>
- │   │││   │  │  ││   │ ╰─ closeTag(a).value
- │   │││   │  │  ││   ╰─ closeTag(a) "</a>"
- │   │││   │  │  │╰─ text "test"
- │   │││   │  │  ╰─ openTagEnd
- │   │││   │  ╰─ attrValue:bound.value "foo"
- │   │││   ├─ attrValue:bound ":= foo"
- │   │││   ╰─ attrName
- │   ││╰─ tagVar.value "bar"
- │   │╰─ tagVar "/bar"
- ╰─  ╰─ tagName
+ │  ││││   │  │  ││   │ │╰─ closeTagEnd(a)
+ │  ││││   │  │  ││   │ ╰─ closeTagName
+ │  ││││   │  │  ││   ╰─ closeTagStart "</"
+ │  ││││   │  │  │╰─ text "test"
+ │  ││││   │  │  ╰─ openTagEnd
+ │  ││││   │  ╰─ attrValue:bound.value "foo"
+ │  ││││   ├─ attrValue:bound ":= foo"
+ │  ││││   ╰─ attrName
+ │  │││╰─ tagVar.value "bar"
+ │  ││╰─ tagVar "/bar"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

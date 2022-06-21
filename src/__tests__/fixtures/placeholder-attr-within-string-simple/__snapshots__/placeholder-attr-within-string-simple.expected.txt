@@ -1,8 +1,10 @@
 1╭─ <custom data="${abc}"></custom>
- │   │      │   ││       ││ ╰─ closeTag(custom).value "custom"
- │   │      │   ││       │╰─ closeTag(custom) "</custom>"
- │   │      │   ││       ╰─ openTagEnd
- │   │      │   │╰─ attrValue.value "\"${abc}\""
- │   │      │   ╰─ attrValue "=\"${abc}\""
- │   │      ╰─ attrName "data"
- ╰─  ╰─ tagName "custom"
+ │  ││      │   ││       ││ │     ╰─ closeTagEnd(custom)
+ │  ││      │   ││       ││ ╰─ closeTagName "custom"
+ │  ││      │   ││       │╰─ closeTagStart "</"
+ │  ││      │   ││       ╰─ openTagEnd
+ │  ││      │   │╰─ attrValue.value "\"${abc}\""
+ │  ││      │   ╰─ attrValue "=\"${abc}\""
+ │  ││      ╰─ attrName "data"
+ │  │╰─ tagName "custom"
+ ╰─ ╰─ openTagStart

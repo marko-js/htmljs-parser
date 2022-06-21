@@ -1,5 +1,5 @@
 1╭─ div#foo.bar
- │  │  ││  ││  ├─ closeTag(div)
+ │  │  ││  ││  ├─ closeTagEnd(div)
  │  │  ││  ││  ╰─ openTagEnd
  │  │  ││  │╰─ tagShorthandClass.quasis[0] "bar"
  │  │  ││  ╰─ tagShorthandClass ".bar"

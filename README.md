@@ -156,19 +156,28 @@ const parser = createParser({
   },
 
   /**
+   * Called when we're about to begin an HTML open tag (before the tag name).
+   * Note: This is only called for HTML mode tags and can be used to track if you are in concise mode.
+   *
+   * @example
+   * 1╭─ <div>Hi</div>
+   *  ╰─ ╰─ openTagStart
+   */
+  onOpenTagStart(range) {}
+
+  /**
    * Called when a tag name, which can include placeholders, has been parsed.
    *
    * @example
    * 1╭─ <div/>
-   *  ╰─  ╰─ tagName "div"
+   *  ╰─  ╰─ openTagName "div"
    * 2╭─ <hello-${test}-again/>
-   *  │   │     │      ╰─ tagName.quasis[1] "-again"
-   *  │   │     ╰─ tagName.expressions[0] "${test}"
-   *  │   ├─ tagName.quasis[0] "hello-"
-   *  ╰─  ╰─ tagName "hello-${test}-again"
+   *  │   │     │      ╰─ openTagName.quasis[1] "-again"
+   *  │   │     ╰─ openTagName.expressions[0] "${test}"
+   *  │   ├─ openTagName.quasis[0] "hello-"
+   *  ╰─  ╰─ openTagName "hello-${test}-again"
    */
-  onTagName(range) {
-    range.concise; // true if this tag is a concise mode tag.
+  onOpenTagName(range) {
     range.quasis; // An array of ranges that indicate the string literal parts of the tag name.
     range.expressions; // A list of placeholder ranges (similar to whats emitted via onPlaceholder).
 
@@ -353,21 +362,38 @@ const parser = createParser({
    *  ╰─     ╰─ openTagEnd ">"
    */
   onOpenTagEnd(range) {
-    range.selfClosed; // true if this tag was self closed (onCloseTag would not be called if so).
+    range.selfClosed; // true if this tag was self closed (the onCloseTag* handlers will not be called if so).
   },
 
   /**
-   * Called once the closing tag (or in concise mode an outdent or eof) is parsed.
+   * Called when we start parsing and html closing tag.
+   * Note this is not emitted for concise, selfClosed, void or statement tags.
+   *
+   * @example
+   * 1╭─ <div><span/></div>
+   *  ╰─             ╰─ closeTagStart "</"
+   */
+  onCloseTagStart(range) {},
+
+  /**
+   * Called after the content within the brackets of an html closing tag has been parsed.
+   * Note this is not emitted for concise, selfClosed, void or statement tags.
+   *
+   * @example
+   * 1╭─ <div><span/></div>
+   *  ╰─               ╰─ closeTagName "div"
+   */
+  onCloseTagName(range) {},
+
+  /**
+   * Called once the closing tag has finished parsing, or in concise mode we hit an outdent or eof.
    * Note this is not called for selfClosed, void or statement tags.
    *
    * @example
    * 1╭─ <div><span/></div>
-   *  │              │ ╰─ closeTag(div).value "div"
-   *  ╰─             ╰─ closeTag(div) "</div>"
+   *  ╰─                  ╰─ closeTagEnd ">"
    */
-  onCloseTag(range) {
-    range.value; // The raw content of the closing tag (undefined in concise mode).
-  },
+  onCloseTagEnd(range) {},
 });
 ```
 

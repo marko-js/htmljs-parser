@@ -3,10 +3,12 @@
  ╰─  ╰─ scriptlet " var str = '' // a string"
 2├─ 
 3╭─ <div>
- │   │  ╰─ openTagEnd
- ╰─  ╰─ tagName "div"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
 4╭─   Hello
  ╰─ ╰─ text "\n  Hello\n"
 5╭─ </div>
- │  │ ╰─ closeTag(div).value "div"
- ╰─ ╰─ closeTag(div) "</div>"
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
+ ╰─ ╰─ closeTagStart "</"

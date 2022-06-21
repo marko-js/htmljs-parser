@@ -1,5 +1,6 @@
 1╭─ <custom-tag
- ╰─  ╰─ tagName "custom-tag"
+ │  │╰─ tagName "custom-tag"
+ ╰─ ╰─ openTagStart
 2╭─   data-attr-a
  ╰─   ╰─ attrName "data-attr-a"
 3╭─   data-attr-b

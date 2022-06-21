@@ -90,10 +90,6 @@ export namespace Ranges {
     escape: boolean;
   }
 
-  export interface TagName extends Template {
-    concise: boolean;
-  }
-
   export interface AttrValue extends Value {
     bound: boolean;
   }
@@ -105,10 +101,6 @@ export namespace Ranges {
 
   export interface OpenTagEnd extends Range {
     selfClosed: boolean;
-  }
-
-  export interface CloseTag extends Range {
-    value: Range | undefined;
   }
 }
 
@@ -157,7 +149,8 @@ export interface ParserOptions {
   onDeclaration?(data: Ranges.Value): void;
   onDoctype?(data: Ranges.Value): void;
   onScriptlet?(data: Ranges.Scriptlet): void;
-  onTagName?(data: Ranges.TagName): TagType | void;
+  onOpenTagStart?(data: Range): void;
+  onOpenTagName?(data: Ranges.Template): TagType | void;
   onTagShorthandId?(data: Ranges.Template): void;
   onTagShorthandClass?(data: Ranges.Template): void;
   onTagVar?(data: Ranges.Value): void;
@@ -169,5 +162,7 @@ export interface ParserOptions {
   onAttrMethod?(data: Ranges.AttrMethod): void;
   onAttrSpread?(data: Ranges.Value): void;
   onOpenTagEnd?(data: Ranges.OpenTagEnd): void;
-  onCloseTag?(data: Ranges.CloseTag): void;
+  onCloseTagStart?(data: Range): void;
+  onCloseTagName?(data: Range): void;
+  onCloseTagEnd?(data: Range): void;
 }

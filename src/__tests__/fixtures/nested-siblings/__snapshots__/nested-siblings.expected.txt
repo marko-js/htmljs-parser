@@ -10,12 +10,12 @@
  │  │   ╰─ tagName "span"
  ╰─ ╰─ openTagEnd
 3╭─     span class="baz"
- │  │   │    │    ││    ├─ closeTag(div)
- │  │   │    │    ││    ├─ closeTag(span)
+ │  │   │    │    ││    ├─ closeTagEnd(div)
+ │  │   │    │    ││    ├─ closeTagEnd(span)
  │  │   │    │    ││    ╰─ openTagEnd
  │  │   │    │    │╰─ attrValue.value "\"baz\""
  │  │   │    │    ╰─ attrValue "=\"baz\""
  │  │   │    ╰─ attrName "class"
  │  │   ╰─ tagName "span"
- │  ├─ closeTag(span)
+ │  ├─ closeTagEnd(span)
  ╰─ ╰─ openTagEnd

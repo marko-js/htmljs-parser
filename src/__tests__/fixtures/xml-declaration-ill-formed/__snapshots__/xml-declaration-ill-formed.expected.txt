@@ -2,8 +2,10 @@
  │  │ ╰─ declaration.value "xml version=\"1.0\" encoding=\"UTF-8\""
  ╰─ ╰─ declaration "<?xml version=\"1.0\" encoding=\"UTF-8\">"
 2╭─ <div>Hello</div>
- │   │  ││    │ ╰─ closeTag(div).value "div"
- │   │  ││    ╰─ closeTag(div) "</div>"
- │   │  │╰─ text "Hello"
- │   │  ╰─ openTagEnd
- ╰─  ╰─ tagName "div"
+ │  ││  ││    │ │  ╰─ closeTagEnd(div)
+ │  ││  ││    │ ╰─ closeTagName "div"
+ │  ││  ││    ╰─ closeTagStart "</"
+ │  ││  │╰─ text "Hello"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

@@ -4,11 +4,11 @@
  │  │   ╰─ attrName "class"
  ╰─ ╰─ tagName "div"
 2╭─ span class="bar"
- │  │    │    ││    ├─ closeTag(span)
+ │  │    │    ││    ├─ closeTagEnd(span)
  │  │    │    ││    ╰─ openTagEnd
  │  │    │    │╰─ attrValue.value "\"bar\""
  │  │    │    ╰─ attrValue "=\"bar\""
  │  │    ╰─ attrName "class"
- │  ├─ closeTag(div)
+ │  ├─ closeTagEnd(div)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "span"

@@ -1,6 +1,7 @@
 1╭─ <script>
- │   │     ╰─ openTagEnd
- ╰─  ╰─ tagName "script"
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
 2╭─ \${test}
  │  │╰─ text "${test}\n\\"
  ╰─ ╰─ text "\n"
@@ -8,6 +9,6 @@
  │    │ ╰─ placeholder:escape.value "test"
  ╰─   ╰─ placeholder:escape "${test}"
 4╭─ </script>
- │  │ ╰─ closeTag(script).value "script"
- │  ├─ text "\n"
- ╰─ ╰─ closeTag(script) "</script>"
+ │  │ │     ╰─ closeTagEnd(script)
+ │  │ ╰─ closeTagName "script"
+ ╰─ ╰─ text "\n"

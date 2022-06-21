@@ -1,9 +1,11 @@
 1╭─ <div>Hello ${xyz}!</div>
- │   │  ││     │ │   ││ ╰─ closeTag(div).value "div"
- │   │  ││     │ │   │╰─ closeTag(div) "</div>"
- │   │  ││     │ │   ╰─ text
- │   │  ││     │ ╰─ placeholder:escape.value "xyz"
- │   │  ││     ╰─ placeholder:escape "${xyz}"
- │   │  │╰─ text "Hello "
- │   │  ╰─ openTagEnd
- ╰─  ╰─ tagName "div"
+ │  ││  ││     │ │   ││ │  ╰─ closeTagEnd(div)
+ │  ││  ││     │ │   ││ ╰─ closeTagName "div"
+ │  ││  ││     │ │   │╰─ closeTagStart "</"
+ │  ││  ││     │ │   ╰─ text
+ │  ││  ││     │ ╰─ placeholder:escape.value "xyz"
+ │  ││  ││     ╰─ placeholder:escape "${xyz}"
+ │  ││  │╰─ text "Hello "
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

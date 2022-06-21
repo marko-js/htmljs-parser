@@ -1,10 +1,12 @@
 1╭─ <custom data="${
- │   │      │   │╰─ attrValue.value "\"${\nabc\n}\""
- │   │      │   ╰─ attrValue "=\"${\nabc\n}\""
- │   │      ╰─ attrName "data"
- ╰─  ╰─ tagName "custom"
+ │  ││      │   │╰─ attrValue.value "\"${\nabc\n}\""
+ │  ││      │   ╰─ attrValue "=\"${\nabc\n}\""
+ │  ││      ╰─ attrName "data"
+ │  │╰─ tagName "custom"
+ ╰─ ╰─ openTagStart
 2├─ abc
 3╭─ }"></custom>
- │    ││ ╰─ closeTag(custom).value "custom"
- │    │╰─ closeTag(custom) "</custom>"
+ │    ││ │     ╰─ closeTagEnd(custom)
+ │    ││ ╰─ closeTagName "custom"
+ │    │╰─ closeTagStart "</"
  ╰─   ╰─ openTagEnd

@@ -1,4 +1,5 @@
 1╭─ <static const x = 1/>
- │   ├─ error(RESERVED_TAG_NAME:The "static" tag is reserved and cannot be used as an HTML tag.) "static"
- ╰─  ╰─ tagName "static"
+ │  │├─ error(RESERVED_TAG_NAME:The "static" tag is reserved and cannot be used as an HTML tag.) "static"
+ │  │╰─ tagName "static"
+ ╰─ ╰─ openTagStart
 2╰─ 

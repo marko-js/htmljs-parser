@@ -1,6 +1,7 @@
 1╭─ <div>
- │   │  ╰─ openTagEnd
- ╰─  ╰─ tagName "div"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
 2╭─     Hello
  ╰─ ╰─ text "\n    Hello\n    "
 3╭─     $!{abc

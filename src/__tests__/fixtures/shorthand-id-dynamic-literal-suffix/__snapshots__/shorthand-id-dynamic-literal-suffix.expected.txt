@@ -1,5 +1,5 @@
 1╭─ #${data.foo}-bar
- │  ││          │   ├─ closeTag()
+ │  ││          │   ├─ closeTagEnd()
  │  ││          │   ╰─ openTagEnd
  │  ││          ╰─ tagShorthandId.quasis[1] "-bar"
  │  │├─ tagShorthandId.expressions[0] "${data.foo}"

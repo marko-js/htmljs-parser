@@ -16,10 +16,10 @@
  ╰─ ╰─ openTagEnd
 5╭─     script
  │  │   ╰─ tagName "script"
- ╰─ ╰─ closeTag(h1)
+ ╰─ ╰─ closeTagEnd(h1)
 6╭─       -- var a = 'marko';
- │  │        │               ├─ closeTag(html)
- │  │        │               ├─ closeTag(body)
- │  │        │               ╰─ closeTag(script)
+ │  │        │               ├─ closeTagEnd(html)
+ │  │        │               ├─ closeTagEnd(body)
+ │  │        │               ╰─ closeTagEnd(script)
  │  │        ╰─ text "var a = 'marko';"
  ╰─ ╰─ openTagEnd

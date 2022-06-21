@@ -1,10 +1,12 @@
 1╭─ <${foo}-bar>
- │   │     │   ╰─ openTagEnd
- │   │     ╰─ tagName.quasis[1] "-bar"
- │   ├─ tagName.expressions[0] "${foo}"
- │   ├─ tagName.quasis[0]
- ╰─  ╰─ tagName "${foo}-bar"
+ │  ││     │   ╰─ openTagEnd
+ │  ││     ╰─ tagName.quasis[1] "-bar"
+ │  │├─ tagName.expressions[0] "${foo}"
+ │  │├─ tagName.quasis[0]
+ │  │╰─ tagName "${foo}-bar"
+ ╰─ ╰─ openTagStart
 2╭─ </>
- │  │ ╰─ closeTag(${foo}-bar).value
+ │  │ ├─ closeTagEnd(${foo}-bar)
+ │  │ ╰─ closeTagName
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(${foo}-bar) "</>"
+ ╰─ ╰─ closeTagStart "</"

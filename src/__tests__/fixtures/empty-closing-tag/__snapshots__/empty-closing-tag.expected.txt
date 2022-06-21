@@ -1,18 +1,22 @@
 1╭─ <div>
- │   │  ╰─ openTagEnd
- ╰─  ╰─ tagName "div"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
 2╭─     Hello World
  ╰─ ╰─ text "\n    Hello World\n    "
 3╭─     <span>
- │       │   ╰─ openTagEnd
- ╰─      ╰─ tagName "span"
+ │      ││   ╰─ openTagEnd
+ │      │╰─ tagName "span"
+ ╰─     ╰─ openTagStart
 4╭─         Hello Universe
  ╰─ ╰─ text "\n        Hello Universe\n    "
 5╭─     </>
- │      │ ╰─ closeTag(span).value
- ╰─     ╰─ closeTag(span) "</>"
+ │      │ ├─ closeTagEnd(span)
+ │      │ ╰─ closeTagName
+ ╰─     ╰─ closeTagStart "</"
 6╭─ </>
- │  │ ╰─ closeTag(div).value
+ │  │ ├─ closeTagEnd(div)
+ │  │ ╰─ closeTagName
  │  ├─ text "\n"
- ╰─ ╰─ closeTag(div) "</>"
+ ╰─ ╰─ closeTagStart "</"
 7╰─ 

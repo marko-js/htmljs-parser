@@ -1,11 +1,13 @@
 1╭─ <div foo="bar" /*this is a comment*/ hello="world" /* this is another comment */ ></div>
- │   │   │  ││                           │    ││                                     ││ ╰─ closeTag(div).value "div"
- │   │   │  ││                           │    ││                                     │╰─ closeTag(div) "</div>"
- │   │   │  ││                           │    ││                                     ╰─ openTagEnd
- │   │   │  ││                           │    │╰─ attrValue.value "\"world\""
- │   │   │  ││                           │    ╰─ attrValue "=\"world\""
- │   │   │  ││                           ╰─ attrName "hello"
- │   │   │  │╰─ attrValue.value "\"bar\""
- │   │   │  ╰─ attrValue "=\"bar\""
- │   │   ╰─ attrName "foo"
- ╰─  ╰─ tagName "div"
+ │  ││   │  ││                           │    ││                                     ││ │  ╰─ closeTagEnd(div)
+ │  ││   │  ││                           │    ││                                     ││ ╰─ closeTagName "div"
+ │  ││   │  ││                           │    ││                                     │╰─ closeTagStart "</"
+ │  ││   │  ││                           │    ││                                     ╰─ openTagEnd
+ │  ││   │  ││                           │    │╰─ attrValue.value "\"world\""
+ │  ││   │  ││                           │    ╰─ attrValue "=\"world\""
+ │  ││   │  ││                           ╰─ attrName "hello"
+ │  ││   │  │╰─ attrValue.value "\"bar\""
+ │  ││   │  ╰─ attrValue "=\"bar\""
+ │  ││   ╰─ attrName "foo"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

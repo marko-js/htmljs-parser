@@ -7,9 +7,9 @@
  │  │   ╰─ tagName "script"
  ╰─ ╰─ openTagEnd
 3╭─     lasso-head
- │  │   │         ├─ closeTag(head)
- │  │   │         ├─ closeTag(lasso-head)
+ │  │   │         ├─ closeTagEnd(head)
+ │  │   │         ├─ closeTagEnd(lasso-head)
  │  │   │         ╰─ openTagEnd
  │  │   ╰─ tagName "lasso-head"
- │  ├─ closeTag(script)
+ │  ├─ closeTagEnd(script)
  ╰─ ╰─ openTagEnd

@@ -3,13 +3,15 @@
 2╭─     ---
  ╰─ ╰─ openTagEnd
 3╭─     Hello <strong>Frank</strong>
- │  │          │     ││    │ ╰─ closeTag(strong).value "strong"
- │  │          │     ││    ╰─ closeTag(strong) "</strong>"
- │  │          │     │╰─ text "Frank"
- │  │          │     ╰─ openTagEnd
- │  │          ╰─ tagName "strong"
+ │  │         ││     ││    │ │     ╰─ closeTagEnd(strong)
+ │  │         ││     ││    │ ╰─ closeTagName "strong"
+ │  │         ││     ││    ╰─ closeTagStart "</"
+ │  │         ││     │╰─ text "Frank"
+ │  │         ││     ╰─ openTagEnd
+ │  │         │╰─ tagName "strong"
+ │  │         ╰─ openTagStart
  ╰─ ╰─ text "\n    Hello "
 4╭─     Line 2
  ╰─ ╰─ text "\n    Line 2\n"
 5╭─     ---
- ╰─        ╰─ closeTag(p)
+ ╰─        ╰─ closeTagEnd(p)

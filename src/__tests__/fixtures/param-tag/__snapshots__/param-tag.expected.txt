@@ -1,10 +1,12 @@
 1╭─ <for|x, y, { destrucure=default }| of=array></for>
- │   │  ││                             │ ││    ││ ╰─ closeTag(for).value "for"
- │   │  ││                             │ ││    │╰─ closeTag(for) "</for>"
- │   │  ││                             │ ││    ╰─ openTagEnd
- │   │  ││                             │ │╰─ attrValue.value "array"
- │   │  ││                             │ ╰─ attrValue "=array"
- │   │  ││                             ╰─ attrName "of"
- │   │  │╰─ tagParams.value "x, y, { destrucure=default }"
- │   │  ╰─ tagParams "|x, y, { destrucure=default }|"
- ╰─  ╰─ tagName "for"
+ │  ││  ││                             │ ││    ││ │  ╰─ closeTagEnd(for)
+ │  ││  ││                             │ ││    ││ ╰─ closeTagName "for"
+ │  ││  ││                             │ ││    │╰─ closeTagStart "</"
+ │  ││  ││                             │ ││    ╰─ openTagEnd
+ │  ││  ││                             │ │╰─ attrValue.value "array"
+ │  ││  ││                             │ ╰─ attrValue "=array"
+ │  ││  ││                             ╰─ attrName "of"
+ │  ││  │╰─ tagParams.value "x, y, { destrucure=default }"
+ │  ││  ╰─ tagParams "|x, y, { destrucure=default }|"
+ │  │╰─ tagName "for"
+ ╰─ ╰─ openTagStart
