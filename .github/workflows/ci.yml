@@ -27,6 +27,8 @@ jobs:
         run: npm ci
       - name: Format Code
         run: npm run format
+      - name: Build Code
+        run: npm run build
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:

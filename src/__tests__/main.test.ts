@@ -68,7 +68,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
 
       return parser.positionAt(offset);
     };
-    const tagStack: Ranges.OpenTagName[] = [];
+    const tagStack: Ranges.Template[] = [];
     const parser = createParser({
       onError(range) {
         addRange(`error(${ErrorCode[range.code]}:${range.message})`, range);
