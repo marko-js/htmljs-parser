@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.0.1
+
+### Patch Changes
+
+- [#117](https://github.com/marko-js/htmljs-parser/pull/117) [`8bd3c40`](https://github.com/marko-js/htmljs-parser/commit/8bd3c4057d485d6b1e47f15bd48e333e25b9951e) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix issue with onCloseTagStart not called for text mode tags (eg style, script, textarea & html-comment).
+
 ## 5.0.0
 
 ### Major Changes
