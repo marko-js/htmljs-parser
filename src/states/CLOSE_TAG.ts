@@ -63,6 +63,10 @@ export function checkForClosingTag(parser: Parser) {
 
   if (match) {
     parser.endText();
+    parser.options.onCloseTagStart?.({
+      start: curPos - 1,
+      end: curPos + 1,
+    });
 
     if (
       ensureExpectedCloseTag(parser, {

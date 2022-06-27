@@ -1,6 +1,7 @@
 1╭─ <script>// this is a comment</script>
- │  ││     ││                     │     ╰─ closeTagEnd(script)
- │  ││     ││                     ╰─ closeTagName "script"
+ │  ││     ││                   │ │     ╰─ closeTagEnd(script)
+ │  ││     ││                   │ ╰─ closeTagName "script"
+ │  ││     ││                   ╰─ closeTagStart "</"
  │  ││     │╰─ text "// this is a comment"
  │  ││     ╰─ openTagEnd
  │  │╰─ tagName "script"

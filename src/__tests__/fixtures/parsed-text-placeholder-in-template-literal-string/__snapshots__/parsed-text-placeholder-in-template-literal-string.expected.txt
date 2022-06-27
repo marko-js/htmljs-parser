@@ -9,6 +9,7 @@
 5├─         ${bar}
 6├─     */
 7╭─ </script>
- │    │     ╰─ closeTagEnd(script)
- ╰─   ╰─ closeTagName "script"
+ │  │ │     ╰─ closeTagEnd(script)
+ │  │ ╰─ closeTagName "script"
+ ╰─ ╰─ closeTagStart "</"
 8╰─ 

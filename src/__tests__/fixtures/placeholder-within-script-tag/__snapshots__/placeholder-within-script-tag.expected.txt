@@ -1,6 +1,7 @@
 1╭─ <script>Hello ${xyz}!</script>
- │  ││     ││     │ │   │  │     ╰─ closeTagEnd(script)
- │  ││     ││     │ │   │  ╰─ closeTagName "script"
+ │  ││     ││     │ │   ││ │     ╰─ closeTagEnd(script)
+ │  ││     ││     │ │   ││ ╰─ closeTagName "script"
+ │  ││     ││     │ │   │╰─ closeTagStart "</"
  │  ││     ││     │ │   ╰─ text
  │  ││     ││     │ ╰─ placeholder:escape.value "xyz"
  │  ││     ││     ╰─ placeholder:escape "${xyz}"

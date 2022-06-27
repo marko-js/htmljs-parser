@@ -1,6 +1,7 @@
 1╭─ <style>/* block comment within <style> */"string within \"<style>\""'string within \'<style>\''</style>
- │  ││    ││                                                                                         │    ╰─ closeTagEnd(style)
- │  ││    ││                                                                                         ╰─ closeTagName "style"
+ │  ││    ││                                                                                       │ │    ╰─ closeTagEnd(style)
+ │  ││    ││                                                                                       │ ╰─ closeTagName "style"
+ │  ││    ││                                                                                       ╰─ closeTagStart "</"
  │  ││    │╰─ text "/* block comment within <style> */\"string within \\\"<style>\\\"\"'string within \\'<style>\\''"
  │  ││    ╰─ openTagEnd
  │  │╰─ tagName "style"
