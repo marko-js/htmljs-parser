@@ -1,6 +1,7 @@
 1╭─ <script>console.log('<div>Hello ${input.name}</div>');</script>
- │  ││     ││                       │ │          │          │     ╰─ closeTagEnd(script)
- │  ││     ││                       │ │          │          ╰─ closeTagName "script"
+ │  ││     ││                       │ │          │        │ │     ╰─ closeTagEnd(script)
+ │  ││     ││                       │ │          │        │ ╰─ closeTagName "script"
+ │  ││     ││                       │ │          │        ╰─ closeTagStart "</"
  │  ││     ││                       │ │          ╰─ text "</div>');"
  │  ││     ││                       │ ╰─ placeholder:escape.value "input.name"
  │  ││     ││                       ╰─ placeholder:escape "${input.name}"

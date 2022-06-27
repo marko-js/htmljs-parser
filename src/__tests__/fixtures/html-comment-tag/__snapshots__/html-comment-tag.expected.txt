@@ -7,8 +7,9 @@
  │  │ ╰─ comment "<!--123-->"
  ╰─ ╰─ text "\n  "
 3╭─   <html-comment>abc</html-comment>
- │  │ ││           ││    │           ╰─ closeTagEnd(html-comment)
- │  │ ││           ││    ╰─ closeTagName "html-comment"
+ │  │ ││           ││  │ │           ╰─ closeTagEnd(html-comment)
+ │  │ ││           ││  │ ╰─ closeTagName "html-comment"
+ │  │ ││           ││  ╰─ closeTagStart "</"
  │  │ ││           │╰─ text "abc"
  │  │ ││           ╰─ openTagEnd
  │  │ │╰─ tagName "html-comment"
@@ -19,8 +20,9 @@
  │  │ ╰─ comment "<!--[if lt IE 9]><script src=\"...\"></script><![endif]-->"
  ╰─ ╰─ text "\n  "
 5╭─   <html-comment>[if lt IE 9]><script src="..."></script><![endif]</html-comment>
- │  │ ││           ││                                                  │           ╰─ closeTagEnd(html-comment)
- │  │ ││           ││                                                  ╰─ closeTagName "html-comment"
+ │  │ ││           ││                                                │ │           ╰─ closeTagEnd(html-comment)
+ │  │ ││           ││                                                │ ╰─ closeTagName "html-comment"
+ │  │ ││           ││                                                ╰─ closeTagStart "</"
  │  │ ││           │╰─ text "[if lt IE 9]><script src=\"...\"></script><![endif]"
  │  │ ││           ╰─ openTagEnd
  │  │ │╰─ tagName "html-comment"

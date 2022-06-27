@@ -11,4 +11,5 @@
 4╭─ </script>
  │  │ │     ╰─ closeTagEnd(script)
  │  │ ╰─ closeTagName "script"
- ╰─ ╰─ text "\n"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTagStart "</"

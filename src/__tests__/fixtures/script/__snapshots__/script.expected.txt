@@ -4,5 +4,6 @@
  │  │╰─ tagName "script"
  ╰─ ╰─ openTagStart
 2╭─ /* block comment within <script> */"string within \"<script>\""'string within \'<script>\''</script>
- │                                                                                               │     ╰─ closeTagEnd(script)
- ╰─                                                                                              ╰─ closeTagName "script"
+ │                                                                                             │ │     ╰─ closeTagEnd(script)
+ │                                                                                             │ ╰─ closeTagName "script"
+ ╰─                                                                                            ╰─ closeTagStart "</"
