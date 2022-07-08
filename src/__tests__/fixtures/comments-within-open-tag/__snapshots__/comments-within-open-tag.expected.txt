@@ -11,3 +11,18 @@
  │  ││   ╰─ attrName "foo"
  │  │╰─ tagName "div"
  ╰─ ╰─ openTagStart
+2╭─ <div foo="bar" // this is a test
+ │  ││   │  │╰─ attrValue.value "\"bar\""
+ │  ││   │  ╰─ attrValue "=\"bar\""
+ │  ││   ╰─ attrName "foo"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╭─      hello="world" // this is another test
+ │       │    │╰─ attrValue.value "\"world\""
+ │       │    ╰─ attrValue "=\"world\""
+ ╰─      ╰─ attrName "hello"
+4╭─ ></div>
+ │  ││ │  ╰─ closeTagEnd(div)
+ │  ││ ╰─ closeTagName "div"
+ │  │╰─ closeTagStart "</"
+ ╰─ ╰─ openTagEnd

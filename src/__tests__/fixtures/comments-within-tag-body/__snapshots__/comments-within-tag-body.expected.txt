@@ -1,0 +1,24 @@
+1╭─ <div>
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─      // This is a comment
+ │  │    │ ╰─ comment.value " This is a comment"
+ │  │    ╰─ comment "// This is a comment"
+ ╰─ ╰─ text "\n     "
+3╭─      This is some real text
+ ╰─ ╰─ text "\n     This is some real text\n     "
+4╭─      /* But this is a comment */
+ │       │ ╰─ comment.value " But this is a comment "
+ ╰─      ╰─ comment "/* But this is a comment */"
+5╭─      And this is more text
+ ╰─ ╰─ text "\n     And this is more text\n     "
+6╭─      <!-- and this is a comment -->
+ │       │   ╰─ comment.value " and this is a comment "
+ ╰─      ╰─ comment "<!-- and this is a comment -->"
+7╭─ </div>
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTagStart "</"
+8╰─ 

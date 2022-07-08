@@ -94,6 +94,23 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       this.endText();
       this.enterState(STATE.INLINE_SCRIPT);
       this.pos++; // skip space
+    } else if (code === CODE.FORWARD_SLASH) {
+      // Check next character to see if we are in a comment
+      switch (this.lookAtCharCodeAhead(1)) {
+        case CODE.FORWARD_SLASH:
+          this.endText();
+          this.enterState(STATE.JS_COMMENT_LINE);
+          this.pos++; // skip /
+          break;
+        case CODE.ASTERISK:
+          this.endText();
+          this.enterState(STATE.JS_COMMENT_BLOCK);
+          this.pos++; // skip *
+          break;
+        default:
+          this.startText();
+          break;
+      }
     } else if (!STATE.checkForPlaceholder(this, code)) {
       this.startText();
     }
@@ -115,7 +132,31 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
 
   eof: htmlEOF,
 
-  return() {},
+  return(child) {
+    switch (child.state) {
+      case STATE.JS_COMMENT_LINE:
+        this.options.onComment?.({
+          start: child.start,
+          end: child.end,
+          value: {
+            start: child.start + 2, // strip //
+            end: child.end,
+          },
+        });
+        break;
+      case STATE.JS_COMMENT_BLOCK: {
+        this.options.onComment?.({
+          start: child.start,
+          end: child.end,
+          value: {
+            start: child.start + 2, // strip /*
+            end: child.end - 2, // strip */,
+          },
+        });
+        break;
+      }
+    }
+  },
 };
 
 function isBeginningOfLine(parser: Parser) {
