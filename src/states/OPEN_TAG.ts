@@ -273,14 +273,18 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       );
     }
 
-    if (
-      code === CODE.FORWARD_SLASH &&
-      this.lookAtCharCodeAhead(1) === CODE.ASTERISK
-    ) {
-      // Skip over code inside a JavaScript block comment
-      this.enterState(STATE.JS_COMMENT_BLOCK);
-      this.pos++; // skip *
-      return;
+    if (code === CODE.FORWARD_SLASH) {
+      // Check next character to see if we are in a comment
+      switch (this.lookAtCharCodeAhead(1)) {
+        case CODE.FORWARD_SLASH:
+          this.enterState(STATE.JS_COMMENT_LINE);
+          this.pos++; // skip /
+          return;
+        case CODE.ASTERISK:
+          this.enterState(STATE.JS_COMMENT_BLOCK);
+          this.pos++; // skip *
+          return;
+      }
     }
 
     if (isWhitespaceCode(code)) {
