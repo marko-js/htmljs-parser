@@ -1,5 +1,13 @@
 # htmljs-parser
 
+## 5.0.2
+
+### Patch Changes
+
+- [#119](https://github.com/marko-js/htmljs-parser/pull/119) [`28fde07`](https://github.com/marko-js/htmljs-parser/commit/28fde072243fc80ddb9eb263c2ef061dbd785b94) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Support JS line comments inside the open tag (previously just block comments could be used).
+
+* [#119](https://github.com/marko-js/htmljs-parser/pull/119) [`28fde07`](https://github.com/marko-js/htmljs-parser/commit/28fde072243fc80ddb9eb263c2ef061dbd785b94) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Support JS style comments in HTML bodies (previously allowed in parsed text and concise mode).
+
 ## 5.0.1
 
 ### Patch Changes
