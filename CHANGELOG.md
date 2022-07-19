@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.0.3
+
+### Patch Changes
+
+- [#121](https://github.com/marko-js/htmljs-parser/pull/121) [`b1e68a3`](https://github.com/marko-js/htmljs-parser/commit/b1e68a300e75aeb538b1045dfd20b451abd74d09) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix regression that causes incorrect expression continuations after regexps.
+
 ## 5.0.2
 
 ### Patch Changes
