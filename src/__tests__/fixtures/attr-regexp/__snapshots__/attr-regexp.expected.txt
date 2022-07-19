@@ -1,0 +1,10 @@
+1╭─ <input pattern=/\s*?\S+\s*?/ name="test">
+ │  ││     │      ││             │   ││     ╰─ openTagEnd
+ │  ││     │      ││             │   │╰─ attrValue.value "\"test\""
+ │  ││     │      ││             │   ╰─ attrValue "=\"test\""
+ │  ││     │      ││             ╰─ attrName "name"
+ │  ││     │      │╰─ attrValue.value "/\\s*?\\S+\\s*?/"
+ │  ││     │      ╰─ attrValue "=/\\s*?\\S+\\s*?/"
+ │  ││     ╰─ attrName "pattern"
+ │  │╰─ tagName "input"
+ ╰─ ╰─ openTagStart

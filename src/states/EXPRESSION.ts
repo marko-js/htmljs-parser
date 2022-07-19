@@ -87,10 +87,13 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
             break;
           default: {
             if (
-              !canCharCodeBeFollowedByDivision(
+              canCharCodeBeFollowedByDivision(
                 this.getPreviousNonWhitespaceCharCode()
               )
             ) {
+              this.pos++;
+              this.consumeWhitespace();
+            } else {
               this.enterState(STATE.REGULAR_EXPRESSION);
             }
             break;
@@ -219,7 +222,6 @@ function buildPattern(type: PatternType) {
     `|(?<!-)-${
       type === PatternType.CONCISE_ATTRS ? "" : "(?:\\s*-\\s*-)*\\s*"
     }(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
-    `|(?<![/*])/(?![/*${type === PatternType.HTML_ATTRS ? ">" : ""}])` + // We only continue after a forward slash if it isn't //, /* (or /> in html mode)
     `|(?<!\\.)\\.(?!\\.)` + // We only continue after a dot if it isn't a ...
     `|>${type === PatternType.HTML_ATTRS ? "{2,}" : "+"}` + // in html mode only consume closing angle brackets if it is >>
     "|[ \\t]+(?:in(?:stanceof)?|as|extends)(?=[ \\t]+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
@@ -233,7 +235,7 @@ function buildPattern(type: PatternType) {
     "|typeof" +
     "|void" +
     ")\\b";
-  const lookAheadPattern = `${space}*(?:${binary})\\s*|${space}+(?=[{(])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
+  const lookAheadPattern = `${space}*(?:${binary})\\s*|${space}+(?=[{(]|/[^>])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
   const lookBehindPattern = `(?<=${unary}|${binary})`;
   return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "ym");
 }
