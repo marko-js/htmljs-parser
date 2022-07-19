@@ -3,23 +3,23 @@
  │  ││   │  ││                           │    ││                                     ││ ╰─ closeTagName "div"
  │  ││   │  ││                           │    ││                                     │╰─ closeTagStart "</"
  │  ││   │  ││                           │    ││                                     ╰─ openTagEnd
- │  ││   │  ││                           │    │╰─ attrValue.value "\"world\""
- │  ││   │  ││                           │    ╰─ attrValue "=\"world\""
+ │  ││   │  ││                           │    │╰─ attrValue.value "\"world\" /* this is another comment */"
+ │  ││   │  ││                           │    ╰─ attrValue "=\"world\" /* this is another comment */"
  │  ││   │  ││                           ╰─ attrName "hello"
- │  ││   │  │╰─ attrValue.value "\"bar\""
- │  ││   │  ╰─ attrValue "=\"bar\""
+ │  ││   │  │╰─ attrValue.value "\"bar\" /*this is a comment*/"
+ │  ││   │  ╰─ attrValue "=\"bar\" /*this is a comment*/"
  │  ││   ╰─ attrName "foo"
  │  │╰─ tagName "div"
  ╰─ ╰─ openTagStart
 2╭─ <div foo="bar" // this is a test
- │  ││   │  │╰─ attrValue.value "\"bar\""
- │  ││   │  ╰─ attrValue "=\"bar\""
+ │  ││   │  │╰─ attrValue.value "\"bar\" // this is a test"
+ │  ││   │  ╰─ attrValue "=\"bar\" // this is a test"
  │  ││   ╰─ attrName "foo"
  │  │╰─ tagName "div"
  ╰─ ╰─ openTagStart
 3╭─      hello="world" // this is another test
- │       │    │╰─ attrValue.value "\"world\""
- │       │    ╰─ attrValue "=\"world\""
+ │       │    │╰─ attrValue.value "\"world\" // this is another test"
+ │       │    ╰─ attrValue "=\"world\" // this is another test"
  ╰─      ╰─ attrName "hello"
 4╭─ ></div>
  │  ││ │  ╰─ closeTagEnd(div)
