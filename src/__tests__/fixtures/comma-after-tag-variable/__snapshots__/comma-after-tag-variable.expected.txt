@@ -1,0 +1,37 @@
+1╭─ <let/x,y=1/>
+ │  ││  ││ │││╰─ openTagEnd:selfClosed "/>"
+ │  ││  ││ ││╰─ attrValue.value
+ │  ││  ││ │╰─ attrValue "=1"
+ │  ││  ││ ╰─ attrName
+ │  ││  │╰─ tagVar.value
+ │  ││  ╰─ tagVar "/x"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
+2╭─ <let/x ,y=1/>
+ │  ││  ││  │││╰─ openTagEnd:selfClosed "/>"
+ │  ││  ││  ││╰─ attrValue.value
+ │  ││  ││  │╰─ attrValue "=1"
+ │  ││  ││  ╰─ attrName
+ │  ││  │╰─ tagVar.value
+ │  ││  ╰─ tagVar "/x"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
+3╭─ <let/x, y=1/>
+ │  ││  ││  │││╰─ openTagEnd:selfClosed "/>"
+ │  ││  ││  ││╰─ attrValue.value
+ │  ││  ││  │╰─ attrValue "=1"
+ │  ││  ││  ╰─ attrName
+ │  ││  │╰─ tagVar.value
+ │  ││  ╰─ tagVar "/x"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
+4╭─ <let/x , y=1/>
+ │  ││  ││   │││╰─ openTagEnd:selfClosed "/>"
+ │  ││  ││   ││╰─ attrValue.value
+ │  ││  ││   │╰─ attrValue "=1"
+ │  ││  ││   ╰─ attrName
+ │  ││  │╰─ tagVar.value
+ │  ││  ╰─ tagVar "/x"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
+5╰─ 
