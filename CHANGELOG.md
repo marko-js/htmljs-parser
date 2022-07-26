@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.0.4
+
+### Patch Changes
+
+- [#123](https://github.com/marko-js/htmljs-parser/pull/123) [`b8bfcd9`](https://github.com/marko-js/htmljs-parser/commit/b8bfcd95c900e9b013510499576c4f879e6365cb) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Comma will now always terminate a tag variable.
+
 ## 5.0.3
 
 ### Patch Changes
