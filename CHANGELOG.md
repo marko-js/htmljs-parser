@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.1.0
+
+### Minor Changes
+
+- [#125](https://github.com/marko-js/htmljs-parser/pull/125) [`725bcb3`](https://github.com/marko-js/htmljs-parser/commit/725bcb3b3efa400fb187f3eecbb7b98cdd0b19c8) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Expose some apis for generating position and location information.
+
 ## 5.0.4
 
 ### Patch Changes
