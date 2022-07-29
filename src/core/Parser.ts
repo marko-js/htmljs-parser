@@ -6,8 +6,8 @@ import {
   Range,
   ParserOptions as Options,
   getLines,
-  getLoc,
-  getPos,
+  getLocation,
+  getPosition,
   ErrorCode,
 } from "../internal";
 
@@ -53,12 +53,19 @@ export class Parser {
     return this.data.slice(range.start, range.end);
   }
 
-  positionAt(index: number) {
-    return getPos(this.lines || (this.lines = getLines(this.data)), 0, index);
+  positionAt(offset: number) {
+    return getPosition(
+      this.lines || (this.lines = getLines(this.data)),
+      offset
+    );
   }
 
   locationAt(range: Range) {
-    return getLoc(this.lines || (this.lines = getLines(this.data)), range);
+    return getLocation(
+      this.lines || (this.lines = getLines(this.data)),
+      range.start,
+      range.end
+    );
   }
 
   enterState<P extends Meta>(state: StateDefinition<P>): P {

@@ -2,6 +2,9 @@ import { type ParserOptions, type Range, Parser } from "./internal";
 export {
   TagType,
   ErrorCode,
+  getLines,
+  getLocation,
+  getPosition,
   type ParserOptions as Handlers,
   type Position,
   type Location,
