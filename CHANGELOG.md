@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.1.1
+
+### Patch Changes
+
+- [#127](https://github.com/marko-js/htmljs-parser/pull/127) [`222b145`](https://github.com/marko-js/htmljs-parser/commit/222b145f4052596807b848116fb7f7581ddadc7c) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix regression around JS style comments in the body by requiring that they are preceded by a whitespace.
+
 ## 5.1.0
 
 ### Minor Changes
