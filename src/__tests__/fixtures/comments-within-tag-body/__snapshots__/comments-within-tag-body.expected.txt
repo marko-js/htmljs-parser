@@ -16,9 +16,19 @@
 6╭─      <!-- and this is a comment -->
  │       │   ╰─ comment.value " and this is a comment "
  ╰─      ╰─ comment "<!-- and this is a comment -->"
-7╭─ </div>
- │  │ │  ╰─ closeTagEnd(div)
- │  │ ╰─ closeTagName "div"
- │  ├─ text "\n"
- ╰─ ╰─ closeTagStart "</"
-8╰─ 
+7╭─      But this, this is not a http://comment.com
+ ╰─ ╰─ text "\n     But this, this is not a http://comment.com\n     And yet this is a "
+8╭─      And yet this is a //comment
+ │                         │ ╰─ comment.value "comment"
+ ╰─                        ╰─ comment "//comment"
+9╭─      And also /* this is a comment */
+ │  │             │ ╰─ comment.value " this is a comment "
+ │  │             ╰─ comment "/* this is a comment */"
+ ╰─ ╰─ text "\n     And also "
+10╭─      Because a//comment must be preceded by whitespace.
+  ╰─ ╰─ text "\n     Because a//comment must be preceded by whitespace.\n"
+11╭─ </div>
+  │  │ │  ╰─ closeTagEnd(div)
+  │  │ ╰─ closeTagName "div"
+  ╰─ ╰─ closeTagStart "</"
+12╰─ 

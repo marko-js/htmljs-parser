@@ -94,7 +94,10 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       this.endText();
       this.enterState(STATE.INLINE_SCRIPT);
       this.pos++; // skip space
-    } else if (code === CODE.FORWARD_SLASH) {
+    } else if (
+      code === CODE.FORWARD_SLASH &&
+      isWhitespaceCode(this.lookAtCharCodeAhead(-1))
+    ) {
       // Check next character to see if we are in a comment
       switch (this.lookAtCharCodeAhead(1)) {
         case CODE.FORWARD_SLASH:
