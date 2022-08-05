@@ -27,6 +27,7 @@ export const enum CODE {
   DOLLAR = 36,
   PERCENT = 37,
   PERIOD = 46,
+  PLUS = 43,
   COMMA = 44,
   COLON = 58,
   SEMICOLON = 59,
@@ -36,6 +37,10 @@ export const enum CODE {
   CARRIAGE_RETURN = 13,
   SPACE = 32,
   TAB = 9,
+  AMPERSAND = 38,
+  CARET = 94,
+  TILDE = 126,
+  UNDERSCORE = 95,
 }
 
 // Same format as https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#position

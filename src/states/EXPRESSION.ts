@@ -8,12 +8,6 @@ import {
   ErrorCode,
 } from "../internal";
 
-const enum PatternType {
-  HTML_ATTRS,
-  CONCISE_ATTRS,
-  CONCISE_ATTRS_GROUP,
-}
-
 export interface ExpressionMeta extends Meta {
   groupStack: number[];
   terminator: number | (number | number[])[];
@@ -22,9 +16,18 @@ export interface ExpressionMeta extends Meta {
   terminatedByWhitespace: boolean;
 }
 
-const htmlAttrsPattern = buildPattern(PatternType.HTML_ATTRS);
-const conciseAttrsPattern = buildPattern(PatternType.CONCISE_ATTRS);
-const conciseAttrsGroupPattern = buildPattern(PatternType.CONCISE_ATTRS_GROUP);
+const unaryKeywords = [
+  "async",
+  "await",
+  "keyof",
+  "class",
+  "function",
+  "new",
+  "typeof",
+  "void",
+] as const;
+
+const binaryKeywords = ["instanceof", "in", "as", "extends"] as const;
 
 export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   name: "EXPRESSION",
@@ -48,7 +51,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   char(code, expression) {
     if (!expression.groupStack.length) {
       if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
-        if (!checkForOperators(this, expression)) {
+        if (!checkForOperators(this, expression, false)) {
           this.exitState();
         }
         return;
@@ -86,11 +89,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
             this.pos++;
             break;
           default: {
-            if (
-              canCharCodeBeFollowedByDivision(
-                this.getPreviousNonWhitespaceCharCode()
-              )
-            ) {
+            if (canFollowDivision(this.getPreviousNonWhitespaceCharCode())) {
               this.pos++;
               this.consumeWhitespace();
             } else {
@@ -145,7 +144,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
     if (
       !expression.groupStack.length &&
       (expression.terminatedByEOL || expression.terminatedByWhitespace) &&
-      !checkForOperators(this, expression)
+      !checkForOperators(this, expression, true)
     ) {
       this.exitState();
     }
@@ -212,67 +211,31 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   return() {},
 };
 
-function buildPattern(type: PatternType) {
-  const space = type === PatternType.CONCISE_ATTRS ? "[ \\t]" : "\\s";
-  const binary =
-    "(?:[!~*%&^|?<]+=*)+" + // Any of these characters can always continue an expression
-    "|:+(?!=)" + // Match a colon without matching a bound attribute
-    "|[>/+=-]+=|=>" + // Match equality and multi char assignment operators w/o matching equals by itself
-    `|(?<!\\+)[ \\t]*\\+(?:\\s*\\+\\s*\\+)*\\s*(?!\\+)` + // We only match an odd number of plus's
-    `|(?<!-)-${
-      type === PatternType.CONCISE_ATTRS ? "" : "(?:\\s*-\\s*-)*\\s*"
-    }(?!-)` + // In concise mode we can't match multiple hyphens otherwise we can match an even number of hyphens
-    `|(?<!\\.)\\.(?!\\.)` + // We only continue after a dot if it isn't a ...
-    `|>${type === PatternType.HTML_ATTRS ? "{2,}" : "+"}` + // in html mode only consume closing angle brackets if it is >>
-    "|[ \\t]+(?:in(?:stanceof)?|as|extends)(?=[ \\t]+[^=/,;:>])"; // We only continue after word operators (instanceof/in) when they are not followed by a terminator
-  const unary =
-    "\\b(?<![.]\\s*)(?:" +
-    "a(?:sync|wait)" +
-    "|keyof" +
-    "|class" +
-    "|function" +
-    "|new" +
-    "|typeof" +
-    "|void" +
-    ")\\b";
-  const lookAheadPattern = `${space}*(?:${binary})\\s*|${space}+(?=[{(]|/[^>])`; // if we have spaces followed by an opening bracket, we'll consume the spaces and let the expression state handle the brackets
-  const lookBehindPattern = `(?<=${unary}|${binary})`;
-  return new RegExp(`${lookAheadPattern}|${lookBehindPattern}`, "ym");
-}
+function checkForOperators(
+  parser: Parser,
+  expression: ExpressionMeta,
+  eol: boolean
+) {
+  if (expression.skipOperators) return false;
 
-function checkForOperators(parser: Parser, expression: ExpressionMeta) {
-  if (expression.skipOperators) {
-    return false;
-  }
-
-  const pattern = parser.isConcise
-    ? parser.activeTag?.stage === STATE.TAG_STAGE.ATTR_GROUP
-      ? conciseAttrsGroupPattern
-      : conciseAttrsPattern
-    : expression.terminatedByEOL
-    ? conciseAttrsPattern
-    : htmlAttrsPattern;
-  pattern.lastIndex = parser.pos;
-  const matches = pattern.exec(parser.data);
-
-  if (matches) {
-    const [match] = matches;
-    if (match.length === 0) {
-      // We matched a look behind.
-      parser.consumeWhitespace();
-    } else {
-      // We matched a look ahead.
-      parser.pos += match.length;
-    }
-
-    // After this point we should be on the character we want to process next
-    // so we don't want to move forward and miss that character.
+  const { pos, data } = parser;
+  const lookBehindPos = lookBehindForOperator(data, pos);
+  if (lookBehindPos !== -1) {
+    parser.consumeWhitespace();
     parser.forward = 0;
-  } else {
-    return false;
+    return true;
+  }
+  const terminatedByEOL = expression.terminatedByEOL || parser.isConcise;
+  if (!(terminatedByEOL && eol)) {
+    const lookAheadPos = lookAheadForOperator(data, pos, terminatedByEOL);
+    if (lookAheadPos !== -1) {
+      parser.pos = lookAheadPos;
+      parser.forward = 0;
+      return true;
+    }
   }
 
-  return true;
+  return false;
 }
 
 function checkForTerminators(
@@ -296,11 +259,173 @@ function checkForTerminators(
   }
 }
 
-function canCharCodeBeFollowedByDivision(code: number) {
+function lookBehindForOperator(data: string, pos: number): number {
+  const curPos = pos - 1;
+  const code = data.charCodeAt(curPos);
+
+  switch (code) {
+    case CODE.AMPERSAND:
+    case CODE.ASTERISK:
+    case CODE.CARET:
+    case CODE.COLON:
+    case CODE.EQUAL:
+    case CODE.EXCLAMATION:
+    case CODE.OPEN_ANGLE_BRACKET:
+    case CODE.CLOSE_ANGLE_BRACKET:
+    case CODE.PERCENT:
+    case CODE.PERIOD:
+    case CODE.PIPE:
+    case CODE.QUESTION:
+    case CODE.TILDE:
+      return curPos;
+
+    case CODE.PLUS:
+    case CODE.HYPHEN: {
+      // special case -- and ++
+      if (data.charCodeAt(curPos - 1) === code) {
+        // Check if we should continue for another reason.
+        // eg "typeof++ x"
+        return lookBehindForOperator(
+          data,
+          lookBehindWhile(isWhitespaceCode, data, curPos - 2)
+        );
+      }
+
+      return curPos;
+    }
+
+    default: {
+      for (const keyword of unaryKeywords) {
+        const keywordPos = lookBehindFor(data, curPos, keyword);
+        if (keywordPos !== -1) {
+          return keywordPos === 0 ||
+            data.charCodeAt(keywordPos - 1) !== CODE.PERIOD
+            ? keywordPos
+            : -1;
+        }
+      }
+      return -1;
+    }
+  }
+}
+
+function lookAheadForOperator(
+  data: string,
+  pos: number,
+  terminatedByEOL: boolean
+): number {
+  const isSpace = terminatedByEOL ? isIndentCode : isWhitespaceCode;
+  const curPos = lookAheadWhile(isSpace, data, pos + 1);
+  const code = data.charCodeAt(curPos);
+
+  switch (code) {
+    case CODE.AMPERSAND:
+    case CODE.ASTERISK:
+    case CODE.CARET:
+    case CODE.EXCLAMATION:
+    case CODE.OPEN_ANGLE_BRACKET:
+    case CODE.PERCENT:
+    case CODE.PIPE:
+    case CODE.QUESTION:
+    case CODE.TILDE:
+    case CODE.PLUS:
+      return curPos + 1;
+
+    case CODE.HYPHEN: {
+      // Can't match -- when in concise mode.
+      return terminatedByEOL && data.charCodeAt(curPos + 1) === CODE.HYPHEN
+        ? -1
+        : curPos + 1;
+    }
+
+    case CODE.OPEN_CURLY_BRACE:
+    case CODE.OPEN_PAREN:
+      return curPos; // defers to base expression state to track block groups.
+
+    case CODE.FORWARD_SLASH:
+      return terminatedByEOL ||
+        // Only match a / in html mode if it's not `/>`
+        data.charCodeAt(curPos + 1) !== CODE.CLOSE_ANGLE_BRACKET
+        ? curPos // defers to base expression state to track regexp groups.
+        : -1;
+
+    case CODE.COLON:
+      // Only match a colon if its not :=
+      return data.charCodeAt(curPos + 1) === CODE.EQUAL ? -1 : curPos + 1;
+
+    case CODE.PERIOD:
+      // Only match a dot if its not ...
+      return data.charCodeAt(curPos + 1) === CODE.PERIOD ? -1 : curPos + 1;
+
+    case CODE.CLOSE_ANGLE_BRACKET:
+      // In concise mode a > is a normal operator.
+      if (terminatedByEOL) return curPos + 1;
+
+      // Otherwise we match >=, >> and >>>
+      switch (data.charCodeAt(curPos + 1)) {
+        case CODE.EQUAL:
+          return curPos + 2;
+        case CODE.CLOSE_ANGLE_BRACKET:
+          return (
+            curPos +
+            (data.charCodeAt(curPos + 2) === CODE.CLOSE_ANGLE_BRACKET ? 3 : 2)
+          );
+        default:
+          return -1;
+      }
+    case CODE.EQUAL:
+      // We'll match ==, ===, and =>
+      // This is primarily to support => since otherwise it'd end some expressions.
+      switch (data.charCodeAt(curPos + 1)) {
+        case CODE.CLOSE_ANGLE_BRACKET:
+          return curPos + 2;
+        case CODE.EQUAL:
+          return curPos + (data.charCodeAt(curPos + 2) === CODE.EQUAL ? 3 : 2);
+        default:
+          return -1;
+      }
+
+    default: {
+      for (const keyword of binaryKeywords) {
+        let nextPos = lookAheadFor(data, curPos, keyword);
+        if (nextPos === -1) continue;
+
+        const max = data.length - 1;
+        if (nextPos === max) return -1;
+
+        let nextCode = data.charCodeAt(nextPos + 1);
+        if (isWhitespaceCode(nextCode)) {
+          // skip any whitespace after the operator
+          nextPos = lookAheadWhile(isWhitespaceCode, data, nextPos + 2);
+          if (nextPos === max) return -1;
+          nextCode = data.charCodeAt(nextPos);
+        } else if (isWordCode(nextCode)) {
+          // bail if we are continuing a word, eg "**in**teger"
+          return -1;
+        }
+
+        // finally check that this is not followed by a terminator.
+        switch (nextCode) {
+          case CODE.COLON:
+          case CODE.COMMA:
+          case CODE.EQUAL:
+          case CODE.FORWARD_SLASH:
+          case CODE.CLOSE_ANGLE_BRACKET:
+          case CODE.SEMICOLON:
+            return -1;
+          default:
+            return nextPos;
+        }
+      }
+
+      return -1;
+    }
+  }
+}
+
+function canFollowDivision(code: number) {
   return (
-    (code >= CODE.NUMBER_0 && code <= CODE.NUMBER_9) ||
-    (code >= CODE.UPPER_A && code <= CODE.UPPER_Z) ||
-    (code >= CODE.LOWER_A && code <= CODE.LOWER_Z) ||
+    isWordCode(code) ||
     code === CODE.PERCENT ||
     code === CODE.CLOSE_PAREN ||
     code === CODE.PERIOD ||
@@ -308,4 +433,74 @@ function canCharCodeBeFollowedByDivision(code: number) {
     code === CODE.CLOSE_SQUARE_BRACKET ||
     code === CODE.CLOSE_CURLY_BRACE
   );
+}
+
+function isWordCode(code: number) {
+  return (
+    (code >= CODE.UPPER_A && code <= CODE.UPPER_Z) ||
+    (code >= CODE.LOWER_A && code <= CODE.LOWER_Z) ||
+    (code >= CODE.NUMBER_0 && code <= CODE.NUMBER_9) ||
+    code === CODE.UNDERSCORE
+  );
+}
+
+function isIndentCode(code: number) {
+  return code === CODE.TAB || code === CODE.SPACE;
+}
+
+function lookAheadWhile(
+  match: (code: number) => boolean,
+  data: string,
+  pos: number
+) {
+  const max = data.length;
+  for (let i = pos; i < max; i++) {
+    if (!match(data.charCodeAt(i))) return i;
+  }
+
+  return max - 1;
+}
+
+function lookBehindWhile(
+  match: (code: number) => boolean,
+  data: string,
+  pos: number
+) {
+  let i = pos;
+
+  do {
+    if (!match(data.charCodeAt(i))) {
+      return i + 1;
+    }
+  } while (i--);
+
+  return 0;
+}
+
+function lookBehindFor(data: string, pos: number, str: string) {
+  let i = str.length;
+  const endPos = pos - i + 1;
+  if (endPos < 0) return -1;
+
+  while (i--) {
+    if (data.charCodeAt(endPos + i) !== str.charCodeAt(i)) {
+      return -1;
+    }
+  }
+
+  return endPos;
+}
+
+function lookAheadFor(data: string, pos: number, str: string) {
+  let i = str.length;
+  const endPos = pos + i;
+  if (endPos > data.length) return -1;
+
+  while (i--) {
+    if (data.charCodeAt(pos + i) !== str.charCodeAt(i)) {
+      return -1;
+    }
+  }
+
+  return endPos - 1;
 }

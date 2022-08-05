@@ -384,11 +384,10 @@
   │  ├─ openTagEnd
   ╰─ ╰─ tagName
 49╭─ a=x ++ y a
-  │  │││ │  │ ╰─ attrName
-  │  │││ │  ╰─ attrName
-  │  │││ ╰─ attrName "++"
-  │  ││╰─ attrValue.value
-  │  │├─ attrValue "=x"
+  │  │││    │ ╰─ attrName
+  │  │││    ╰─ attrName
+  │  ││╰─ attrValue.value "x ++"
+  │  │├─ attrValue "=x ++"
   │  │╰─ attrName
   │  ├─ closeTagEnd(a)
   │  ├─ openTagEnd
@@ -879,17 +878,32 @@
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-111╭─ <a=x ++ y a/>
-   │  ││││ │  │ │╰─ openTagEnd:selfClosed "/>"
-   │  ││││ │  │ ╰─ attrName
-   │  ││││ │  ╰─ attrName
-   │  ││││ ╰─ attrName "++"
-   │  │││╰─ attrValue.value
-   │  ││├─ attrValue "=x"
+111╭─ <a=typeof ++ y a/>
+   │  ││││           │╰─ openTagEnd:selfClosed "/>"
+   │  ││││           ╰─ attrName
+   │  │││╰─ attrValue.value "typeof ++ y"
+   │  ││├─ attrValue "=typeof ++ y"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-112╭─ <a=x > y <a/>
+112╭─ <a=typeof y ++ a/>
+   │  ││││           │╰─ openTagEnd:selfClosed "/>"
+   │  ││││           ╰─ attrName
+   │  │││╰─ attrValue.value "typeof y ++"
+   │  ││├─ attrValue "=typeof y ++"
+   │  ││╰─ attrName
+   │  │╰─ tagName
+   ╰─ ╰─ openTagStart
+113╭─ <a=x ++ y a/>
+   │  ││││    │ │╰─ openTagEnd:selfClosed "/>"
+   │  ││││    │ ╰─ attrName
+   │  ││││    ╰─ attrName
+   │  │││╰─ attrValue.value "x ++"
+   │  ││├─ attrValue "=x ++"
+   │  ││╰─ attrName
+   │  │╰─ tagName
+   ╰─ ╰─ openTagStart
+114╭─ <a=x > y <a/>
    │  ││││ ││  ││╰─ openTagEnd:selfClosed "/>"
    │  ││││ ││  │╰─ tagName
    │  ││││ ││  ╰─ openTagStart
@@ -901,7 +915,7 @@
    │  │╰─ tagName
    │  ├─ error(MISSING_END_TAG:Missing ending "a" tag) "<a=x >"
    ╰─ ╰─ openTagStart
-113╭─ <a=x >> y a/>
+115╭─ <a=x >> y a/>
    │  ││││      │╰─ openTagEnd:selfClosed "/>"
    │  ││││      ╰─ attrName
    │  │││╰─ attrValue.value "x >> y"
@@ -910,7 +924,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-114╭─ <a=x >>> y a/>
+116╭─ <a=x >>> y a/>
    │  ││││       │╰─ openTagEnd:selfClosed "/>"
    │  ││││       ╰─ attrName
    │  │││╰─ attrValue.value "x >>> y"
@@ -919,7 +933,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-115╭─ <a=x ( y ) a/>
+117╭─ <a=x ( y ) a/>
    │  ││││       │╰─ openTagEnd:selfClosed "/>"
    │  ││││       ╰─ attrName
    │  │││╰─ attrValue.value "x ( y )"
@@ -928,7 +942,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-116╭─ <a=x { y } a/>
+118╭─ <a=x { y } a/>
    │  ││││       │╰─ openTagEnd:selfClosed "/>"
    │  ││││       ╰─ attrName
    │  │││╰─ attrValue.value "x { y }"
@@ -937,7 +951,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-117╭─ <a=x => y a/>
+119╭─ <a=x => y a/>
    │  ││││      │╰─ openTagEnd:selfClosed "/>"
    │  ││││      ╰─ attrName
    │  │││╰─ attrValue.value "x => y"
@@ -946,7 +960,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-118╭─ <a=x => ( y ) a/>
+120╭─ <a=x => ( y ) a/>
    │  ││││          │╰─ openTagEnd:selfClosed "/>"
    │  ││││          ╰─ attrName
    │  │││╰─ attrValue.value "x => ( y )"
@@ -955,7 +969,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-119╭─ <a=x => { y } a/>
+121╭─ <a=x => { y } a/>
    │  ││││          │╰─ openTagEnd:selfClosed "/>"
    │  ││││          ╰─ attrName
    │  │││╰─ attrValue.value "x => { y }"
@@ -964,7 +978,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-120╭─ <a=( x ) { y } a/>
+122╭─ <a=( x ) { y } a/>
    │  ││││           │╰─ openTagEnd:selfClosed "/>"
    │  ││││           ╰─ attrName
    │  │││╰─ attrValue.value "( x ) { y }"
@@ -973,7 +987,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-121╭─ <a= (x) => { console.log("y") } a/>
+123╭─ <a= (x) => { console.log("y") } a/>
    │  │││ │                           │╰─ openTagEnd:selfClosed "/>"
    │  │││ │                           ╰─ attrName
    │  │││ ╰─ attrValue.value "(x) => { console.log(\"y\") }"
@@ -982,7 +996,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-122╭─ <a= async x => { console.log("y") } a/>
+124╭─ <a= async x => { console.log("y") } a/>
    │  │││ │                               │╰─ openTagEnd:selfClosed "/>"
    │  │││ │                               ╰─ attrName
    │  │││ ╰─ attrValue.value "async x => { console.log(\"y\") }"
@@ -991,7 +1005,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-123╭─ <a= function (x) { console.log("y") } a/>
+125╭─ <a= function (x) { console.log("y") } a/>
    │  │││ │                                 │╰─ openTagEnd:selfClosed "/>"
    │  │││ │                                 ╰─ attrName
    │  │││ ╰─ attrValue.value "function (x) { console.log(\"y\") }"
@@ -1000,7 +1014,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-124╭─ <a= x => { console.log("y") } a/>
+126╭─ <a= x => { console.log("y") } a/>
    │  │││ │                         │╰─ openTagEnd:selfClosed "/>"
    │  │││ │                         ╰─ attrName
    │  │││ ╰─ attrValue.value "x => { console.log(\"y\") }"
@@ -1009,7 +1023,7 @@
    │  │╰─ tagName
    │  ├─ text "\n"
    ╰─ ╰─ openTagStart
-125╭─ <a= async function (x) { console.log("y") } a/>
+127╭─ <a= async function (x) { console.log("y") } a/>
    │  │││ │                                       │╰─ openTagEnd:selfClosed "/>"
    │  │││ │                                       ╰─ attrName
    │  │││ ╰─ attrValue.value "async function (x) { console.log(\"y\") }"
