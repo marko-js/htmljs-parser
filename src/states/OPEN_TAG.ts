@@ -8,8 +8,9 @@ import {
   TagType,
   ErrorCode,
 } from "../internal";
+import { OPERATOR_TERMINATOR } from "./EXPRESSION";
 
-export const enum TAG_STAGE {
+const enum TAG_STAGE {
   UNKNOWN,
   VAR,
   ARGUMENT,
@@ -310,9 +311,16 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
 
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
-      expr.terminator = this.isConcise
-        ? CONCISE_TAG_VAR_TERMINATORS
-        : HTML_TAG_VAR_TERMINATORS;
+
+      if (this.isConcise) {
+        expr.terminator = CONCISE_TAG_VAR_TERMINATORS;
+        expr.operatorTerminator =
+          OPERATOR_TERMINATOR.AttrValue | OPERATOR_TERMINATOR.Hyphens;
+      } else {
+        expr.terminator = HTML_TAG_VAR_TERMINATORS;
+        expr.operatorTerminator =
+          OPERATOR_TERMINATOR.AttrValue | OPERATOR_TERMINATOR.CloseAngleBracket;
+      }
     } else if (code === CODE.OPEN_PAREN && !tag.hasAttrs) {
       if (tag.hasArgs) {
         this.emitError(

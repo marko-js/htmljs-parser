@@ -9,6 +9,7 @@ import {
   Meta,
   ErrorCode,
 } from "../internal";
+import { OPERATOR_TERMINATOR } from "./EXPRESSION";
 
 const enum ATTR_STAGE {
   UNKNOWN,
@@ -109,9 +110,14 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       attr.stage = ATTR_STAGE.VALUE;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
-      expr.terminator = this.isConcise
-        ? CONCISE_VALUE_TERMINATORS
-        : HTML_VALUE_TERMINATORS;
+
+      if (this.isConcise) {
+        expr.terminator = CONCISE_VALUE_TERMINATORS;
+        expr.operatorTerminator = OPERATOR_TERMINATOR.Hyphens;
+      } else {
+        expr.terminator = HTML_VALUE_TERMINATORS;
+        expr.operatorTerminator = OPERATOR_TERMINATOR.CloseAngleBracket;
+      }
     } else if (code === CODE.OPEN_PAREN) {
       ensureAttrName(this, attr);
       attr.stage = ATTR_STAGE.ARGUMENT;
@@ -124,7 +130,6 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       this.pos++; // skip {
       this.forward = 0;
       const expr = this.enterState(STATE.EXPRESSION);
-      expr.terminatedByWhitespace = false;
       expr.terminator = CODE.CLOSE_CURLY_BRACE;
     } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
       attr.stage = ATTR_STAGE.NAME;

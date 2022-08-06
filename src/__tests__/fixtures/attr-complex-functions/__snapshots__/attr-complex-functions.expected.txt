@@ -20,7 +20,31 @@
  │  ├─ closeTagEnd(tag)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
-4╭─ tag a = async x => { console.log("y") } b
+4╭─ tag a = x => y b
+ │  │   │ │ │      ╰─ attrName
+ │  │   │ │ ╰─ attrValue.value "x => y"
+ │  │   │ ╰─ attrValue "= x => y"
+ │  │   ╰─ attrName
+ │  ├─ closeTagEnd(tag)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "tag"
+5╭─ tag a = x => y + 1 b
+ │  │   │ │ │          ╰─ attrName
+ │  │   │ │ ╰─ attrValue.value "x => y + 1"
+ │  │   │ ╰─ attrValue "= x => y + 1"
+ │  │   ╰─ attrName
+ │  ├─ closeTagEnd(tag)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "tag"
+6╭─ tag a = x => y = 1 b
+ │  │   │ │ │          ╰─ attrName
+ │  │   │ │ ╰─ attrValue.value "x => y = 1"
+ │  │   │ ╰─ attrValue "= x => y = 1"
+ │  │   ╰─ attrName
+ │  ├─ closeTagEnd(tag)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "tag"
+7╭─ tag a = async x => { console.log("y") } b
  │  │   │ │ │                               ╰─ attrName
  │  │   │ │ ╰─ attrValue.value "async x => { console.log(\"y\") }"
  │  │   │ ╰─ attrValue "= async x => { console.log(\"y\") }"
@@ -28,7 +52,7 @@
  │  ├─ closeTagEnd(tag)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "tag"
-5╭─ tag a = async function (x) { console.log("y") } b
+8╭─ tag a = async function (x) { console.log("y") } b
  │  │   │ │ │                                       │├─ closeTagEnd(tag)
  │  │   │ │ │                                       │╰─ openTagEnd
  │  │   │ │ │                                       ╰─ attrName
