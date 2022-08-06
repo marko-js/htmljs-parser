@@ -1,0 +1,18 @@
+1╭─ a b=c -- y
+ │  │ │││ │  ╰─ text
+ │  │ │││ ╰─ openTagEnd
+ │  │ ││╰─ attrValue.value
+ │  │ │╰─ attrValue "=c"
+ │  │ ╰─ attrName
+ ╰─ ╰─ tagName
+2├─ 
+3╭─ a [b=c -- y]
+ │  │  │││    ╰─ attrName
+ │  │  ││╰─ attrValue.value "c --"
+ │  │  │╰─ attrValue "=c --"
+ │  │  ╰─ attrName
+ │  ├─ closeTagEnd(a)
+ ╰─ ╰─ tagName
+4╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(a)

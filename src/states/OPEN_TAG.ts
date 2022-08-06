@@ -10,7 +10,7 @@ import {
 } from "../internal";
 import { OPERATOR_TERMINATOR } from "./EXPRESSION";
 
-const enum TAG_STAGE {
+export enum TAG_STAGE {
   UNKNOWN,
   VAR,
   ARGUMENT,

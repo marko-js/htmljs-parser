@@ -10,6 +10,7 @@ import {
   ErrorCode,
 } from "../internal";
 import { OPERATOR_TERMINATOR } from "./EXPRESSION";
+import { TAG_STAGE } from "./OPEN_TAG";
 
 const enum ATTR_STAGE {
   UNKNOWN,
@@ -113,7 +114,10 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
 
       if (this.isConcise) {
         expr.terminator = CONCISE_VALUE_TERMINATORS;
-        expr.operatorTerminator = OPERATOR_TERMINATOR.Hyphens;
+
+        if (this.activeTag!.stage !== TAG_STAGE.ATTR_GROUP) {
+          expr.operatorTerminator = OPERATOR_TERMINATOR.Hyphens;
+        }
       } else {
         expr.terminator = HTML_VALUE_TERMINATORS;
         expr.operatorTerminator = OPERATOR_TERMINATOR.CloseAngleBracket;
