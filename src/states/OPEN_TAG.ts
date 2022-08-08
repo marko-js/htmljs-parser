@@ -293,6 +293,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       }
 
       const expr = this.enterState(STATE.EXPRESSION);
+      expr.operators = true;
       expr.terminatedByWhitespace = true;
       expr.shouldTerminate = this.isConcise
         ? shouldTerminateConciseTagVar
@@ -309,16 +310,12 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       tag.stage = TAG_STAGE.ARGUMENT;
       this.pos++; // skip (
       this.forward = 0;
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.skipOperators = true;
-      expr.shouldTerminate = matchesCloseParen;
+      this.enterState(STATE.EXPRESSION).shouldTerminate = matchesCloseParen;
     } else if (code === CODE.PIPE && !tag.hasAttrs) {
       tag.stage = TAG_STAGE.PARAMS;
       this.pos++; // skip |
       this.forward = 0;
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.skipOperators = true;
-      expr.shouldTerminate = matchesPipe;
+      this.enterState(STATE.EXPRESSION).shouldTerminate = matchesPipe;
     } else {
       this.forward = 0;
 

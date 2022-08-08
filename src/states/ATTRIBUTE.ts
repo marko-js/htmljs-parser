@@ -81,6 +81,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
 
       attr.stage = ATTR_STAGE.VALUE;
       const expr = this.enterState(STATE.EXPRESSION);
+      expr.operators = true;
       expr.terminatedByWhitespace = true;
       expr.shouldTerminate = this.isConcise
         ? this.activeTag!.stage === TAG_STAGE.ATTR_GROUP
@@ -98,14 +99,13 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       attr.stage = ATTR_STAGE.BLOCK;
       this.pos++; // skip {
       this.forward = 0;
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.shouldTerminate = matchesCloseCurlyBrace;
+      this.enterState(STATE.EXPRESSION).shouldTerminate =
+        matchesCloseCurlyBrace;
     } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
       attr.stage = ATTR_STAGE.NAME;
       this.forward = 0;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
-      expr.skipOperators = true;
       expr.shouldTerminate = this.isConcise
         ? this.activeTag!.stage === TAG_STAGE.ATTR_GROUP
           ? shouldTerminateConciseGroupedAttrName

@@ -1,4 +1,10 @@
-import { CODE, ErrorCode, STATE, StateDefinition } from "../internal";
+import {
+  CODE,
+  ErrorCode,
+  STATE,
+  StateDefinition,
+  matchesCloseCurlyBrace,
+} from "../internal";
 
 export const TEMPLATE_STRING: StateDefinition = {
   name: "TEMPLATE_STRING",
@@ -20,9 +26,8 @@ export const TEMPLATE_STRING: StateDefinition = {
       this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
     ) {
       this.pos++; // skip {
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.skipOperators = true;
-      expr.shouldTerminate = shouldTerminate;
+      this.enterState(STATE.EXPRESSION).shouldTerminate =
+        matchesCloseCurlyBrace;
     } else {
       if (code === CODE.BACK_SLASH) {
         this.pos++; // skip \
@@ -55,7 +60,3 @@ export const TEMPLATE_STRING: StateDefinition = {
     this.pos++; // skip closing }
   },
 };
-
-function shouldTerminate(code: number) {
-  return code === CODE.CLOSE_CURLY_BRACE;
-}

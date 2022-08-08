@@ -5,6 +5,7 @@ import {
   StateDefinition,
   Meta,
   ErrorCode,
+  matchesCloseCurlyBrace,
 } from "../internal";
 
 interface PlaceholderMeta extends Meta {
@@ -94,14 +95,11 @@ export function checkForPlaceholder(parser: Parser, code: number) {
       parser.enterState(PLACEHOLDER).escape = escape;
       parser.pos += escape ? 2 : 3; // skip ${ or $!{
       parser.forward = 0;
-      parser.enterState(STATE.EXPRESSION).shouldTerminate = shouldTerminate;
+      parser.enterState(STATE.EXPRESSION).shouldTerminate =
+        matchesCloseCurlyBrace;
       return true;
     }
   }
 
   return false;
-}
-
-function shouldTerminate(code: number) {
-  return code === CODE.CLOSE_CURLY_BRACE;
 }

@@ -50,11 +50,11 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
     if (code === CODE.OPEN_CURLY_BRACE) {
       inlineScript.block = true;
       this.pos++; // skip {
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.shouldTerminate = matchesCloseCurlyBrace;
-      expr.skipOperators = true;
+      this.enterState(STATE.EXPRESSION).shouldTerminate =
+        matchesCloseCurlyBrace;
     } else {
       const expr = this.enterState(STATE.EXPRESSION);
+      expr.operators = true;
       expr.terminatedByEOL = true;
     }
   },

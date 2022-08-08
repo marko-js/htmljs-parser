@@ -10,7 +10,7 @@ import {
 
 export interface ExpressionMeta extends Meta {
   groupStack: number[];
-  skipOperators: boolean;
+  operators: boolean;
   terminatedByEOL: boolean;
   terminatedByWhitespace: boolean;
   shouldTerminate(code: number, data: string, pos: number): boolean;
@@ -43,7 +43,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       end: start,
       groupStack: [],
       shouldTerminate,
-      skipOperators: false,
+      operators: false,
       terminatedByEOL: false,
       terminatedByWhitespace: false,
     };
@@ -215,7 +215,7 @@ function checkForOperators(
   expression: ExpressionMeta,
   eol: boolean
 ) {
-  if (expression.skipOperators) return false;
+  if (!expression.operators) return false;
 
   const { pos, data } = parser;
   if (lookBehindForOperator(data, pos) !== -1) {
