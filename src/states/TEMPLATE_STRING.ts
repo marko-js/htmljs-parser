@@ -21,20 +21,21 @@ export const TEMPLATE_STRING: StateDefinition = {
   exit() {},
 
   char(code) {
-    if (
-      code === CODE.DOLLAR &&
-      this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
-    ) {
-      this.pos++; // skip {
-      this.enterState(STATE.EXPRESSION).shouldTerminate =
-        matchesCloseCurlyBrace;
-    } else {
-      if (code === CODE.BACK_SLASH) {
+    switch (code) {
+      case CODE.DOLLAR:
+        if (this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE) {
+          this.pos++; // skip {
+          this.enterState(STATE.EXPRESSION).shouldTerminate =
+            matchesCloseCurlyBrace;
+        }
+        break;
+      case CODE.BACK_SLASH:
         this.pos++; // skip \
-      } else if (code === CODE.BACKTICK) {
+        break;
+      case CODE.BACKTICK:
         this.pos++; // skip `
         this.exitState();
-      }
+        break;
     }
   },
 
