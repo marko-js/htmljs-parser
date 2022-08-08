@@ -22,7 +22,7 @@ export const TEMPLATE_STRING: StateDefinition = {
       this.pos++; // skip {
       const expr = this.enterState(STATE.EXPRESSION);
       expr.skipOperators = true;
-      expr.terminator = CODE.CLOSE_CURLY_BRACE;
+      expr.shouldTerminate = shouldTerminate;
     } else {
       if (code === CODE.BACK_SLASH) {
         this.pos++; // skip \
@@ -55,3 +55,7 @@ export const TEMPLATE_STRING: StateDefinition = {
     this.pos++; // skip closing }
   },
 };
+
+function shouldTerminate(code: number) {
+  return code === CODE.CLOSE_CURLY_BRACE;
+}

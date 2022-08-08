@@ -8,8 +8,9 @@ import {
   Ranges,
   Meta,
   ErrorCode,
+  matchesCloseCurlyBrace,
+  matchesCloseParen,
 } from "../internal";
-import { OPERATOR_TERMINATOR } from "./EXPRESSION";
 import { TAG_STAGE } from "./OPEN_TAG";
 
 const enum ATTR_STAGE {
@@ -28,36 +29,6 @@ export interface AttrMeta extends Meta {
   spread: boolean;
   bound: boolean;
 }
-
-const HTML_VALUE_TERMINATORS = [
-  CODE.CLOSE_ANGLE_BRACKET,
-  CODE.COMMA,
-  [CODE.FORWARD_SLASH, CODE.CLOSE_ANGLE_BRACKET],
-];
-
-const CONCISE_VALUE_TERMINATORS = [
-  CODE.CLOSE_SQUARE_BRACKET,
-  CODE.SEMICOLON,
-  CODE.COMMA,
-];
-
-const HTML_NAME_TERMINATORS = [
-  CODE.CLOSE_ANGLE_BRACKET,
-  CODE.COMMA,
-  CODE.OPEN_PAREN,
-  CODE.EQUAL,
-  [CODE.COLON, CODE.EQUAL],
-  [CODE.FORWARD_SLASH, CODE.CLOSE_ANGLE_BRACKET],
-];
-
-const CONCISE_NAME_TERMINATORS = [
-  CODE.CLOSE_SQUARE_BRACKET,
-  CODE.SEMICOLON,
-  CODE.EQUAL,
-  CODE.COMMA,
-  CODE.OPEN_PAREN,
-  [CODE.COLON, CODE.EQUAL],
-];
 
 // We enter STATE.ATTRIBUTE when we see a non-whitespace
 // character after reading the tag name
@@ -111,39 +82,35 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       attr.stage = ATTR_STAGE.VALUE;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
-
-      if (this.isConcise) {
-        expr.terminator = CONCISE_VALUE_TERMINATORS;
-
-        if (this.activeTag!.stage !== TAG_STAGE.ATTR_GROUP) {
-          expr.operatorTerminator = OPERATOR_TERMINATOR.Hyphens;
-        }
-      } else {
-        expr.terminator = HTML_VALUE_TERMINATORS;
-        expr.operatorTerminator = OPERATOR_TERMINATOR.CloseAngleBracket;
-      }
+      expr.shouldTerminate = this.isConcise
+        ? this.activeTag!.stage === TAG_STAGE.ATTR_GROUP
+          ? shouldTerminateConciseGroupedAttrValue
+          : shouldTerminateConciseAttrValue
+        : shouldTerminateHtmlAttrValue;
     } else if (code === CODE.OPEN_PAREN) {
       ensureAttrName(this, attr);
       attr.stage = ATTR_STAGE.ARGUMENT;
       this.pos++; // skip (
       this.forward = 0;
-      this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_PAREN;
+      this.enterState(STATE.EXPRESSION).shouldTerminate = matchesCloseParen;
     } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
       ensureAttrName(this, attr);
       attr.stage = ATTR_STAGE.BLOCK;
       this.pos++; // skip {
       this.forward = 0;
       const expr = this.enterState(STATE.EXPRESSION);
-      expr.terminator = CODE.CLOSE_CURLY_BRACE;
+      expr.shouldTerminate = matchesCloseCurlyBrace;
     } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
       attr.stage = ATTR_STAGE.NAME;
       this.forward = 0;
       const expr = this.enterState(STATE.EXPRESSION);
       expr.terminatedByWhitespace = true;
       expr.skipOperators = true;
-      expr.terminator = this.isConcise
-        ? CONCISE_NAME_TERMINATORS
-        : HTML_NAME_TERMINATORS;
+      expr.shouldTerminate = this.isConcise
+        ? this.activeTag!.stage === TAG_STAGE.ATTR_GROUP
+          ? shouldTerminateConciseGroupedAttrName
+          : shouldTerminateConciseAttrName
+        : shouldTerminateHtmlAttrName;
     } else {
       this.exitState();
     }
@@ -280,5 +247,118 @@ function ensureAttrName(parser: Parser, attr: AttrMeta) {
       start: attr.start,
       end: attr.start,
     });
+  }
+}
+
+function shouldTerminateHtmlAttrName(code: number, data: string, pos: number) {
+  switch (code) {
+    case CODE.COMMA:
+    case CODE.EQUAL:
+    case CODE.OPEN_PAREN:
+    case CODE.CLOSE_ANGLE_BRACKET:
+      return true;
+    case CODE.COLON:
+      return data.charCodeAt(pos + 1) === CODE.EQUAL;
+    case CODE.FORWARD_SLASH:
+      return data.charCodeAt(pos + 1) === CODE.CLOSE_ANGLE_BRACKET;
+    default:
+      return false;
+  }
+}
+
+function shouldTerminateHtmlAttrValue(code: number, data: string, pos: number) {
+  switch (code) {
+    case CODE.COMMA:
+      return true;
+    case CODE.FORWARD_SLASH:
+      return data.charCodeAt(pos + 1) === CODE.CLOSE_ANGLE_BRACKET;
+
+    // Add special cases for >> >= =>
+    case CODE.CLOSE_ANGLE_BRACKET:
+      switch (data.charCodeAt(pos + 1)) {
+        case CODE.CLOSE_ANGLE_BRACKET:
+        case CODE.EQUAL:
+          return false;
+        default:
+          switch (data.charCodeAt(pos - 1)) {
+            case CODE.CLOSE_ANGLE_BRACKET:
+            case CODE.EQUAL:
+              return false;
+            default:
+              return true;
+          }
+      }
+    default:
+      return false;
+  }
+}
+
+function shouldTerminateConciseAttrName(
+  code: number,
+  data: string,
+  pos: number
+) {
+  switch (code) {
+    case CODE.COMMA:
+    case CODE.EQUAL:
+    case CODE.OPEN_PAREN:
+    case CODE.SEMICOLON:
+      return true;
+    case CODE.COLON:
+      return data.charCodeAt(pos + 1) === CODE.EQUAL;
+    case CODE.HYPHEN:
+      return (
+        data.charCodeAt(pos + 1) === CODE.HYPHEN &&
+        isWhitespaceCode(data.charCodeAt(pos - 1))
+      );
+    default:
+      return false;
+  }
+}
+
+function shouldTerminateConciseAttrValue(
+  code: number,
+  data: string,
+  pos: number
+) {
+  switch (code) {
+    case CODE.COMMA:
+    case CODE.SEMICOLON:
+      return true;
+    case CODE.HYPHEN:
+      return (
+        data.charCodeAt(pos + 1) === CODE.HYPHEN &&
+        isWhitespaceCode(data.charCodeAt(pos - 1))
+      );
+    default:
+      return false;
+  }
+}
+
+function shouldTerminateConciseGroupedAttrName(
+  code: number,
+  data: string,
+  pos: number
+) {
+  switch (code) {
+    case CODE.COMMA:
+    case CODE.EQUAL:
+    case CODE.OPEN_PAREN:
+    case CODE.CLOSE_SQUARE_BRACKET:
+      return true;
+    case CODE.COLON:
+      return data.charCodeAt(pos + 1) === CODE.EQUAL;
+    default:
+      return false;
+  }
+}
+
+function shouldTerminateConciseGroupedAttrValue(code: number) {
+  switch (code) {
+    case CODE.COMMA:
+    case CODE.CLOSE_SQUARE_BRACKET:
+      return true;
+    default:
+      return false;
   }
 }

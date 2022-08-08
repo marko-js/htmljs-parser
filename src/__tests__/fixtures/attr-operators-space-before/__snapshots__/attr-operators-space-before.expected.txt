@@ -647,17 +647,16 @@
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
-83╭─ <a=x >y <a/>
-  │  ││││ ││ ││╰─ openTagEnd:selfClosed "/>"
-  │  ││││ ││ │╰─ tagName
-  │  ││││ ││ ╰─ openTagStart
+83╭─ <a=x >y </a>
+  │  ││││ ││ │ │╰─ closeTagEnd(a)
+  │  ││││ ││ │ ╰─ closeTagName
+  │  ││││ ││ ╰─ closeTagStart "</"
   │  ││││ │╰─ text "y "
   │  ││││ ╰─ openTagEnd
   │  │││╰─ attrValue.value
   │  ││├─ attrValue "=x"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ error(MISSING_END_TAG:Missing ending "a" tag) "<a=x >"
   ╰─ ╰─ openTagStart
 84╭─ <a=x >>y a/>
   │  ││││     │╰─ openTagEnd:selfClosed "/>"
@@ -666,7 +665,6 @@
   │  ││├─ attrValue "=x >>y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 85╭─ <a=x >>>y a/>
   │  ││││      │╰─ openTagEnd:selfClosed "/>"
@@ -675,7 +673,6 @@
   │  ││├─ attrValue "=x >>>y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 86╭─ <a=x (y ) a/>
   │  ││││      │╰─ openTagEnd:selfClosed "/>"
@@ -684,7 +681,6 @@
   │  ││├─ attrValue "=x (y )"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 87╭─ <a=x {y } a/>
   │  ││││      │╰─ openTagEnd:selfClosed "/>"
@@ -693,7 +689,6 @@
   │  ││├─ attrValue "=x {y }"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 88╭─ <a=x =>y a/>
   │  ││││     │╰─ openTagEnd:selfClosed "/>"
@@ -702,7 +697,6 @@
   │  ││├─ attrValue "=x =>y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 89╭─ <a=x => (y ) a/>
   │  ││││         │╰─ openTagEnd:selfClosed "/>"
@@ -711,7 +705,6 @@
   │  ││├─ attrValue "=x => (y )"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 90╭─ <a=x => {y } a/>
   │  ││││         │╰─ openTagEnd:selfClosed "/>"
@@ -720,7 +713,6 @@
   │  ││├─ attrValue "=x => {y }"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 91╭─ <a=( x ) {y } a/>
   │  ││││          │╰─ openTagEnd:selfClosed "/>"
@@ -729,7 +721,5 @@
   │  ││├─ attrValue "=( x ) {y }"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
-92╭─ 
-  ╰─ ╰─ text "\n"
+92╰─ 

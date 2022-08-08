@@ -110,7 +110,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
     ) {
       this.pos += 2; // skip ${
       this.forward = 0;
-      this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_CURLY_BRACE;
+      this.enterState(STATE.EXPRESSION).shouldTerminate = shouldTerminate;
     } else if (
       isWhitespaceCode(code) ||
       code === CODE.EQUAL ||
@@ -168,3 +168,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
     quasis.push({ start: nextStart, end: nextStart });
   },
 };
+
+function shouldTerminate(code: number) {
+  return code === CODE.CLOSE_CURLY_BRACE;
+}

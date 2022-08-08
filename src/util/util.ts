@@ -68,6 +68,18 @@ export function htmlEOF(this: Parser) {
   }
 }
 
+export function matchesCloseParen(code: number) {
+  return code === CODE.CLOSE_PAREN;
+}
+
+export function matchesCloseCurlyBrace(code: number) {
+  return code === CODE.CLOSE_CURLY_BRACE;
+}
+
+export function matchesPipe(code: number) {
+  return code === CODE.PIPE;
+}
+
 function getPosAfterLine(
   lines: number[],
   startLine: number,

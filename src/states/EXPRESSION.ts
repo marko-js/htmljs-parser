@@ -8,25 +8,16 @@ import {
   ErrorCode,
 } from "../internal";
 
-export enum OPERATOR_TERMINATOR {
-  // All operators are ok.
-  None = 0,
-  // Prevents double hyphens (set when in concise mode attrs).
-  Hyphens = 1,
-  // Prevent equals continuing an expression (set for tag variable expression)
-  AttrValue = 1 << 1,
-  // Prevent close angle bracket continuing an expression (set for html mode attrs)
-  CloseAngleBracket = 1 << 2,
-}
-
 export interface ExpressionMeta extends Meta {
   groupStack: number[];
-  terminator: number | (number | number[])[];
   skipOperators: boolean;
   terminatedByEOL: boolean;
   terminatedByWhitespace: boolean;
-  operatorTerminator: OPERATOR_TERMINATOR;
+  shouldTerminate(code: number, data: string, pos: number): boolean;
 }
+
+// Never terminate early by default.
+const shouldTerminate = () => false;
 
 const unaryKeywords = [
   "async",
@@ -51,11 +42,10 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       start,
       end: start,
       groupStack: [],
-      terminator: -1,
+      shouldTerminate,
       skipOperators: false,
       terminatedByEOL: false,
       terminatedByWhitespace: false,
-      operatorTerminator: OPERATOR_TERMINATOR.None,
     };
   },
 
@@ -70,11 +60,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         return;
       }
 
-      if (
-        typeof expression.terminator === "number"
-          ? expression.terminator === code
-          : checkForTerminators(this, code, expression.terminator)
-      ) {
+      if (expression.shouldTerminate(code, this.data, this.pos)) {
         this.exitState();
         return;
       }
@@ -232,52 +218,37 @@ function checkForOperators(
   if (expression.skipOperators) return false;
 
   const { pos, data } = parser;
-  const lookBehindPos = lookBehindForOperator(data, pos);
-  if (lookBehindPos !== -1) {
+  if (lookBehindForOperator(data, pos) !== -1) {
     parser.consumeWhitespace();
     parser.forward = 0;
     return true;
   }
+
   const terminatedByEOL = expression.terminatedByEOL || parser.isConcise;
   if (!(terminatedByEOL && eol)) {
-    const lookAheadPos = lookAheadForOperator(
+    const nextNonSpace = lookAheadWhile(
+      terminatedByEOL ? isIndentCode : isWhitespaceCode,
       data,
-      lookAheadWhile(
-        terminatedByEOL ? isIndentCode : isWhitespaceCode,
-        data,
-        pos + 1
-      ),
-      expression.operatorTerminator
+      pos + 1
     );
-    if (lookAheadPos !== -1) {
-      parser.pos = lookAheadPos;
-      parser.forward = 0;
-      return true;
-    }
-  }
 
-  return false;
-}
-
-function checkForTerminators(
-  parser: Parser,
-  code: number,
-  terminators: (number | number[])[]
-) {
-  outer: for (const terminator of terminators) {
-    if (typeof terminator === "number") {
-      if (code === terminator) return true;
-    } else {
-      if (terminator[0] === code) {
-        for (let i = terminator.length; i-- > 1; ) {
-          if (parser.data.charCodeAt(parser.pos + i) !== terminator[i])
-            continue outer;
-        }
-
+    if (
+      !expression.shouldTerminate(
+        data.charCodeAt(nextNonSpace),
+        data,
+        nextNonSpace
+      )
+    ) {
+      const lookAheadPos = lookAheadForOperator(data, nextNonSpace);
+      if (lookAheadPos !== -1) {
+        parser.pos = lookAheadPos;
+        parser.forward = 0;
         return true;
       }
     }
   }
+
+  return false;
 }
 
 function lookBehindForOperator(data: string, pos: number): number {
@@ -300,9 +271,9 @@ function lookBehindForOperator(data: string, pos: number): number {
     case CODE.TILDE:
       return curPos;
 
+    // special case -- and ++
     case CODE.PLUS:
     case CODE.HYPHEN: {
-      // special case -- and ++
       if (data.charCodeAt(curPos - 1) === code) {
         // Check if we should continue for another reason.
         // eg "typeof++ x"
@@ -319,10 +290,9 @@ function lookBehindForOperator(data: string, pos: number): number {
       for (const keyword of unaryKeywords) {
         const keywordPos = lookBehindFor(data, curPos, keyword);
         if (keywordPos !== -1) {
-          return keywordPos === 0 ||
-            data.charCodeAt(keywordPos - 1) !== CODE.PERIOD
-            ? keywordPos
-            : -1;
+          return data.charCodeAt(keywordPos - 1) === CODE.PERIOD
+            ? -1
+            : keywordPos;
         }
       }
       return -1;
@@ -330,11 +300,7 @@ function lookBehindForOperator(data: string, pos: number): number {
   }
 }
 
-function lookAheadForOperator(
-  data: string,
-  pos: number,
-  terminator: OPERATOR_TERMINATOR
-): number {
+function lookAheadForOperator(data: string, pos: number): number {
   switch (data.charCodeAt(pos)) {
     case CODE.AMPERSAND:
     case CODE.ASTERISK:
@@ -346,82 +312,20 @@ function lookAheadForOperator(
     case CODE.QUESTION:
     case CODE.TILDE:
     case CODE.PLUS:
+    case CODE.HYPHEN:
+    case CODE.COLON:
+    case CODE.CLOSE_ANGLE_BRACKET:
+    case CODE.EQUAL:
       return pos + 1;
 
-    case CODE.HYPHEN: {
-      return (terminator & OPERATOR_TERMINATOR.Hyphens) ===
-        OPERATOR_TERMINATOR.Hyphens && data.charCodeAt(pos + 1) === CODE.HYPHEN
-        ? -1
-        : pos + 1;
-    }
-
+    case CODE.FORWARD_SLASH:
     case CODE.OPEN_CURLY_BRACE:
     case CODE.OPEN_PAREN:
       return pos; // defers to base expression state to track block groups.
 
-    case CODE.FORWARD_SLASH:
-      return (terminator & OPERATOR_TERMINATOR.CloseAngleBracket) ===
-        OPERATOR_TERMINATOR.CloseAngleBracket &&
-        data.charCodeAt(pos + 1) === CODE.CLOSE_ANGLE_BRACKET
-        ? -1
-        : pos; // defers to base expression state to track regexp groups.
-
-    case CODE.COLON:
-      return (terminator & OPERATOR_TERMINATOR.AttrValue) ===
-        OPERATOR_TERMINATOR.AttrValue && data.charCodeAt(pos + 1) === CODE.EQUAL
-        ? -1
-        : pos + 1;
-
     case CODE.PERIOD:
       // Only match a dot if its not ...
       return data.charCodeAt(pos + 1) === CODE.PERIOD ? -1 : pos + 1;
-
-    case CODE.CLOSE_ANGLE_BRACKET:
-      // In concise mode a > is a normal operator.
-      if (
-        (terminator & OPERATOR_TERMINATOR.CloseAngleBracket) !==
-        OPERATOR_TERMINATOR.CloseAngleBracket
-      ) {
-        return pos + 1;
-      }
-
-      // Otherwise we match >=, >> and >>>
-      switch (data.charCodeAt(pos + 1)) {
-        case CODE.EQUAL:
-          return pos + 2;
-        case CODE.CLOSE_ANGLE_BRACKET:
-          return (
-            pos +
-            (data.charCodeAt(pos + 2) === CODE.CLOSE_ANGLE_BRACKET ? 3 : 2)
-          );
-        default:
-          return -1;
-      }
-    case CODE.EQUAL:
-      if (
-        (terminator & OPERATOR_TERMINATOR.AttrValue) ===
-        OPERATOR_TERMINATOR.AttrValue
-      ) {
-        return -1;
-      }
-
-      if (
-        (terminator & OPERATOR_TERMINATOR.CloseAngleBracket) !==
-        OPERATOR_TERMINATOR.CloseAngleBracket
-      ) {
-        return pos + 1;
-      }
-
-      // We'll match ==, ===, and =>
-      // This is primarily to support => since otherwise it'd end a CloseAngleBracket terminator.
-      switch (data.charCodeAt(pos + 1)) {
-        case CODE.CLOSE_ANGLE_BRACKET:
-          return pos + 2;
-        case CODE.EQUAL:
-          return pos + (data.charCodeAt(pos + 2) === CODE.EQUAL ? 3 : 2);
-        default:
-          return -1;
-      }
 
     default: {
       for (const keyword of binaryKeywords) {

@@ -1,4 +1,11 @@
-import { CODE, Range, STATE, StateDefinition, Meta } from "../internal";
+import {
+  CODE,
+  Range,
+  STATE,
+  StateDefinition,
+  Meta,
+  matchesCloseCurlyBrace,
+} from "../internal";
 
 interface ScriptletMeta extends Meta {
   block: boolean;
@@ -44,7 +51,7 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
       inlineScript.block = true;
       this.pos++; // skip {
       const expr = this.enterState(STATE.EXPRESSION);
-      expr.terminator = CODE.CLOSE_CURLY_BRACE;
+      expr.shouldTerminate = matchesCloseCurlyBrace;
       expr.skipOperators = true;
     } else {
       const expr = this.enterState(STATE.EXPRESSION);
