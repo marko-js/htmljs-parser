@@ -272,22 +272,9 @@ function shouldTerminateHtmlAttrValue(code: number, data: string, pos: number) {
       return true;
     case CODE.FORWARD_SLASH:
       return data.charCodeAt(pos + 1) === CODE.CLOSE_ANGLE_BRACKET;
-
-    // Add special cases for >> >= =>
+    // Add special case for =>
     case CODE.CLOSE_ANGLE_BRACKET:
-      switch (data.charCodeAt(pos + 1)) {
-        case CODE.CLOSE_ANGLE_BRACKET:
-        case CODE.EQUAL:
-          return false;
-        default:
-          switch (data.charCodeAt(pos - 1)) {
-            case CODE.CLOSE_ANGLE_BRACKET:
-            case CODE.EQUAL:
-              return false;
-            default:
-              return true;
-          }
-      }
+      return data.charCodeAt(pos - 1) !== CODE.EQUAL;
     default:
       return false;
   }

@@ -699,11 +699,14 @@
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
-89╭─ <a=x >= y a/>
-  │  ││││      │╰─ openTagEnd:selfClosed "/>"
-  │  ││││      ╰─ attrName
-  │  │││╰─ attrValue.value "x >= y"
-  │  ││├─ attrValue "=x >= y"
+89╭─ <a=x >= y </a>
+  │  ││││ ││   │ │╰─ closeTagEnd(a)
+  │  ││││ ││   │ ╰─ closeTagName
+  │  ││││ ││   ╰─ closeTagStart "</"
+  │  ││││ │╰─ text "= y "
+  │  ││││ ╰─ openTagEnd
+  │  │││╰─ attrValue.value
+  │  ││├─ attrValue "=x"
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
@@ -755,19 +758,25 @@
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
-96╭─ <a=x >>= y a/>
-  │  ││││       │╰─ openTagEnd:selfClosed "/>"
-  │  ││││       ╰─ attrName
-  │  │││╰─ attrValue.value "x >>= y"
-  │  ││├─ attrValue "=x >>= y"
+96╭─ <a=x >>= y </a>
+  │  ││││ ││    │ │╰─ closeTagEnd(a)
+  │  ││││ ││    │ ╰─ closeTagName
+  │  ││││ ││    ╰─ closeTagStart "</"
+  │  ││││ │╰─ text ">= y "
+  │  ││││ ╰─ openTagEnd
+  │  │││╰─ attrValue.value
+  │  ││├─ attrValue "=x"
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
-97╭─ <a=x >>>= y a/>
-  │  ││││        │╰─ openTagEnd:selfClosed "/>"
-  │  ││││        ╰─ attrName
-  │  │││╰─ attrValue.value "x >>>= y"
-  │  ││├─ attrValue "=x >>>= y"
+97╭─ <a=x >>>= y </a>
+  │  ││││ ││     │ │╰─ closeTagEnd(a)
+  │  ││││ ││     │ ╰─ closeTagName
+  │  ││││ ││     ╰─ closeTagStart "</"
+  │  ││││ │╰─ text ">>= y "
+  │  ││││ ╰─ openTagEnd
+  │  │││╰─ attrValue.value
+  │  ││├─ attrValue "=x"
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
@@ -914,19 +923,25 @@
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-115╭─ <a=x >> y a/>
-   │  ││││      │╰─ openTagEnd:selfClosed "/>"
-   │  ││││      ╰─ attrName
-   │  │││╰─ attrValue.value "x >> y"
-   │  ││├─ attrValue "=x >> y"
+115╭─ <a=x >> y </a>
+   │  ││││ ││   │ │╰─ closeTagEnd(a)
+   │  ││││ ││   │ ╰─ closeTagName
+   │  ││││ ││   ╰─ closeTagStart "</"
+   │  ││││ │╰─ text "> y "
+   │  ││││ ╰─ openTagEnd
+   │  │││╰─ attrValue.value
+   │  ││├─ attrValue "=x"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-116╭─ <a=x >>> y a/>
-   │  ││││       │╰─ openTagEnd:selfClosed "/>"
-   │  ││││       ╰─ attrName
-   │  │││╰─ attrValue.value "x >>> y"
-   │  ││├─ attrValue "=x >>> y"
+116╭─ <a=x >>> y </a>
+   │  ││││ ││    │ │╰─ closeTagEnd(a)
+   │  ││││ ││    │ ╰─ closeTagName
+   │  ││││ ││    ╰─ closeTagStart "</"
+   │  ││││ │╰─ text ">> y "
+   │  ││││ ╰─ openTagEnd
+   │  │││╰─ attrValue.value
+   │  ││├─ attrValue "=x"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart

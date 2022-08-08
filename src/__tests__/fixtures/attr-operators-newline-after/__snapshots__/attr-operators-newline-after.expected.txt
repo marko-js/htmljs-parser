@@ -683,14 +683,17 @@
    │    │╰─ openTagEnd:selfClosed "/>"
    ╰─   ╰─ attrName
 159╭─ <a=x >=
-   │  │││╰─ attrValue.value "x >=\ny"
-   │  ││├─ attrValue "=x >=\ny"
+   │  ││││ │╰─ text "=\ny "
+   │  ││││ ╰─ openTagEnd
+   │  │││╰─ attrValue.value
+   │  ││├─ attrValue "=x"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-160╭─ y a/>
-   │    │╰─ openTagEnd:selfClosed "/>"
-   ╰─   ╰─ attrName
+160╭─ y </a>
+   │    │ │╰─ closeTagEnd(a)
+   │    │ ╰─ closeTagName
+   ╰─   ╰─ closeTagStart "</"
 161╭─ <a=x &=
    │  │││╰─ attrValue.value "x &=\ny"
    │  ││├─ attrValue "=x &=\ny"
@@ -746,23 +749,29 @@
    │    │╰─ openTagEnd:selfClosed "/>"
    ╰─   ╰─ attrName
 173╭─ <a=x >>=
-   │  │││╰─ attrValue.value "x >>=\ny"
-   │  ││├─ attrValue "=x >>=\ny"
+   │  ││││ │╰─ text ">=\ny "
+   │  ││││ ╰─ openTagEnd
+   │  │││╰─ attrValue.value
+   │  ││├─ attrValue "=x"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-174╭─ y a/>
-   │    │╰─ openTagEnd:selfClosed "/>"
-   ╰─   ╰─ attrName
+174╭─ y </a>
+   │    │ │╰─ closeTagEnd(a)
+   │    │ ╰─ closeTagName
+   ╰─   ╰─ closeTagStart "</"
 175╭─ <a=x >>>=
-   │  │││╰─ attrValue.value "x >>>=\ny"
-   │  ││├─ attrValue "=x >>>=\ny"
+   │  ││││ │╰─ text ">>=\ny "
+   │  ││││ ╰─ openTagEnd
+   │  │││╰─ attrValue.value
+   │  ││├─ attrValue "=x"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-176╭─ y a/>
-   │    │╰─ openTagEnd:selfClosed "/>"
-   ╰─   ╰─ attrName
+176╭─ y </a>
+   │    │ │╰─ closeTagEnd(a)
+   │    │ ╰─ closeTagName
+   ╰─   ╰─ closeTagStart "</"
 177╭─ <a=x -=
    │  │││╰─ attrValue.value "x -=\ny"
    │  ││├─ attrValue "=x -=\ny"
@@ -836,23 +845,29 @@
    │       │╰─ openTagEnd:selfClosed "/>"
    ╰─      ╰─ attrName
 193╭─ <a=x >>
-   │  │││╰─ attrValue.value "x >>\ny"
-   │  ││├─ attrValue "=x >>\ny"
+   │  ││││ │╰─ text ">\ny "
+   │  ││││ ╰─ openTagEnd
+   │  │││╰─ attrValue.value
+   │  ││├─ attrValue "=x"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-194╭─ y a/>
-   │    │╰─ openTagEnd:selfClosed "/>"
-   ╰─   ╰─ attrName
+194╭─ y </a>
+   │    │ │╰─ closeTagEnd(a)
+   │    │ ╰─ closeTagName
+   ╰─   ╰─ closeTagStart "</"
 195╭─ <a=x >>>
-   │  │││╰─ attrValue.value "x >>>\ny"
-   │  ││├─ attrValue "=x >>>\ny"
+   │  ││││ │╰─ text ">>\ny "
+   │  ││││ ╰─ openTagEnd
+   │  │││╰─ attrValue.value
+   │  ││├─ attrValue "=x"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-196╭─ y a/>
-   │    │╰─ openTagEnd:selfClosed "/>"
-   ╰─   ╰─ attrName
+196╭─ y </a>
+   │    │ │╰─ closeTagEnd(a)
+   │    │ ╰─ closeTagName
+   ╰─   ╰─ closeTagStart "</"
 197╭─ <a=x
    │  │││╰─ attrValue.value "x\n( y )"
    │  ││├─ attrValue "=x\n( y )"
