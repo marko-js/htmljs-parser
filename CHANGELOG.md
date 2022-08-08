@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.1.2
+
+### Patch Changes
+
+- [#130](https://github.com/marko-js/htmljs-parser/pull/130) [`ebc850f`](https://github.com/marko-js/htmljs-parser/commit/ebc850f8aa0f5ad544f11cae18998a42cf56f54b) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Switch from regexp based parsing for the expression continuations. This slightly improves performance and more importantly fixes usage of the parser in safari.
+
 ## 5.1.1
 
 ### Patch Changes
