@@ -7,9 +7,11 @@ import {
   Meta,
   TagType,
   ErrorCode,
+  matchesPipe,
+  matchesCloseParen,
 } from "../internal";
 
-export const enum TAG_STAGE {
+export enum TAG_STAGE {
   UNKNOWN,
   VAR,
   ARGUMENT,
@@ -32,24 +34,6 @@ export interface OpenTagMeta extends Meta {
   nestedIndent: string | undefined;
   parentTag: OpenTagMeta | undefined;
 }
-const CONCISE_TAG_VAR_TERMINATORS = [
-  CODE.SEMICOLON,
-  CODE.OPEN_PAREN,
-  CODE.PIPE,
-  CODE.EQUAL,
-  CODE.COMMA,
-  [CODE.COLON, CODE.EQUAL],
-];
-
-const HTML_TAG_VAR_TERMINATORS = [
-  CODE.CLOSE_ANGLE_BRACKET,
-  CODE.OPEN_PAREN,
-  CODE.PIPE,
-  CODE.EQUAL,
-  CODE.COMMA,
-  [CODE.COLON, CODE.EQUAL],
-  [CODE.FORWARD_SLASH, CODE.CLOSE_ANGLE_BRACKET],
-];
 
 export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   name: "OPEN_TAG",
@@ -309,10 +293,11 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       }
 
       const expr = this.enterState(STATE.EXPRESSION);
+      expr.operators = true;
       expr.terminatedByWhitespace = true;
-      expr.terminator = this.isConcise
-        ? CONCISE_TAG_VAR_TERMINATORS
-        : HTML_TAG_VAR_TERMINATORS;
+      expr.shouldTerminate = this.isConcise
+        ? shouldTerminateConciseTagVar
+        : shouldTerminateHtmlTagVar;
     } else if (code === CODE.OPEN_PAREN && !tag.hasAttrs) {
       if (tag.hasArgs) {
         this.emitError(
@@ -325,16 +310,12 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       tag.stage = TAG_STAGE.ARGUMENT;
       this.pos++; // skip (
       this.forward = 0;
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.skipOperators = true;
-      expr.terminator = CODE.CLOSE_PAREN;
+      this.enterState(STATE.EXPRESSION).shouldTerminate = matchesCloseParen;
     } else if (code === CODE.PIPE && !tag.hasAttrs) {
       tag.stage = TAG_STAGE.PARAMS;
       this.pos++; // skip |
       this.forward = 0;
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.skipOperators = true;
-      expr.terminator = CODE.PIPE;
+      this.enterState(STATE.EXPRESSION).shouldTerminate = matchesPipe;
     } else {
       this.forward = 0;
 
@@ -416,3 +397,35 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     }
   },
 };
+
+function shouldTerminateConciseTagVar(code: number, data: string, pos: number) {
+  switch (code) {
+    case CODE.COMMA:
+    case CODE.EQUAL:
+    case CODE.PIPE:
+    case CODE.OPEN_PAREN:
+    case CODE.SEMICOLON:
+      return true;
+    case CODE.COLON:
+      return data.charCodeAt(pos + 1) === CODE.EQUAL;
+    default:
+      return false;
+  }
+}
+
+function shouldTerminateHtmlTagVar(code: number, data: string, pos: number) {
+  switch (code) {
+    case CODE.PIPE:
+    case CODE.COMMA:
+    case CODE.EQUAL:
+    case CODE.OPEN_PAREN:
+    case CODE.CLOSE_ANGLE_BRACKET:
+      return true;
+    case CODE.COLON:
+      return data.charCodeAt(pos + 1) === CODE.EQUAL;
+    case CODE.FORWARD_SLASH:
+      return data.charCodeAt(pos + 1) === CODE.CLOSE_ANGLE_BRACKET;
+    default:
+      return false;
+  }
+}

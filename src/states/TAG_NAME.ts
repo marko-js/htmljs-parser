@@ -7,6 +7,7 @@ import {
   Meta,
   TagType,
   ErrorCode,
+  matchesCloseCurlyBrace,
 } from "../internal";
 
 export interface TagNameMeta extends Meta, Ranges.Template {
@@ -94,7 +95,9 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
               );
             }
 
-            this.enterState(STATE.EXPRESSION).terminatedByEOL = true;
+            const expr = this.enterState(STATE.EXPRESSION);
+            expr.operators = true;
+            expr.terminatedByEOL = true;
           }
         }
 
@@ -110,7 +113,8 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
     ) {
       this.pos += 2; // skip ${
       this.forward = 0;
-      this.enterState(STATE.EXPRESSION).terminator = CODE.CLOSE_CURLY_BRACE;
+      this.enterState(STATE.EXPRESSION).shouldTerminate =
+        matchesCloseCurlyBrace;
     } else if (
       isWhitespaceCode(code) ||
       code === CODE.EQUAL ||

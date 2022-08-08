@@ -1,0 +1,9 @@
+1╭─ tag a = 'foo' instanceof   
+ │  │   │ │ │     ╰─ attrName "instanceof"
+ │  │   │ │ ╰─ attrValue.value "'foo'"
+ │  │   │ ╰─ attrValue "= 'foo'"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "tag"
+2╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(tag)

@@ -74,3 +74,22 @@
   │  ││   ╰─ attrName
   │  │╰─ tagName "tag"
   ╰─ ╰─ openTagStart
+12├─ 
+13╭─ tag a = 'foo' instanceofthing String
+  │  │   │ │ │     │               ╰─ attrName "String"
+  │  │   │ │ │     ╰─ attrName "instanceofthing"
+  │  │   │ │ ╰─ attrValue.value "'foo'"
+  │  │   │ ╰─ attrValue "= 'foo'"
+  │  │   ╰─ attrName
+  ╰─ ╰─ tagName "tag"
+14╭─ 
+  ╰─ ╰─ openTagEnd
+15╭─ tag a = 'foo' instanceof
+  │  │   │ │ │     │         ├─ closeTagEnd(tag)
+  │  │   │ │ │     │         ╰─ openTagEnd
+  │  │   │ │ │     ╰─ attrName "instanceof"
+  │  │   │ │ ╰─ attrValue.value "'foo'"
+  │  │   │ ╰─ attrValue "= 'foo'"
+  │  │   ╰─ attrName
+  │  ├─ closeTagEnd(tag)
+  ╰─ ╰─ tagName "tag"

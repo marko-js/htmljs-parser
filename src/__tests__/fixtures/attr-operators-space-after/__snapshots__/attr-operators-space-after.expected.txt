@@ -511,8 +511,11 @@
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
-66╭─ <a=x>= y a/>
-  │  │││││╰─ text "= y a/>\n"
+66╭─ <a=x>= y </a>
+  │  ││││││   │ │╰─ closeTagEnd(a)
+  │  ││││││   │ ╰─ closeTagName
+  │  ││││││   ╰─ closeTagStart "</"
+  │  │││││╰─ text "= y "
   │  ││││╰─ openTagEnd
   │  │││╰─ attrValue.value
   │  ││├─ attrValue "=x"
@@ -534,7 +537,6 @@
   │  ││├─ attrValue "=x&&= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 69╭─ <a=x|= y a/>
   │  ││││     │╰─ openTagEnd:selfClosed "/>"
@@ -543,7 +545,6 @@
   │  ││├─ attrValue "=x|= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 70╭─ <a=x||= y a/>
   │  ││││      │╰─ openTagEnd:selfClosed "/>"
@@ -552,7 +553,6 @@
   │  ││├─ attrValue "=x||= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 71╭─ <a=x^= y a/>
   │  ││││     │╰─ openTagEnd:selfClosed "/>"
@@ -561,7 +561,6 @@
   │  ││├─ attrValue "=x^= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 72╭─ <a=x~= y a/>
   │  ││││     │╰─ openTagEnd:selfClosed "/>"
@@ -570,19 +569,23 @@
   │  ││├─ attrValue "=x~= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
-73╭─ <a=x>>= y a/>
-  │  │││││╰─ text ">= y a/>\n"
+73╭─ <a=x>>= y </a>
+  │  ││││││    │ │╰─ closeTagEnd(a)
+  │  ││││││    │ ╰─ closeTagName
+  │  ││││││    ╰─ closeTagStart "</"
+  │  │││││╰─ text ">= y "
   │  ││││╰─ openTagEnd
   │  │││╰─ attrValue.value
   │  ││├─ attrValue "=x"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
-74╭─ <a=x>>>= y a/>
-  │  │││││╰─ text ">>= y a/>\n"
+74╭─ <a=x>>>= y </a>
+  │  ││││││     │ │╰─ closeTagEnd(a)
+  │  ││││││     │ ╰─ closeTagName
+  │  ││││││     ╰─ closeTagStart "</"
+  │  │││││╰─ text ">>= y "
   │  ││││╰─ openTagEnd
   │  │││╰─ attrValue.value
   │  ││├─ attrValue "=x"
@@ -604,7 +607,6 @@
   │  ││├─ attrValue "=x/= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 77╭─ <a=x*= y a/>
   │  ││││     │╰─ openTagEnd:selfClosed "/>"
@@ -613,7 +615,6 @@
   │  ││├─ attrValue "=x*= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 78╭─ <a=x**= y a/>
   │  ││││      │╰─ openTagEnd:selfClosed "/>"
@@ -622,7 +623,6 @@
   │  ││├─ attrValue "=x**= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 79╭─ <a=x%= y a/>
   │  ││││     │╰─ openTagEnd:selfClosed "/>"
@@ -631,7 +631,6 @@
   │  ││├─ attrValue "=x%= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 80╭─ <a=x+= y a/>
   │  ││││     │╰─ openTagEnd:selfClosed "/>"
@@ -640,7 +639,6 @@
   │  ││├─ attrValue "=x+= y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 81╭─ <a=x++ + y a/>
   │  ││││       │╰─ openTagEnd:selfClosed "/>"
@@ -649,7 +647,6 @@
   │  ││├─ attrValue "=x++ + y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 82╭─ <a=x+ ++ y a/>
   │  ││││       │╰─ openTagEnd:selfClosed "/>"
@@ -658,31 +655,34 @@
   │  ││├─ attrValue "=x+ ++ y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
-83╭─ <a=x> y <a/>
-  │  ││││││  ││╰─ openTagEnd:selfClosed "/>"
-  │  ││││││  │╰─ tagName
-  │  ││││││  ╰─ openTagStart
+83╭─ <a=x> y </a>
+  │  ││││││  │ │╰─ closeTagEnd(a)
+  │  ││││││  │ ╰─ closeTagName
+  │  ││││││  ╰─ closeTagStart "</"
   │  │││││╰─ text " y "
   │  ││││╰─ openTagEnd
   │  │││╰─ attrValue.value
   │  ││├─ attrValue "=x"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
-84╭─ <a=x>> y a/>
-  │  │││││╰─ text "> y a/>\n"
+84╭─ <a=x>> y </a>
+  │  ││││││   │ │╰─ closeTagEnd(a)
+  │  ││││││   │ ╰─ closeTagName
+  │  ││││││   ╰─ closeTagStart "</"
+  │  │││││╰─ text "> y "
   │  ││││╰─ openTagEnd
   │  │││╰─ attrValue.value
   │  ││├─ attrValue "=x"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
-85╭─ <a=x>>> y a/>
-  │  │││││╰─ text ">> y a/>\n"
+85╭─ <a=x>>> y </a>
+  │  ││││││    │ │╰─ closeTagEnd(a)
+  │  ││││││    │ ╰─ closeTagName
+  │  ││││││    ╰─ closeTagStart "</"
+  │  │││││╰─ text ">> y "
   │  ││││╰─ openTagEnd
   │  │││╰─ attrValue.value
   │  ││├─ attrValue "=x"
@@ -704,33 +704,30 @@
   │  ││├─ attrValue "=z {y }"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 88╭─ <a=x=> y a/>
-  │  ││││ │╰─ text " y a/>\n"
-  │  ││││ ╰─ openTagEnd
-  │  │││╰─ attrValue.value "x="
-  │  ││├─ attrValue "=x="
+  │  ││││     │╰─ openTagEnd:selfClosed "/>"
+  │  ││││     ╰─ attrName
+  │  │││╰─ attrValue.value "x=> y"
+  │  ││├─ attrValue "=x=> y"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ text "\n"
   ╰─ ╰─ openTagStart
 89╭─ <a=x=> (y ) a/>
-  │  ││││ │╰─ text " (y ) a/>\n"
-  │  ││││ ╰─ openTagEnd
-  │  │││╰─ attrValue.value "x="
-  │  ││├─ attrValue "=x="
+  │  ││││        │╰─ openTagEnd:selfClosed "/>"
+  │  ││││        ╰─ attrName
+  │  │││╰─ attrValue.value "x=> (y )"
+  │  ││├─ attrValue "=x=> (y )"
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
 90╭─ <a=x=> {y } a/>
-  │  ││││ │╰─ text " {y } a/>\n"
-  │  ││││ ╰─ openTagEnd
-  │  │││╰─ attrValue.value "x="
-  │  ││├─ attrValue "=x="
+  │  ││││        │╰─ openTagEnd:selfClosed "/>"
+  │  ││││        ╰─ attrName
+  │  │││╰─ attrValue.value "x=> {y }"
+  │  ││├─ attrValue "=x=> {y }"
   │  ││╰─ attrName
   │  │╰─ tagName
-  │  ├─ error(MISSING_END_TAG:Missing ending "a" tag) "<a=x=>"
   ╰─ ╰─ openTagStart
 91╭─ <a=(x ) {y } a/>
   │  ││││         │╰─ openTagEnd:selfClosed "/>"
@@ -740,5 +737,4 @@
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
-92╭─ 
-  ╰─ ╰─ text "\n"
+92╰─ 
