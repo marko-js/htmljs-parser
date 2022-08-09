@@ -6,3 +6,32 @@
  │  ││     ╰─ openTagEnd
  │  │╰─ tagName "script"
  ╰─ ╰─ openTagStart
+2├─ 
+3╭─ <div>
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╭─   <script>// this is a comment</script>
+ │  │ ││     ││                   │ │     ╰─ closeTagEnd(script)
+ │  │ ││     ││                   │ ╰─ closeTagName "script"
+ │  │ ││     ││                   ╰─ closeTagStart "</"
+ │  │ ││     │╰─ text "// this is a comment"
+ │  │ ││     ╰─ openTagEnd
+ │  │ │╰─ tagName "script"
+ │  │ ╰─ openTagStart
+ ╰─ ╰─ text "\n  "
+5╭─   <span>hi</span>
+ │  │ ││   ││ │ │   ╰─ closeTagEnd(span)
+ │  │ ││   ││ │ ╰─ closeTagName "span"
+ │  │ ││   ││ ╰─ closeTagStart "</"
+ │  │ ││   │╰─ text "hi"
+ │  │ ││   ╰─ openTagEnd
+ │  │ │╰─ tagName "span"
+ │  │ ╰─ openTagStart
+ ╰─ ╰─ text "\n  "
+6╭─ </div>
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTagStart "</"
+7╰─ 
