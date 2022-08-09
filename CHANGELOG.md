@@ -1,5 +1,13 @@
 # htmljs-parser
 
+## 5.1.3
+
+### Patch Changes
+
+- [#132](https://github.com/marko-js/htmljs-parser/pull/132) [`59a10d5`](https://github.com/marko-js/htmljs-parser/commit/59a10d57b1c6fa273ceafe19ff814a1ae03409bf) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix regression which caused script tags with a trailing comment as the same line as the closing tag to not always parse properly.
+
+* [#132](https://github.com/marko-js/htmljs-parser/pull/132) [`59a10d5`](https://github.com/marko-js/htmljs-parser/commit/59a10d57b1c6fa273ceafe19ff814a1ae03409bf) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Remove unecessary check for cdata inside parsed text state.
+
 ## 5.1.2
 
 ### Patch Changes
