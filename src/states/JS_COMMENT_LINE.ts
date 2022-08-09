@@ -21,11 +21,12 @@ export const JS_COMMENT_LINE: StateDefinition = {
     if (
       !this.isConcise &&
       code === CODE.OPEN_ANGLE_BRACKET &&
-      this.activeTag?.type === TagType.text
+      this.activeTag?.type === TagType.text &&
+      STATE.checkForClosingTag(this)
     ) {
-      // First, see if we need to see if we reached the closing tag
+      // We need to see if we reached the closing tag
       // eg: <script>//foo</script>
-      STATE.checkForClosingTag(this);
+      this.exitState();
     }
   },
 
