@@ -1,0 +1,6 @@
+1╭─ <span class=>
+ │  ││    │     ╰─ error(INVALID_ATTRIBUTE_VALUE:Missing value for attribute)
+ │  ││    ╰─ attrName "class"
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
+2╰─ 
