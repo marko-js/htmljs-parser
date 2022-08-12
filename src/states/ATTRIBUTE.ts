@@ -266,15 +266,22 @@ function shouldTerminateHtmlAttrName(code: number, data: string, pos: number) {
   }
 }
 
-function shouldTerminateHtmlAttrValue(code: number, data: string, pos: number) {
+function shouldTerminateHtmlAttrValue(
+  this: STATE.ExpressionMeta,
+  code: number,
+  data: string,
+  pos: number
+) {
   switch (code) {
     case CODE.COMMA:
       return true;
     case CODE.FORWARD_SLASH:
       return data.charCodeAt(pos + 1) === CODE.CLOSE_ANGLE_BRACKET;
-    // Add special case for =>
     case CODE.CLOSE_ANGLE_BRACKET:
-      return data.charCodeAt(pos - 1) !== CODE.EQUAL;
+      // Add special case for =>
+      // We only look behind to match => if we're not at the start of the expression
+      // otherwise this would match something like "<span class=>".
+      return pos === this.start || data.charCodeAt(pos - 1) !== CODE.EQUAL;
     default:
       return false;
   }
