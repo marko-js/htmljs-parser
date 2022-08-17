@@ -1,5 +1,13 @@
 # htmljs-parser
 
+## 5.1.4
+
+### Patch Changes
+
+- [#136](https://github.com/marko-js/htmljs-parser/pull/136) [`b5fa4d0`](https://github.com/marko-js/htmljs-parser/commit/b5fa4d02599cf8ec840d70e813b08959ba0ec21d) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Optimize parser constructor to avoid initializing unecessary properties.
+
+* [#134](https://github.com/marko-js/htmljs-parser/pull/134) [`cdbc6b2`](https://github.com/marko-js/htmljs-parser/commit/cdbc6b2cfb22070f2330e7e37eb61a79e21f0c4d) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Improve missing attribute error when the tag is immediately closed without the attribute value.
+
 ## 5.1.3
 
 ### Patch Changes
