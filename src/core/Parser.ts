@@ -30,24 +30,22 @@ export interface StateDefinition<P extends Meta = Meta> {
 }
 
 export class Parser {
-  public pos!: number;
-  public maxPos!: number;
-  public data!: string;
-  public activeState!: StateDefinition;
-  public activeRange!: Meta;
-  public forward!: number;
-  public activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
-  public activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
-  public indent!: string; // Used to build the indent for the current concise line
-  public isConcise!: boolean; // Set to true if parser is currently in concise mode
-  public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
-  public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
-  public textPos!: number; // Used to buffer text that is found within the body of a tag
-  public lines: undefined | number[]; // Keeps track of line indexes to provide line/column info.
+  public declare pos: number;
+  public declare maxPos: number;
+  public declare data: string;
+  public declare activeState: StateDefinition;
+  public declare activeRange: Meta;
+  public declare forward: number;
+  public declare activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
+  public declare activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
+  public declare indent: string; // Used to build the indent for the current concise line
+  public declare isConcise: boolean; // Set to true if parser is currently in concise mode
+  public declare beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
+  public declare endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
+  public declare textPos: number; // Used to buffer text that is found within the body of a tag
+  public declare lines: undefined | number[]; // Keeps track of line indexes to provide line/column info.
 
-  constructor(public options: Options) {
-    this.options = options;
-  }
+  constructor(public options: Options) {}
 
   read(range: Range) {
     return this.data.slice(range.start, range.end);
