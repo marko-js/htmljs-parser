@@ -163,7 +163,7 @@ const parser = createParser({
    * 1╭─ <div>Hi</div>
    *  ╰─ ╰─ openTagStart
    */
-  onOpenTagStart(range) {}
+  onOpenTagStart(range) {},
 
   /**
    * Called when a tag name, which can include placeholders, has been parsed.
