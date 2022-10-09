@@ -90,6 +90,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           default: {
             if (canFollowDivision(this.getPreviousNonWhitespaceCharCode())) {
               this.pos++;
+              this.forward = 0;
               this.consumeWhitespace();
             } else {
               this.enterState(STATE.REGULAR_EXPRESSION);

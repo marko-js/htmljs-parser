@@ -1033,3 +1033,10 @@
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
+128╭─ <a= x / (y[z])/>
+   │  │││ │         ╰─ openTagEnd:selfClosed "/>"
+   │  │││ ╰─ attrValue.value "x / (y[z])"
+   │  ││├─ attrValue "= x / (y[z])"
+   │  ││╰─ attrName
+   │  │╰─ tagName
+   ╰─ ╰─ openTagStart
