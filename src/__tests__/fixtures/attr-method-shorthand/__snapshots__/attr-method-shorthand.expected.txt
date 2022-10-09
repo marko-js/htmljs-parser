@@ -173,6 +173,18 @@
   ╰─ ╰─ tagName "foo"
 59├─   console.log("hello"); 
 60├─   event.preventDefault();
-61╭─ }
-  │   ├─ closeTagEnd(foo)
-  ╰─  ╰─ openTagEnd
+61├─ }
+62╭─ 
+  ╰─ ╰─ openTagEnd
+63╭─ <a b() { c / (d) }/>
+  │  ││ │││ ││         ╰─ openTagEnd:selfClosed "/>"
+  │  ││ │││ │╰─ attrMethod.body.value " c / (d) "
+  │  ││ │││ ╰─ attrMethod.body "{ c / (d) }"
+  │  ││ ││╰─ attrMethod.params.value
+  │  ││ │├─ attrMethod.params "()"
+  │  ││ │╰─ attrMethod "() { c / (d) }"
+  │  ││ ╰─ attrName
+  │  │╰─ tagName
+  │  ├─ closeTagEnd(foo)
+  ╰─ ╰─ openTagStart
+64╰─ 
