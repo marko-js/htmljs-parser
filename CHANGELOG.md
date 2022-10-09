@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.1.5
+
+### Patch Changes
+
+- [#138](https://github.com/marko-js/htmljs-parser/pull/138) [`8c34227`](https://github.com/marko-js/htmljs-parser/commit/8c342277b2c5be4899f5d973a2acdeb60ba3edd7) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fixes a parse error where division is immediately followed by enclosed code.
+
 ## 5.1.4
 
 ### Patch Changes
