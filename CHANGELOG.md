@@ -1,5 +1,12 @@
 # htmljs-parser
 
+## 5.2.0
+
+### Minor Changes
+
+- [#141](https://github.com/marko-js/htmljs-parser/pull/141) [`81cff30`](https://github.com/marko-js/htmljs-parser/commit/81cff303caa95b7d425bbe5c3c056f369522d0e5) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Add support for type parameter/argument parsing.
+  This adds a new `onTagTypeParams`, `onTagTypeArgs` events and a `.typeParams` property on the `AttrMethod` range.
+
 ## 5.1.5
 
 ### Patch Changes
