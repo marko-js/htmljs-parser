@@ -1,0 +1,9 @@
+1╭─ <foo|a||b|>
+ │  ││  ││ ╰─ error(INVALID_TAG_PARAMS:A tag can only specify parameters once)
+ │  ││  │╰─ tagParams.value
+ │  ││  ╰─ tagParams "|a|"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2├─   
+3├─ </foo>
+4╰─ 

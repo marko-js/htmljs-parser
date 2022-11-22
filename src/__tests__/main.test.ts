@@ -137,6 +137,9 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       onTagShorthandClass(range) {
         addTemplateRange("tagShorthandClass", range);
       },
+      onTagTypeArgs(range) {
+        addValueRange("tagTypeArgs", range);
+      },
       onTagVar(range) {
         addValueRange("tagVar", range);
       },
@@ -145,6 +148,9 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       },
       onTagParams(range) {
         addValueRange("tagParams", range);
+      },
+      onTagTypeParams(range) {
+        addValueRange("tagTypeParams", range);
       },
       onAttrName(range) {
         addRange("attrName", range);
@@ -157,6 +163,8 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       },
       onAttrMethod(range) {
         addRange("attrMethod", range);
+        if (range.typeParams)
+          addValueRange("attrMethod.typeParams", range.typeParams);
         addValueRange("attrMethod.params", range.params);
         addValueRange("attrMethod.body", range.body);
       },

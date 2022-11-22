@@ -1,0 +1,11 @@
+1╭─ <foo(a){}<A>/>
+ │  ││  ││ ││╰─ error(INVALID_ATTRIBUTE_NAME:Invalid attribute name. Attribute name cannot begin with the "<" character.)
+ │  ││  ││ │╰─ attrMethod.body.value
+ │  ││  ││ ╰─ attrMethod.body "{}"
+ │  ││  │╰─ attrMethod.params.value
+ │  ││  ├─ attrMethod.params "(a)"
+ │  ││  ├─ attrMethod "(a){}"
+ │  ││  ╰─ attrName
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2╰─ 

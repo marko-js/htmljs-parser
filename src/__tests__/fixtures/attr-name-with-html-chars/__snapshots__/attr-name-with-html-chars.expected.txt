@@ -1,3 +1,7 @@
 1╭─ tagname <span>hello frank</span>
- │  │       ╰─ error(INVALID_ATTRIBUTE_NAME:Invalid attribute name. Attribute name cannot begin with the "<" character.)
+ │  │       ││    │     │     ╰─ error(INVALID_ATTR_TYPE_PARAMS:Attribute cannot contain type parameters unless it is a shorthand method) "/span"
+ │  │       ││    │     ╰─ attrName "frank"
+ │  │       ││    ╰─ attrName "hello"
+ │  │       │╰─ tagTypeArgs.value "span"
+ │  │       ╰─ tagTypeArgs "<span>"
  ╰─ ╰─ tagName "tagname"

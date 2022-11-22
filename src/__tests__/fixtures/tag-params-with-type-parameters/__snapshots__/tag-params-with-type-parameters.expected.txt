@@ -1,0 +1,120 @@
+1╭─ <foo<A>|data: A|>
+ │  ││  ││ ││       ╰─ openTagEnd
+ │  ││  ││ │╰─ tagParams.value "data: A"
+ │  ││  ││ ╰─ tagParams "|data: A|"
+ │  ││  │╰─ tagTypeParams.value
+ │  ││  ╰─ tagTypeParams "<A>"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2╭─   hi
+ ╰─ ╰─ text "\n  hi\n"
+3╭─ </>
+ │  │ ├─ closeTagEnd(foo)
+ │  │ ╰─ closeTagName
+ ╰─ ╰─ closeTagStart "</"
+4├─ 
+5╭─ <foo<A> |data: A|>
+ │  ││  ││  ││       ╰─ openTagEnd
+ │  ││  ││  │╰─ tagParams.value "data: A"
+ │  ││  ││  ╰─ tagParams "|data: A|"
+ │  ││  │╰─ tagTypeParams.value
+ │  ││  ╰─ tagTypeParams "<A>"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+6╭─   hi
+ ╰─ ╰─ text "\n  hi\n"
+7╭─ </>
+ │  │ ├─ closeTagEnd(foo)
+ │  │ ╰─ closeTagName
+ ╰─ ╰─ closeTagStart "</"
+8├─ 
+9╭─ <foo <A>|data: A|>
+ │  ││   ││ ││       ╰─ openTagEnd
+ │  ││   ││ │╰─ tagParams.value "data: A"
+ │  ││   ││ ╰─ tagParams "|data: A|"
+ │  ││   │╰─ tagTypeParams.value
+ │  ││   ╰─ tagTypeParams "<A>"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+10╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+11╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+12├─ 
+13╭─ <foo <A> |data: A|>
+  │  ││   ││  ││       ╰─ openTagEnd
+  │  ││   ││  │╰─ tagParams.value "data: A"
+  │  ││   ││  ╰─ tagParams "|data: A|"
+  │  ││   │╰─ tagTypeParams.value
+  │  ││   ╰─ tagTypeParams "<A>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+14╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+15╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+16├─ 
+17╭─ <foo<A, B = string>|data: A & B|>
+  │  ││  ││             ││           ╰─ openTagEnd
+  │  ││  ││             │╰─ tagParams.value "data: A & B"
+  │  ││  ││             ╰─ tagParams "|data: A & B|"
+  │  ││  │╰─ tagTypeParams.value "A, B = string"
+  │  ││  ╰─ tagTypeParams "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+18╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+19╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+20├─ 
+21╭─ <foo<A, B = string> |data: A & B|>
+  │  ││  ││              ││           ╰─ openTagEnd
+  │  ││  ││              │╰─ tagParams.value "data: A & B"
+  │  ││  ││              ╰─ tagParams "|data: A & B|"
+  │  ││  │╰─ tagTypeParams.value "A, B = string"
+  │  ││  ╰─ tagTypeParams "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+22╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+23╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+24├─ 
+25╭─ <foo <A, B = string>|data: A & B|>
+  │  ││   ││             ││           ╰─ openTagEnd
+  │  ││   ││             │╰─ tagParams.value "data: A & B"
+  │  ││   ││             ╰─ tagParams "|data: A & B|"
+  │  ││   │╰─ tagTypeParams.value "A, B = string"
+  │  ││   ╰─ tagTypeParams "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+26╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+27╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+28├─ 
+29╭─ <foo <A, B = string> |data: A & B|>
+  │  ││   ││              ││           ╰─ openTagEnd
+  │  ││   ││              │╰─ tagParams.value "data: A & B"
+  │  ││   ││              ╰─ tagParams "|data: A & B|"
+  │  ││   │╰─ tagTypeParams.value "A, B = string"
+  │  ││   ╰─ tagTypeParams "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+30╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+31╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+32╰─ 

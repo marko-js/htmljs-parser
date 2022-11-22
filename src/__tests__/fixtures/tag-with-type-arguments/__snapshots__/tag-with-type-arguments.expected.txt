@@ -1,0 +1,224 @@
+1╭─ <foo<A>>
+ │  ││  ││ ╰─ openTagEnd
+ │  ││  │╰─ tagTypeArgs.value
+ │  ││  ╰─ tagTypeArgs "<A>"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2╭─   hi
+ ╰─ ╰─ text "\n  hi\n"
+3╭─ </>
+ │  │ ├─ closeTagEnd(foo)
+ │  │ ╰─ closeTagName
+ ╰─ ╰─ closeTagStart "</"
+4├─ 
+5╭─ <foo<A> >
+ │  ││  ││  ╰─ openTagEnd
+ │  ││  │╰─ tagTypeArgs.value
+ │  ││  ╰─ tagTypeArgs "<A>"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+6╭─   hi
+ ╰─ ╰─ text "\n  hi\n"
+7╭─ </>
+ │  │ ├─ closeTagEnd(foo)
+ │  │ ╰─ closeTagName
+ ╰─ ╰─ closeTagStart "</"
+8├─ 
+9╭─ <foo <A>>
+ │  ││   ││ ╰─ openTagEnd
+ │  ││   │╰─ tagTypeArgs.value
+ │  ││   ╰─ tagTypeArgs "<A>"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+10╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+11╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+12├─ 
+13╭─ <foo <A> >
+  │  ││   ││  ╰─ openTagEnd
+  │  ││   │╰─ tagTypeArgs.value
+  │  ││   ╰─ tagTypeArgs "<A>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+14╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+15╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+16├─ 
+17╭─ <foo<A, B = string>>
+  │  ││  ││             ╰─ openTagEnd
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+18╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+19╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+20├─ 
+21╭─ <foo<A, B = string> >
+  │  ││  ││              ╰─ openTagEnd
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+22╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+23╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+24├─ 
+25╭─ <foo <A, B = string>>
+  │  ││   ││             ╰─ openTagEnd
+  │  ││   │╰─ tagTypeArgs.value "A, B = string"
+  │  ││   ╰─ tagTypeArgs "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+26╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+27╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+28├─ 
+29╭─ <foo <A, B = string> >
+  │  ││   ││              ╰─ openTagEnd
+  │  ││   │╰─ tagTypeArgs.value "A, B = string"
+  │  ││   ╰─ tagTypeArgs "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+30╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+31╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+32├─ 
+33╭─ <foo<A>(bar)>
+  │  ││  ││ ││   ╰─ openTagEnd
+  │  ││  ││ │╰─ tagArgs.value "bar"
+  │  ││  ││ ╰─ tagArgs "(bar)"
+  │  ││  │╰─ tagTypeArgs.value
+  │  ││  ╰─ tagTypeArgs "<A>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+34╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+35╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+36├─ 
+37╭─ <foo<A> (bar)>
+  │  ││  ││  ││   ╰─ openTagEnd
+  │  ││  ││  │╰─ tagArgs.value "bar"
+  │  ││  ││  ╰─ tagArgs "(bar)"
+  │  ││  │╰─ tagTypeArgs.value
+  │  ││  ╰─ tagTypeArgs "<A>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+38╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+39╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+40├─ 
+41╭─ <foo <A>(bar)>
+  │  ││   ││ ││   ╰─ openTagEnd
+  │  ││   ││ │╰─ tagArgs.value "bar"
+  │  ││   ││ ╰─ tagArgs "(bar)"
+  │  ││   │╰─ tagTypeArgs.value
+  │  ││   ╰─ tagTypeArgs "<A>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+42╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+43╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+44├─ 
+45╭─ <foo <A> (bar)>
+  │  ││   ││  ││   ╰─ openTagEnd
+  │  ││   ││  │╰─ tagArgs.value "bar"
+  │  ││   ││  ╰─ tagArgs "(bar)"
+  │  ││   │╰─ tagTypeArgs.value
+  │  ││   ╰─ tagTypeArgs "<A>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+46╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+47╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+48├─ 
+49╭─ <foo<A, B = string>(bar)>
+  │  ││  ││             ││   ╰─ openTagEnd
+  │  ││  ││             │╰─ tagArgs.value "bar"
+  │  ││  ││             ╰─ tagArgs "(bar)"
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+50╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+51╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+52├─ 
+53╭─ <foo<A, B = string> (bar)>
+  │  ││  ││              ││   ╰─ openTagEnd
+  │  ││  ││              │╰─ tagArgs.value "bar"
+  │  ││  ││              ╰─ tagArgs "(bar)"
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+54╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+55╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+56├─ 
+57╭─ <foo <A, B = string>(bar)>
+  │  ││   ││             ││   ╰─ openTagEnd
+  │  ││   ││             │╰─ tagArgs.value "bar"
+  │  ││   ││             ╰─ tagArgs "(bar)"
+  │  ││   │╰─ tagTypeArgs.value "A, B = string"
+  │  ││   ╰─ tagTypeArgs "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+58╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+59╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+60├─ 
+61╭─ <foo <A, B = string> (bar)>
+  │  ││   ││              ││   ╰─ openTagEnd
+  │  ││   ││              │╰─ tagArgs.value "bar"
+  │  ││   ││              ╰─ tagArgs "(bar)"
+  │  ││   │╰─ tagTypeArgs.value "A, B = string"
+  │  ││   ╰─ tagTypeArgs "<A, B = string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+62╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+63╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+64╰─ 

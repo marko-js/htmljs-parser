@@ -1,0 +1,7 @@
+1╭─ <foo<A><B>/>
+ │  ││  ││  ╰─ error(INVALID_TAG_TYPES:Unexpected types. Type arguments must follow a tag name and type paremeters must precede a method or tag parameters.)
+ │  ││  │╰─ tagTypeArgs.value
+ │  ││  ╰─ tagTypeArgs "<A>"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2╰─ 

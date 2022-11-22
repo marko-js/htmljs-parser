@@ -68,6 +68,10 @@ export function htmlEOF(this: Parser) {
   }
 }
 
+export function matchesCloseAngleBracket(code: number) {
+  return code === CODE.CLOSE_ANGLE_BRACKET;
+}
+
 export function matchesCloseParen(code: number) {
   return code === CODE.CLOSE_PAREN;
 }

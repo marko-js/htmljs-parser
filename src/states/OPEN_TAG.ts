@@ -9,12 +9,14 @@ import {
   ErrorCode,
   matchesPipe,
   matchesCloseParen,
+  matchesCloseAngleBracket,
 } from "../internal";
 
 export enum TAG_STAGE {
   UNKNOWN,
   VAR,
   ARGUMENT,
+  TYPES,
   PARAMS,
   ATTR_GROUP,
 }
@@ -28,6 +30,8 @@ export interface OpenTagMeta extends Meta {
   shorthandEnd: number;
   hasArgs: boolean;
   hasAttrs: boolean;
+  hasParams: boolean;
+  types: undefined | Ranges.Value;
   hasShorthandId: boolean;
   selfClosed: boolean;
   indent: string;
@@ -52,6 +56,8 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       hasShorthandId: false,
       hasArgs: false,
       hasAttrs: false,
+      hasParams: false,
+      types: undefined,
       selfClosed: false,
       shorthandEnd: -1,
       tagName: undefined!,
@@ -251,14 +257,6 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       return;
     }
 
-    if (code === CODE.OPEN_ANGLE_BRACKET) {
-      return this.emitError(
-        this.pos,
-        ErrorCode.INVALID_ATTRIBUTE_NAME,
-        'Invalid attribute name. Attribute name cannot begin with the "<" character.'
-      );
-    }
-
     if (code === CODE.FORWARD_SLASH) {
       // Check next character to see if we are in a comment
       switch (this.lookAtCharCodeAhead(1)) {
@@ -279,49 +277,78 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       this.pos++; // skip ,
       this.forward = 0;
       this.consumeWhitespace();
-    } else if (code === CODE.FORWARD_SLASH && !tag.hasAttrs) {
-      tag.stage = TAG_STAGE.VAR;
-      this.pos++; // skip /
-      this.forward = 0;
-
-      if (isWhitespaceCode(this.lookAtCharCodeAhead(0))) {
-        return this.emitError(
-          this.pos,
-          ErrorCode.MISSING_TAG_VARIABLE,
-          "A slash was found that was not followed by a variable name or lhs expression"
-        );
-      }
-
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.operators = true;
-      expr.terminatedByWhitespace = true;
-      expr.shouldTerminate = this.isConcise
-        ? shouldTerminateConciseTagVar
-        : shouldTerminateHtmlTagVar;
-    } else if (code === CODE.OPEN_PAREN && !tag.hasAttrs) {
-      if (tag.hasArgs) {
-        this.emitError(
-          this.pos,
-          ErrorCode.INVALID_TAG_ARGUMENT,
-          "A tag can only have one argument"
-        );
-        return;
-      }
-      tag.stage = TAG_STAGE.ARGUMENT;
-      this.pos++; // skip (
-      this.forward = 0;
-      this.enterState(STATE.EXPRESSION).shouldTerminate = matchesCloseParen;
-    } else if (code === CODE.PIPE && !tag.hasAttrs) {
-      tag.stage = TAG_STAGE.PARAMS;
-      this.pos++; // skip |
-      this.forward = 0;
-      this.enterState(STATE.EXPRESSION).shouldTerminate = matchesPipe;
     } else {
       this.forward = 0;
 
-      if (tag.tagName) {
+      if (tag.hasAttrs) {
         this.enterState(STATE.ATTRIBUTE);
-        tag.hasAttrs = true;
+      } else if (tag.tagName) {
+        switch (code) {
+          case CODE.FORWARD_SLASH: {
+            tag.stage = TAG_STAGE.VAR;
+            this.pos++; // skip /
+
+            if (isWhitespaceCode(this.lookAtCharCodeAhead(0))) {
+              return this.emitError(
+                this.pos,
+                ErrorCode.MISSING_TAG_VARIABLE,
+                "A slash was found that was not followed by a variable name or lhs expression"
+              );
+            }
+
+            const expr = this.enterState(STATE.EXPRESSION);
+            expr.operators = true;
+            expr.terminatedByWhitespace = true;
+            expr.shouldTerminate = this.isConcise
+              ? shouldTerminateConciseTagVar
+              : shouldTerminateHtmlTagVar;
+            break;
+          }
+
+          case CODE.OPEN_PAREN:
+            if (tag.hasArgs) {
+              this.emitError(
+                this.pos,
+                ErrorCode.INVALID_TAG_ARGUMENT,
+                "A tag can only have one argument"
+              );
+              return;
+            }
+
+            tag.hasArgs = true;
+            tag.stage = TAG_STAGE.ARGUMENT;
+            this.pos++; // skip (
+            this.enterState(STATE.EXPRESSION).shouldTerminate =
+              matchesCloseParen;
+            break;
+
+          case CODE.PIPE:
+            if (tag.hasParams) {
+              this.emitError(
+                this.pos,
+                ErrorCode.INVALID_TAG_PARAMS,
+                "A tag can only specify parameters once"
+              );
+              return;
+            }
+
+            tag.hasParams = true;
+            tag.stage = TAG_STAGE.PARAMS;
+            this.pos++; // skip |
+            this.enterState(STATE.EXPRESSION).shouldTerminate = matchesPipe;
+            break;
+
+          case CODE.OPEN_ANGLE_BRACKET:
+            tag.stage = TAG_STAGE.TYPES;
+            this.pos++; // skip <
+            this.enterState(STATE.EXPRESSION).shouldTerminate =
+              matchesCloseAngleBracket;
+            break;
+
+          default:
+            tag.hasAttrs = true;
+            this.enterState(STATE.ATTRIBUTE);
+        }
       } else {
         this.enterState(STATE.TAG_NAME);
       }
@@ -329,69 +356,113 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   },
 
   return(child, tag) {
-    switch (child.state) {
-      case STATE.JS_COMMENT_BLOCK: {
-        /* Ignore comments within an open tag */
+    if (child.state !== STATE.EXPRESSION) return;
+
+    switch (tag.stage) {
+      case TAG_STAGE.VAR: {
+        if (child.start === child.end) {
+          return this.emitError(
+            child,
+            ErrorCode.MISSING_TAG_VARIABLE,
+            "A slash was found that was not followed by a variable name or lhs expression"
+          );
+        }
+
+        this.options.onTagVar?.({
+          start: child.start - 1, // include /,
+          end: child.end,
+          value: {
+            start: child.start,
+            end: child.end,
+          },
+        });
         break;
       }
-      case STATE.EXPRESSION: {
-        switch (tag.stage) {
-          case TAG_STAGE.VAR: {
-            if (child.start === child.end) {
-              return this.emitError(
-                child,
-                ErrorCode.MISSING_TAG_VARIABLE,
-                "A slash was found that was not followed by a variable name or lhs expression"
-              );
-            }
+      case TAG_STAGE.ARGUMENT: {
+        const { types } = tag;
+        const start = child.start - 1; // include (
+        const end = ++this.pos; // include )
+        const value = {
+          start: child.start,
+          end: child.end,
+        };
 
-            this.options.onTagVar?.({
-              start: child.start - 1, // include /,
-              end: child.end,
-              value: {
-                start: child.start,
-                end: child.end,
-              },
-            });
-            break;
-          }
-          case TAG_STAGE.ARGUMENT: {
-            const start = child.start - 1; // include (
-            const end = ++this.pos; // include )
-            const value = {
-              start: child.start,
-              end: child.end,
-            };
+        if (this.consumeWhitespaceIfBefore("{")) {
+          const attr = this.enterState(STATE.ATTRIBUTE);
 
-            if (this.consumeWhitespaceIfBefore("{")) {
-              const attr = this.enterState(STATE.ATTRIBUTE);
-              attr.start = start;
-              attr.args = { start, end, value };
-              tag.hasAttrs = true;
-              this.forward = 0;
-            } else {
-              tag.hasArgs = true;
-              this.options.onTagArgs?.({
-                start,
-                end,
-                value,
-              });
-            }
-            break;
+          if (types) {
+            attr.start = types.start;
+            attr.typeParams = types;
+          } else {
+            attr.start = start;
           }
-          case TAG_STAGE.PARAMS: {
-            const end = ++this.pos; // include closing |
-            this.options.onTagParams?.({
-              start: child.start - 1, // include leading |
-              end,
-              value: {
-                start: child.start,
-                end: child.end,
-              },
-            });
-            break;
+
+          attr.args = { start, end, value };
+          this.forward = 0;
+          tag.hasAttrs = true;
+        } else {
+          if (types) {
+            this.options.onTagTypeArgs?.(types);
           }
+
+          this.options.onTagArgs?.({
+            start,
+            end,
+            value,
+          });
         }
+        break;
+      }
+      case TAG_STAGE.TYPES: {
+        const { types, hasParams, hasArgs } = tag;
+        const end = ++this.pos; // include >
+        const typeArgs: Ranges.Value = {
+          start: child.start - 1, // include <
+          end,
+          value: {
+            start: child.start,
+            end: child.end,
+          },
+        };
+
+        this.consumeWhitespace();
+        const nextCode = this.lookAtCharCodeAhead(0);
+
+        if (!hasParams && nextCode === CODE.PIPE) {
+          if (types) {
+            this.options.onTagTypeArgs?.(types);
+          }
+
+          this.options.onTagTypeParams?.(typeArgs);
+        } else if (!hasArgs && nextCode === CODE.OPEN_PAREN) {
+          if (types) {
+            this.options.onTagTypeArgs?.(types);
+          }
+
+          tag.types = typeArgs;
+        } else if (!(types || hasParams || hasArgs)) {
+          this.options.onTagTypeArgs?.(typeArgs);
+          tag.types = typeArgs;
+        } else {
+          this.emitError(
+            child,
+            ErrorCode.INVALID_TAG_TYPES,
+            "Unexpected types. Type arguments must follow a tag name and type paremeters must precede a method or tag parameters."
+          );
+        }
+
+        break;
+      }
+      case TAG_STAGE.PARAMS: {
+        const end = ++this.pos; // include closing |
+        this.options.onTagParams?.({
+          start: child.start - 1,
+          end,
+          value: {
+            start: child.start,
+            end: child.end,
+          },
+        });
         break;
       }
     }
@@ -405,6 +476,7 @@ function shouldTerminateConciseTagVar(code: number, data: string, pos: number) {
     case CODE.PIPE:
     case CODE.OPEN_PAREN:
     case CODE.SEMICOLON:
+    case CODE.OPEN_ANGLE_BRACKET:
       return true;
     case CODE.COLON:
       return data.charCodeAt(pos + 1) === CODE.EQUAL;
@@ -420,6 +492,7 @@ function shouldTerminateHtmlTagVar(code: number, data: string, pos: number) {
     case CODE.EQUAL:
     case CODE.OPEN_PAREN:
     case CODE.CLOSE_ANGLE_BRACKET:
+    case CODE.OPEN_ANGLE_BRACKET:
       return true;
     case CODE.COLON:
       return data.charCodeAt(pos + 1) === CODE.EQUAL;
