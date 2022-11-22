@@ -8,6 +8,7 @@ import {
   Ranges,
   Meta,
   ErrorCode,
+  matchesCloseAngleBracket,
   matchesCloseCurlyBrace,
   matchesCloseParen,
 } from "../internal";
@@ -18,6 +19,7 @@ const enum ATTR_STAGE {
   NAME,
   VALUE,
   ARGUMENT,
+  TYPE_PARAMS,
   BLOCK,
 }
 
@@ -26,6 +28,7 @@ export interface AttrMeta extends Meta {
   name: undefined | Range;
   valueStart: number;
   args: boolean | Ranges.AttrMethod["params"];
+  typeParams: undefined | Ranges.Value;
   spread: boolean;
   bound: boolean;
 }
@@ -45,6 +48,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       stage: ATTR_STAGE.UNKNOWN,
       name: undefined,
       args: false,
+      typeParams: undefined,
       bound: false,
       spread: false,
     });
@@ -94,6 +98,15 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       this.pos++; // skip (
       this.forward = 0;
       this.enterState(STATE.EXPRESSION).shouldTerminate = matchesCloseParen;
+    } else if (
+      code === CODE.OPEN_ANGLE_BRACKET &&
+      attr.stage === ATTR_STAGE.NAME
+    ) {
+      attr.stage = ATTR_STAGE.TYPE_PARAMS;
+      this.pos++; // skip <
+      this.forward = 0;
+      this.enterState(STATE.EXPRESSION).shouldTerminate =
+        matchesCloseAngleBracket;
     } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
       ensureAttrName(this, attr);
       attr.stage = ATTR_STAGE.BLOCK;
@@ -102,6 +115,14 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       this.enterState(STATE.EXPRESSION).shouldTerminate =
         matchesCloseCurlyBrace;
     } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
+      if (code === CODE.OPEN_ANGLE_BRACKET) {
+        return this.emitError(
+          this.pos,
+          ErrorCode.INVALID_ATTRIBUTE_NAME,
+          'Invalid attribute name. Attribute name cannot begin with the "<" character.'
+        );
+      }
+
       attr.stage = ATTR_STAGE.NAME;
       this.forward = 0;
       const expr = this.enterState(STATE.EXPRESSION);
@@ -172,6 +193,12 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
             end,
             value,
           };
+        } else if (attr.typeParams) {
+          this.emitError(
+            child,
+            ErrorCode.INVALID_ATTRIBUTE_ARGUMENT,
+            "An attribute cannot have both type parameters and arguments"
+          );
         } else {
           attr.args = true;
           this.options.onAttrArgs?.({
@@ -185,12 +212,15 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       }
       case ATTR_STAGE.BLOCK: {
         const params = attr.args as Ranges.Value;
-        const start = params.start;
         const end = ++this.pos; // include }
+        const { typeParams } = attr;
+        const start = typeParams ? typeParams.start : params.start;
+
         this.options.onAttrMethod?.({
           start,
           end,
           params,
+          typeParams,
           body: {
             start: child.start - 1, // include {
             end,
@@ -201,6 +231,30 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           },
         });
         this.exitState();
+        break;
+      }
+
+      case ATTR_STAGE.TYPE_PARAMS: {
+        const start = child.start - 1; // include <
+        const end = ++this.pos; // include >
+
+        if (!this.consumeWhitespaceIfBefore("(")) {
+          return this.emitError(
+            child,
+            ErrorCode.INVALID_ATTR_TYPE_PARAMS,
+            "Attribute cannot contain type parameters unless it is a shorthand method"
+          );
+        }
+
+        attr.typeParams = {
+          start,
+          end,
+          value: {
+            start: child.start,
+            end: child.end,
+          },
+        };
+
         break;
       }
 
@@ -256,6 +310,7 @@ function shouldTerminateHtmlAttrName(code: number, data: string, pos: number) {
     case CODE.EQUAL:
     case CODE.OPEN_PAREN:
     case CODE.CLOSE_ANGLE_BRACKET:
+    case CODE.OPEN_ANGLE_BRACKET:
       return true;
     case CODE.COLON:
       return data.charCodeAt(pos + 1) === CODE.EQUAL;
@@ -297,6 +352,7 @@ function shouldTerminateConciseAttrName(
     case CODE.EQUAL:
     case CODE.OPEN_PAREN:
     case CODE.SEMICOLON:
+    case CODE.OPEN_ANGLE_BRACKET:
       return true;
     case CODE.COLON:
       return data.charCodeAt(pos + 1) === CODE.EQUAL;
@@ -339,6 +395,7 @@ function shouldTerminateConciseGroupedAttrName(
     case CODE.EQUAL:
     case CODE.OPEN_PAREN:
     case CODE.CLOSE_SQUARE_BRACKET:
+    case CODE.OPEN_ANGLE_BRACKET:
       return true;
     case CODE.COLON:
       return data.charCodeAt(pos + 1) === CODE.EQUAL;

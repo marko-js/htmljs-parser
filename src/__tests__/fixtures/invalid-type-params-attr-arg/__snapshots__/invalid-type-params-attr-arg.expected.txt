@@ -1,0 +1,6 @@
+1╭─ <foo a<A>(b) c/>
+ │  ││   │    ╰─ error(INVALID_ATTRIBUTE_ARGUMENT:An attribute cannot have both type parameters and arguments)
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2╰─ 

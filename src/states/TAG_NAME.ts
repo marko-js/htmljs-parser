@@ -11,7 +11,7 @@ import {
 } from "../internal";
 
 export interface TagNameMeta extends Meta, Ranges.Template {
-  shorthandCode?: CODE.NUMBER_SIGN | CODE.PERIOD;
+  shorthandCode: -1 | CODE.NUMBER_SIGN | CODE.PERIOD;
 }
 
 // We enter STATE.TAG_NAME after we encounter a "<"
@@ -25,6 +25,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       parent,
       start,
       end: start,
+      shorthandCode: -1,
       expressions: [],
       quasis: [{ start, end: start }],
     };
@@ -122,6 +123,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       code === CODE.OPEN_PAREN ||
       code === CODE.FORWARD_SLASH ||
       code === CODE.PIPE ||
+      code === CODE.OPEN_ANGLE_BRACKET ||
       (this.isConcise
         ? code === CODE.SEMICOLON
         : code === CODE.CLOSE_ANGLE_BRACKET)

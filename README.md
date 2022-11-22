@@ -250,6 +250,18 @@ const parser = createParser({
   },
 
   /**
+   * Called after the type arguments for a tag have been parsed.
+   *
+   * @example
+   * 1╭─ <foo<string>>
+   *  │      │╰─ tagTypeArgs.value "string"
+   *  ╰─     ╰─ tagTypeArgs "<string>"
+   */
+  onTagTypeArgs(range) {
+    range.value; // Another range that includes only the type arguments themselves and not the angle brackets.
+  },
+
+  /**
    * Called after a tag variable has been parsed.
    *
    * @example
@@ -271,6 +283,18 @@ const parser = createParser({
    */
   onTagArgs(range) {
     range.value; // Another range that includes only the args themselves and not the outer parenthesis.
+  },
+
+  /**
+   * Called after type parameters for the tag parameters have been parsed.
+   *
+   * @example
+   * 1╭─ <tag<T>|input: { name: T }|>
+   *  │      │╰─ tagTypeParams.value
+   *  ╰─     ╰─ tagTypeParams "<T>"
+   */
+  onTagTypeParams(range) {
+    range.value; // Another range that includes only the type params themselves and not the angle brackets.
   },
 
   /**
@@ -334,6 +358,9 @@ const parser = createParser({
    *  ╰─             ╰─ attrMethod "(ev) { foo(); }"
    */
   onAttrMethod(range) {
+    range.typeParams; // Another range which includes the type params for the method.
+    range.typeParams.value; // Another range which includes the type params without outer angle brackets.
+
     range.params; // Another range which includes the params for the method.
     range.params.value; // Another range which includes the method params without outer parenthesis.
 

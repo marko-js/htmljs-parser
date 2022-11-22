@@ -1,0 +1,5 @@
+1╭─ <foo/, x=1/>
+ │  ││   ╰─ error(MISSING_TAG_VARIABLE:A slash was found that was not followed by a variable name or lhs expression)
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2╰─ 

@@ -102,6 +102,7 @@ export namespace Ranges {
   export interface AttrMethod extends Range {
     body: Value;
     params: Value;
+    typeParams: Value | undefined;
   }
 
   export interface OpenTagEnd extends Range {
@@ -136,6 +137,9 @@ export enum ErrorCode {
   MISSING_TAG_VARIABLE,
   RESERVED_TAG_NAME,
   ROOT_TAG_ONLY,
+  INVALID_TAG_PARAMS,
+  INVALID_TAG_TYPES,
+  INVALID_ATTR_TYPE_PARAMS,
 }
 
 export const enum TagType {
@@ -158,8 +162,10 @@ export interface ParserOptions {
   onOpenTagName?(data: Ranges.Template): TagType | void;
   onTagShorthandId?(data: Ranges.Template): void;
   onTagShorthandClass?(data: Ranges.Template): void;
+  onTagTypeArgs?(data: Ranges.Value): void;
   onTagVar?(data: Ranges.Value): void;
   onTagArgs?(data: Ranges.Value): void;
+  onTagTypeParams?(data: Ranges.Value): void;
   onTagParams?(data: Ranges.Value): void;
   onAttrName?(data: Range): void;
   onAttrArgs?(data: Ranges.Value): void;

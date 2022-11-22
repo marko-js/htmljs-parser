@@ -1,0 +1,120 @@
+1╭─ <foo<A>(event: A){
+ │  ││  ││ ││        ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
+ │  ││  ││ │╰─ attrMethod.params.value "event: A"
+ │  ││  ││ ╰─ attrMethod.params "(event: A)"
+ │  ││  │╰─ attrMethod.typeParams.value
+ │  ││  ├─ attrMethod.typeParams "<A>"
+ │  ││  ├─ attrMethod "<A>(event: A){\n  console.log(event.type)\n}"
+ │  ││  ╰─ attrName
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2╭─   console.log(event.type)
+ ╰─ ╰─ attrMethod.body.value "\n  console.log(event.type)\n"
+3╭─ }/>
+ ╰─  ╰─ openTagEnd:selfClosed "/>"
+4├─ 
+5╭─ <foo<A> (event: A){
+ │  ││  ││  ││        ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
+ │  ││  ││  │╰─ attrMethod.params.value "event: A"
+ │  ││  ││  ╰─ attrMethod.params "(event: A)"
+ │  ││  │╰─ attrMethod.typeParams.value
+ │  ││  ├─ attrMethod.typeParams "<A>"
+ │  ││  ├─ attrMethod "<A> (event: A){\n  console.log(event.type)\n}"
+ │  ││  ╰─ attrName
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+6╭─   console.log(event.type)
+ ╰─ ╰─ attrMethod.body.value "\n  console.log(event.type)\n"
+7╭─ }/>
+ ╰─  ╰─ openTagEnd:selfClosed "/>"
+8├─ 
+9╭─ <foo <A>(event: A){
+ │  ││   ││ ││        ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
+ │  ││   ││ │╰─ attrMethod.params.value "event: A"
+ │  ││   ││ ╰─ attrMethod.params "(event: A)"
+ │  ││   │╰─ attrMethod.typeParams.value
+ │  ││   ├─ attrMethod.typeParams "<A>"
+ │  ││   ├─ attrMethod "<A>(event: A){\n  console.log(event.type)\n}"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+10╭─   console.log(event.type)
+  ╰─ ╰─ attrMethod.body.value "\n  console.log(event.type)\n"
+11╭─ }/>
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+12├─ 
+13╭─ <foo <A> (event: A){
+  │  ││   ││  ││        ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
+  │  ││   ││  │╰─ attrMethod.params.value "event: A"
+  │  ││   ││  ╰─ attrMethod.params "(event: A)"
+  │  ││   │╰─ attrMethod.typeParams.value
+  │  ││   ├─ attrMethod.typeParams "<A>"
+  │  ││   ├─ attrMethod "<A> (event: A){\n  console.log(event.type)\n}"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+14╭─   console.log(event.type)
+  ╰─ ╰─ attrMethod.body.value "\n  console.log(event.type)\n"
+15╭─ }/>
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+16├─ 
+17╭─ <foo<A, B = string>(event: A & B){
+  │  ││  ││             ││            ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
+  │  ││  ││             │╰─ attrMethod.params.value "event: A & B"
+  │  ││  ││             ╰─ attrMethod.params "(event: A & B)"
+  │  ││  │╰─ attrMethod.typeParams.value "A, B = string"
+  │  ││  ├─ attrMethod.typeParams "<A, B = string>"
+  │  ││  ├─ attrMethod "<A, B = string>(event: A & B){\n  console.log(event.type)\n}"
+  │  ││  ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+18╭─   console.log(event.type)
+  ╰─ ╰─ attrMethod.body.value "\n  console.log(event.type)\n"
+19╭─ }/>
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+20├─ 
+21╭─ <foo<A, B = string> (event: A & B){
+  │  ││  ││              ││            ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
+  │  ││  ││              │╰─ attrMethod.params.value "event: A & B"
+  │  ││  ││              ╰─ attrMethod.params "(event: A & B)"
+  │  ││  │╰─ attrMethod.typeParams.value "A, B = string"
+  │  ││  ├─ attrMethod.typeParams "<A, B = string>"
+  │  ││  ├─ attrMethod "<A, B = string> (event: A & B){\n  console.log(event.type)\n}"
+  │  ││  ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+22╭─   console.log(event.type)
+  ╰─ ╰─ attrMethod.body.value "\n  console.log(event.type)\n"
+23╭─ }/>
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+24├─ 
+25╭─ <foo <A, B = string>(event: A & B){
+  │  ││   ││             ││            ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
+  │  ││   ││             │╰─ attrMethod.params.value "event: A & B"
+  │  ││   ││             ╰─ attrMethod.params "(event: A & B)"
+  │  ││   │╰─ attrMethod.typeParams.value "A, B = string"
+  │  ││   ├─ attrMethod.typeParams "<A, B = string>"
+  │  ││   ├─ attrMethod "<A, B = string>(event: A & B){\n  console.log(event.type)\n}"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+26╭─   console.log(event.type)
+  ╰─ ╰─ attrMethod.body.value "\n  console.log(event.type)\n"
+27╭─ }/>
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+28├─ 
+29╭─ <foo <A, B = string> (event: A & B){
+  │  ││   ││              ││            ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
+  │  ││   ││              │╰─ attrMethod.params.value "event: A & B"
+  │  ││   ││              ╰─ attrMethod.params "(event: A & B)"
+  │  ││   │╰─ attrMethod.typeParams.value "A, B = string"
+  │  ││   ├─ attrMethod.typeParams "<A, B = string>"
+  │  ││   ├─ attrMethod "<A, B = string> (event: A & B){\n  console.log(event.type)\n}"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+30╭─   console.log(event.type)
+  ╰─ ╰─ attrMethod.body.value "\n  console.log(event.type)\n"
+31╭─ }/>
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+32╰─ 
