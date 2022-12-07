@@ -73,6 +73,8 @@ export function checkForPlaceholder(parser: Parser, code: number) {
     }
 
     if (curCode === CODE.OPEN_CURLY_BRACE) {
+      parser.forward = 0;
+
       if (ahead) {
         const remainder = ahead % 2;
         const extra = (ahead + remainder) / 2; // Number of backslashes to omit from output.
@@ -94,7 +96,6 @@ export function checkForPlaceholder(parser: Parser, code: number) {
       parser.endText();
       parser.enterState(PLACEHOLDER).escape = escape;
       parser.pos += escape ? 2 : 3; // skip ${ or $!{
-      parser.forward = 0;
       parser.enterState(STATE.EXPRESSION).shouldTerminate =
         matchesCloseCurlyBrace;
       return true;

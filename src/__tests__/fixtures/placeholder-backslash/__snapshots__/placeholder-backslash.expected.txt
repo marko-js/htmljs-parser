@@ -68,3 +68,13 @@
   │  │ ╰─ closeTagName
   │  ├─ text "\n"
   ╰─ ╰─ closeTagStart "</"
+16├─ 
+17╭─ <e>\${</e>
+  │  │││ │ │ │╰─ closeTagEnd(e)
+  │  │││ │ │ ╰─ closeTagName
+  │  │││ │ ╰─ closeTagStart "</"
+  │  │││ ╰─ text "${"
+  │  ││╰─ openTagEnd
+  │  │╰─ tagName
+  ╰─ ╰─ openTagStart
+18╰─ 
