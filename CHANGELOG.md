@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.2.1
+
+### Patch Changes
+
+- [#143](https://github.com/marko-js/htmljs-parser/pull/143) [`635b97c`](https://github.com/marko-js/htmljs-parser/commit/635b97c33e14e64a71b9894bc6a37988136d9fa1) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix issue where and extra character was being consumed if an escaped placeholder was at the end of a tag.
+
 ## 5.2.0
 
 ### Minor Changes
