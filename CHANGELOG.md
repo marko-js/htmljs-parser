@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.2.2
+
+### Patch Changes
+
+- [#146](https://github.com/marko-js/htmljs-parser/pull/146) [`bcfd809`](https://github.com/marko-js/htmljs-parser/commit/bcfd809fd376527e5fe624aa8418dd62fb2bf4fa) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fixes an issue where attribute names that started with a keyword (eg: `as-thing` or `instanceof-thing`) were incorrectly treated as an expression continuation.
+
 ## 5.2.1
 
 ### Patch Changes
