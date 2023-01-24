@@ -342,8 +342,8 @@ function lookAheadForOperator(data: string, pos: number): number {
           nextPos = lookAheadWhile(isWhitespaceCode, data, nextPos + 2);
           if (nextPos === max) return -1;
           nextCode = data.charCodeAt(nextPos);
-        } else if (isWordCode(nextCode)) {
-          // bail if we are continuing a word, eg "**in**teger"
+        } else {
+          // bail if we didn't match a space keyword.
           return -1;
         }
 
