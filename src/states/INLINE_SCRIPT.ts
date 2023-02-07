@@ -60,7 +60,15 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
   },
 
   return(child, inlineScript) {
-    if (inlineScript.block) this.pos++; // skip }
+    if (inlineScript.block) {
+      this.pos++; // skip }
+      if (
+        this.lookAtCharCodeAhead(0) === CODE.SEMICOLON ||
+        this.consumeWhitespaceIfBefore(";")
+      ) {
+        this.pos++;
+      }
+    }
     inlineScript.value.start = child.start;
     inlineScript.value.end = child.end;
     this.exitState();

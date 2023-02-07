@@ -1,0 +1,13 @@
+1╭─ $ { hello() };
+ │   │ ╰─ scriptlet:block.value " hello() "
+ ╰─  ╰─ scriptlet:block " { hello() };"
+2├─ 
+3╭─ $ { hello() }  ;
+ │   │ ╰─ scriptlet:block.value " hello() "
+ ╰─  ╰─ scriptlet:block " { hello() }  ;"
+4├─ 
+5╭─ $ { hello() };  
+ │   │ ╰─ scriptlet:block.value " hello() "
+ ╰─  ╰─ scriptlet:block " { hello() };"
+6├─ 
+7╰─ 
