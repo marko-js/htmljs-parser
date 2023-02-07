@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.2.3
+
+### Patch Changes
+
+- [#148](https://github.com/marko-js/htmljs-parser/pull/148) [`948830e`](https://github.com/marko-js/htmljs-parser/commit/948830ef7bddf1d76cb75b6cbb14dcb79adfb115) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix issue with semi-colon after a block scriptlet.
+
 ## 5.2.2
 
 ### Patch Changes
