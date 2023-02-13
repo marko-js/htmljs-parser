@@ -1,0 +1,11 @@
+1╭─ <div><img/></div>
+ │  ││  │││  │ │ │  ╰─ closeTagEnd(div)
+ │  ││  │││  │ │ ╰─ closeTagName "div"
+ │  ││  │││  │ ╰─ closeTagStart "</"
+ │  ││  │││  ╰─ openTagEnd:selfClosed "/>"
+ │  ││  ││╰─ tagName "img"
+ │  ││  │╰─ openTagStart
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 

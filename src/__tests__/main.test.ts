@@ -68,7 +68,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
 
       return parser.positionAt(offset);
     };
-    const tagStack: Ranges.Template[] = [];
+    const tagStack: { type: TagType; range: Ranges.Template }[] = [];
     const parser = createParser({
       onError(range) {
         addRange(`error(${ErrorCode[range.code]}:${range.message})`, range);
@@ -113,22 +113,24 @@ for (const entry of fs.readdirSync(FIXTURES)) {
             case "source":
             case "track":
             case "wbr":
+              tagStack.push({ type: TagType.void, range });
               return TagType.void;
             case "script":
             case "style":
             case "textarea":
             case "html-comment":
-              tagStack.push(range);
+              tagStack.push({ type: TagType.text, range });
               return TagType.text;
             case "import":
             case "export":
             case "static":
             case "class":
+              tagStack.push({ type: TagType.statement, range });
               return TagType.statement;
           }
         }
 
-        tagStack.push(range);
+        tagStack.push({ type: TagType.html, range });
         return TagType.html;
       },
       onTagShorthandId(range) {
@@ -173,6 +175,13 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       },
       onOpenTagEnd(range) {
         if (range.selfClosed) tagStack.pop();
+        else
+          switch (tagStack.at(-1)!.type) {
+            case TagType.statement:
+            case TagType.void:
+              tagStack.pop();
+              break;
+          }
         addRange(`openTagEnd${range.selfClosed ? ":selfClosed" : ""}`, range);
       },
       onCloseTagStart(range) {
@@ -182,7 +191,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
         addRange("closeTagName", range);
       },
       onCloseTagEnd(range) {
-        addRange(`closeTagEnd(${read(tagStack.pop()!)})`, range);
+        addRange(`closeTagEnd(${read(tagStack.pop()!.range)})`, range);
       },
       onScriptlet(range) {
         addValueRange(range.block ? `scriptlet:block` : `scriptlet`, range);
