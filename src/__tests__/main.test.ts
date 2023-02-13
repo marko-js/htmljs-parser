@@ -176,7 +176,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       onOpenTagEnd(range) {
         if (range.selfClosed) tagStack.pop();
         else
-          switch (tagStack.at(-1)!.type) {
+          switch (tagStack[tagStack.length - 1]!.type) {
             case TagType.statement:
             case TagType.void:
               tagStack.pop();
