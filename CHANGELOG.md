@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.2.4
+
+### Patch Changes
+
+- [#150](https://github.com/marko-js/htmljs-parser/pull/150) [`0d7210b`](https://github.com/marko-js/htmljs-parser/commit/0d7210b6d77ff57b55f38d8c9ee15effbfa05603) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix issue with tag variable not terminated on concise mode text delimiter
+
 ## 5.2.3
 
 ### Patch Changes
