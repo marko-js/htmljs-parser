@@ -1,0 +1,11 @@
+1╭─ style/style --
+ │  │    ││     ╰─ openTagEnd
+ │  │    │╰─ tagVar.value "style"
+ │  │    ╰─ tagVar "/style"
+ ╰─ ╰─ tagName "style"
+2╭─   header {
+ ╰─ ╰─ text "\n  header {\n    color: green\n  }\n"
+3├─     color: green
+4├─   }
+5╭─ 
+ ╰─ ╰─ closeTagEnd(style)
