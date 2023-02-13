@@ -478,6 +478,8 @@ function shouldTerminateConciseTagVar(code: number, data: string, pos: number) {
     case CODE.SEMICOLON:
     case CODE.OPEN_ANGLE_BRACKET:
       return true;
+    case CODE.HYPHEN:
+      return data.charCodeAt(pos + 1) === CODE.HYPHEN;
     case CODE.COLON:
       return data.charCodeAt(pos + 1) === CODE.EQUAL;
     default:
