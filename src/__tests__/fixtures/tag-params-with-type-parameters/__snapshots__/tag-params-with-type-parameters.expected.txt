@@ -2,8 +2,8 @@
  │  ││  ││ ││       ╰─ openTagEnd
  │  ││  ││ │╰─ tagParams.value "data: A"
  │  ││  ││ ╰─ tagParams "|data: A|"
- │  ││  │╰─ tagTypeParams.value
- │  ││  ╰─ tagTypeParams "<A>"
+ │  ││  │╰─ tagTypeArgs.value
+ │  ││  ╰─ tagTypeArgs "<A>"
  │  │╰─ tagName "foo"
  ╰─ ╰─ openTagStart
 2╭─   hi
@@ -17,8 +17,8 @@
  │  ││  ││  ││       ╰─ openTagEnd
  │  ││  ││  │╰─ tagParams.value "data: A"
  │  ││  ││  ╰─ tagParams "|data: A|"
- │  ││  │╰─ tagTypeParams.value
- │  ││  ╰─ tagTypeParams "<A>"
+ │  ││  │╰─ tagTypeArgs.value
+ │  ││  ╰─ tagTypeArgs "<A>"
  │  │╰─ tagName "foo"
  ╰─ ╰─ openTagStart
 6╭─   hi
@@ -62,8 +62,8 @@
   │  ││  ││             ││           ╰─ openTagEnd
   │  ││  ││             │╰─ tagParams.value "data: A & B"
   │  ││  ││             ╰─ tagParams "|data: A & B|"
-  │  ││  │╰─ tagTypeParams.value "A, B = string"
-  │  ││  ╰─ tagTypeParams "<A, B = string>"
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
   │  │╰─ tagName "foo"
   ╰─ ╰─ openTagStart
 18╭─   hi
@@ -77,8 +77,8 @@
   │  ││  ││              ││           ╰─ openTagEnd
   │  ││  ││              │╰─ tagParams.value "data: A & B"
   │  ││  ││              ╰─ tagParams "|data: A & B|"
-  │  ││  │╰─ tagTypeParams.value "A, B = string"
-  │  ││  ╰─ tagTypeParams "<A, B = string>"
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
   │  │╰─ tagName "foo"
   ╰─ ╰─ openTagStart
 22╭─   hi

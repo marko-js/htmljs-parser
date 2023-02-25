@@ -6,27 +6,11 @@
   hi
 </>
 
-<foo <A>>
-  hi
-</>
-
-<foo <A> >
-  hi
-</>
-
 <foo<A, B = string>>
   hi
 </>
 
 <foo<A, B = string> >
-  hi
-</>
-
-<foo <A, B = string>>
-  hi
-</>
-
-<foo <A, B = string> >
   hi
 </>
 
@@ -38,14 +22,6 @@
   hi
 </>
 
-<foo <A>(bar)>
-  hi
-</>
-
-<foo <A> (bar)>
-  hi
-</>
-
 <foo<A, B = string>(bar)>
   hi
 </>
@@ -54,10 +30,21 @@
   hi
 </>
 
-<foo <A, B = string>(bar)>
+
+<foo<A> (bar) {
+  
+}>
   hi
 </>
 
-<foo <A, B = string> (bar)>
+<foo <A> (bar) {
+  
+}>
+  hi
+</>
+
+<foo <A>(bar) {
+  
+}>
   hi
 </>

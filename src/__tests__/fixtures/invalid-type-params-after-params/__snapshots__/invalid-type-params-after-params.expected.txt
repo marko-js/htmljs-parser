@@ -1,5 +1,5 @@
 1╭─ <foo|a|<A>/>
- │  ││  ││  ╰─ error(INVALID_TAG_TYPES:Unexpected types. Type arguments must follow a tag name and type paremeters must precede a method or tag parameters.)
+ │  ││  ││  ╰─ error(INVALID_TAG_TYPES:Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters.)
  │  ││  │╰─ tagParams.value
  │  ││  ╰─ tagParams "|a|"
  │  │╰─ tagName "foo"
