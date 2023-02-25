@@ -31,7 +31,7 @@ export interface OpenTagMeta extends Meta {
   hasArgs: boolean;
   hasAttrs: boolean;
   hasParams: boolean;
-  types: undefined | Ranges.Value;
+  typeParams: undefined | Ranges.Value;
   hasShorthandId: boolean;
   selfClosed: boolean;
   indent: string;
@@ -57,7 +57,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       hasArgs: false,
       hasAttrs: false,
       hasParams: false,
-      types: undefined,
+      typeParams: undefined,
       selfClosed: false,
       shorthandEnd: -1,
       tagName: undefined!,
@@ -379,7 +379,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         break;
       }
       case TAG_STAGE.ARGUMENT: {
-        const { types } = tag;
+        const { typeParams } = tag;
         const start = child.start - 1; // include (
         const end = ++this.pos; // include )
         const value = {
@@ -390,9 +390,9 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         if (this.consumeWhitespaceIfBefore("{")) {
           const attr = this.enterState(STATE.ATTRIBUTE);
 
-          if (types) {
-            attr.start = types.start;
-            attr.typeParams = types;
+          if (typeParams) {
+            attr.start = typeParams.start;
+            attr.typeParams = typeParams;
           } else {
             attr.start = start;
           }
@@ -401,8 +401,13 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           this.forward = 0;
           tag.hasAttrs = true;
         } else {
-          if (types) {
-            this.options.onTagTypeArgs?.(types);
+          if (typeParams) {
+            this.emitError(
+              child,
+              ErrorCode.INVALID_TAG_TYPES,
+              "Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters."
+            );
+            break;
           }
 
           this.options.onTagArgs?.({
@@ -414,9 +419,9 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         break;
       }
       case TAG_STAGE.TYPES: {
-        const { types, hasParams, hasArgs } = tag;
+        const { typeParams, hasParams, hasArgs } = tag;
         const end = ++this.pos; // include >
-        const typeArgs: Ranges.Value = {
+        const types: Ranges.Value = {
           start: child.start - 1, // include <
           end,
           value: {
@@ -425,29 +430,27 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           },
         };
 
+        if (tag.tagName.end === types.start) {
+          // When we match types just after the tag name then we are dealing with a type argument.
+          this.options.onTagTypeArgs?.(types);
+          break;
+        }
+
         this.consumeWhitespace();
         const nextCode = this.lookAtCharCodeAhead(0);
 
-        if (!hasParams && nextCode === CODE.PIPE) {
-          if (types) {
-            this.options.onTagTypeArgs?.(types);
-          }
-
-          this.options.onTagTypeParams?.(typeArgs);
-        } else if (!hasArgs && nextCode === CODE.OPEN_PAREN) {
-          if (types) {
-            this.options.onTagTypeArgs?.(types);
-          }
-
-          tag.types = typeArgs;
-        } else if (!(types || hasParams || hasArgs)) {
-          this.options.onTagTypeArgs?.(typeArgs);
-          tag.types = typeArgs;
+        if (nextCode === CODE.PIPE && !hasParams) {
+          this.options.onTagTypeParams?.(types);
+        } else if (
+          nextCode === CODE.OPEN_PAREN &&
+          !(typeParams || hasParams || hasArgs)
+        ) {
+          tag.typeParams = types;
         } else {
           this.emitError(
             child,
             ErrorCode.INVALID_TAG_TYPES,
-            "Unexpected types. Type arguments must follow a tag name and type paremeters must precede a method or tag parameters."
+            "Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters."
           );
         }
 

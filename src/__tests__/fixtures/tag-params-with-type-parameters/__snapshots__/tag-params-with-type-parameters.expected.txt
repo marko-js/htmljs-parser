@@ -2,8 +2,8 @@
  │  ││  ││ ││       ╰─ openTagEnd
  │  ││  ││ │╰─ tagParams.value "data: A"
  │  ││  ││ ╰─ tagParams "|data: A|"
- │  ││  │╰─ tagTypeParams.value
- │  ││  ╰─ tagTypeParams "<A>"
+ │  ││  │╰─ tagTypeArgs.value
+ │  ││  ╰─ tagTypeArgs "<A>"
  │  │╰─ tagName "foo"
  ╰─ ╰─ openTagStart
 2╭─   hi
@@ -17,8 +17,8 @@
  │  ││  ││  ││       ╰─ openTagEnd
  │  ││  ││  │╰─ tagParams.value "data: A"
  │  ││  ││  ╰─ tagParams "|data: A|"
- │  ││  │╰─ tagTypeParams.value
- │  ││  ╰─ tagTypeParams "<A>"
+ │  ││  │╰─ tagTypeArgs.value
+ │  ││  ╰─ tagTypeArgs "<A>"
  │  │╰─ tagName "foo"
  ╰─ ╰─ openTagStart
 6╭─   hi
@@ -62,8 +62,8 @@
   │  ││  ││             ││           ╰─ openTagEnd
   │  ││  ││             │╰─ tagParams.value "data: A & B"
   │  ││  ││             ╰─ tagParams "|data: A & B|"
-  │  ││  │╰─ tagTypeParams.value "A, B = string"
-  │  ││  ╰─ tagTypeParams "<A, B = string>"
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
   │  │╰─ tagName "foo"
   ╰─ ╰─ openTagStart
 18╭─   hi
@@ -77,8 +77,8 @@
   │  ││  ││              ││           ╰─ openTagEnd
   │  ││  ││              │╰─ tagParams.value "data: A & B"
   │  ││  ││              ╰─ tagParams "|data: A & B|"
-  │  ││  │╰─ tagTypeParams.value "A, B = string"
-  │  ││  ╰─ tagTypeParams "<A, B = string>"
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
   │  │╰─ tagName "foo"
   ╰─ ╰─ openTagStart
 22╭─   hi
@@ -117,4 +117,54 @@
   │  │ ├─ closeTagEnd(foo)
   │  │ ╰─ closeTagName
   ╰─ ╰─ closeTagStart "</"
-32╰─ 
+32├─ 
+33╭─ <foo()<A> |data: A|>
+  │  ││  ││││  ││       ╰─ openTagEnd
+  │  ││  ││││  │╰─ tagParams.value "data: A"
+  │  ││  ││││  ╰─ tagParams "|data: A|"
+  │  ││  │││╰─ tagTypeParams.value
+  │  ││  ││╰─ tagTypeParams "<A>"
+  │  ││  │╰─ tagArgs.value
+  │  ││  ╰─ tagArgs "()"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+34╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+35╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+36├─ 
+37╭─ <foo/x<A> |data: A|>
+  │  ││  ││││  ││       ╰─ openTagEnd
+  │  ││  ││││  │╰─ tagParams.value "data: A"
+  │  ││  ││││  ╰─ tagParams "|data: A|"
+  │  ││  │││╰─ tagTypeParams.value
+  │  ││  ││╰─ tagTypeParams "<A>"
+  │  ││  │╰─ tagVar.value
+  │  ││  ╰─ tagVar "/x"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+38╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+39╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"
+40├─ 
+41╭─ <foo<string><A> |data: A|>
+  │  ││  ││      ││  ││       ╰─ openTagEnd
+  │  ││  ││      ││  │╰─ tagParams.value "data: A"
+  │  ││  ││      ││  ╰─ tagParams "|data: A|"
+  │  ││  ││      │╰─ tagTypeParams.value
+  │  ││  ││      ╰─ tagTypeParams "<A>"
+  │  ││  │╰─ tagTypeArgs.value "string"
+  │  ││  ╰─ tagTypeArgs "<string>"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+42╭─   hi
+  ╰─ ╰─ text "\n  hi\n"
+43╭─ </>
+  │  │ ├─ closeTagEnd(foo)
+  │  │ ╰─ closeTagName
+  ╰─ ╰─ closeTagStart "</"

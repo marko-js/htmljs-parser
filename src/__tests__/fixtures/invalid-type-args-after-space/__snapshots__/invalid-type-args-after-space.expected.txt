@@ -1,0 +1,7 @@
+1╭─ <foo <A>>
+ │  ││    ╰─ error(INVALID_TAG_TYPES:Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters.)
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2├─   hi
+3├─ </>
+4╰─ 

@@ -1,7 +1,3 @@
 1╭─ tagname <span>hello frank</span>
- │  │       ││    │     │     ╰─ error(INVALID_ATTR_TYPE_PARAMS:Attribute cannot contain type parameters unless it is a shorthand method) "/span"
- │  │       ││    │     ╰─ attrName "frank"
- │  │       ││    ╰─ attrName "hello"
- │  │       │╰─ tagTypeArgs.value "span"
- │  │       ╰─ tagTypeArgs "<span>"
+ │  │        ╰─ error(INVALID_TAG_TYPES:Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters.) "span"
  ╰─ ╰─ tagName "tagname"

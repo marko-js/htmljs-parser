@@ -1,11 +1,11 @@
 1╭─ <foo<A>(event: A){
  │  ││  ││ ││        ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
  │  ││  ││ │╰─ attrMethod.params.value "event: A"
- │  ││  ││ ╰─ attrMethod.params "(event: A)"
- │  ││  │╰─ attrMethod.typeParams.value
- │  ││  ├─ attrMethod.typeParams "<A>"
- │  ││  ├─ attrMethod "<A>(event: A){\n  console.log(event.type)\n}"
- │  ││  ╰─ attrName
+ │  ││  ││ ├─ attrMethod.params "(event: A)"
+ │  ││  ││ ├─ attrMethod "(event: A){\n  console.log(event.type)\n}"
+ │  ││  ││ ╰─ attrName
+ │  ││  │╰─ tagTypeArgs.value
+ │  ││  ╰─ tagTypeArgs "<A>"
  │  │╰─ tagName "foo"
  ╰─ ╰─ openTagStart
 2╭─   console.log(event.type)
@@ -16,11 +16,11 @@
 5╭─ <foo<A> (event: A){
  │  ││  ││  ││        ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
  │  ││  ││  │╰─ attrMethod.params.value "event: A"
- │  ││  ││  ╰─ attrMethod.params "(event: A)"
- │  ││  │╰─ attrMethod.typeParams.value
- │  ││  ├─ attrMethod.typeParams "<A>"
- │  ││  ├─ attrMethod "<A> (event: A){\n  console.log(event.type)\n}"
- │  ││  ╰─ attrName
+ │  ││  ││  ├─ attrMethod.params "(event: A)"
+ │  ││  ││  ├─ attrMethod "(event: A){\n  console.log(event.type)\n}"
+ │  ││  ││  ╰─ attrName
+ │  ││  │╰─ tagTypeArgs.value
+ │  ││  ╰─ tagTypeArgs "<A>"
  │  │╰─ tagName "foo"
  ╰─ ╰─ openTagStart
 6╭─   console.log(event.type)
@@ -61,11 +61,11 @@
 17╭─ <foo<A, B = string>(event: A & B){
   │  ││  ││             ││            ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
   │  ││  ││             │╰─ attrMethod.params.value "event: A & B"
-  │  ││  ││             ╰─ attrMethod.params "(event: A & B)"
-  │  ││  │╰─ attrMethod.typeParams.value "A, B = string"
-  │  ││  ├─ attrMethod.typeParams "<A, B = string>"
-  │  ││  ├─ attrMethod "<A, B = string>(event: A & B){\n  console.log(event.type)\n}"
-  │  ││  ╰─ attrName
+  │  ││  ││             ├─ attrMethod.params "(event: A & B)"
+  │  ││  ││             ├─ attrMethod "(event: A & B){\n  console.log(event.type)\n}"
+  │  ││  ││             ╰─ attrName
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
   │  │╰─ tagName "foo"
   ╰─ ╰─ openTagStart
 18╭─   console.log(event.type)
@@ -76,11 +76,11 @@
 21╭─ <foo<A, B = string> (event: A & B){
   │  ││  ││              ││            ╰─ attrMethod.body "{\n  console.log(event.type)\n}"
   │  ││  ││              │╰─ attrMethod.params.value "event: A & B"
-  │  ││  ││              ╰─ attrMethod.params "(event: A & B)"
-  │  ││  │╰─ attrMethod.typeParams.value "A, B = string"
-  │  ││  ├─ attrMethod.typeParams "<A, B = string>"
-  │  ││  ├─ attrMethod "<A, B = string> (event: A & B){\n  console.log(event.type)\n}"
-  │  ││  ╰─ attrName
+  │  ││  ││              ├─ attrMethod.params "(event: A & B)"
+  │  ││  ││              ├─ attrMethod "(event: A & B){\n  console.log(event.type)\n}"
+  │  ││  ││              ╰─ attrName
+  │  ││  │╰─ tagTypeArgs.value "A, B = string"
+  │  ││  ╰─ tagTypeArgs "<A, B = string>"
   │  │╰─ tagName "foo"
   ╰─ ╰─ openTagStart
 22╭─   console.log(event.type)
