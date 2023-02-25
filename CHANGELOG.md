@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.3.0
+
+### Minor Changes
+
+- [#152](https://github.com/marko-js/htmljs-parser/pull/152) [`ea65c9f`](https://github.com/marko-js/htmljs-parser/commit/ea65c9fe8fac0a47122b4f3b6b811856e2ceac99) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Improve handling ambiguity with tag type args vs type params. Type args must now always be directly adjacent the tag name, otherwise it will become type params.
+
 ## 5.2.4
 
 ### Patch Changes
