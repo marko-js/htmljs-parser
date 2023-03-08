@@ -213,6 +213,7 @@ export class Parser {
 
     if (this.lookAheadFor(str, cur)) {
       this.pos = cur;
+      if (this.forward > 1) this.forward = 1;
       return true;
     }
 

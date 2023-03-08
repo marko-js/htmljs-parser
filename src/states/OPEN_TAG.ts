@@ -99,8 +99,12 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   },
 
   eol(_, tag) {
-    if (this.isConcise && tag.stage !== TAG_STAGE.ATTR_GROUP) {
-      // In concise mode we always end the open tag
+    if (
+      this.isConcise &&
+      tag.stage !== TAG_STAGE.ATTR_GROUP &&
+      !this.consumeWhitespaceIfBefore(",")
+    ) {
+      // In concise mode we always end the open tag unless we're in an attr group or the next line starts with ",".
       this.exitState();
     }
   },
