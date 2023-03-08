@@ -124,6 +124,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       code === CODE.FORWARD_SLASH ||
       code === CODE.PIPE ||
       code === CODE.OPEN_ANGLE_BRACKET ||
+      code === CODE.COMMA ||
       (this.isConcise
         ? code === CODE.SEMICOLON
         : code === CODE.CLOSE_ANGLE_BRACKET)

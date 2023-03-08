@@ -1,0 +1,122 @@
+1╭─ div, class="a", id="c"
+ │  │    │    ││    │ │╰─ attrValue.value "\"c\""
+ │  │    │    ││    │ ╰─ attrValue "=\"c\""
+ │  │    │    ││    ╰─ attrName "id"
+ │  │    │    │╰─ attrValue.value "\"a\""
+ │  │    │    ╰─ attrValue "=\"a\""
+ │  │    ╰─ attrName "class"
+ ╰─ ╰─ tagName "div"
+2╭─ 
+ ╰─ ╰─ openTagEnd
+3╭─ div,
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+4╭─     class="a",
+ │      │    │╰─ attrValue.value "\"a\""
+ │      │    ╰─ attrValue "=\"a\""
+ ╰─     ╰─ attrName "class"
+5╭─     id="c"
+ │      │ │╰─ attrValue.value "\"c\""
+ │      │ ╰─ attrValue "=\"c\""
+ ╰─     ╰─ attrName "id"
+6╭─ 
+ ╰─ ╰─ openTagEnd
+7╭─ div , class="a", id="c"
+ │  │     │    ││    │ │╰─ attrValue.value "\"c\""
+ │  │     │    ││    │ ╰─ attrValue "=\"c\""
+ │  │     │    ││    ╰─ attrName "id"
+ │  │     │    │╰─ attrValue.value "\"a\""
+ │  │     │    ╰─ attrValue "=\"a\""
+ │  │     ╰─ attrName "class"
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+8╭─ 
+ ╰─ ╰─ openTagEnd
+9╭─ div ,
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+10╭─     class="a",
+  │      │    │╰─ attrValue.value "\"a\""
+  │      │    ╰─ attrValue "=\"a\""
+  ╰─     ╰─ attrName "class"
+11╭─     id="c"
+  │      │ │╰─ attrValue.value "\"c\""
+  │      │ ╰─ attrValue "=\"c\""
+  ╰─     ╰─ attrName "id"
+12╭─ 
+  ╰─ ╰─ openTagEnd
+13╭─ div
+  │  ├─ closeTagEnd(div)
+  ╰─ ╰─ tagName "div"
+14╭─     ,class="a"
+  │       │    │╰─ attrValue.value "\"a\""
+  │       │    ╰─ attrValue "=\"a\""
+  ╰─      ╰─ attrName "class"
+15╭─     ,id="c"
+  │       │ │╰─ attrValue.value "\"c\""
+  │       │ ╰─ attrValue "=\"c\""
+  ╰─      ╰─ attrName "id"
+16╭─ 
+  ╰─ ╰─ openTagEnd
+17╭─ <div, class="a", id="c"/>
+  │  ││    │    ││    │ ││  ╰─ openTagEnd:selfClosed "/>"
+  │  ││    │    ││    │ │╰─ attrValue.value "\"c\""
+  │  ││    │    ││    │ ╰─ attrValue "=\"c\""
+  │  ││    │    ││    ╰─ attrName "id"
+  │  ││    │    │╰─ attrValue.value "\"a\""
+  │  ││    │    ╰─ attrValue "=\"a\""
+  │  ││    ╰─ attrName "class"
+  │  │╰─ tagName "div"
+  │  ├─ closeTagEnd(div)
+  ╰─ ╰─ openTagStart
+18├─ 
+19╭─ <div,
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+20╭─     class="a",
+  │      │    │╰─ attrValue.value "\"a\""
+  │      │    ╰─ attrValue "=\"a\""
+  ╰─     ╰─ attrName "class"
+21╭─     id="c"/>
+  │      │ ││  ╰─ openTagEnd:selfClosed "/>"
+  │      │ │╰─ attrValue.value "\"c\""
+  │      │ ╰─ attrValue "=\"c\""
+  ╰─     ╰─ attrName "id"
+22├─ 
+23╭─ <div , class="a", id="c"/>
+  │  ││     │    ││    │ ││  ╰─ openTagEnd:selfClosed "/>"
+  │  ││     │    ││    │ │╰─ attrValue.value "\"c\""
+  │  ││     │    ││    │ ╰─ attrValue "=\"c\""
+  │  ││     │    ││    ╰─ attrName "id"
+  │  ││     │    │╰─ attrValue.value "\"a\""
+  │  ││     │    ╰─ attrValue "=\"a\""
+  │  ││     ╰─ attrName "class"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+24├─ 
+25╭─ <div ,
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+26╭─     class="a",
+  │      │    │╰─ attrValue.value "\"a\""
+  │      │    ╰─ attrValue "=\"a\""
+  ╰─     ╰─ attrName "class"
+27╭─     id="c"/>
+  │      │ ││  ╰─ openTagEnd:selfClosed "/>"
+  │      │ │╰─ attrValue.value "\"c\""
+  │      │ ╰─ attrValue "=\"c\""
+  ╰─     ╰─ attrName "id"
+28├─ 
+29╭─ <div
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+30╭─     ,class="a"
+  │       │    │╰─ attrValue.value "\"a\""
+  │       │    ╰─ attrValue "=\"a\""
+  ╰─      ╰─ attrName "class"
+31╭─     ,id="c"/>
+  │       │ ││  ╰─ openTagEnd:selfClosed "/>"
+  │       │ │╰─ attrValue.value "\"c\""
+  │       │ ╰─ attrValue "=\"c\""
+  ╰─      ╰─ attrName "id"
+32╰─ 
