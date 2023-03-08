@@ -266,11 +266,16 @@ function lookBehindForOperator(data: string, pos: number): number {
     case CODE.OPEN_ANGLE_BRACKET:
     case CODE.CLOSE_ANGLE_BRACKET:
     case CODE.PERCENT:
-    case CODE.PERIOD:
     case CODE.PIPE:
     case CODE.QUESTION:
     case CODE.TILDE:
       return curPos;
+
+    case CODE.PERIOD: {
+      // Only matches `.` followed by something that could be an identifier.
+      const nextPos = lookAheadWhile(isWhitespaceCode, data, pos);
+      return isWordCode(data.charCodeAt(nextPos)) ? nextPos : -1;
+    }
 
     // special case -- and ++
     case CODE.PLUS:
@@ -324,9 +329,11 @@ function lookAheadForOperator(data: string, pos: number): number {
     case CODE.OPEN_PAREN:
       return pos; // defers to base expression state to track block groups.
 
-    case CODE.PERIOD:
-      // Only match a dot if its not ...
-      return data.charCodeAt(pos + 1) === CODE.PERIOD ? -1 : pos + 1;
+    case CODE.PERIOD: {
+      // Only matches `.` followed by something that could be an identifier.
+      const nextPos = lookAheadWhile(isWhitespaceCode, data, pos + 1);
+      return isWordCode(data.charCodeAt(nextPos)) ? nextPos : -1;
+    }
 
     default: {
       for (const keyword of binaryKeywords) {
@@ -383,6 +390,7 @@ function isWordCode(code: number) {
     (code >= CODE.UPPER_A && code <= CODE.UPPER_Z) ||
     (code >= CODE.LOWER_A && code <= CODE.LOWER_Z) ||
     (code >= CODE.NUMBER_0 && code <= CODE.NUMBER_9) ||
+    code == CODE.DOLLAR ||
     code === CODE.UNDERSCORE
   );
 }

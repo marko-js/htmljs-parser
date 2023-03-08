@@ -1,0 +1,27 @@
+1╭─ $ $global.
+ │   │╰─ scriptlet.value "$global."
+ ╰─  ╰─ scriptlet " $global."
+2├─ 
+3╭─ <header>
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "header"
+ ╰─ ╰─ openTagStart
+4╭─   <img.logo src=logo alt="Marko"/>
+ │  │ ││  ││    │  ││    │  ││      ╰─ openTagEnd:selfClosed "/>"
+ │  │ ││  ││    │  ││    │  │╰─ attrValue.value "\"Marko\""
+ │  │ ││  ││    │  ││    │  ╰─ attrValue "=\"Marko\""
+ │  │ ││  ││    │  ││    ╰─ attrName "alt"
+ │  │ ││  ││    │  │╰─ attrValue.value "logo"
+ │  │ ││  ││    │  ╰─ attrValue "=logo"
+ │  │ ││  ││    ╰─ attrName "src"
+ │  │ ││  │╰─ tagShorthandClass.quasis[0] "logo"
+ │  │ ││  ╰─ tagShorthandClass ".logo"
+ │  │ │╰─ tagName "img"
+ │  │ ╰─ openTagStart
+ ╰─ ╰─ text "\n  "
+5╭─ </header>
+ │  │ │     ╰─ closeTagEnd(header)
+ │  │ ╰─ closeTagName "header"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTagStart "</"
+6╰─ 
