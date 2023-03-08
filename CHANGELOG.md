@@ -1,5 +1,17 @@
 # htmljs-parser
 
+## 5.4.0
+
+### Minor Changes
+
+- [#154](https://github.com/marko-js/htmljs-parser/pull/154) [`6b5b196`](https://github.com/marko-js/htmljs-parser/commit/6b5b1968d332078042406c62ee9be3f21e5ed687) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - In concise mode, a new line which starts with a coma will now continue attributes for the current tag.
+
+- [#154](https://github.com/marko-js/htmljs-parser/pull/154) [`6b5b196`](https://github.com/marko-js/htmljs-parser/commit/6b5b1968d332078042406c62ee9be3f21e5ed687) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Allow a comma to follow the tag name to begin attributes.
+
+### Patch Changes
+
+- [#154](https://github.com/marko-js/htmljs-parser/pull/154) [`61e6966`](https://github.com/marko-js/htmljs-parser/commit/61e696631d18472978e2c5a2f4959cb852e0414f) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Avoid continuing expressions after a period if after the whitespace is something that could not be an identifier.
+
 ## 5.3.0
 
 ### Minor Changes
