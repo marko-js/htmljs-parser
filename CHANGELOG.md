@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.4.1
+
+### Patch Changes
+
+- [#156](https://github.com/marko-js/htmljs-parser/pull/156) [`72b3379`](https://github.com/marko-js/htmljs-parser/commit/72b3379fb37d2c4e76976bcb4bb0312b376068a3) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix regression where the parser would continue unary keyword expressions even if the keyword was inside a word boundary. Eg `<div class=thing_new x>` would cause the parser to see the expression as `thing_` and `new x`.
+
 ## 5.4.0
 
 ### Minor Changes
