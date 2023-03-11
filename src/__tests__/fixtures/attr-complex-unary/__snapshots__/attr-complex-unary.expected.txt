@@ -1,0 +1,80 @@
+1╭─ tag a = class b {}
+ │  │   │ │ ╰─ attrValue.value "class b {}"
+ │  │   │ ╰─ attrValue "= class b {}"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "tag"
+2╭─ 
+ ╰─ ╰─ openTagEnd
+3╭─ tag a = class, b
+ │  │   │ │ │      ╰─ attrName
+ │  │   │ │ ╰─ attrValue.value "class"
+ │  │   │ ╰─ attrValue "= class"
+ │  │   ╰─ attrName
+ │  ├─ closeTagEnd(tag)
+ ╰─ ╰─ tagName "tag"
+4╭─ 
+ ╰─ ╰─ openTagEnd
+5╭─ <tag a = class></tag>
+ │  ││   │ │ │    ││ │  ╰─ closeTagEnd(tag)
+ │  ││   │ │ │    ││ ╰─ closeTagName "tag"
+ │  ││   │ │ │    │╰─ closeTagStart "</"
+ │  ││   │ │ │    ╰─ openTagEnd
+ │  ││   │ │ ╰─ attrValue.value "class"
+ │  ││   │ ╰─ attrValue "= class"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "tag"
+ │  ├─ closeTagEnd(tag)
+ ╰─ ╰─ openTagStart
+6├─ 
+7╭─ <tag a = class/>
+ │  ││   │ │ │    ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │ │ ╰─ attrValue.value "class"
+ │  ││   │ ╰─ attrValue "= class"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "tag"
+ ╰─ ╰─ openTagStart
+8├─ 
+9╭─ tag a = classthing b
+ │  │   │ │ │          ╰─ attrName
+ │  │   │ │ ╰─ attrValue.value "classthing"
+ │  │   │ ╰─ attrValue "= classthing"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "tag"
+10╭─ 
+  ╰─ ╰─ openTagEnd
+11╭─ tag a = testclass b
+  │  │   │ │ │         ╰─ attrName
+  │  │   │ │ ╰─ attrValue.value "testclass"
+  │  │   │ ╰─ attrValue "= testclass"
+  │  │   ╰─ attrName
+  │  ├─ closeTagEnd(tag)
+  ╰─ ╰─ tagName "tag"
+12╭─ 
+  ╰─ ╰─ openTagEnd
+13╭─ tag a = test_class b
+  │  │   │ │ │          ╰─ attrName
+  │  │   │ │ ╰─ attrValue.value "test_class"
+  │  │   │ ╰─ attrValue "= test_class"
+  │  │   ╰─ attrName
+  │  ├─ closeTagEnd(tag)
+  ╰─ ╰─ tagName "tag"
+14╭─ 
+  ╰─ ╰─ openTagEnd
+15╭─ tag a = test$class b
+  │  │   │ │ │          ╰─ attrName
+  │  │   │ │ ╰─ attrValue.value "test$class"
+  │  │   │ ╰─ attrValue "= test$class"
+  │  │   ╰─ attrName
+  │  ├─ closeTagEnd(tag)
+  ╰─ ╰─ tagName "tag"
+16╭─ 
+  ╰─ ╰─ openTagEnd
+17╭─ tag a = test+class b
+  │  │   │ │ ╰─ attrValue.value "test+class b"
+  │  │   │ ╰─ attrValue "= test+class b"
+  │  │   ╰─ attrName
+  │  ├─ closeTagEnd(tag)
+  ╰─ ╰─ tagName "tag"
+18╭─ 
+  │  ├─ openTagEnd
+  ╰─ ╰─ closeTagEnd(tag)
