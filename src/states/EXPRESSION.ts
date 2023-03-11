@@ -296,7 +296,8 @@ function lookBehindForOperator(data: string, pos: number): number {
       for (const keyword of unaryKeywords) {
         const keywordPos = lookBehindFor(data, curPos, keyword);
         if (keywordPos !== -1) {
-          return data.charCodeAt(keywordPos - 1) === CODE.PERIOD
+          const prevCode = data.charCodeAt(keywordPos - 1);
+          return prevCode === CODE.PERIOD || isWordCode(prevCode)
             ? -1
             : keywordPos;
         }
