@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.4.2
+
+### Patch Changes
+
+- [#158](https://github.com/marko-js/htmljs-parser/pull/158) [`fe98530`](https://github.com/marko-js/htmljs-parser/commit/fe985307a2112ba48c1317a16481c321ba256619) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fixes an regression where string literals inside of parsed text nodes (eg `<script>`) were not properly changing the parser state. This caused issues when comment like syntax was embedded within these string literals"
+
 ## 5.4.1
 
 ### Patch Changes
