@@ -17,4 +17,5 @@ export * from "./REGULAR_EXPRESSION";
 export * from "./STRING";
 export * from "./TAG_NAME";
 export * from "./TEMPLATE_STRING";
+export * from "./PARSED_STRING";
 export * from "./OPEN_TAG";

@@ -50,6 +50,12 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
         this.startText();
         this.enterState(STATE.TEMPLATE_STRING);
         break;
+      case CODE.DOUBLE_QUOTE:
+      case CODE.SINGLE_QUOTE:
+        this.startText();
+        this.enterState(STATE.PARSED_STRING).quoteCharCode = code;
+        break;
+
       default:
         if (!STATE.checkForPlaceholder(this, code)) this.startText();
         break;
