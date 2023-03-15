@@ -21,6 +21,7 @@ export const PARSED_STRING: StateDefinition<ParsedStringMeta> = {
 
   char(code, str) {
     if (code === str.quoteCharCode) {
+      this.startText();
       this.pos++; // skip end quote
       this.exitState();
     } else if (!STATE.checkForPlaceholder(this, code)) {
