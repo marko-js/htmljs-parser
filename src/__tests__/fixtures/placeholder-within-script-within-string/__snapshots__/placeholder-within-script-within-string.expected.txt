@@ -9,3 +9,14 @@
  │  ││     ╰─ openTagEnd
  │  │╰─ tagName "script"
  ╰─ ╰─ openTagStart
+2╭─ <script>alert('${xyz}')</script>
+ │  ││     ││      │ │   │ │ │     ╰─ closeTagEnd(script)
+ │  ││     ││      │ │   │ │ ╰─ closeTagName "script"
+ │  ││     ││      │ │   │ ╰─ closeTagStart "</"
+ │  ││     ││      │ │   ╰─ text "')"
+ │  ││     ││      │ ╰─ placeholder:escape.value "xyz"
+ │  ││     ││      ╰─ placeholder:escape "${xyz}"
+ │  ││     │╰─ text "alert('"
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
