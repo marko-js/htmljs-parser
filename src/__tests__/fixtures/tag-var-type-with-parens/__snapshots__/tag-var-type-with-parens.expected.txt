@@ -1,0 +1,50 @@
+1╭─ let/a:(B | C) = D
+ │  │  ││         │ ╰─ attrValue.value
+ │  │  ││         ├─ attrValue "= D"
+ │  │  ││         ╰─ attrName
+ │  │  │╰─ tagVar.value "a:(B | C)"
+ │  │  ╰─ tagVar "/a:(B | C)"
+ ╰─ ╰─ tagName "let"
+2╭─ 
+ ╰─ ╰─ openTagEnd
+3╭─ let/a: (B | C) = D
+ │  │  ││          │ ╰─ attrValue.value
+ │  │  ││          ├─ attrValue "= D"
+ │  │  ││          ╰─ attrName
+ │  │  │╰─ tagVar.value "a: (B | C)"
+ │  │  ╰─ tagVar "/a: (B | C)"
+ │  ├─ closeTagEnd(let)
+ ╰─ ╰─ tagName "let"
+4╭─ 
+ ╰─ ╰─ openTagEnd
+5╭─ let/a : (B | C) = D
+ │  │  ││           │ ╰─ attrValue.value
+ │  │  ││           ├─ attrValue "= D"
+ │  │  ││           ╰─ attrName
+ │  │  │╰─ tagVar.value "a : (B | C)"
+ │  │  ╰─ tagVar "/a : (B | C)"
+ │  ├─ closeTagEnd(let)
+ ╰─ ╰─ tagName "let"
+6╭─ 
+ ╰─ ╰─ openTagEnd
+7╭─ let/a :(B | C) = D
+ │  │  ││          │ ╰─ attrValue.value
+ │  │  ││          ├─ attrValue "= D"
+ │  │  ││          ╰─ attrName
+ │  │  │╰─ tagVar.value "a :(B | C)"
+ │  │  ╰─ tagVar "/a :(B | C)"
+ │  ├─ closeTagEnd(let)
+ ╰─ ╰─ tagName "let"
+8╭─ 
+ ╰─ ╰─ openTagEnd
+9╭─ let/a: B & (C | D) = D
+ │  │  ││              │ ╰─ attrValue.value
+ │  │  ││              ├─ attrValue "= D"
+ │  │  ││              ╰─ attrName
+ │  │  │╰─ tagVar.value "a: B & (C | D)"
+ │  │  ╰─ tagVar "/a: B & (C | D)"
+ │  ├─ closeTagEnd(let)
+ ╰─ ╰─ tagName "let"
+10╭─ 
+  │  ├─ openTagEnd
+  ╰─ ╰─ closeTagEnd(let)
