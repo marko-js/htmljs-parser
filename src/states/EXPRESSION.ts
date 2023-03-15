@@ -61,8 +61,23 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       }
 
       if (expression.shouldTerminate(code, this.data, this.pos)) {
-        this.exitState();
-        return;
+        let wasExpression = false;
+        if (expression.operators) {
+          const prevNonWhitespacePos = lookBehindWhile(
+            isWhitespaceCode,
+            this.data,
+            this.pos - 1
+          );
+          if (prevNonWhitespacePos > expression.start) {
+            wasExpression =
+              lookBehindForOperator(this.data, prevNonWhitespacePos) !== -1;
+          }
+        }
+
+        if (!wasExpression) {
+          this.exitState();
+          return;
+        }
       }
     }
 
