@@ -1,5 +1,13 @@
 # htmljs-parser
 
+## 5.4.3
+
+### Patch Changes
+
+- [#161](https://github.com/marko-js/htmljs-parser/pull/161) [`be73442`](https://github.com/marko-js/htmljs-parser/commit/be734429cc67b87a21a6a0c8880da64a3475d03e) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fixes a regression where the parsed text state (used by eg `script`, `style`) was not properly entering back into text for the closing quote on the string.
+
+- [#162](https://github.com/marko-js/htmljs-parser/pull/162) [`085451c`](https://github.com/marko-js/htmljs-parser/commit/085451cc574b56ce6689f2168a9eed1bd0f0b0e6) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Always consume next character of expression if terminator was preceded by an operator.
+
 ## 5.4.2
 
 ### Patch Changes
