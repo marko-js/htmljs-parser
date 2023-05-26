@@ -1,2 +1,5 @@
-1╭─     var colors=['red', 'green', 'blue']
+1╭─      // I am indented, and that is OK, but the following is not
+ │       │ ╰─ comment.value " I am indented, and that is OK, but the following is not"
+ ╰─      ╰─ comment "// I am indented, and that is OK, but the following is not"
+2╭─     var colors=['red', 'green', 'blue']
  ╰─     ╰─ error(INVALID_INDENTATION:Line has extra indentation at the beginning)
