@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.5.0
+
+### Minor Changes
+
+- [#164](https://github.com/marko-js/htmljs-parser/pull/164) [`13a33a3`](https://github.com/marko-js/htmljs-parser/commit/13a33a3499889b4abf3001cf505b08558e303eea) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Allow indented javascript style comments that are not under a parent tag in concise mode.
+
 ## 5.4.3
 
 ### Patch Changes
