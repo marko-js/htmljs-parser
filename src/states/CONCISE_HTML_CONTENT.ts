@@ -39,12 +39,14 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       }
 
       if (!parentTag && curIndent) {
-        this.emitError(
-          this.pos,
-          ErrorCode.INVALID_INDENTATION,
-          "Line has extra indentation at the beginning"
-        );
-        return;
+        if (code !== CODE.FORWARD_SLASH) {
+          this.emitError(
+            this.pos,
+            ErrorCode.INVALID_INDENTATION,
+            "Line has extra indentation at the beginning"
+          );
+          return;
+        }
       }
 
       if (parentTag) {
