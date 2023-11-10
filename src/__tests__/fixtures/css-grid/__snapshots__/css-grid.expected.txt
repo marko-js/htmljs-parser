@@ -1,0 +1,12 @@
+1╭─ ﻿style.scss {
+ │   │    ││    ╰─ attrName "{\n  .foo {\n    grid: \"left right\" / 3fr 7fr;\n  }\n}"
+ │   │    │╰─ tagShorthandClass.quasis[0] "scss"
+ │   │    ╰─ tagShorthandClass ".scss"
+ ╰─  ╰─ tagName "style"
+2├─   .foo {
+3├─     grid: "left right" / 3fr 7fr;
+4├─   }
+5├─ }
+6╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(style)
