@@ -390,15 +390,21 @@ function lookAheadForOperator(data: string, pos: number): number {
 }
 
 function canFollowDivision(code: number) {
-  return (
-    isWordCode(code) ||
-    code === CODE.PERCENT ||
-    code === CODE.CLOSE_PAREN ||
-    code === CODE.PERIOD ||
-    code === CODE.OPEN_ANGLE_BRACKET ||
-    code === CODE.CLOSE_SQUARE_BRACKET ||
-    code === CODE.CLOSE_CURLY_BRACE
-  );
+  if (isWordCode(code)) return true;
+  switch (code) {
+    case CODE.BACKTICK:
+    case CODE.SINGLE_QUOTE:
+    case CODE.DOUBLE_QUOTE:
+    case CODE.PERCENT:
+    case CODE.CLOSE_PAREN:
+    case CODE.PERIOD:
+    case CODE.OPEN_ANGLE_BRACKET:
+    case CODE.CLOSE_SQUARE_BRACKET:
+    case CODE.CLOSE_CURLY_BRACE:
+      return true;
+    default:
+      return false;
+  }
 }
 
 function isWordCode(code: number) {
