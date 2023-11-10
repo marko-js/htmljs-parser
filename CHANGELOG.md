@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.5.1
+
+### Patch Changes
+
+- [#168](https://github.com/marko-js/htmljs-parser/pull/168) [`3a696d0`](https://github.com/marko-js/htmljs-parser/commit/3a696d018d063665c36296565279881d6b05d8c6) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - When the preceding character of an expression is a quote, prefer division over regexp state. This improves parsing for inline css grid properties.
+
 ## 5.5.0
 
 ### Minor Changes
