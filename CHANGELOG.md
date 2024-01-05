@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.5.2
+
+### Patch Changes
+
+- [#171](https://github.com/marko-js/htmljs-parser/pull/171) [`aa98807`](https://github.com/marko-js/htmljs-parser/commit/aa98807ef3e9f2d439e499f737bfe1b7c923983a) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Upgrade dependencies and configs
+
 ## 5.5.1
 
 ### Patch Changes
