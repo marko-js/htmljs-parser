@@ -1,4 +1,4 @@
-import { CODE, StateDefinition, Meta, ErrorCode } from "../internal";
+import { CODE, type StateDefinition, type Meta, ErrorCode } from "../internal";
 
 interface StringMeta extends Meta {
   quoteCharCode: number;
@@ -38,7 +38,7 @@ export const STRING: StateDefinition<StringMeta> = {
     this.emitError(
       string,
       ErrorCode.INVALID_STRING,
-      "EOF reached while parsing string expression"
+      "EOF reached while parsing string expression",
     );
   },
 

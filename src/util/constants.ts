@@ -23,7 +23,6 @@ export const enum CODE {
   CLOSE_CURLY_BRACE = 125,
   ASTERISK = 42,
   HYPHEN = 45,
-  HTML_BLOCK_DELIMITER = 45,
   DOLLAR = 36,
   PERCENT = 37,
   PERIOD = 46,

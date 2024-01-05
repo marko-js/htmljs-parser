@@ -1,10 +1,10 @@
 import {
   Parser,
   CODE,
-  StateDefinition,
+  type StateDefinition,
   STATE,
   htmlEOF,
-  Meta,
+  type Meta,
   ErrorCode,
 } from "../internal";
 
@@ -33,7 +33,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
     exit() {},
 
     char(code, block) {
-      if (code === CODE.HTML_BLOCK_DELIMITER) {
+      if (code === CODE.HYPHEN) {
         block.delimiter += "-";
       } else {
         const startPos = this.pos;
@@ -60,7 +60,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
 export function handleDelimitedEOL(
   parser: Parser,
   newLineLength: number,
-  content: STATE.ParsedTextContentMeta | STATE.HTMLContentMeta
+  content: STATE.ParsedTextContentMeta | STATE.HTMLContentMeta,
 ) {
   if (content.singleLine) {
     parser.endText();
@@ -86,7 +86,7 @@ function handleDelimitedBlockEOL(
   }:
     | STATE.ParsedTextContentMeta
     | STATE.HTMLContentMeta
-    | DelimitedHTMLBlockMeta
+    | DelimitedHTMLBlockMeta,
 ) {
   // If we are within a delimited HTML block then we want to check if the next line is the end
   // delimiter. Since we are currently positioned at the start of the new line character our lookahead
@@ -108,7 +108,7 @@ function handleDelimitedBlockEOL(
       parser.emitError(
         parser.pos,
         ErrorCode.INVALID_CHARACTER,
-        "A concise mode closing block delimiter can only be followed by whitespace."
+        "A concise mode closing block delimiter can only be followed by whitespace.",
       );
     }
   } else if (parser.lookAheadFor(indent, parser.pos + newLineLength)) {

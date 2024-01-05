@@ -1,4 +1,4 @@
-import { CODE, ErrorCode, Parser, StateDefinition } from "../internal";
+import { CODE, ErrorCode, Parser, type StateDefinition } from "../internal";
 
 // We enter STATE.CDATA after we see "<![CDATA["
 export const CDATA: StateDefinition = {
@@ -38,7 +38,7 @@ export const CDATA: StateDefinition = {
     this.emitError(
       cdata,
       ErrorCode.MALFORMED_CDATA,
-      "EOF reached while parsing CDATA"
+      "EOF reached while parsing CDATA",
     );
   },
 

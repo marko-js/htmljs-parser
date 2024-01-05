@@ -1,5 +1,5 @@
 import { CODE, type Parser } from "../internal";
-import { ErrorCode, Location, Position } from "./constants";
+import { ErrorCode, type Location, type Position } from "./constants";
 
 export function isWhitespaceCode(code: number) {
   // For all practical purposes, the space character (32) and all the
@@ -15,7 +15,7 @@ export function isWhitespaceCode(code: number) {
 export function getLocation(
   lines: number[],
   startOffset: number,
-  endOffset: number
+  endOffset: number,
 ): Location {
   const start = getPosition(lines, startOffset);
   const end =
@@ -62,7 +62,7 @@ export function htmlEOF(this: Parser) {
       return this.emitError(
         this.activeTag,
         ErrorCode.MISSING_END_TAG,
-        'Missing ending "' + this.read(this.activeTag.tagName) + '" tag'
+        'Missing ending "' + this.read(this.activeTag.tagName) + '" tag',
       );
     }
   }
@@ -87,7 +87,7 @@ export function matchesPipe(code: number) {
 function getPosAfterLine(
   lines: number[],
   startLine: number,
-  index: number
+  index: number,
 ): Position {
   let max = lines.length - 1;
   let line = startLine;

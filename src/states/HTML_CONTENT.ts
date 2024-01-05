@@ -3,9 +3,9 @@ import {
   CODE,
   STATE,
   isWhitespaceCode,
-  StateDefinition,
+  type StateDefinition,
   htmlEOF,
-  Meta,
+  type Meta,
 } from "../internal";
 
 export interface HTMLContentMeta extends Meta {

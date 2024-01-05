@@ -3,8 +3,8 @@ import {
   CODE,
   STATE,
   isWhitespaceCode,
-  Range,
-  ParserOptions as Options,
+  type Range,
+  type ParserOptions as Options,
   getLines,
   getLocation,
   getPosition,
@@ -20,7 +20,7 @@ export interface StateDefinition<P extends Meta = Meta> {
   enter: (
     this: Parser,
     parent: Meta,
-    pos: number
+    pos: number,
   ) => Partial<P & { state: unknown }>;
   exit: (this: Parser, activeRange: P) => void;
   char: (this: Parser, code: number, activeRange: P) => void;
@@ -54,7 +54,7 @@ export class Parser {
   positionAt(offset: number) {
     return getPosition(
       this.lines || (this.lines = getLines(this.data)),
-      offset
+      offset,
     );
   }
 
@@ -62,7 +62,7 @@ export class Parser {
     return getLocation(
       this.lines || (this.lines = getLines(this.data)),
       range.start,
-      range.end
+      range.end,
     );
   }
 
@@ -71,7 +71,7 @@ export class Parser {
     return (this.activeRange = state.enter.call(
       this,
       this.activeRange,
-      this.pos
+      this.pos,
     ) as P);
   }
 
@@ -167,7 +167,7 @@ export class Parser {
     const content = this.enterState(
       this.activeTag?.type === TagType.text
         ? STATE.PARSED_TEXT_CONTENT
-        : STATE.HTML_CONTENT
+        : STATE.HTML_CONTENT,
     );
 
     content.singleLine = singleLine;

@@ -2,9 +2,9 @@ import {
   CODE,
   STATE,
   isWhitespaceCode,
-  StateDefinition,
-  Ranges,
-  Meta,
+  type StateDefinition,
+  type Ranges,
+  type Meta,
   TagType,
   ErrorCode,
   matchesCloseCurlyBrace,
@@ -42,7 +42,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
           return this.emitError(
             tagName,
             ErrorCode.INVALID_TAG_SHORTHAND,
-            "Multiple shorthand ID parts are not allowed on the same tag"
+            "Multiple shorthand ID parts are not allowed on the same tag",
           );
         }
 
@@ -81,8 +81,8 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
                 tagName,
                 ErrorCode.RESERVED_TAG_NAME,
                 `The "${this.read(
-                  tagName
-                )}" tag is reserved and cannot be used as an HTML tag.`
+                  tagName,
+                )}" tag is reserved and cannot be used as an HTML tag.`,
               );
             }
 
@@ -91,8 +91,8 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
                 tagName,
                 ErrorCode.ROOT_TAG_ONLY,
                 `"${this.read(
-                  tagName
-                )}" can only be used at the root of the template.`
+                  tagName,
+                )}" can only be used at the root of the template.`,
               );
             }
 
@@ -154,7 +154,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       this.emitError(
         child,
         ErrorCode.MALFORMED_PLACEHOLDER,
-        "Invalid placeholder, the expression cannot be missing"
+        "Invalid placeholder, the expression cannot be missing",
       );
     }
 

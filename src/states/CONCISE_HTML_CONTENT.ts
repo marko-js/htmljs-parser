@@ -2,7 +2,7 @@ import {
   CODE,
   STATE,
   isWhitespaceCode,
-  StateDefinition,
+  type StateDefinition,
   TagType,
   htmlEOF,
   ErrorCode,
@@ -43,21 +43,18 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           this.emitError(
             this.pos,
             ErrorCode.INVALID_INDENTATION,
-            "Line has extra indentation at the beginning"
+            "Line has extra indentation at the beginning",
           );
           return;
         }
       }
 
       if (parentTag) {
-        if (
-          parentTag.type === TagType.text &&
-          code !== CODE.HTML_BLOCK_DELIMITER
-        ) {
+        if (parentTag.type === TagType.text && code !== CODE.HYPHEN) {
           this.emitError(
             this.pos,
             ErrorCode.INVALID_LINE_START,
-            'A line within a tag that only allows text content must begin with a "-" character'
+            'A line within a tag that only allows text content must begin with a "-" character',
           );
           return;
         }
@@ -68,7 +65,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           this.emitError(
             this.pos,
             ErrorCode.INVALID_INDENTATION,
-            "Line indentation does match indentation of previous line"
+            "Line indentation does match indentation of previous line",
           );
           return;
         }
@@ -87,15 +84,15 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
             return;
           }
           break;
-        case CODE.HTML_BLOCK_DELIMITER:
-          if (this.lookAtCharCodeAhead(1) === CODE.HTML_BLOCK_DELIMITER) {
+        case CODE.HYPHEN:
+          if (this.lookAtCharCodeAhead(1) === CODE.HYPHEN) {
             this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
             this.pos--;
           } else {
             this.emitError(
               this.pos,
               ErrorCode.INVALID_LINE_START,
-              'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43'
+              'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43',
             );
           }
           return;
@@ -114,7 +111,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
               this.emitError(
                 this.pos,
                 ErrorCode.INVALID_LINE_START,
-                'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment'
+                'A line in concise mode cannot start with "/" unless it starts a "//" or "/*" comment',
               );
               return;
           }
@@ -162,7 +159,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           this.emitError(
             this.pos,
             ErrorCode.INVALID_CHARACTER,
-            "In concise mode a javascript comment block can only be followed by whitespace characters and a newline."
+            "In concise mode a javascript comment block can only be followed by whitespace characters and a newline.",
           );
         }
 
