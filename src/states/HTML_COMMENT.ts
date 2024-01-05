@@ -1,4 +1,4 @@
-import { CODE, ErrorCode, StateDefinition } from "../internal";
+import { CODE, ErrorCode, type StateDefinition } from "../internal";
 
 // We enter STATE.HTML_COMMENT after we encounter a "<--"
 // while in the STATE.HTML_CONTENT.
@@ -46,7 +46,7 @@ export const HTML_COMMENT: StateDefinition = {
     this.emitError(
       comment,
       ErrorCode.MALFORMED_COMMENT,
-      "EOF reached while parsing comment"
+      "EOF reached while parsing comment",
     );
   },
 

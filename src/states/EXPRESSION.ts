@@ -2,9 +2,9 @@ import {
   CODE,
   STATE,
   isWhitespaceCode,
-  StateDefinition,
+  type StateDefinition,
   Parser,
-  Meta,
+  type Meta,
   ErrorCode,
 } from "../internal";
 
@@ -66,7 +66,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           const prevNonWhitespacePos = lookBehindWhile(
             isWhitespaceCode,
             this.data,
-            this.pos - 1
+            this.pos - 1,
           );
           if (prevNonWhitespacePos > expression.start) {
             wasExpression =
@@ -133,7 +133,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
             ErrorCode.INVALID_EXPRESSION,
             'Mismatched group. A closing "' +
               String.fromCharCode(code) +
-              '" character was found but it is not matched with a corresponding opening character.'
+              '" character was found but it is not matched with a corresponding opening character.',
           );
         }
 
@@ -146,7 +146,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
               String.fromCharCode(code) +
               '" character was found when "' +
               String.fromCharCode(expectedCode) +
-              '" was expected.'
+              '" was expected.',
           );
         }
 
@@ -183,7 +183,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
               ErrorCode.MALFORMED_OPEN_TAG,
               'EOF reached while parsing attribute name for the "' +
                 this.read(this.activeTag!.tagName) +
-                '" tag'
+                '" tag',
             );
           }
 
@@ -194,9 +194,9 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
               attr.spread
                 ? "..."
                 : attr.name
-                ? `"${this.read(attr.name)}"`
-                : `"default"`
-            } attribute`
+                  ? `"${this.read(attr.name)}"`
+                  : `"default"`
+            } attribute`,
           );
         }
 
@@ -204,21 +204,21 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           return this.emitError(
             expression,
             ErrorCode.MALFORMED_OPEN_TAG,
-            "EOF reached while parsing tag name"
+            "EOF reached while parsing tag name",
           );
 
         case STATE.PLACEHOLDER:
           return this.emitError(
             expression,
             ErrorCode.MALFORMED_PLACEHOLDER,
-            "EOF reached while parsing placeholder"
+            "EOF reached while parsing placeholder",
           );
       }
 
       return this.emitError(
         expression,
         ErrorCode.INVALID_EXPRESSION,
-        "EOF reached while parsing expression"
+        "EOF reached while parsing expression",
       );
     }
   },
@@ -229,7 +229,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 function checkForOperators(
   parser: Parser,
   expression: ExpressionMeta,
-  eol: boolean
+  eol: boolean,
 ) {
   if (!expression.operators) return false;
 
@@ -245,14 +245,14 @@ function checkForOperators(
     const nextNonSpace = lookAheadWhile(
       terminatedByEOL ? isIndentCode : isWhitespaceCode,
       data,
-      pos + 1
+      pos + 1,
     );
 
     if (
       !expression.shouldTerminate(
         data.charCodeAt(nextNonSpace),
         data,
-        nextNonSpace
+        nextNonSpace,
       )
     ) {
       const lookAheadPos = lookAheadForOperator(data, nextNonSpace);
@@ -300,7 +300,7 @@ function lookBehindForOperator(data: string, pos: number): number {
         // eg "typeof++ x"
         return lookBehindForOperator(
           data,
-          lookBehindWhile(isWhitespaceCode, data, curPos - 2)
+          lookBehindWhile(isWhitespaceCode, data, curPos - 2),
         );
       }
 
@@ -424,7 +424,7 @@ function isIndentCode(code: number) {
 function lookAheadWhile(
   match: (code: number) => boolean,
   data: string,
-  pos: number
+  pos: number,
 ) {
   const max = data.length;
   for (let i = pos; i < max; i++) {
@@ -437,7 +437,7 @@ function lookAheadWhile(
 function lookBehindWhile(
   match: (code: number) => boolean,
   data: string,
-  pos: number
+  pos: number,
 ) {
   let i = pos;
 

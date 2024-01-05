@@ -2,11 +2,11 @@ import {
   STATE,
   CODE,
   isWhitespaceCode,
-  StateDefinition,
-  Range,
+  type StateDefinition,
+  type Range,
   Parser,
-  Ranges,
-  Meta,
+  type Ranges,
+  type Meta,
   ErrorCode,
   matchesCloseAngleBracket,
   matchesCloseCurlyBrace,
@@ -119,7 +119,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         return this.emitError(
           this.pos,
           ErrorCode.INVALID_ATTRIBUTE_NAME,
-          'Invalid attribute name. Attribute name cannot begin with the "<" character.'
+          'Invalid attribute name. Attribute name cannot begin with the "<" character.',
         );
       }
 
@@ -154,7 +154,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           (attr.name ? this.read(attr.name) : "default") +
           '" for the "' +
           this.read(this.activeTag!.tagName) +
-          '" tag'
+          '" tag',
       );
     }
   },
@@ -175,7 +175,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           this.emitError(
             child,
             ErrorCode.INVALID_ATTRIBUTE_ARGUMENT,
-            "An attribute can only have one set of arguments"
+            "An attribute can only have one set of arguments",
           );
           return;
         }
@@ -197,7 +197,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           this.emitError(
             child,
             ErrorCode.INVALID_ATTRIBUTE_ARGUMENT,
-            "An attribute cannot have both type parameters and arguments"
+            "An attribute cannot have both type parameters and arguments",
           );
         } else {
           attr.args = true;
@@ -242,7 +242,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           return this.emitError(
             child,
             ErrorCode.INVALID_ATTR_TYPE_PARAMS,
-            "Attribute cannot contain type parameters unless it is a shorthand method"
+            "Attribute cannot contain type parameters unless it is a shorthand method",
           );
         }
 
@@ -263,7 +263,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           return this.emitError(
             child,
             ErrorCode.INVALID_ATTRIBUTE_VALUE,
-            "Missing value for attribute"
+            "Missing value for attribute",
           );
         }
 
@@ -325,7 +325,7 @@ function shouldTerminateHtmlAttrValue(
   this: STATE.ExpressionMeta,
   code: number,
   data: string,
-  pos: number
+  pos: number,
 ) {
   switch (code) {
     case CODE.COMMA:
@@ -345,7 +345,7 @@ function shouldTerminateHtmlAttrValue(
 function shouldTerminateConciseAttrName(
   code: number,
   data: string,
-  pos: number
+  pos: number,
 ) {
   switch (code) {
     case CODE.COMMA:
@@ -369,7 +369,7 @@ function shouldTerminateConciseAttrName(
 function shouldTerminateConciseAttrValue(
   code: number,
   data: string,
-  pos: number
+  pos: number,
 ) {
   switch (code) {
     case CODE.COMMA:
@@ -388,7 +388,7 @@ function shouldTerminateConciseAttrValue(
 function shouldTerminateConciseGroupedAttrName(
   code: number,
   data: string,
-  pos: number
+  pos: number,
 ) {
   switch (code) {
     case CODE.COMMA:

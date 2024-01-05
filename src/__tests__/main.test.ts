@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 import snap from "mocha-snap";
+import { createParser, type Position, type Ranges, type Range } from "..";
 import { ErrorCode, getLines, TagType } from "../internal";
-import { createParser, Position, Ranges, Range } from "..";
 
 const FIXTURES = path.join(__dirname, "fixtures");
 
@@ -207,8 +207,8 @@ for (const entry of fs.readdirSync(FIXTURES)) {
         len || (line === 0 && lines.length > 1)
           ? "╭"
           : line === lines.length - 1
-          ? "╰"
-          : "├"
+            ? "╰"
+            : "├"
       }─ `;
 
       if (line === 0) {
@@ -277,6 +277,6 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       }
     }
 
-    await snap(result, ".txt", dir);
+    await snap(result, { dir, ext: ".txt" });
   });
 }

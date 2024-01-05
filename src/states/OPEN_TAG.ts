@@ -2,9 +2,9 @@ import {
   CODE,
   STATE,
   isWhitespaceCode,
-  StateDefinition,
-  Ranges,
-  Meta,
+  type StateDefinition,
+  type Ranges,
+  type Meta,
   TagType,
   ErrorCode,
   matchesPipe,
@@ -115,7 +115,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         this.emitError(
           tag,
           ErrorCode.MALFORMED_OPEN_TAG,
-          'EOF reached while within an attribute group (e.g. "[ ... ]").'
+          'EOF reached while within an attribute group (e.g. "[ ... ]").',
         );
         return;
       }
@@ -129,7 +129,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       this.emitError(
         tag,
         ErrorCode.MALFORMED_OPEN_TAG,
-        "EOF reached while parsing open tag"
+        "EOF reached while parsing open tag",
       );
     }
   },
@@ -166,19 +166,19 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           this.emitError(
             this.pos,
             ErrorCode.INVALID_CODE_AFTER_SEMICOLON,
-            "A semicolon indicates the end of a line. Only comments may follow it."
+            "A semicolon indicates the end of a line. Only comments may follow it.",
           );
         }
 
         return;
       }
 
-      if (code === CODE.HTML_BLOCK_DELIMITER) {
-        if (this.lookAtCharCodeAhead(1) !== CODE.HTML_BLOCK_DELIMITER) {
+      if (code === CODE.HYPHEN) {
+        if (this.lookAtCharCodeAhead(1) !== CODE.HYPHEN) {
           this.emitError(
             tag,
             ErrorCode.MALFORMED_OPEN_TAG,
-            '"-" not allowed as first character of attribute name'
+            '"-" not allowed as first character of attribute name',
           );
           return;
         }
@@ -187,7 +187,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           this.emitError(
             this.pos,
             ErrorCode.MALFORMED_OPEN_TAG,
-            "Attribute group was not properly ended"
+            "Attribute group was not properly ended",
           );
           return;
         }
@@ -227,7 +227,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           this.emitError(
             this.pos,
             ErrorCode.MALFORMED_OPEN_TAG,
-            'Unexpected "[" character within open tag.'
+            'Unexpected "[" character within open tag.',
           );
           return;
         }
@@ -239,7 +239,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           this.emitError(
             this.pos,
             ErrorCode.MALFORMED_OPEN_TAG,
-            'Unexpected "]" character within open tag.'
+            'Unexpected "]" character within open tag.',
           );
           return;
         }
@@ -296,7 +296,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               return this.emitError(
                 this.pos,
                 ErrorCode.MISSING_TAG_VARIABLE,
-                "A slash was found that was not followed by a variable name or lhs expression"
+                "A slash was found that was not followed by a variable name or lhs expression",
               );
             }
 
@@ -314,7 +314,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               this.emitError(
                 this.pos,
                 ErrorCode.INVALID_TAG_ARGUMENT,
-                "A tag can only have one argument"
+                "A tag can only have one argument",
               );
               return;
             }
@@ -331,7 +331,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               this.emitError(
                 this.pos,
                 ErrorCode.INVALID_TAG_PARAMS,
-                "A tag can only specify parameters once"
+                "A tag can only specify parameters once",
               );
               return;
             }
@@ -368,7 +368,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           return this.emitError(
             child,
             ErrorCode.MISSING_TAG_VARIABLE,
-            "A slash was found that was not followed by a variable name or lhs expression"
+            "A slash was found that was not followed by a variable name or lhs expression",
           );
         }
 
@@ -409,7 +409,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             this.emitError(
               child,
               ErrorCode.INVALID_TAG_TYPES,
-              "Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters."
+              "Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters.",
             );
             break;
           }
@@ -454,7 +454,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           this.emitError(
             child,
             ErrorCode.INVALID_TAG_TYPES,
-            "Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters."
+            "Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters.",
           );
         }
 

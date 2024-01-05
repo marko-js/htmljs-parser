@@ -1,4 +1,4 @@
-import { CODE, STATE, StateDefinition, TagType } from "../internal";
+import { CODE, STATE, type StateDefinition, TagType } from "../internal";
 
 // We enter STATE.JS_COMMENT_LINE after we encounter a "//" sequence
 // when parsing JavaScript code.

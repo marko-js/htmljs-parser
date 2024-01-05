@@ -1,4 +1,4 @@
-import { CODE, ErrorCode, StateDefinition } from "../internal";
+import { CODE, ErrorCode, type StateDefinition } from "../internal";
 
 // We enter STATE.JS_COMMENT_BLOCK after we encounter a "/*" sequence
 // We leave STATE.JS_COMMENT_BLOCK when we see a "*/" sequence.
@@ -32,7 +32,7 @@ export const JS_COMMENT_BLOCK: StateDefinition = {
     this.emitError(
       comment,
       ErrorCode.MALFORMED_COMMENT,
-      "EOF reached while parsing multi-line JavaScript comment"
+      "EOF reached while parsing multi-line JavaScript comment",
     );
   },
 

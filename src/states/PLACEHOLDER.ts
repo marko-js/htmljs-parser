@@ -2,8 +2,8 @@ import {
   CODE,
   Parser,
   STATE,
-  StateDefinition,
-  Meta,
+  type StateDefinition,
+  type Meta,
   ErrorCode,
   matchesCloseCurlyBrace,
 } from "../internal";
@@ -47,7 +47,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
       this.emitError(
         child,
         ErrorCode.MALFORMED_PLACEHOLDER,
-        "Invalid placeholder, the expression cannot be missing"
+        "Invalid placeholder, the expression cannot be missing",
       );
     }
     this.pos++; // skip }

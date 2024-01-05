@@ -1,9 +1,9 @@
 import {
   CODE,
-  Range,
+  type Range,
   STATE,
-  StateDefinition,
-  Meta,
+  type StateDefinition,
+  type Meta,
   matchesCloseCurlyBrace,
 } from "../internal";
 

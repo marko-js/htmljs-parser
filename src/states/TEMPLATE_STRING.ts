@@ -2,7 +2,7 @@ import {
   CODE,
   ErrorCode,
   STATE,
-  StateDefinition,
+  type StateDefinition,
   matchesCloseCurlyBrace,
 } from "../internal";
 
@@ -43,7 +43,7 @@ export const TEMPLATE_STRING: StateDefinition = {
     this.emitError(
       templateString,
       ErrorCode.INVALID_TEMPLATE_STRING,
-      "EOF reached while parsing template string expression"
+      "EOF reached while parsing template string expression",
     );
   },
 
@@ -54,7 +54,7 @@ export const TEMPLATE_STRING: StateDefinition = {
       this.emitError(
         child,
         ErrorCode.MALFORMED_PLACEHOLDER,
-        "Invalid placeholder, the expression cannot be missing"
+        "Invalid placeholder, the expression cannot be missing",
       );
     }
 

@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize]
   push:
-    branches: [main, next]
+    branches: [main]
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.head_ref || github.ref }}"
@@ -13,15 +13,17 @@ concurrency:
 jobs:
   format:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
       - name: Use node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -30,7 +32,7 @@ jobs:
       - name: Build Code
         run: npm run build
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "[ci] format"
           commit_user_name: "github-actions[bot]"
@@ -44,10 +46,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node: [14, 16, 18]
+        node: [16, 18, 20]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Use node@${{ matrix.node }}
         uses: actions/setup-node@v3
         with:
@@ -65,11 +67,11 @@ jobs:
     if: "${{ github.repository_owner == 'marko-js' && github.event_name == 'push' }}"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
           cache: npm
       - name: Install dependencies
         run: npm ci
