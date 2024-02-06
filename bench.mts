@@ -40,7 +40,7 @@ for (const entry of await fs.readdir(FIXTURES)) {
   if (compareAPI) {
     group(() => {
       bench(entry, check(api));
-      bench(`${entry}#${COMPARE}`, check(compareAPI));
+      bench(`${entry}#${COMPARE}`, check(compareAPI!));
     });
   } else {
     bench(entry, check(api));
