@@ -30,7 +30,13 @@ const unaryKeywords = [
   "void",
 ] as const;
 
-const binaryKeywords = ["instanceof", "in", "as", "extends"] as const;
+const binaryKeywords = [
+  "instanceof",
+  "in",
+  "as",
+  "extends",
+  "satisfies",
+] as const;
 
 export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   name: "EXPRESSION",
