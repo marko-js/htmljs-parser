@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.5.3
+
+### Patch Changes
+
+- [#175](https://github.com/marko-js/htmljs-parser/pull/175) [`4fcee24`](https://github.com/marko-js/htmljs-parser/commit/4fcee24a3fcfdf7c580dac86500906a8b20e2a1e) Thanks [@LuLaValva](https://github.com/LuLaValva)! - Add support for `satisfies`
+
 ## 5.5.2
 
 ### Patch Changes
