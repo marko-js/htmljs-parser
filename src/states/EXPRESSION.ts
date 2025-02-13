@@ -11,6 +11,7 @@ import {
 export interface ExpressionMeta extends Meta {
   groupStack: number[];
   operators: boolean;
+  wasComment: boolean;
   terminatedByEOL: boolean;
   terminatedByWhitespace: boolean;
   shouldTerminate(code: number, data: string, pos: number): boolean;
@@ -50,6 +51,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       groupStack: [],
       shouldTerminate,
       operators: false,
+      wasComment: false,
       terminatedByEOL: false,
       terminatedByWhitespace: false,
     };
@@ -165,10 +167,11 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
     if (
       !expression.groupStack.length &&
       (expression.terminatedByEOL || expression.terminatedByWhitespace) &&
-      !checkForOperators(this, expression, true)
+      (expression.wasComment || !checkForOperators(this, expression, true))
     ) {
       this.exitState();
     }
+    expression.wasComment = false;
   },
 
   eof(expression) {
@@ -229,7 +232,11 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
     }
   },
 
-  return() {},
+  return(child, expression) {
+    if (child.state === STATE.JS_COMMENT_LINE) {
+      expression.wasComment = true;
+    }
+  },
 };
 
 function checkForOperators(
