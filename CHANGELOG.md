@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.5.4
+
+### Patch Changes
+
+- [#178](https://github.com/marko-js/htmljs-parser/pull/178) [`06f4716`](https://github.com/marko-js/htmljs-parser/commit/06f47161304cbb0bb80f8a8c7ed4442ff2e89b3b) Thanks [@LuLaValva](https://github.com/LuLaValva)! - Fix operator-terminated comments in scriptlets
+
 ## 5.5.3
 
 ### Patch Changes
