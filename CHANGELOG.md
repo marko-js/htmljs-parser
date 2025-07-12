@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.6.0
+
+### Minor Changes
+
+- [#180](https://github.com/marko-js/htmljs-parser/pull/180) [`22bfdda`](https://github.com/marko-js/htmljs-parser/commit/22bfdda84034970787a61114e9bc20e8b9d78f17) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - When parsing statements, consume any indented content without errors.
+
 ## 5.5.4
 
 ### Patch Changes
