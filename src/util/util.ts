@@ -9,6 +9,10 @@ export function isWhitespaceCode(code: number) {
   return code <= CODE.SPACE;
 }
 
+export function isIndentCode(code: number) {
+  return code === CODE.TAB || code === CODE.SPACE;
+}
+
 /**
  * Given a source code line offsets, a start offset and an end offset, returns a Location object with line & character information for the start and end offsets.
  */

@@ -30,20 +30,20 @@ export interface StateDefinition<P extends Meta = Meta> {
 }
 
 export class Parser {
-  public declare pos: number;
-  public declare maxPos: number;
-  public declare data: string;
-  public declare activeState: StateDefinition;
-  public declare activeRange: Meta;
-  public declare forward: number;
-  public declare activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
-  public declare activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
-  public declare indent: string; // Used to build the indent for the current concise line
-  public declare isConcise: boolean; // Set to true if parser is currently in concise mode
-  public declare beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
-  public declare endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
-  public declare textPos: number; // Used to buffer text that is found within the body of a tag
-  public declare lines: undefined | number[]; // Keeps track of line indexes to provide line/column info.
+  declare public pos: number;
+  declare public maxPos: number;
+  declare public data: string;
+  declare public activeState: StateDefinition;
+  declare public activeRange: Meta;
+  declare public forward: number;
+  declare public activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
+  declare public activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
+  declare public indent: string; // Used to build the indent for the current concise line
+  declare public isConcise: boolean; // Set to true if parser is currently in concise mode
+  declare public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
+  declare public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
+  declare public textPos: number; // Used to buffer text that is found within the body of a tag
+  declare public lines: undefined | number[]; // Keeps track of line indexes to provide line/column info.
 
   constructor(public options: Options) {}
 

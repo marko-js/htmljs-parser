@@ -5,5 +5,13 @@
 4╭─ 
  ╰─ ╰─ openTagEnd
 5╭─ import mod, { b as bar } from "./bar"
- │  │                                    ╰─ openTagEnd
  ╰─ ╰─ tagName "import"
+6╭─ export interface Input
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "export"
+7├─   extends Pick<StarRatingInput, "value" | "a11y-text">,
+8├─     Link,
+9├─     BaseInput {
+10├─   reviewCount: number;
+11╭─ }
+  ╰─  ╰─ openTagEnd

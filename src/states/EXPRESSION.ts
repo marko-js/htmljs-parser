@@ -6,6 +6,7 @@ import {
   Parser,
   type Meta,
   ErrorCode,
+  isIndentCode,
 } from "../internal";
 
 export interface ExpressionMeta extends Meta {
@@ -14,6 +15,7 @@ export interface ExpressionMeta extends Meta {
   wasComment: boolean;
   terminatedByEOL: boolean;
   terminatedByWhitespace: boolean;
+  consumeIndentedContent: boolean;
   shouldTerminate(code: number, data: string, pos: number): boolean;
 }
 
@@ -54,6 +56,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       wasComment: false,
       terminatedByEOL: false,
       terminatedByWhitespace: false,
+      consumeIndentedContent: false,
     };
   },
 
@@ -163,11 +166,15 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
     }
   },
 
-  eol(_, expression) {
+  eol(len, expression) {
     if (
       !expression.groupStack.length &&
       (expression.terminatedByEOL || expression.terminatedByWhitespace) &&
-      (expression.wasComment || !checkForOperators(this, expression, true))
+      (expression.wasComment || !checkForOperators(this, expression, true)) &&
+      !(
+        expression.consumeIndentedContent &&
+        isIndentCode(this.lookAtCharCodeAhead(len + 1))
+      )
     ) {
       this.exitState();
     }
@@ -428,10 +435,6 @@ function isWordCode(code: number) {
     code == CODE.DOLLAR ||
     code === CODE.UNDERSCORE
   );
-}
-
-function isIndentCode(code: number) {
-  return code === CODE.TAB || code === CODE.SPACE;
 }
 
 function lookAheadWhile(
