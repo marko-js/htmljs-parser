@@ -3,3 +3,9 @@ static const x = {
 };
 
 import mod, { b as bar } from "./bar"
+export interface Input
+  extends Pick<StarRatingInput, "value" | "a11y-text">,
+    Link,
+    BaseInput {
+  reviewCount: number;
+}

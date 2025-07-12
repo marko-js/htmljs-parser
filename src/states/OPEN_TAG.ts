@@ -10,6 +10,7 @@ import {
   matchesPipe,
   matchesCloseParen,
   matchesCloseAngleBracket,
+  isIndentCode,
 } from "../internal";
 
 export enum TAG_STAGE {
@@ -207,8 +208,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
 
         // Count how many spaces/tabs we have after the newline.
         while (curPos < maxPos) {
-          const nextCode = this.data.charCodeAt(curPos);
-          if (nextCode === CODE.SPACE || nextCode === CODE.TAB) {
+          if (isIndentCode(this.data.charCodeAt(curPos))) {
             curPos++;
           } else {
             break;

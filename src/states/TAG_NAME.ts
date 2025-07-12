@@ -99,6 +99,7 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
             const expr = this.enterState(STATE.EXPRESSION);
             expr.operators = true;
             expr.terminatedByEOL = true;
+            expr.consumeIndentedContent = true;
           }
         }
 
