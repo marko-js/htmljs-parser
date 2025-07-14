@@ -13,5 +13,15 @@
 8├─     Link,
 9├─     BaseInput {
 10├─   reviewCount: number;
-11╭─ }
-  ╰─  ╰─ openTagEnd
+11├─ }
+12╭─ 
+  ╰─ ╰─ openTagEnd
+13╭─ export interface Input {
+  ╰─ ╰─ tagName "export"
+14├─   foo: string;
+15├─ }
+16╭─ $ const bar = "bar"
+  │  ││╰─ scriptlet.value "const bar = \"bar\""
+  │  │╰─ scriptlet " const bar = \"bar\""
+  ╰─ ╰─ openTagEnd
+17╰─ 
