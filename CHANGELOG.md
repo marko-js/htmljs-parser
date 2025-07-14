@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.6.2
+
+### Patch Changes
+
+- [#184](https://github.com/marko-js/htmljs-parser/pull/184) [`eb9865c`](https://github.com/marko-js/htmljs-parser/commit/eb9865c821d232a5ce0bbd0642b8ef3857c2d71c) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Avoid startText call at eof.
+
 ## 5.6.1
 
 ### Patch Changes
