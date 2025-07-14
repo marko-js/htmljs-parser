@@ -101,7 +101,6 @@ function handleDelimitedBlockEOL(
     parser.pos += endHtmlBlockLookahead.length;
 
     if (parser.consumeWhitespaceOnLine(0)) {
-      parser.endText();
       parser.exitState();
       parser.exitState();
     } else {
@@ -115,7 +114,6 @@ function handleDelimitedBlockEOL(
     // We know the next line does not end the multiline HTML block, but we need to check if there
     // is any indentation that we need to skip over as we continue parsing the HTML in this
     // multiline HTML block
-
     parser.startText();
     parser.pos += indent.length;
     // We stay in the same state since we are still parsing a multiline, delimited HTML block
@@ -126,7 +124,7 @@ function handleDelimitedBlockEOL(
     parser.endText();
     parser.exitState();
     parser.exitState();
-  } else {
+  } else if (parser.pos + newLineLength !== parser.maxPos) {
     parser.startText();
   }
 }
