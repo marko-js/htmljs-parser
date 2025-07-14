@@ -173,7 +173,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       (expression.wasComment || !checkForOperators(this, expression, true)) &&
       !(
         expression.consumeIndentedContent &&
-        isIndentCode(this.lookAtCharCodeAhead(len + 1))
+        isIndentCode(this.lookAtCharCodeAhead(len))
       )
     ) {
       this.exitState();
