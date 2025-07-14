@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.6.1
+
+### Patch Changes
+
+- [#182](https://github.com/marko-js/htmljs-parser/pull/182) [`7c4f4c3`](https://github.com/marko-js/htmljs-parser/commit/7c4f4c3a5e0205807607694614c4be1d017c7d41) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix regression caused by indented statement parsing.
+
 ## 5.6.0
 
 ### Minor Changes
