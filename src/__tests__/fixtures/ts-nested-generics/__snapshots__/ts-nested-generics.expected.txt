@@ -1,0 +1,15 @@
+1╭─ <div value=x as Promise<Array<Record<string, number>>> />
+ │  ││   │    ││                                           ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "x as Promise<Array<Record<string, number>>>"
+ │  ││   │    ╰─ attrValue "=x as Promise<Array<Record<string, number>>>"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <div value=x as Promise< Array< Record< string, number > > > />
+ │  ││   │    ││                                                 ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "x as Promise< Array< Record< string, number > > >"
+ │  ││   │    ╰─ attrValue "=x as Promise< Array< Record< string, number > > >"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╰─ 

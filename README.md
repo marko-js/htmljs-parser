@@ -201,15 +201,18 @@ const parser = createParser({
         // TagType.void makes this a void element (cannot have children).
         return TagType.void;
       case "html-comment":
+      case "html-script":
+      case "html-style":
       case "script":
       case "style":
       case "textarea":
         // TagType.text makes the child content text only (with placeholders).
         return TagType.text;
-      case "class":
       case "export":
       case "import":
       case "static":
+      case "client":
+      case "server":
         // TagType.statement makes this a statement tag where the content following the tag name will be parsed as script code until we reach a new line, eg for `import x from "y"`).
         return TagType.statement;
     }

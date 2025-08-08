@@ -13,31 +13,44 @@ export interface ExpressionMeta extends Meta {
   groupStack: number[];
   operators: boolean;
   wasComment: boolean;
+  inType: boolean;
+  forceType: boolean;
+  ternaryDepth: number;
   terminatedByEOL: boolean;
   terminatedByWhitespace: boolean;
   consumeIndentedContent: boolean;
-  shouldTerminate(code: number, data: string, pos: number): boolean;
+  shouldTerminate(
+    code: number,
+    data: string,
+    pos: number,
+    expression: ExpressionMeta,
+  ): boolean;
 }
 
 // Never terminate early by default.
 const shouldTerminate = () => false;
 
 const unaryKeywords = [
+  "asserts",
   "async",
   "await",
-  "keyof",
   "class",
   "function",
+  "infer",
+  "is",
+  "keyof",
   "new",
+  "readonly",
   "typeof",
+  "unique",
   "void",
 ] as const;
 
 const binaryKeywords = [
-  "instanceof",
-  "in",
   "as",
   "extends",
+  "instanceof", // Note: instanceof must be checked before `in`
+  "in",
   "satisfies",
 ] as const;
 
@@ -54,6 +67,9 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       shouldTerminate,
       operators: false,
       wasComment: false,
+      inType: false,
+      forceType: false,
+      ternaryDepth: 0,
       terminatedByEOL: false,
       terminatedByWhitespace: false,
       consumeIndentedContent: false,
@@ -71,7 +87,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         return;
       }
 
-      if (expression.shouldTerminate(code, this.data, this.pos)) {
+      if (expression.shouldTerminate(code, this.data, this.pos, expression)) {
         let wasExpression = false;
         if (expression.operators) {
           const prevNonWhitespacePos = lookBehindWhile(
@@ -81,7 +97,11 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           );
           if (prevNonWhitespacePos > expression.start) {
             wasExpression =
-              lookBehindForOperator(this.data, prevNonWhitespacePos) !== -1;
+              lookBehindForOperator(
+                expression,
+                this.data,
+                prevNonWhitespacePos,
+              ) !== -1;
           }
         }
 
@@ -101,6 +121,40 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         break;
       case CODE.BACKTICK:
         this.enterState(STATE.TEMPLATE_STRING);
+        break;
+      case CODE.QUESTION:
+        if (expression.operators && !expression.groupStack.length) {
+          expression.ternaryDepth++;
+          this.pos++;
+          this.forward = 0;
+          this.consumeWhitespace();
+        }
+        break;
+      case CODE.COLON:
+        if (expression.operators && !expression.groupStack.length) {
+          if (expression.ternaryDepth) {
+            expression.ternaryDepth--;
+          } else {
+            expression.inType = true;
+          }
+
+          this.pos++;
+          this.forward = 0;
+          this.consumeWhitespace();
+        }
+        break;
+      case CODE.EQUAL:
+        if (expression.operators && !expression.groupStack.length) {
+          if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
+            this.pos++;
+          } else if (!expression.forceType) {
+            expression.inType = false;
+          }
+
+          this.pos++;
+          this.forward = 0;
+          this.consumeWhitespace();
+        }
         break;
       case CODE.FORWARD_SLASH:
         // Check next character to see if we are in a comment or regexp
@@ -134,10 +188,20 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       case CODE.OPEN_CURLY_BRACE:
         expression.groupStack.push(CODE.CLOSE_CURLY_BRACE);
         break;
+      case CODE.OPEN_ANGLE_BRACKET:
+        if (expression.inType) {
+          expression.groupStack.push(CODE.CLOSE_ANGLE_BRACKET);
+        } else if (expression.operators && !expression.groupStack.length) {
+          this.pos++;
+          this.forward = 0;
+          this.consumeWhitespace();
+        }
+        break;
 
       case CODE.CLOSE_PAREN:
       case CODE.CLOSE_SQUARE_BRACKET:
-      case CODE.CLOSE_CURLY_BRACE: {
+      case CODE.CLOSE_CURLY_BRACE:
+      case expression.inType && CODE.CLOSE_ANGLE_BRACKET: {
         if (!expression.groupStack.length) {
           return this.emitError(
             expression,
@@ -254,7 +318,7 @@ function checkForOperators(
   if (!expression.operators) return false;
 
   const { pos, data } = parser;
-  if (lookBehindForOperator(data, pos) !== -1) {
+  if (lookBehindForOperator(expression, data, pos) !== -1) {
     parser.consumeWhitespace();
     parser.forward = 0;
     return true;
@@ -273,9 +337,10 @@ function checkForOperators(
         data.charCodeAt(nextNonSpace),
         data,
         nextNonSpace,
+        expression,
       )
     ) {
-      const lookAheadPos = lookAheadForOperator(data, nextNonSpace);
+      const lookAheadPos = lookAheadForOperator(expression, data, nextNonSpace);
       if (lookAheadPos !== -1) {
         parser.pos = lookAheadPos;
         parser.forward = 0;
@@ -287,7 +352,11 @@ function checkForOperators(
   return false;
 }
 
-function lookBehindForOperator(data: string, pos: number): number {
+function lookBehindForOperator(
+  expression: ExpressionMeta,
+  data: string,
+  pos: number,
+): number {
   const curPos = pos - 1;
   const code = data.charCodeAt(curPos);
 
@@ -299,12 +368,18 @@ function lookBehindForOperator(data: string, pos: number): number {
     case CODE.EQUAL:
     case CODE.EXCLAMATION:
     case CODE.OPEN_ANGLE_BRACKET:
-    case CODE.CLOSE_ANGLE_BRACKET:
     case CODE.PERCENT:
     case CODE.PIPE:
     case CODE.QUESTION:
     case CODE.TILDE:
       return curPos;
+
+    case CODE.CLOSE_ANGLE_BRACKET:
+      return data.charCodeAt(curPos - 1) === CODE.EQUAL
+        ? curPos - 1
+        : expression.inType
+          ? -1
+          : curPos;
 
     case CODE.PERIOD: {
       // Only matches `.` followed by something that could be an identifier.
@@ -319,6 +394,7 @@ function lookBehindForOperator(data: string, pos: number): number {
         // Check if we should continue for another reason.
         // eg "typeof++ x"
         return lookBehindForOperator(
+          expression,
           data,
           lookBehindWhile(isWhitespaceCode, data, curPos - 2),
         );
@@ -331,8 +407,7 @@ function lookBehindForOperator(data: string, pos: number): number {
       for (const keyword of unaryKeywords) {
         const keywordPos = lookBehindFor(data, curPos, keyword);
         if (keywordPos !== -1) {
-          const prevCode = data.charCodeAt(keywordPos - 1);
-          return prevCode === CODE.PERIOD || isWordCode(prevCode)
+          return isWordOrPeriodCode(data.charCodeAt(keywordPos - 1))
             ? -1
             : keywordPos;
         }
@@ -342,7 +417,11 @@ function lookBehindForOperator(data: string, pos: number): number {
   }
 }
 
-function lookAheadForOperator(data: string, pos: number): number {
+function lookAheadForOperator(
+  expression: ExpressionMeta,
+  data: string,
+  pos: number,
+): number {
   switch (data.charCodeAt(pos)) {
     case CODE.AMPERSAND:
     case CODE.ASTERISK:
@@ -351,18 +430,18 @@ function lookAheadForOperator(data: string, pos: number): number {
     case CODE.OPEN_ANGLE_BRACKET:
     case CODE.PERCENT:
     case CODE.PIPE:
-    case CODE.QUESTION:
     case CODE.TILDE:
     case CODE.PLUS:
     case CODE.HYPHEN:
-    case CODE.COLON:
-    case CODE.CLOSE_ANGLE_BRACKET:
-    case CODE.EQUAL:
       return pos + 1;
 
     case CODE.FORWARD_SLASH:
     case CODE.OPEN_CURLY_BRACE:
     case CODE.OPEN_PAREN:
+    case CODE.CLOSE_ANGLE_BRACKET:
+    case CODE.QUESTION:
+    case CODE.COLON:
+    case CODE.EQUAL:
       return pos; // defers to base expression state to track block groups.
 
     case CODE.PERIOD: {
@@ -373,33 +452,33 @@ function lookAheadForOperator(data: string, pos: number): number {
 
     default: {
       for (const keyword of binaryKeywords) {
-        let nextPos = lookAheadFor(data, pos, keyword);
-        if (nextPos === -1) continue;
+        const keywordPos = lookAheadFor(data, pos, keyword);
+        if (keywordPos === -1) continue;
+        if (!isWhitespaceCode(data.charCodeAt(keywordPos + 1))) break;
 
-        const max = data.length - 1;
-        if (nextPos === max) return -1;
-
-        let nextCode = data.charCodeAt(nextPos + 1);
-        if (isWhitespaceCode(nextCode)) {
-          // skip any whitespace after the operator
-          nextPos = lookAheadWhile(isWhitespaceCode, data, nextPos + 2);
-          if (nextPos === max) return -1;
-          nextCode = data.charCodeAt(nextPos);
-        } else {
-          // bail if we didn't match a space keyword.
-          return -1;
-        }
+        // skip any whitespace after the operator
+        const nextPos = lookAheadWhile(isWhitespaceCode, data, keywordPos + 2);
+        if (nextPos === data.length - 1) break;
 
         // finally check that this is not followed by a terminator.
-        switch (nextCode) {
+        switch (data.charCodeAt(nextPos)) {
           case CODE.COLON:
           case CODE.COMMA:
           case CODE.EQUAL:
           case CODE.FORWARD_SLASH:
           case CODE.CLOSE_ANGLE_BRACKET:
           case CODE.SEMICOLON:
-            return -1;
+            break;
           default:
+            if (
+              !expression.inType &&
+              (keyword === "as" || keyword === "satisfies")
+            ) {
+              expression.inType = true;
+              if (!(expression.ternaryDepth || expression.groupStack.length)) {
+                expression.forceType = true;
+              }
+            }
             return nextPos;
         }
       }
@@ -425,6 +504,10 @@ function canFollowDivision(code: number) {
     default:
       return false;
   }
+}
+
+function isWordOrPeriodCode(code: number) {
+  return code === CODE.PERIOD || isWordCode(code);
 }
 
 function isWordCode(code: number) {

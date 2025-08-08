@@ -100,6 +100,18 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
             expr.operators = true;
             expr.terminatedByEOL = true;
             expr.consumeIndentedContent = true;
+
+            const typeStatementMatch =
+              this.lookAheadFor("declare ") ||
+              this.lookAheadFor("interface ") ||
+              this.lookAheadFor("type ");
+            if (typeStatementMatch) {
+              expr.inType = true;
+              expr.forceType = true;
+              this.pos += typeStatementMatch.length;
+              this.forward = 0;
+              this.consumeWhitespace();
+            }
           }
         }
 

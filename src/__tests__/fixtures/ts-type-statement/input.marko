@@ -1,0 +1,22 @@
+static interface Foo<
+  A,
+  B,
+> {
+  x: 1
+}
+
+static type Bar<
+  A,
+  B,
+> = A &
+    B
+
+static declare const x: Foo<
+  1,
+  2
+>;
+
+static const x: Foo<
+  1,
+  2
+> = baz;

@@ -1,0 +1,11 @@
+1╭─ static type Foo = Array<
+ ╰─ ╰─ tagName "static"
+2├─   Bar
+3├─ >
+4╭─ 
+ ╰─ ╰─ openTagEnd
+5╭─ div
+ ╰─ ╰─ tagName "div"
+6╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)
