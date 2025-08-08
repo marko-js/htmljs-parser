@@ -1,5 +1,15 @@
 # htmljs-parser
 
+## 5.7.0
+
+### Minor Changes
+
+- [#186](https://github.com/marko-js/htmljs-parser/pull/186) [`f297f19`](https://github.com/marko-js/htmljs-parser/commit/f297f19b8f2b27d41df99d98a1fbf0801e2c96ba) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Improve expression parsing for typescript, especially around multi line generics.
+
+### Patch Changes
+
+- [#187](https://github.com/marko-js/htmljs-parser/pull/187) [`1110d1d`](https://github.com/marko-js/htmljs-parser/commit/1110d1d8ed21f92e1dfa56d8f0ca17c719c19bc5) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix regexp charset parsing issue.
+
 ## 5.6.2
 
 ### Patch Changes
