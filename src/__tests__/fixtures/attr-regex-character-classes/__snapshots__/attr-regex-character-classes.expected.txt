@@ -1,0 +1,51 @@
+1╭─ <div pattern=/[abc/] /></div>
+ │  ││   │      ││        ││ │  ╰─ closeTagEnd(div)
+ │  ││   │      ││        ││ ╰─ closeTagName "div"
+ │  ││   │      ││        │╰─ closeTagStart "</"
+ │  ││   │      ││        ╰─ openTagEnd
+ │  ││   │      │╰─ attrValue.value "/[abc/] /"
+ │  ││   │      ╰─ attrValue "=/[abc/] /"
+ │  ││   ╰─ attrName "pattern"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <div pattern=/[a-z/] /></div>
+ │  ││   │      ││        ││ │  ╰─ closeTagEnd(div)
+ │  ││   │      ││        ││ ╰─ closeTagName "div"
+ │  ││   │      ││        │╰─ closeTagStart "</"
+ │  ││   │      ││        ╰─ openTagEnd
+ │  ││   │      │╰─ attrValue.value "/[a-z/] /"
+ │  ││   │      ╰─ attrValue "=/[a-z/] /"
+ │  ││   ╰─ attrName "pattern"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╭─ <div pattern=/[^abc/] /></div>
+ │  ││   │      ││         ││ │  ╰─ closeTagEnd(div)
+ │  ││   │      ││         ││ ╰─ closeTagName "div"
+ │  ││   │      ││         │╰─ closeTagStart "</"
+ │  ││   │      ││         ╰─ openTagEnd
+ │  ││   │      │╰─ attrValue.value "/[^abc/] /"
+ │  ││   │      ╰─ attrValue "=/[^abc/] /"
+ │  ││   ╰─ attrName "pattern"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╭─ <div pattern=/[a\]b/] /></div>
+ │  ││   │      ││         ││ │  ╰─ closeTagEnd(div)
+ │  ││   │      ││         ││ ╰─ closeTagName "div"
+ │  ││   │      ││         │╰─ closeTagStart "</"
+ │  ││   │      ││         ╰─ openTagEnd
+ │  ││   │      │╰─ attrValue.value "/[a\\]b/] /"
+ │  ││   │      ╰─ attrValue "=/[a\\]b/] /"
+ │  ││   ╰─ attrName "pattern"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+5╭─ <div pattern=/[\w\s/] /></div>
+ │  ││   │      ││         ││ │  ╰─ closeTagEnd(div)
+ │  ││   │      ││         ││ ╰─ closeTagName "div"
+ │  ││   │      ││         │╰─ closeTagStart "</"
+ │  ││   │      ││         ╰─ openTagEnd
+ │  ││   │      │╰─ attrValue.value "/[\\w\\s/] /"
+ │  ││   │      ╰─ attrValue "=/[\\w\\s/] /"
+ │  ││   ╰─ attrName "pattern"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+6╰─ 
