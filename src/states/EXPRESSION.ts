@@ -144,10 +144,10 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         }
         break;
       case CODE.EQUAL:
-        if (expression.operators && !expression.groupStack.length) {
+        if (expression.operators) {
           if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
             this.pos++;
-          } else if (!expression.forceType) {
+          } else if (!(expression.forceType || expression.groupStack.length)) {
             expression.inType = false;
           }
 

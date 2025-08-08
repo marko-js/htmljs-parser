@@ -29,3 +29,9 @@
 22├─ > = baz;
 23╭─ 
   ╰─ ╰─ openTagEnd
+24╭─ export interface Foo {
+  ╰─ ╰─ tagName "export"
+25├─   bar: () => Baz;
+26├─ }
+27╭─ 
+  ╰─ ╰─ openTagEnd
