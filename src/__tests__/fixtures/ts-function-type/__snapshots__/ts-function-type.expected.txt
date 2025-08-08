@@ -1,0 +1,7 @@
+1╭─ <div value=fn as (x: number) => string />
+ │  ││   │    ││                           ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "fn as (x: number) => string"
+ │  ││   │    ╰─ attrValue "=fn as (x: number) => string"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

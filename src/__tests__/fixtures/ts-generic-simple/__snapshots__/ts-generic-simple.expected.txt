@@ -1,0 +1,15 @@
+1╭─ <div value=x as Array<T> />
+ │  ││   │    ││             ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "x as Array<T>"
+ │  ││   │    ╰─ attrValue "=x as Array<T>"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <div value=x as Array< T > />
+ │  ││   │    ││               ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "x as Array< T >"
+ │  ││   │    ╰─ attrValue "=x as Array< T >"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╰─ 

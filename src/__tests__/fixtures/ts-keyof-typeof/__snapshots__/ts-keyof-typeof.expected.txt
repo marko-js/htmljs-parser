@@ -1,0 +1,8 @@
+1╭─ <div value=x as keyof typeof T />
+ │  ││   │    ││                   ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "x as keyof typeof T"
+ │  ││   │    ╰─ attrValue "=x as keyof typeof T"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 

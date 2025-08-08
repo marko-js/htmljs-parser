@@ -12,6 +12,7 @@ import {
   matchesCloseAngleBracket,
   isIndentCode,
 } from "../internal";
+import type { ExpressionMeta } from "./EXPRESSION";
 
 export enum TAG_STAGE {
   UNKNOWN,
@@ -476,15 +477,21 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   },
 };
 
-function shouldTerminateConciseTagVar(code: number, data: string, pos: number) {
+function shouldTerminateConciseTagVar(
+  code: number,
+  data: string,
+  pos: number,
+  expression: ExpressionMeta,
+) {
   switch (code) {
     case CODE.COMMA:
     case CODE.EQUAL:
     case CODE.PIPE:
     case CODE.OPEN_PAREN:
     case CODE.SEMICOLON:
-    case CODE.OPEN_ANGLE_BRACKET:
       return true;
+    case CODE.OPEN_ANGLE_BRACKET:
+      return !expression.inType;
     case CODE.HYPHEN:
       return data.charCodeAt(pos + 1) === CODE.HYPHEN;
     case CODE.COLON:
@@ -494,15 +501,21 @@ function shouldTerminateConciseTagVar(code: number, data: string, pos: number) {
   }
 }
 
-function shouldTerminateHtmlTagVar(code: number, data: string, pos: number) {
+function shouldTerminateHtmlTagVar(
+  code: number,
+  data: string,
+  pos: number,
+  expression: ExpressionMeta,
+) {
   switch (code) {
     case CODE.PIPE:
     case CODE.COMMA:
     case CODE.EQUAL:
     case CODE.OPEN_PAREN:
     case CODE.CLOSE_ANGLE_BRACKET:
-    case CODE.OPEN_ANGLE_BRACKET:
       return true;
+    case CODE.OPEN_ANGLE_BRACKET:
+      return !expression.inType;
     case CODE.COLON:
       return data.charCodeAt(pos + 1) === CODE.EQUAL;
     case CODE.FORWARD_SLASH:

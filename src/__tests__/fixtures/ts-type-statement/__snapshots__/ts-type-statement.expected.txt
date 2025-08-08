@@ -1,0 +1,31 @@
+1╭─ static interface Foo<
+ ╰─ ╰─ tagName "static"
+2├─   A,
+3├─   B,
+4├─ > {
+5├─   x: 1
+6├─ }
+7╭─ 
+ ╰─ ╰─ openTagEnd
+8╭─ static type Bar<
+ ╰─ ╰─ tagName "static"
+9├─   A,
+10├─   B,
+11├─ > = A &
+12├─     B
+13╭─ 
+  ╰─ ╰─ openTagEnd
+14╭─ static declare const x: Foo<
+  ╰─ ╰─ tagName "static"
+15├─   1,
+16├─   2
+17├─ >;
+18╭─ 
+  ╰─ ╰─ openTagEnd
+19╭─ static const x: Foo<
+  ╰─ ╰─ tagName "static"
+20├─   1,
+21├─   2
+22├─ > = baz;
+23╭─ 
+  ╰─ ╰─ openTagEnd

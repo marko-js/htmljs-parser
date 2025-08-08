@@ -1,0 +1,14 @@
+1╭─ <div value=x as A & B<T> />
+ │  ││   │    ││             ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "x as A & B<T>"
+ │  ││   │    ╰─ attrValue "=x as A & B<T>"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <div value=x as A & B< T > />
+ │  ││   │    ││               ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "x as A & B< T >"
+ │  ││   │    ╰─ attrValue "=x as A & B< T >"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

@@ -1,0 +1,13 @@
+1╭─ const/foo:Bar<
+ │  │    │╰─ tagVar.value "foo:Bar<\n  A,\n  B\n>"
+ │  │    ╰─ tagVar "/foo:Bar<\n  A,\n  B\n>"
+ ╰─ ╰─ tagName "const"
+2├─   A,
+3├─   B
+4╭─ > = baz
+ │    │ ╰─ attrValue.value "baz"
+ │    ├─ attrValue "= baz"
+ ╰─   ╰─ attrName
+5╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(const)

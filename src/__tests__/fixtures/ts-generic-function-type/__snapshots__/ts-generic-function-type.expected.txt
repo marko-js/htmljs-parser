@@ -1,0 +1,15 @@
+1╭─ <div value=fn as <T>(x: T) => T />
+ │  ││   │    ││                    ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "fn as <T>(x: T) => T"
+ │  ││   │    ╰─ attrValue "=fn as <T>(x: T) => T"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <div value=fn as < T >(x: T) => T />
+ │  ││   │    ││                      ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "fn as < T >(x: T) => T"
+ │  ││   │    ╰─ attrValue "=fn as < T >(x: T) => T"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╰─ 
