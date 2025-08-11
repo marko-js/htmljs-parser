@@ -343,12 +343,15 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             this.enterState(STATE.EXPRESSION).shouldTerminate = matchesPipe;
             break;
 
-          case CODE.OPEN_ANGLE_BRACKET:
+          case CODE.OPEN_ANGLE_BRACKET: {
             tag.stage = TAG_STAGE.TYPES;
             this.pos++; // skip <
-            this.enterState(STATE.EXPRESSION).shouldTerminate =
-              matchesCloseAngleBracket;
+            const expr = this.enterState(STATE.EXPRESSION);
+            expr.inType = true;
+            expr.forceType = true;
+            expr.shouldTerminate = matchesCloseAngleBracket;
             break;
+          }
 
           default:
             tag.hasAttrs = true;

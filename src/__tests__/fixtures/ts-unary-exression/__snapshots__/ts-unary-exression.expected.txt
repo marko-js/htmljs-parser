@@ -1,0 +1,21 @@
+1╭─ div foo=readonly bar=true
+ │  │   │  ││        │  │╰─ attrValue.value "true"
+ │  │   │  ││        │  ╰─ attrValue "=true"
+ │  │   │  ││        ╰─ attrName "bar"
+ │  │   │  │╰─ attrValue.value "readonly"
+ │  │   │  ╰─ attrValue "=readonly"
+ │  │   ╰─ attrName "foo"
+ ╰─ ╰─ tagName "div"
+2╭─ div foo=val as readonly string[] bar=true
+ │  │   │  ││                        │  │╰─ attrValue.value "true"
+ │  │   │  ││                        │  ╰─ attrValue "=true"
+ │  │   │  ││                        ╰─ attrName "bar"
+ │  │   │  │╰─ attrValue.value "val as readonly string[]"
+ │  │   │  ╰─ attrValue "=val as readonly string[]"
+ │  │   ╰─ attrName "foo"
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+3╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)
