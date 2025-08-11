@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.7.2
+
+### Patch Changes
+
+- [#192](https://github.com/marko-js/htmljs-parser/pull/192) [`eed2eb1`](https://github.com/marko-js/htmljs-parser/commit/eed2eb1eba4a3a5275b03ec4a07bfcf7da2ac7dd) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix regression where typescript unary operators were being used in javascript contexts.
+
 ## 5.7.1
 
 ### Patch Changes
