@@ -105,8 +105,10 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       attr.stage = ATTR_STAGE.TYPE_PARAMS;
       this.pos++; // skip <
       this.forward = 0;
-      this.enterState(STATE.EXPRESSION).shouldTerminate =
-        matchesCloseAngleBracket;
+      const expr = this.enterState(STATE.EXPRESSION);
+      expr.inType = true;
+      expr.forceType = true;
+      expr.shouldTerminate = matchesCloseAngleBracket;
     } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
       ensureAttrName(this, attr);
       attr.stage = ATTR_STAGE.BLOCK;

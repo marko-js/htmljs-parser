@@ -31,19 +31,23 @@ export interface ExpressionMeta extends Meta {
 const shouldTerminate = () => false;
 
 const unaryKeywords = [
-  "asserts",
   "async",
   "await",
   "class",
   "function",
+  "new",
+  "typeof",
+  "void",
+] as const;
+
+const tsUnaryKeywords = [
+  ...unaryKeywords,
+  "asserts",
   "infer",
   "is",
   "keyof",
-  "new",
   "readonly",
-  "typeof",
   "unique",
-  "void",
 ] as const;
 
 const binaryKeywords = [
@@ -404,7 +408,9 @@ function lookBehindForOperator(
     }
 
     default: {
-      for (const keyword of unaryKeywords) {
+      for (const keyword of expression.inType
+        ? tsUnaryKeywords
+        : unaryKeywords) {
         const keywordPos = lookBehindFor(data, curPos, keyword);
         if (keywordPos !== -1) {
           return isWordOrPeriodCode(data.charCodeAt(keywordPos - 1))
