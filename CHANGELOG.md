@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.7.3
+
+### Patch Changes
+
+- [#195](https://github.com/marko-js/htmljs-parser/pull/195) [`442e7cc`](https://github.com/marko-js/htmljs-parser/commit/442e7cc16a7ee5a4a6954fa3c61a44044eb4e9d1) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix issue where arrow functions content was being parsed as types.
+
 ## 5.7.2
 
 ### Patch Changes
