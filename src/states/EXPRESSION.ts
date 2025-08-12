@@ -150,6 +150,13 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       case CODE.EQUAL:
         if (expression.operators) {
           if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
+            if (
+              expression.inType &&
+              !expression.forceType &&
+              this.getPreviousNonWhitespaceCharCode() !== CODE.CLOSE_PAREN
+            ) {
+              expression.inType = false;
+            }
             this.pos++;
           } else if (!(expression.forceType || expression.groupStack.length)) {
             expression.inType = false;

@@ -1,0 +1,28 @@
+1╭─ static const a = (a: number, b: number): string => {
+ ╰─ ╰─ tagName "static"
+2├─   if (a < b) {
+3├─     return "foo";
+4├─   } else {
+5├─     return "bar";
+6├─   }
+7├─ };
+8╭─ 
+ ╰─ ╰─ openTagEnd
+9╭─ static const b = (a: number, b: number): () => string => () => {
+ ╰─ ╰─ tagName "static"
+10├─   if (a < b) {
+11├─     return "foo";
+12├─   } else {
+13├─     return "bar";
+14├─   }
+15├─ };
+16╭─ 
+  ╰─ ╰─ openTagEnd
+17╭─ static const c = (a: number, b: number): string => a < b ? "foo" : "bar";
+  ╰─ ╰─ tagName "static"
+18╭─ 
+  ╰─ ╰─ openTagEnd
+19╭─ static const d = (a: number, b: number): () => string => () => a < b ? "foo" : "bar";
+  ╰─ ╰─ tagName "static"
+20╭─ 
+  ╰─ ╰─ openTagEnd
