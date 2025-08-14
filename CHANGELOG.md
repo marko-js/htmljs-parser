@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.7.4
+
+### Patch Changes
+
+- [#197](https://github.com/marko-js/htmljs-parser/pull/197) [`9bf68be`](https://github.com/marko-js/htmljs-parser/commit/9bf68be4fceb0798f4d7d51ff70dee40b17c6c38) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix issue with arrow functions in type args/params.
+
 ## 5.7.3
 
 ### Patch Changes
