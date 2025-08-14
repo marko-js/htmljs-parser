@@ -212,7 +212,16 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       case CODE.CLOSE_PAREN:
       case CODE.CLOSE_SQUARE_BRACKET:
       case CODE.CLOSE_CURLY_BRACE:
-      case expression.inType && CODE.CLOSE_ANGLE_BRACKET: {
+      case CODE.CLOSE_ANGLE_BRACKET: {
+        if (code === CODE.CLOSE_ANGLE_BRACKET) {
+          if (
+            !expression.inType ||
+            this.lookAtCharCodeAhead(-1) === CODE.EQUAL
+          ) {
+            break;
+          }
+        }
+
         if (!expression.groupStack.length) {
           return this.emitError(
             expression,
