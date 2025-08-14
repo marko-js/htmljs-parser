@@ -1,0 +1,7 @@
+1╭─ <foo<{ bar: () => void }>/>
+ │  ││  ││                   ╰─ openTagEnd:selfClosed "/>"
+ │  ││  │╰─ tagTypeArgs.value "{ bar: () => void }"
+ │  ││  ╰─ tagTypeArgs "<{ bar: () => void }>"
+ │  │╰─ tagName "foo"
+ ╰─ ╰─ openTagStart
+2╰─ 
