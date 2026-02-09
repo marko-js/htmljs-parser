@@ -28,7 +28,13 @@ const ROOT_RANGE = {
   end: 0,
 };
 
-export function isValidStatement(code: string): boolean {
+export enum Validity {
+  invalid,
+  valid,
+  enclosed,
+}
+
+export function isValidStatement(code: string): Validity {
   return isValid(code, true, prepareStatement);
 }
 
@@ -38,7 +44,7 @@ function prepareStatement(expr: STATE.ExpressionMeta) {
   expr.consumeIndentedContent = true;
 }
 
-export function isValidAttrValue(code: string, concise: boolean): boolean {
+export function isValidAttrValue(code: string, concise: boolean): Validity {
   return isValid(code, concise, prepareAttrValue);
 }
 
@@ -54,7 +60,7 @@ function isValid(
   data: string,
   concise: boolean,
   prepare: (expr: STATE.ExpressionMeta, concise: boolean) => void,
-) {
+): Validity {
   const parser = new Parser({});
   const maxPos = (parser.maxPos = data.length);
   parser.pos = 0;
@@ -68,18 +74,21 @@ function isValid(
   parser.activeState = ROOT_STATE;
   parser.activeRange = ROOT_RANGE;
   const expr = parser.enterState(STATE.EXPRESSION);
+  let isEnclosed = true;
   prepare(expr, concise);
 
   while (parser.pos < maxPos) {
     const code = data.charCodeAt(parser.pos);
 
     if (code === CODE.NEWLINE) {
+      if (isEnclosed && !expr.groupStack.length) isEnclosed = false;
       parser.forward = 1;
       parser.activeState.eol.call(parser, 1, parser.activeRange);
     } else if (
       code === CODE.CARRIAGE_RETURN &&
       data.charCodeAt(parser.pos + 1) === CODE.NEWLINE
     ) {
+      if (isEnclosed && !expr.groupStack.length) isEnclosed = false;
       parser.forward = 2;
       parser.activeState.eol.call(parser, 2, parser.activeRange);
     } else {
@@ -88,15 +97,19 @@ function isValid(
     }
 
     if (parser.activeRange === ROOT_RANGE) {
-      return false;
+      return Validity.invalid;
     }
 
     parser.pos += parser.forward;
   }
 
-  return (
+  if (
     parser.pos === maxPos &&
     parser.activeRange === expr &&
     !expr.groupStack.length
-  );
+  ) {
+    return isEnclosed ? Validity.enclosed : Validity.valid;
+  }
+
+  return Validity.invalid;
 }
