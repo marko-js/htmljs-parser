@@ -141,7 +141,7 @@ export enum ErrorCode {
   INVALID_ATTR_TYPE_PARAMS,
 }
 
-export const enum TagType {
+export enum TagType {
   html,
   text,
   void,
