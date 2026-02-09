@@ -323,7 +323,7 @@ function shouldTerminateHtmlAttrName(code: number, data: string, pos: number) {
   }
 }
 
-function shouldTerminateHtmlAttrValue(
+export function shouldTerminateHtmlAttrValue(
   this: STATE.ExpressionMeta,
   code: number,
   data: string,
@@ -368,7 +368,7 @@ function shouldTerminateConciseAttrName(
   }
 }
 
-function shouldTerminateConciseAttrValue(
+export function shouldTerminateConciseAttrValue(
   code: number,
   data: string,
   pos: number,
