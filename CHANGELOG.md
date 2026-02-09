@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.8.1
+
+### Patch Changes
+
+- [#207](https://github.com/marko-js/htmljs-parser/pull/207) [`572cce0`](https://github.com/marko-js/htmljs-parser/commit/572cce0ed34c5505a5e54b5a690500b5ba576ae5) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Use normal enum for TagType which allows easier usage in consuming packages.
+
 ## 5.8.0
 
 ### Minor Changes
