@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.8.0
+
+### Minor Changes
+
+- [#204](https://github.com/marko-js/htmljs-parser/pull/204) [`9a637a3`](https://github.com/marko-js/htmljs-parser/commit/9a637a3250d239c0c03c345777d34a6af8f9c093) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Add expression validator helpers.
+
 ## 5.7.4
 
 ### Patch Changes
