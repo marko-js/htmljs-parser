@@ -12,7 +12,11 @@ export {
   type Range,
 } from "./internal";
 
-export { isValidStatement, isValidAttrValue } from "./util/validators";
+export {
+  isValidStatement,
+  isValidAttrValue,
+  Validity,
+} from "./util/validators";
 
 /**
  * Creates a new Marko parser.
