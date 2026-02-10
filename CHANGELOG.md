@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.8.2
+
+### Patch Changes
+
+- [#209](https://github.com/marko-js/htmljs-parser/pull/209) [`ae1be31`](https://github.com/marko-js/htmljs-parser/commit/ae1be31a5046673a71a96fe7a932fbd6d01fcd9f) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Expose extra information about statement and attr value validity.
+
 ## 5.8.1
 
 ### Patch Changes
