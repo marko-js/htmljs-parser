@@ -152,7 +152,9 @@ export class Parser {
   endText() {
     const start = this.textPos;
     if (start !== -1) {
-      this.options.onText?.({ start, end: this.pos });
+      if (start !== this.pos) {
+        this.options.onText?.({ start, end: this.pos });
+      }
       this.textPos = -1;
     }
   }

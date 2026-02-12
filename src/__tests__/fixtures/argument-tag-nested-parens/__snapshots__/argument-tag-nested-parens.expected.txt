@@ -4,12 +4,9 @@
  │  ││ │╰─ tagArgs.value "notEmpty(data.colors)"
  │  ││ ╰─ tagArgs "(notEmpty(data.colors))"
  │  │╰─ tagName "if"
- │  ├─ text "\n"
  ╰─ ╰─ openTagStart
 3╭─ </if>
  │  │ │ ╰─ closeTagEnd(if)
  │  │ ╰─ closeTagName "if"
- │  ├─ text "\n"
  ╰─ ╰─ closeTagStart "</"
-4╭─ ---
- ╰─ ╰─ text "\n"
+4╰─ ---

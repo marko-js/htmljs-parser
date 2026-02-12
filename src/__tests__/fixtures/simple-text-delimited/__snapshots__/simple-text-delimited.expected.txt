@@ -1,5 +1,5 @@
 1╭─ ---
 2╭─ test
- ╰─ ╰─ text "\ntest\n"
+ ╰─ ╰─ text "test"
 3├─ ---
 4╰─ 

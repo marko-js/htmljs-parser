@@ -1,10 +1,10 @@
 1╭─ --
 2╭─ hi
- ╰─ ╰─ text "\nhi\n"
+ ╰─ ╰─ text "hi"
 3├─ --
 4├─ 
 5├─ --
 6╭─ foo
- ╰─ ╰─ text "\nfoo\n\n"
+ ╰─ ╰─ text "foo"
 7├─ 
 8╰─ 

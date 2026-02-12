@@ -4,8 +4,10 @@
  │  │    ╰─ tagVar "/style"
  ╰─ ╰─ tagName "style"
 2╭─   header {
- ╰─ ╰─ text "\n  header {\n    color: green\n  }\n"
-3├─     color: green
-4├─   }
+ ╰─   ╰─ text "header {\n"
+3╭─     color: green
+ ╰─   ╰─ text "  color: green\n"
+4╭─   }
+ ╰─   ╰─ text
 5╭─ 
  ╰─ ╰─ closeTagEnd(style)

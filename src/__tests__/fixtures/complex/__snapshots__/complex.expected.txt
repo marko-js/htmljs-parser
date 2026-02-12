@@ -1,13 +1,13 @@
 1╭─ --
 2╭─ This is top-level text
- ╰─ ╰─ text "\nThis is top-level text\n"
+ ╰─ ╰─ text "This is top-level text"
 3├─ --
 4╭─ p
  ╰─ ╰─ tagName
 5╭─     --
  ╰─ ╰─ openTagEnd
 6╭─     This is text that spans multiple lines.
- ╰─ ╰─ text "\n    This is text that spans multiple lines.\n\n    "
+ ╰─     ╰─ text "This is text that spans multiple lines.\n\n"
 7├─ 
 8╭─     <strong>You can throw in some HTML markup if you want!</strong>
  │      ││     ││                                             │ │     ╰─ closeTagEnd(strong)
@@ -17,18 +17,20 @@
  │      ││     ╰─ openTagEnd
  │      │╰─ tagName "strong"
  ╰─     ╰─ openTagStart
-9╭─     --
- ╰─ ╰─ text "\n"
+9├─     --
 10╭─ p
   │  ├─ closeTagEnd(p)
   ╰─ ╰─ tagName
 11╭─     -----
   ╰─ ╰─ openTagEnd
 12╭─     If you really want to you can change the block delimiter for the following
-  ╰─ ╰─ text "\n    If you really want to you can change the block delimiter for the following\n    reasons:\n    - Avoid accidentally ending a block\n    - To improve readability\n"
-13├─     reasons:
-14├─     - Avoid accidentally ending a block
-15├─     - To improve readability
+  ╰─     ╰─ text "If you really want to you can change the block delimiter for the following\n"
+13╭─     reasons:
+  ╰─     ╰─ text "reasons:\n"
+14╭─     - Avoid accidentally ending a block
+  ╰─     ╰─ text "- Avoid accidentally ending a block\n"
+15╭─     - To improve readability
+  ╰─     ╰─ text "- To improve readability"
 16├─     -----
 17╭─ i -- This text will be in italics
   │  │ │  ╰─ text "This text will be in italics"
@@ -47,7 +49,6 @@
   │  ├─ closeTagEnd(b)
   ╰─ ╰─ tagName "app-hello"
 22╭─     -- ${data.name} some html - <b>bold</b>
-  │  │      │ │         │            ││││   │ ││╰─ closeTagEnd(app-hello)
   │  │      │ │         │            ││││   │ │╰─ closeTagEnd(b)
   │  │      │ │         │            ││││   │ ╰─ closeTagName
   │  │      │ │         │            ││││   ╰─ closeTagStart "</"
@@ -59,3 +60,60 @@
   │  │      │ ╰─ placeholder:escape.value "data.name"
   │  │      ╰─ placeholder:escape "${data.name}"
   ╰─ ╰─ openTagEnd
+23├─ 
+24╭─ pre
+  │  ├─ closeTagEnd(app-hello)
+  ╰─ ╰─ tagName "pre"
+25╭─     --
+  ╰─ ╰─ openTagEnd
+26╭─     foo
+  ╰─     ╰─ text "foo"
+27├─     --
+28├─ 
+29╭─ p
+  │  ├─ closeTagEnd(pre)
+  ╰─ ╰─ tagName
+30╭─     --
+  ╰─ ╰─ openTagEnd
+31╭─     before
+  ╰─     ╰─ text "before\n"
+32╭─     ${"placeholder"}
+  │      │ ╰─ placeholder:escape.value "\"placeholder\""
+  ╰─     ╰─ placeholder:escape "${\"placeholder\"}"
+33╭─     after
+  │  │   ╰─ text "after"
+  ╰─ ╰─ text "\n"
+34├─     --
+35├─ 
+36╭─ p
+  │  ├─ closeTagEnd(p)
+  ╰─ ╰─ tagName
+37╭─     --
+  ╰─ ╰─ openTagEnd
+38╭─     before
+  ╰─     ╰─ text "before\n"
+39╭─     <!--comment-->
+  │      │   ╰─ comment.value "comment"
+  ╰─     ╰─ comment "<!--comment-->"
+40╭─     after
+  │  │   ╰─ text "after"
+  ╰─ ╰─ text "\n"
+41├─     --
+42├─ 
+43╭─ p
+  │  ├─ closeTagEnd(p)
+  ╰─ ╰─ tagName
+44╭─     --
+  ╰─ ╰─ openTagEnd
+45╭─     before
+  ╰─     ╰─ text "before\n"
+46╭─     <div/>
+  │      ││  ╰─ openTagEnd:selfClosed "/>"
+  │      │╰─ tagName "div"
+  ╰─     ╰─ openTagStart
+47╭─     after
+  │  │   ╰─ text "after"
+  ╰─ ╰─ text "\n"
+48├─     --
+49╭─ 
+  ╰─ ╰─ closeTagEnd(p)

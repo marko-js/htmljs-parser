@@ -3,5 +3,4 @@
 2╭─     ---
  ╰─ ╰─ openTagEnd
 3╭─     ---
- │  │      ╰─ closeTagEnd(p)
- ╰─ ╰─ text "\n"
+ ╰─        ╰─ closeTagEnd(p)

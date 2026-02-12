@@ -20,7 +20,7 @@
 6╭─       ---
  ╰─ ╰─ openTagEnd
 7╭─       var a = 'marko';
- ╰─ ╰─ text "\n      var a = 'marko';\n"
+ ╰─       ╰─ text "var a = 'marko';"
 8╭─       ---
  │           ├─ closeTagEnd(html)
  │           ├─ closeTagEnd(body)

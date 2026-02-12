@@ -1,7 +1,5 @@
 1╭─ ---
 2╭─ $ var foo = 123;
  │  │ ╰─ scriptlet.value "var foo = 123;"
- │  ├─ text "\n"
  ╰─ ╰─ scriptlet "$ var foo = 123;"
-3╭─ ---
- ╰─ ╰─ text "\n"
+3╰─ ---

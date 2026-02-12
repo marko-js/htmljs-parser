@@ -1,10 +1,8 @@
 1╭─ ---
 2╭─ $ {
- │  ├─ text "\n"
  ╰─ ╰─ scriptlet:block "$ {\n    var foo = 123;\n    var bar = 456;\n}"
 3╭─     var foo = 123;
  ╰─ ╰─ scriptlet:block.value "\n    var foo = 123;\n    var bar = 456;\n"
 4├─     var bar = 456;
 5├─ }
-6╭─ ---
- ╰─ ╰─ text "\n"
+6╰─ ---

@@ -1,4 +1,4 @@
 1╭─ ---
 2╭─ hello $ var foo = 123;
- ╰─ ╰─ text "\nhello $ var foo = 123;\n"
+ ╰─ ╰─ text "hello $ var foo = 123;"
 3╰─ ---
