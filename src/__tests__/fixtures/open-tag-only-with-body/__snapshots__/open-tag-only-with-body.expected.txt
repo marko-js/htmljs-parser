@@ -5,10 +5,9 @@
  │  ││   │  ╰─ attrValue "=\"marko.png\""
  │  ││   ╰─ attrName "src"
  │  │╰─ tagName "img"
- │  ├─ text "\n"
  ╰─ ╰─ openTagStart
 3╭─     This is not allowed!
- ╰─ ╰─ text "\n    This is not allowed!\n"
+ ╰─ ╰─ text "    This is not allowed!\n"
 4╭─ </img>
  │  ├─ error(EXTRA_CLOSING_TAG:The closing "img" tag was not expected) "</img>"
  ╰─ ╰─ closeTagStart "</"

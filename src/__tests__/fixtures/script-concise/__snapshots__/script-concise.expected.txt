@@ -3,8 +3,9 @@
 2╭─     ---
  ╰─ ╰─ openTagEnd
 3╭─     This is text
- ╰─ ╰─ text "\n    This is text\n    within the </script> block\n"
-4├─     within the </script> block
+ ╰─     ╰─ text "This is text\n"
+4╭─     within the </script> block
+ ╰─     ╰─ text "within the </script> block"
 5├─     ---
 6╭─     -- This should be okay too
  ╰─        ╰─ text "This should be okay too"

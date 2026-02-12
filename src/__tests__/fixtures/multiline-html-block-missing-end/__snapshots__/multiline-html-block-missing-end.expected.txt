@@ -3,19 +3,21 @@
 2╭─     --
  ╰─ ╰─ openTagEnd
 3╭─     Hello World
- ╰─ ╰─ text "\n    Hello World\n    Hello Again\n"
-4├─     Hello Again
+ ╰─     ╰─ text "Hello World\n"
+4╭─     Hello Again
+ ╰─     ╰─ text "Hello Again"
 5├─ 
 6╭─ script --
  │  │      ╰─ openTagEnd
  │  ├─ closeTagEnd(div)
  ╰─ ╰─ tagName "script"
 7╭─     console.log('foo');
- ╰─ ╰─ text "\n    console.log('foo');\n    alert('bar');\n"
-8├─     alert('bar');
+ ╰─     ╰─ text "console.log('foo');\n"
+8╭─     alert('bar');
+ ╰─     ╰─ text "alert('bar');"
 9├─ 
 10╭─ --
   ╰─ ╰─ closeTagEnd(script)
 11╭─ Multi-line text
-  ╰─ ╰─ text "\nMulti-line text\nReached EOF"
+  ╰─ ╰─ text "Multi-line text\nReached EOF"
 12╰─ Reached EOF

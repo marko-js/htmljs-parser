@@ -3,8 +3,9 @@
 2╭─     ---
  ╰─ ╰─ openTagEnd
 3╭─     This is
- ╰─ ╰─ text "\n    This is\n    multi-line text\n"
-4├─     multi-line text
+ ╰─     ╰─ text "This is\n"
+4╭─     multi-line text
+ ╰─     ╰─ text "multi-line text"
 5├─     ---
 6╭─     span -- This is body text of span
  │      │    │  ╰─ text "This is body text of span"

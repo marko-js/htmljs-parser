@@ -6,6 +6,7 @@ import {
   htmlEOF,
   type Meta,
   ErrorCode,
+  isWhitespaceCode,
 } from "../internal";
 
 export interface DelimitedHTMLBlockMeta extends Meta {
@@ -49,7 +50,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
       // We have reached the end of the first delimiter... we need to skip over any indentation on the next
       // line and we might also find that the multi-line, delimited block is immediately ended
       this.beginHtmlBlock(block.delimiter, false);
-      handleDelimitedBlockEOL(this, len, block);
+      handleDelimitedBlockEOL(this, true, len, block);
     },
 
     eof: htmlEOF,
@@ -70,7 +71,7 @@ export function handleDelimitedEOL(
   }
 
   if (content.delimiter) {
-    handleDelimitedBlockEOL(parser, newLineLength, content);
+    handleDelimitedBlockEOL(parser, false, newLineLength, content);
     return true;
   }
 
@@ -79,6 +80,7 @@ export function handleDelimitedEOL(
 
 function handleDelimitedBlockEOL(
   parser: Parser,
+  first: boolean,
   newLineLength: number,
   {
     indent,
@@ -95,10 +97,9 @@ function handleDelimitedBlockEOL(
   const endHtmlBlockLookahead = indent + delimiter;
 
   if (parser.lookAheadFor(endHtmlBlockLookahead, parser.pos + newLineLength)) {
-    parser.startText(); // we want to at least include the newline as text.
-    parser.pos += newLineLength;
     parser.endText();
-    parser.pos += endHtmlBlockLookahead.length;
+    parser.pos += newLineLength + endHtmlBlockLookahead.length;
+    parser.forward = 0;
 
     if (parser.consumeWhitespaceOnLine(0)) {
       parser.exitState();
@@ -111,20 +112,30 @@ function handleDelimitedBlockEOL(
       );
     }
   } else if (parser.lookAheadFor(indent, parser.pos + newLineLength)) {
+    if (!first) parser.startText();
+    parser.pos += newLineLength;
+    parser.endText();
     // We know the next line does not end the multiline HTML block, but we need to check if there
     // is any indentation that we need to skip over as we continue parsing the HTML in this
     // multiline HTML block
-    parser.startText();
     parser.pos += indent.length;
+    parser.forward = 0;
+    parser.startText();
     // We stay in the same state since we are still parsing a multiline, delimited HTML block
   } else if (indent && !parser.onlyWhitespaceRemainsOnLine(newLineLength)) {
     // the next line does not have enough indentation
     // so unless it is blank (whitespace only),
     // we will end the block
+    const pos = parser.pos;
+    let cur = parser.pos;
+    while (cur && isWhitespaceCode(parser.data.charCodeAt(cur - 1))) {
+      cur--;
+    }
+
+    parser.pos = cur;
     parser.endText();
+    parser.pos = pos;
     parser.exitState();
     parser.exitState();
-  } else if (parser.pos + newLineLength !== parser.maxPos) {
-    parser.startText();
   }
 }

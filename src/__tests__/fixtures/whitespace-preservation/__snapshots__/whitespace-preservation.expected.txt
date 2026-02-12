@@ -32,7 +32,7 @@
   │  ├─ closeTagEnd(span)
   ╰─ ╰─ tagName "span"
 11╭─   hi
-  ╰─ ╰─ text "\n  hi\n"
+  ╰─   ╰─ text "hi"
 12├─ 
 13╭─ span.e --
   │  │   ││ ╰─ openTagEnd
@@ -41,8 +41,9 @@
   │  ├─ closeTagEnd(span)
   ╰─ ╰─ tagName "span"
 14╭─   hi
-  ╰─ ╰─ text "\n  hi\n  you\n"
-15├─   you
+  ╰─   ╰─ text "hi\n"
+15╭─   you
+  ╰─   ╰─ text "you"
 16├─ 
 17╭─ span.f
   │  │   │╰─ tagShorthandClass.quasis[0]
@@ -52,7 +53,7 @@
 18╭─   --
   ╰─ ╰─ openTagEnd
 19╭─   hi
-  ╰─ ╰─ text "\n  hi\n"
+  ╰─   ╰─ text "hi"
 20├─   --
 21├─ 
 22╭─ span.g
@@ -63,8 +64,9 @@
 23╭─   --
   ╰─ ╰─ openTagEnd
 24╭─   hi
-  ╰─ ╰─ text "\n  hi\n  you\n"
-25├─   you
+  ╰─   ╰─ text "hi\n"
+25╭─   you
+  ╰─   ╰─ text "you"
 26├─   --
 27├─ 
 28╭─ <span.h>hi</span>

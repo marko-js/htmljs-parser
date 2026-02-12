@@ -6,7 +6,7 @@
 3╭─         ---
  ╰─ ╰─ openTagEnd
 4╭─         Test
- ╰─ ╰─ text "\n        Test\n        "
+ ╰─         ╰─ text "Test\n"
 5╭─         <b>Hello World</b>
  │          ││││          │ │╰─ closeTagEnd(b)
  │          ││││          │ ╰─ closeTagName
@@ -16,6 +16,5 @@
  │          │╰─ tagName
  ╰─         ╰─ openTagStart
 6╭─         ---
- │  │          ├─ closeTagEnd(div)
- │  │          ╰─ closeTagEnd(span)
- ╰─ ╰─ text "\n"
+ │             ├─ closeTagEnd(div)
+ ╰─            ╰─ closeTagEnd(span)

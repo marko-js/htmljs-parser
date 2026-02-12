@@ -7,7 +7,7 @@
  │  │     ││     ╰─ openTagEnd
  │  │     │╰─ tagName "strong"
  │  │     ╰─ openTagStart
- ╰─ ╰─ text "\nHello "
+ ╰─ ╰─ text "Hello "
 3╭─ Line 2
- ╰─ ╰─ text "\nLine 2\n"
+ ╰─ ╰─ text "Line 2"
 4╰─ ---

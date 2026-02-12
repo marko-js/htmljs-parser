@@ -52,7 +52,19 @@ export function getLines(src: string) {
 }
 
 export function htmlEOF(this: Parser) {
-  this.endText();
+  if (!this.activeTag || this.activeTag.concise) {
+    const pos = this.pos;
+    let cur = this.pos;
+    while (cur && isWhitespaceCode(this.data.charCodeAt(cur - 1))) {
+      cur--;
+    }
+
+    this.pos = cur;
+    this.endText();
+    this.pos = pos;
+  } else {
+    this.endText();
+  }
 
   while (this.activeTag) {
     if (this.activeTag.concise) {
