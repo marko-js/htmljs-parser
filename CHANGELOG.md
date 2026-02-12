@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.9.0
+
+### Minor Changes
+
+- [#199](https://github.com/marko-js/htmljs-parser/pull/199) [`d647d74`](https://github.com/marko-js/htmljs-parser/commit/d647d74977919d6b2b7effd2be26585296c30bf3) Thanks [@LuLaValva](https://github.com/LuLaValva)! - Remove boundary newlines and leading indent from concise mode text.
+
 ## 5.8.2
 
 ### Patch Changes
