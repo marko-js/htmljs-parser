@@ -14,6 +14,7 @@ export {
 
 export {
   isValidStatement,
+  isValidScriptlet,
   isValidAttrValue,
   Validity,
 } from "./util/validators";

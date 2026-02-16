@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { isValidAttrValue, isValidStatement } from "..";
+import { isValidAttrValue, isValidScriptlet, isValidStatement } from "..";
 
 describe("validation helpers", () => {
   describe("isValidStatement", () => {
@@ -25,6 +25,32 @@ describe("validation helpers", () => {
 
     it("rejects mismatched closing groups", () => {
       assert.equal(isValidStatement(")"), 0);
+    });
+  });
+
+  describe("isValidScriptlet", () => {
+    it("accepts single-line expressions", () => {
+      assert.equal(isValidScriptlet("foo + bar"), 2);
+    });
+
+    it("rejects indented continuation lines", () => {
+      assert.equal(isValidScriptlet("foo\n  + bar"), 0);
+    });
+
+    it("rejects unindented continuation lines", () => {
+      assert.equal(isValidScriptlet("foo\nbar"), 0);
+    });
+
+    it("accepts indented ternary continuation", () => {
+      assert.equal(isValidScriptlet("foo ?\n  bar : baz"), 2);
+    });
+
+    it("rejects unterminated groups", () => {
+      assert.equal(isValidScriptlet("(foo"), 0);
+    });
+
+    it("rejects mismatched closing groups", () => {
+      assert.equal(isValidScriptlet(")"), 0);
     });
   });
 
