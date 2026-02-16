@@ -44,6 +44,15 @@ function prepareStatement(expr: STATE.ExpressionMeta) {
   expr.consumeIndentedContent = true;
 }
 
+export function isValidScriptlet(code: string): Validity {
+  return isValid(code, true, prepareScriptlet);
+}
+
+function prepareScriptlet(expr: STATE.ExpressionMeta) {
+  expr.operators = true;
+  expr.terminatedByEOL = true;
+}
+
 export function isValidAttrValue(code: string, concise: boolean): Validity {
   return isValid(code, concise, prepareAttrValue);
 }
