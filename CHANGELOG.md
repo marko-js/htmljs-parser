@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.10.0
+
+### Minor Changes
+
+- [#213](https://github.com/marko-js/htmljs-parser/pull/213) [`f64e525`](https://github.com/marko-js/htmljs-parser/commit/f64e525d48b74458c3dc4d3948208f8fd15bf313) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Add "isValidScriptlet" api.
+
 ## 5.9.0
 
 ### Minor Changes
