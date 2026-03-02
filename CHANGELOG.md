@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.10.1
+
+### Patch Changes
+
+- [#216](https://github.com/marko-js/htmljs-parser/pull/216) [`5d9c02c`](https://github.com/marko-js/htmljs-parser/commit/5d9c02cd6772c65c38d2c9d51ca1d3130680424a) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix regression which incorrectly removed some whitespace in concise mode html blocks.
+
 ## 5.10.0
 
 ### Minor Changes
