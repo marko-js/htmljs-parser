@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.10.2
+
+### Patch Changes
+
+- [#218](https://github.com/marko-js/htmljs-parser/pull/218) [`ca9ae8f`](https://github.com/marko-js/htmljs-parser/commit/ca9ae8fc1e6bb668cb9a53c39d97da5ae173f1ff) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix incorrectly skipped trailing literal whitespace in concise blocks.
+
 ## 5.10.1
 
 ### Patch Changes
