@@ -8,5 +8,6 @@
 3╭─ </if>
  │  │ │ ╰─ closeTagEnd(if)
  │  │ ╰─ closeTagName "if"
+ │  ├─ text "\n"
  ╰─ ╰─ closeTagStart "</"
 4╰─ ---

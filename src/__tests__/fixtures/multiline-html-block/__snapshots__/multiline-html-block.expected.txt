@@ -9,5 +9,5 @@
  │  │     ╰─ openTagStart
  ╰─ ╰─ text "Hello "
 3╭─ Line 2
- ╰─ ╰─ text "Line 2"
+ ╰─ ╰─ text "\nLine 2"
 4╰─ ---

@@ -137,5 +137,7 @@ function handleDelimitedBlockEOL(
     parser.pos = pos;
     parser.exitState();
     parser.exitState();
+  } else if (!first && parser.pos + newLineLength !== parser.maxPos) {
+    parser.startText();
   }
 }

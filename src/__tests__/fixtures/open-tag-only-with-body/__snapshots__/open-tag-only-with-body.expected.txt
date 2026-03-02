@@ -7,7 +7,7 @@
  │  │╰─ tagName "img"
  ╰─ ╰─ openTagStart
 3╭─     This is not allowed!
- ╰─ ╰─ text "    This is not allowed!\n"
+ ╰─ ╰─ text "\n    This is not allowed!\n"
 4╭─ </img>
  │  ├─ error(EXTRA_CLOSING_TAG:The closing "img" tag was not expected) "</img>"
  ╰─ ╰─ closeTagStart "</"

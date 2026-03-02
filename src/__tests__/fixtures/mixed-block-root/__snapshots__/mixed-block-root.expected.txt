@@ -1,0 +1,29 @@
+1╭─ ---
+2╭─ 1
+ ╰─ ╰─ text "1\n"
+3╭─ <div>
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╭─     2
+ ╰─ ╰─ text "\n    2\n"
+5╭─ </div>
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
+ ╰─ ╰─ closeTagStart "</"
+6╭─ 3
+ ╰─ ╰─ text "\n3\n"
+7╭─ <div>
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+8╭─     4
+ ╰─ ╰─ text "\n    4\n"
+9╭─ </div>
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
+ ╰─ ╰─ closeTagStart "</"
+10╭─ 5
+  ╰─ ╰─ text "\n5"
+11├─ ---
+12╰─ 
