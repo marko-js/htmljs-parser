@@ -9,6 +9,16 @@ export function isWhitespaceCode(code: number) {
   return code <= CODE.SPACE;
 }
 
+export function isLineCode(code: number) {
+  switch (code) {
+    case CODE.NEWLINE:
+    case CODE.CARRIAGE_RETURN:
+      return true;
+    default:
+      return false;
+  }
+}
+
 export function isIndentCode(code: number) {
   return code === CODE.TAB || code === CODE.SPACE;
 }
@@ -55,7 +65,7 @@ export function htmlEOF(this: Parser) {
   if (!this.activeTag || this.activeTag.concise) {
     const pos = this.pos;
     let cur = this.pos;
-    while (cur && isWhitespaceCode(this.data.charCodeAt(cur - 1))) {
+    while (cur && isLineCode(this.data.charCodeAt(cur - 1))) {
       cur--;
     }
 

@@ -1,0 +1,4 @@
+1╭─ -- ${value} 
+ │     │ │     ╰─ text " "
+ │     │ ╰─ placeholder:escape.value "value"
+ ╰─    ╰─ placeholder:escape "${value}"

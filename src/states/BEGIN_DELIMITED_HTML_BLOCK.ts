@@ -6,7 +6,7 @@ import {
   htmlEOF,
   type Meta,
   ErrorCode,
-  isWhitespaceCode,
+  isLineCode,
 } from "../internal";
 
 export interface DelimitedHTMLBlockMeta extends Meta {
@@ -128,7 +128,7 @@ function handleDelimitedBlockEOL(
     // we will end the block
     const pos = parser.pos;
     let cur = parser.pos;
-    while (cur && isWhitespaceCode(parser.data.charCodeAt(cur - 1))) {
+    while (cur && isLineCode(parser.data.charCodeAt(cur - 1))) {
       cur--;
     }
 

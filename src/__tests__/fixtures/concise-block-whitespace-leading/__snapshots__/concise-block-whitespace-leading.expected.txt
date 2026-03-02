@@ -1,0 +1,7 @@
+1╭─ ---
+2╭─   A ${'B'} C  
+ │  │   │ │   ╰─ text " C  "
+ │  │   │ ╰─ placeholder:escape.value "'B'"
+ │  │   ╰─ placeholder:escape "${'B'}"
+ ╰─ ╰─ text "  A "
+3╰─ ---
