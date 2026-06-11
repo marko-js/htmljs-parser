@@ -25,10 +25,43 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
   exit() {},
 
-  char(code) {
-    if (isWhitespaceCode(code)) {
-      this.indent += this.data[this.pos];
-    } else {
+  parse(data, maxPos) {
+    if (this.pos === maxPos) {
+      htmlEOF.call(this);
+      this.pos++;
+      return;
+    }
+
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
+
+      if (code === CODE.NEWLINE || code === CODE.CARRIAGE_RETURN) {
+        this.indent = "";
+        this.pos +=
+          code === CODE.CARRIAGE_RETURN &&
+          data.charCodeAt(this.pos + 1) === CODE.NEWLINE
+            ? 2
+            : 1;
+        continue;
+      }
+
+      if (isWhitespaceCode(code)) {
+        // Eagerly consume the indent up to the end of the line.
+        const start = this.pos;
+        let next: number;
+        do {
+          this.pos++;
+        } while (
+          this.pos < maxPos &&
+          isWhitespaceCode((next = data.charCodeAt(this.pos))) &&
+          next !== CODE.NEWLINE &&
+          next !== CODE.CARRIAGE_RETURN
+        );
+        this.indent += data.slice(start, this.pos);
+        continue;
+      }
+
+      // Non-whitespace character: dispatch based on current indent level
       const curIndent = this.indent.length;
       const indentStart = this.pos - curIndent - 1;
       let parentTag = this.activeTag;
@@ -74,38 +107,36 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       switch (code) {
         case CODE.OPEN_ANGLE_BRACKET:
           this.beginMixedMode = true;
-          this.pos--;
-          this.beginHtmlBlock(undefined, false);
+          this.beginHtmlBlock(undefined, false); // pos stays at <
           return;
         case CODE.DOLLAR:
-          if (isWhitespaceCode(this.lookAtCharCodeAhead(1))) {
-            this.pos++; // skip space after $
+          if (isWhitespaceCode(data.charCodeAt(this.pos + 1))) {
+            this.pos++; // skip $, INLINE_SCRIPT starts at space
             this.enterState(STATE.INLINE_SCRIPT);
             return;
           }
-          break;
+          break; // fall through to enter OPEN_TAG
         case CODE.HYPHEN:
-          if (this.lookAtCharCodeAhead(1) === CODE.HYPHEN) {
+          if (data.charCodeAt(this.pos + 1) === CODE.HYPHEN) {
             this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
-            this.pos--;
+            return; // pos stays at the first -, BEGIN_DELIMITED_HTML_BLOCK parses it
           } else {
             this.emitError(
               this.pos,
               ErrorCode.INVALID_LINE_START,
               'A line in concise mode cannot start with a single hyphen. Use "--" instead. See: https://github.com/marko-js/htmljs-parser/issues/43',
             );
+            return;
           }
-          return;
         case CODE.FORWARD_SLASH:
-          // Check next character to see if we are in a comment
-          switch (this.lookAtCharCodeAhead(1)) {
+          switch (data.charCodeAt(this.pos + 1)) {
             case CODE.FORWARD_SLASH:
               this.enterState(STATE.JS_COMMENT_LINE);
-              this.pos++; // skip /
+              this.pos += 2; // skip //
               return;
             case CODE.ASTERISK:
               this.enterState(STATE.JS_COMMENT_BLOCK);
-              this.pos++; // skip *
+              this.pos += 2; // skip /*
               return;
             default:
               this.emitError(
@@ -118,15 +149,9 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       }
 
       this.enterState(STATE.OPEN_TAG);
-      this.forward = 0; // START_TAG_NAME expects to start at the first character
+      return; // pos stays at current char, OPEN_TAG sees it
     }
   },
-
-  eol() {
-    this.indent = "";
-  },
-
-  eof: htmlEOF,
 
   return(child) {
     this.indent = "";

@@ -33,27 +33,47 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
 
     exit() {},
 
-    char(code, block) {
-      if (code === CODE.HYPHEN) {
-        block.delimiter += "-";
-      } else {
+    parse(data, maxPos, block) {
+      if (this.pos === maxPos) {
+        htmlEOF.call(this);
+        this.pos++;
+        return;
+      }
+
+      while (this.pos < maxPos) {
+        const code = data.charCodeAt(this.pos);
+
+        if (code === CODE.NEWLINE || code === CODE.CARRIAGE_RETURN) {
+          const len =
+            code === CODE.CARRIAGE_RETURN &&
+            data.charCodeAt(this.pos + 1) === CODE.NEWLINE
+              ? 2
+              : 1;
+          const prevPos = this.pos;
+          this.beginHtmlBlock(block.delimiter, false);
+          handleDelimitedBlockEOL(this, true, len, block);
+          if (this.pos === prevPos) this.pos += len; // advance past newline if not already advanced
+          return;
+        }
+
+        if (code === CODE.HYPHEN) {
+          block.delimiter += "-";
+          this.pos++;
+          continue;
+        }
+
+        // Non-hyphen, non-newline: check if whitespace-only remains on line
         const startPos = this.pos;
         if (!this.consumeWhitespaceOnLine()) {
+          // Non-whitespace content on this line: start single-line HTML block
           this.pos = startPos + 1;
-          this.forward = 0;
           this.beginHtmlBlock(undefined, true);
+          return;
         }
+        // Only whitespace to EOL: consumeWhitespaceOnLine set pos to newline
+        // Continue to let the newline trigger EOL handling above
       }
     },
-
-    eol(len, block) {
-      // We have reached the end of the first delimiter... we need to skip over any indentation on the next
-      // line and we might also find that the multi-line, delimited block is immediately ended
-      this.beginHtmlBlock(block.delimiter, false);
-      handleDelimitedBlockEOL(this, true, len, block);
-    },
-
-    eof: htmlEOF,
 
     return() {},
   };
@@ -99,7 +119,6 @@ function handleDelimitedBlockEOL(
   if (parser.lookAheadFor(endHtmlBlockLookahead, parser.pos + newLineLength)) {
     parser.endText();
     parser.pos += newLineLength + endHtmlBlockLookahead.length;
-    parser.forward = 0;
 
     if (parser.consumeWhitespaceOnLine(0)) {
       parser.exitState();
@@ -119,7 +138,6 @@ function handleDelimitedBlockEOL(
     // is any indentation that we need to skip over as we continue parsing the HTML in this
     // multiline HTML block
     parser.pos += indent.length;
-    parser.forward = 0;
     parser.startText();
     // We stay in the same state since we are still parsing a multiline, delimited HTML block
   } else if (indent && !parser.onlyWhitespaceRemainsOnLine(newLineLength)) {

@@ -1,5 +1,4 @@
 import {
-  CODE,
   type StateDefinition,
   Parser,
   type Range,
@@ -23,22 +22,19 @@ export const CLOSE_TAG: StateDefinition = {
 
   exit() {},
 
-  char(code, closeTag) {
-    if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.pos++; // skip >
-      this.exitState();
-      ensureExpectedCloseTag(this, closeTag);
+  parse(data, maxPos, closeTag) {
+    const idx = data.indexOf(">", this.pos);
+    if (idx === -1) {
+      return this.emitError(
+        closeTag,
+        ErrorCode.MALFORMED_CLOSE_TAG,
+        "EOF reached while parsing closing tag",
+      );
     }
-  },
 
-  eol() {},
-
-  eof(closeTag) {
-    this.emitError(
-      closeTag,
-      ErrorCode.MALFORMED_CLOSE_TAG,
-      "EOF reached while parsing closing tag",
-    );
+    this.pos = idx + 1; // skip >
+    this.exitState();
+    ensureExpectedCloseTag(this, closeTag);
   },
 
   return() {},

@@ -13,6 +13,7 @@ export interface ExpressionMeta extends Meta {
   groupStack: number[];
   operators: boolean;
   wasComment: boolean;
+  hadUnguardedNewline: boolean;
   inType: boolean;
   forceType: boolean;
   ternaryDepth: number;
@@ -71,6 +72,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       shouldTerminate,
       operators: false,
       wasComment: false,
+      hadUnguardedNewline: false,
       inType: false,
       forceType: false,
       ternaryDepth: 0,
@@ -82,245 +84,285 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
 
   exit() {},
 
-  char(code, expression) {
-    if (!expression.groupStack.length) {
-      if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
-        if (!checkForOperators(this, expression, false)) {
-          this.exitState();
-        }
-        return;
-      }
+  parse(data, maxPos, expression) {
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
 
-      if (expression.shouldTerminate(code, this.data, this.pos, expression)) {
-        let wasExpression = false;
-        if (expression.operators) {
-          const prevNonWhitespacePos = lookBehindWhile(
-            isWhitespaceCode,
-            this.data,
-            this.pos - 1,
-          );
-          if (prevNonWhitespacePos > expression.start) {
-            wasExpression =
-              lookBehindForOperator(
-                expression,
-                this.data,
-                prevNonWhitespacePos,
-              ) !== -1;
-          }
-        }
+      // EOL handling
+      if (code === CODE.NEWLINE || code === CODE.CARRIAGE_RETURN) {
+        const len =
+          code === CODE.CARRIAGE_RETURN &&
+          data.charCodeAt(this.pos + 1) === CODE.NEWLINE
+            ? 2
+            : 1;
 
-        if (!wasExpression) {
+        const prevPos = this.pos;
+        if (
+          !expression.groupStack.length &&
+          (expression.terminatedByEOL || expression.terminatedByWhitespace) &&
+          (expression.wasComment ||
+            !checkForOperators(this, expression, true)) &&
+          !(
+            expression.consumeIndentedContent &&
+            isIndentCode(data.charCodeAt(prevPos + len))
+          )
+        ) {
+          // Don't advance past the newline.
           this.exitState();
           return;
         }
-      }
-    }
 
-    switch (code) {
-      case CODE.DOUBLE_QUOTE:
-        this.enterState(STATE.STRING);
-        break;
-      case CODE.SINGLE_QUOTE:
-        this.enterState(STATE.STRING).quoteCharCode = code;
-        break;
-      case CODE.BACKTICK:
-        this.enterState(STATE.TEMPLATE_STRING);
-        break;
-      case CODE.QUESTION:
-        if (expression.operators && !expression.groupStack.length) {
-          expression.ternaryDepth++;
-          this.pos++;
-          this.forward = 0;
-          this.consumeWhitespace();
+        expression.wasComment = false;
+        if (!expression.groupStack.length)
+          expression.hadUnguardedNewline = true;
+        // checkForOperators may have advanced pos; only advance by len if it didn't
+        if (this.pos === prevPos) this.pos += len;
+        continue;
+      }
+
+      // Termination checks (no groupStack)
+      if (!expression.groupStack.length) {
+        if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
+          if (!checkForOperators(this, expression, false)) {
+            this.exitState();
+            return;
+          }
+          // checkForOperators already advanced this.pos
+          continue;
         }
-        break;
-      case CODE.COLON:
-        if (expression.operators && !expression.groupStack.length) {
-          if (expression.ternaryDepth) {
-            expression.ternaryDepth--;
-          } else {
-            expression.inType = true;
+
+        if (expression.shouldTerminate(code, data, this.pos, expression)) {
+          let wasExpression = false;
+          if (expression.operators) {
+            const prevNonWhitespacePos = lookBehindWhile(
+              isWhitespaceCode,
+              data,
+              this.pos - 1,
+            );
+            if (prevNonWhitespacePos > expression.start) {
+              wasExpression =
+                lookBehindForOperator(
+                  expression,
+                  data,
+                  prevNonWhitespacePos,
+                ) !== -1;
+            }
           }
 
-          this.pos++;
-          this.forward = 0;
-          this.consumeWhitespace();
+          if (!wasExpression) {
+            this.exitState();
+            return;
+          }
         }
-        break;
-      case CODE.EQUAL:
-        if (expression.operators) {
-          if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
-            if (
-              expression.inType &&
-              !expression.forceType &&
-              this.getPreviousNonWhitespaceCharCode() !== CODE.CLOSE_PAREN
+      }
+
+      switch (code) {
+        case CODE.DOUBLE_QUOTE:
+          this.enterState(STATE.STRING);
+          this.pos++; // skip "
+          return;
+        case CODE.SINGLE_QUOTE:
+          this.enterState(STATE.STRING).quoteCharCode = code;
+          this.pos++; // skip '
+          return;
+        case CODE.BACKTICK:
+          this.enterState(STATE.TEMPLATE_STRING);
+          this.pos++; // skip `
+          return;
+        case CODE.QUESTION:
+          if (expression.operators && !expression.groupStack.length) {
+            expression.ternaryDepth++;
+            this.pos++; // skip ?
+            this.consumeWhitespace();
+            continue;
+          }
+          this.pos++;
+          break;
+        case CODE.COLON:
+          if (expression.operators && !expression.groupStack.length) {
+            if (expression.ternaryDepth) {
+              expression.ternaryDepth--;
+            } else {
+              expression.inType = true;
+            }
+            this.pos++; // skip :
+            this.consumeWhitespace();
+            continue;
+          }
+          this.pos++;
+          break;
+        case CODE.EQUAL:
+          if (expression.operators) {
+            if (data.charCodeAt(this.pos + 1) === CODE.CLOSE_ANGLE_BRACKET) {
+              if (
+                expression.inType &&
+                !expression.forceType &&
+                this.getPreviousNonWhitespaceCharCode() !== CODE.CLOSE_PAREN
+              ) {
+                expression.inType = false;
+              }
+              this.pos++; // skip =, outer iteration handles >
+            } else if (
+              !(expression.forceType || expression.groupStack.length)
             ) {
               expression.inType = false;
             }
-            this.pos++;
-          } else if (!(expression.forceType || expression.groupStack.length)) {
-            expression.inType = false;
+            this.pos++; // skip = (or the char after =>)
+            this.consumeWhitespace();
+            continue;
           }
-
           this.pos++;
-          this.forward = 0;
-          this.consumeWhitespace();
-        }
-        break;
-      case CODE.FORWARD_SLASH:
-        // Check next character to see if we are in a comment or regexp
-        switch (this.lookAtCharCodeAhead(1)) {
-          case CODE.FORWARD_SLASH:
-            this.enterState(STATE.JS_COMMENT_LINE);
+          break;
+        case CODE.FORWARD_SLASH:
+          switch (data.charCodeAt(this.pos + 1)) {
+            case CODE.FORWARD_SLASH:
+              this.enterState(STATE.JS_COMMENT_LINE);
+              this.pos += 2; // skip //
+              return;
+            case CODE.ASTERISK:
+              this.enterState(STATE.JS_COMMENT_BLOCK);
+              this.pos += 2; // skip /*
+              return;
+            default:
+              if (canFollowDivision(this.getPreviousNonWhitespaceCharCode())) {
+                this.pos++;
+                this.consumeWhitespace();
+                continue;
+              } else {
+                this.enterState(STATE.REGULAR_EXPRESSION);
+                this.pos++; // skip /, REGULAR_EXPRESSION starts after
+                return;
+              }
+          }
+        case CODE.OPEN_PAREN:
+          expression.groupStack.push(CODE.CLOSE_PAREN);
+          this.pos++;
+          break;
+        case CODE.OPEN_SQUARE_BRACKET:
+          expression.groupStack.push(CODE.CLOSE_SQUARE_BRACKET);
+          this.pos++;
+          break;
+        case CODE.OPEN_CURLY_BRACE:
+          expression.groupStack.push(CODE.CLOSE_CURLY_BRACE);
+          this.pos++;
+          break;
+        case CODE.OPEN_ANGLE_BRACKET:
+          if (expression.inType) {
+            expression.groupStack.push(CODE.CLOSE_ANGLE_BRACKET);
             this.pos++;
-            break;
-          case CODE.ASTERISK:
-            this.enterState(STATE.JS_COMMENT_BLOCK);
+          } else if (expression.operators && !expression.groupStack.length) {
             this.pos++;
-            break;
-          default: {
-            if (canFollowDivision(this.getPreviousNonWhitespaceCharCode())) {
+            this.consumeWhitespace();
+            continue;
+          } else {
+            this.pos++;
+          }
+          break;
+
+        case CODE.CLOSE_PAREN:
+        case CODE.CLOSE_SQUARE_BRACKET:
+        case CODE.CLOSE_CURLY_BRACE:
+        case CODE.CLOSE_ANGLE_BRACKET: {
+          if (code === CODE.CLOSE_ANGLE_BRACKET) {
+            if (
+              !expression.inType ||
+              data.charCodeAt(this.pos - 1) === CODE.EQUAL
+            ) {
               this.pos++;
-              this.forward = 0;
-              this.consumeWhitespace();
-            } else {
-              this.enterState(STATE.REGULAR_EXPRESSION);
+              break;
             }
-            break;
           }
-        }
-        break;
-      case CODE.OPEN_PAREN:
-        expression.groupStack.push(CODE.CLOSE_PAREN);
-        break;
-      case CODE.OPEN_SQUARE_BRACKET:
-        expression.groupStack.push(CODE.CLOSE_SQUARE_BRACKET);
-        break;
-      case CODE.OPEN_CURLY_BRACE:
-        expression.groupStack.push(CODE.CLOSE_CURLY_BRACE);
-        break;
-      case CODE.OPEN_ANGLE_BRACKET:
-        if (expression.inType) {
-          expression.groupStack.push(CODE.CLOSE_ANGLE_BRACKET);
-        } else if (expression.operators && !expression.groupStack.length) {
+
+          if (!expression.groupStack.length) {
+            return this.emitError(
+              expression,
+              ErrorCode.INVALID_EXPRESSION,
+              'Mismatched group. A closing "' +
+                String.fromCharCode(code) +
+                '" character was found but it is not matched with a corresponding opening character.',
+            );
+          }
+
+          const expectedCode = expression.groupStack.pop()!;
+          if (expectedCode !== code) {
+            return this.emitError(
+              expression,
+              ErrorCode.INVALID_EXPRESSION,
+              'Mismatched group. A "' +
+                String.fromCharCode(code) +
+                '" character was found when "' +
+                String.fromCharCode(expectedCode) +
+                '" was expected.',
+            );
+          }
+
           this.pos++;
-          this.forward = 0;
-          this.consumeWhitespace();
-        }
-        break;
-
-      case CODE.CLOSE_PAREN:
-      case CODE.CLOSE_SQUARE_BRACKET:
-      case CODE.CLOSE_CURLY_BRACE:
-      case CODE.CLOSE_ANGLE_BRACKET: {
-        if (code === CODE.CLOSE_ANGLE_BRACKET) {
-          if (
-            !expression.inType ||
-            this.lookAtCharCodeAhead(-1) === CODE.EQUAL
-          ) {
-            break;
-          }
+          break;
         }
 
-        if (!expression.groupStack.length) {
-          return this.emitError(
-            expression,
-            ErrorCode.INVALID_EXPRESSION,
-            'Mismatched group. A closing "' +
-              String.fromCharCode(code) +
-              '" character was found but it is not matched with a corresponding opening character.',
-          );
-        }
-
-        const expectedCode = expression.groupStack.pop()!;
-        if (expectedCode !== code) {
-          return this.emitError(
-            expression,
-            ErrorCode.INVALID_EXPRESSION,
-            'Mismatched group. A "' +
-              String.fromCharCode(code) +
-              '" character was found when "' +
-              String.fromCharCode(expectedCode) +
-              '" was expected.',
-          );
-        }
-
-        break;
+        default:
+          this.pos++;
+          break;
       }
     }
-  },
 
-  eol(len, expression) {
-    if (
-      !expression.groupStack.length &&
-      (expression.terminatedByEOL || expression.terminatedByWhitespace) &&
-      (expression.wasComment || !checkForOperators(this, expression, true)) &&
-      !(
-        expression.consumeIndentedContent &&
-        isIndentCode(this.lookAtCharCodeAhead(len))
-      )
-    ) {
-      this.exitState();
-    }
-    expression.wasComment = false;
-  },
-
-  eof(expression) {
+    // EOF
     if (
       !expression.groupStack.length &&
       (this.isConcise || expression.terminatedByEOL)
     ) {
       this.exitState();
-    } else {
-      const { parent } = expression;
+      return;
+    }
 
-      switch (parent.state) {
-        case STATE.ATTRIBUTE: {
-          const attr = parent as STATE.AttrMeta;
-          if (!attr.spread && !attr.name) {
-            return this.emitError(
-              expression,
-              ErrorCode.MALFORMED_OPEN_TAG,
-              'EOF reached while parsing attribute name for the "' +
-                this.read(this.activeTag!.tagName) +
-                '" tag',
-            );
-          }
+    const { parent } = expression;
 
+    switch (parent.state) {
+      case STATE.ATTRIBUTE: {
+        const attr = parent as STATE.AttrMeta;
+        if (!attr.spread && !attr.name) {
           return this.emitError(
             expression,
             ErrorCode.MALFORMED_OPEN_TAG,
-            `EOF reached while parsing attribute value for the ${
-              attr.spread
-                ? "..."
-                : attr.name
-                  ? `"${this.read(attr.name)}"`
-                  : `"default"`
-            } attribute`,
+            'EOF reached while parsing attribute name for the "' +
+              this.read(this.activeTag!.tagName) +
+              '" tag',
           );
         }
 
-        case STATE.TAG_NAME:
-          return this.emitError(
-            expression,
-            ErrorCode.MALFORMED_OPEN_TAG,
-            "EOF reached while parsing tag name",
-          );
-
-        case STATE.PLACEHOLDER:
-          return this.emitError(
-            expression,
-            ErrorCode.MALFORMED_PLACEHOLDER,
-            "EOF reached while parsing placeholder",
-          );
+        return this.emitError(
+          expression,
+          ErrorCode.MALFORMED_OPEN_TAG,
+          `EOF reached while parsing attribute value for the ${
+            attr.spread
+              ? "..."
+              : attr.name
+                ? `"${this.read(attr.name)}"`
+                : `"default"`
+          } attribute`,
+        );
       }
 
-      return this.emitError(
-        expression,
-        ErrorCode.INVALID_EXPRESSION,
-        "EOF reached while parsing expression",
-      );
+      case STATE.TAG_NAME:
+        return this.emitError(
+          expression,
+          ErrorCode.MALFORMED_OPEN_TAG,
+          "EOF reached while parsing tag name",
+        );
+
+      case STATE.PLACEHOLDER:
+        return this.emitError(
+          expression,
+          ErrorCode.MALFORMED_PLACEHOLDER,
+          "EOF reached while parsing placeholder",
+        );
     }
+
+    return this.emitError(
+      expression,
+      ErrorCode.INVALID_EXPRESSION,
+      "EOF reached while parsing expression",
+    );
   },
 
   return(child, expression) {
@@ -340,7 +382,6 @@ function checkForOperators(
   const { pos, data } = parser;
   if (lookBehindForOperator(expression, data, pos) !== -1) {
     parser.consumeWhitespace();
-    parser.forward = 0;
     return true;
   }
 
@@ -363,7 +404,6 @@ function checkForOperators(
       const lookAheadPos = lookAheadForOperator(expression, data, nextNonSpace);
       if (lookAheadPos !== -1) {
         parser.pos = lookAheadPos;
-        parser.forward = 0;
         return true;
       }
     }
@@ -478,9 +518,10 @@ function lookAheadForOperator(
         if (keywordPos === -1) continue;
         if (!isWhitespaceCode(data.charCodeAt(keywordPos + 1))) break;
 
-        // skip any whitespace after the operator
+        // skip any whitespace after the operator;
+        // there must be an operand before the end of the input.
         const nextPos = lookAheadWhile(isWhitespaceCode, data, keywordPos + 2);
-        if (nextPos === data.length - 1) break;
+        if (nextPos === data.length) break;
 
         // finally check that this is not followed by a terminator.
         switch (data.charCodeAt(nextPos)) {
@@ -552,7 +593,7 @@ function lookAheadWhile(
     if (!match(data.charCodeAt(i))) return i;
   }
 
-  return max - 1;
+  return max;
 }
 
 function lookBehindWhile(

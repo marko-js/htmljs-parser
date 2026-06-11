@@ -1,4 +1,4 @@
-import { CODE, ErrorCode, Parser, type StateDefinition } from "../internal";
+import { ErrorCode, Parser, type StateDefinition } from "../internal";
 
 // We enter STATE.CDATA after we see "<![CDATA["
 export const CDATA: StateDefinition = {
@@ -24,22 +24,18 @@ export const CDATA: StateDefinition = {
     });
   },
 
-  char(code) {
-    if (code === CODE.CLOSE_SQUARE_BRACKET && this.lookAheadFor("]>")) {
-      this.pos += 3; // skip ]]>
-      this.exitState();
-      return;
+  parse(data, maxPos, cdata) {
+    const idx = data.indexOf("]]>", this.pos);
+    if (idx === -1) {
+      return this.emitError(
+        cdata,
+        ErrorCode.MALFORMED_CDATA,
+        "EOF reached while parsing CDATA",
+      );
     }
-  },
 
-  eol() {},
-
-  eof(cdata) {
-    this.emitError(
-      cdata,
-      ErrorCode.MALFORMED_CDATA,
-      "EOF reached while parsing CDATA",
-    );
+    this.pos = idx + 3; // skip ]]>
+    this.exitState();
   },
 
   return() {},
@@ -49,7 +45,7 @@ export function checkForCDATA(parser: Parser) {
   if (parser.lookAheadFor("![CDATA[")) {
     parser.endText();
     parser.enterState(CDATA);
-    parser.pos += 8; // skip ![CDATA[
+    parser.pos += 9; // skip <![CDATA[
     return true;
   }
 

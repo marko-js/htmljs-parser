@@ -17,24 +17,28 @@ export const JS_COMMENT_LINE: StateDefinition = {
 
   exit() {},
 
-  char(code) {
-    if (
-      !this.isConcise &&
-      code === CODE.OPEN_ANGLE_BRACKET &&
-      this.activeTag?.type === TagType.text &&
-      STATE.checkForClosingTag(this)
-    ) {
-      // We need to see if we reached the closing tag
-      // eg: <script>//foo</script>
-      this.exitState();
+  parse(data, maxPos) {
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
+      if (code === CODE.NEWLINE || code === CODE.CARRIAGE_RETURN) {
+        // Leave pos at the newline for the parent state to handle.
+        this.exitState();
+        return;
+      } else if (
+        !this.isConcise &&
+        code === CODE.OPEN_ANGLE_BRACKET &&
+        this.activeTag?.type === TagType.text &&
+        STATE.checkForClosingTag(this)
+      ) {
+        // We reached the closing tag of a text-only tag (eg "<script>//foo</script>").
+        // checkForClosingTag exited this comment; also exit the text content state.
+        this.exitState();
+        return;
+      } else {
+        this.pos++;
+      }
     }
-  },
-
-  eol() {
-    this.exitState();
-  },
-
-  eof() {
+    // EOF
     this.exitState();
   },
 

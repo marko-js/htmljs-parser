@@ -1,0 +1,4 @@
+1╭─ $ const a = /b\
+ ╰─             ╰─ error(INVALID_REGULAR_EXPRESSION:EOL reached while parsing regular expression)
+2├─   c/;
+3╰─ 

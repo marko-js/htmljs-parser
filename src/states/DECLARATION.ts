@@ -25,24 +25,23 @@ export const DECLARATION: StateDefinition = {
 
   exit() {},
 
-  char(code, declaration) {
-    if (code === CODE.QUESTION) {
-      if (this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET) {
-        exitDeclaration(this, declaration, 2); // will skip ?>
-      }
-    } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      exitDeclaration(this, declaration, 1); // will skip >
+  parse(data, maxPos, declaration) {
+    const idx = data.indexOf(">", this.pos);
+    if (idx === -1) {
+      return this.emitError(
+        declaration,
+        ErrorCode.MALFORMED_DECLARATION,
+        "EOF reached while parsing declaration",
+      );
     }
-  },
 
-  eol() {},
-
-  eof(declaration) {
-    this.emitError(
-      declaration,
-      ErrorCode.MALFORMED_DECLARATION,
-      "EOF reached while parsing declaration",
-    );
+    if (idx > this.pos && data.charCodeAt(idx - 1) === CODE.QUESTION) {
+      this.pos = idx - 1;
+      exitDeclaration(this, declaration, 2); // skip ?>
+    } else {
+      this.pos = idx;
+      exitDeclaration(this, declaration, 1); // skip >
+    }
   },
 
   return() {},

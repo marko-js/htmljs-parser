@@ -1,4 +1,4 @@
-import { CODE, ErrorCode, type StateDefinition } from "../internal";
+import { ErrorCode, type StateDefinition } from "../internal";
 
 // We enter STATE.DTD after we encounter a "<!" while in the STATE.HTML_CONTENT.
 // We leave STATE.DTD if we see a ">".
@@ -26,21 +26,18 @@ export const DTD: StateDefinition = {
     });
   },
 
-  char(code) {
-    if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.pos++; // skip >
-      this.exitState();
+  parse(data, maxPos, documentType) {
+    const idx = data.indexOf(">", this.pos);
+    if (idx === -1) {
+      return this.emitError(
+        documentType,
+        ErrorCode.MALFORMED_DOCUMENT_TYPE,
+        "EOF reached while parsing document type",
+      );
     }
-  },
 
-  eol() {},
-
-  eof(documentType) {
-    this.emitError(
-      documentType,
-      ErrorCode.MALFORMED_DOCUMENT_TYPE,
-      "EOF reached while parsing document type",
-    );
+    this.pos = idx + 1; // skip >
+    this.exitState();
   },
 
   return() {},

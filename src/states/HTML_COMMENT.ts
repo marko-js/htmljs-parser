@@ -1,4 +1,4 @@
-import { CODE, ErrorCode, type StateDefinition } from "../internal";
+import { ErrorCode, type StateDefinition } from "../internal";
 
 // We enter STATE.HTML_COMMENT after we encounter a "<--"
 // while in the STATE.HTML_CONTENT.
@@ -27,27 +27,20 @@ export const HTML_COMMENT: StateDefinition = {
     });
   },
 
-  char(code) {
-    if (code === CODE.HYPHEN) {
-      let offset = 1;
-      let next: number;
-      while ((next = this.lookAtCharCodeAhead(offset++)) === CODE.HYPHEN);
-      this.pos += offset; // skip all -
-
-      if (next === CODE.CLOSE_ANGLE_BRACKET) {
-        this.exitState();
-      }
+  parse(data, maxPos, comment) {
+    // The comment ends at the first "-" directly followed by ">", which also
+    // matches the final hyphens of "-->", "--->", etc.
+    const idx = data.indexOf("->", this.pos);
+    if (idx === -1) {
+      return this.emitError(
+        comment,
+        ErrorCode.MALFORMED_COMMENT,
+        "EOF reached while parsing comment",
+      );
     }
-  },
 
-  eol() {},
-
-  eof(comment) {
-    this.emitError(
-      comment,
-      ErrorCode.MALFORMED_COMMENT,
-      "EOF reached while parsing comment",
-    );
+    this.pos = idx + 2; // skip ->
+    this.exitState();
   },
 
   return() {},

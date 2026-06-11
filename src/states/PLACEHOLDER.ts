@@ -36,11 +36,9 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
     });
   },
 
-  char() {},
-
-  eol() {},
-
-  eof() {},
+  // Never parses directly: checkForPlaceholder immediately stacks EXPRESSION
+  // on top, and return() exits this state as soon as the expression finishes.
+  parse() {},
 
   return(child) {
     if (child.start === child.end) {
@@ -73,24 +71,24 @@ export function checkForPlaceholder(parser: Parser, code: number) {
     }
 
     if (curCode === CODE.OPEN_CURLY_BRACE) {
-      parser.forward = 0;
-
       if (ahead) {
         const remainder = ahead % 2;
         const extra = (ahead + remainder) / 2; // Number of backslashes to omit from output.
 
         if (remainder) {
+          // Odd backslashes: the $ is escaped, treat ${...} as literal text.
           parser.endText();
           parser.pos += extra;
           parser.startText();
           parser.pos += escape ? 2 : 3; // skip the ${ or $!{
           return true;
-        } else {
-          parser.startText();
-          parser.pos += extra; // include half of the backslashes.
-          parser.endText();
-          parser.pos += extra;
         }
+
+        // Even backslashes: emit half as text, skip other half, then enter placeholder.
+        parser.startText();
+        parser.pos += extra; // include half of the backslashes.
+        parser.endText();
+        parser.pos += extra;
       }
 
       parser.endText();

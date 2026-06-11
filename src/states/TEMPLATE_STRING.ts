@@ -20,34 +20,37 @@ export const TEMPLATE_STRING: StateDefinition = {
 
   exit() {},
 
-  char(code) {
-    switch (code) {
-      case CODE.DOLLAR:
-        if (this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE) {
-          this.pos++; // skip {
-          this.enterState(STATE.EXPRESSION).shouldTerminate =
-            matchesCloseCurlyBrace;
-        }
-        break;
-      case CODE.BACK_SLASH:
-        this.pos++; // skip \
-        break;
-      case CODE.BACKTICK:
-        this.pos++; // skip `
-        this.exitState();
-        break;
+  parse(data, maxPos, templateString) {
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
+      switch (code) {
+        case CODE.DOLLAR:
+          if (data.charCodeAt(this.pos + 1) === CODE.OPEN_CURLY_BRACE) {
+            this.pos += 2; // skip ${
+            this.enterState(STATE.EXPRESSION).shouldTerminate =
+              matchesCloseCurlyBrace;
+            return;
+          }
+          this.pos++;
+          break;
+        case CODE.BACK_SLASH:
+          this.pos += 2; // skip escape sequence
+          break;
+        case CODE.BACKTICK:
+          this.pos++; // skip `
+          this.exitState();
+          return;
+        default:
+          this.pos++;
+          break;
+      }
     }
-  },
-
-  eof(templateString) {
     this.emitError(
       templateString,
       ErrorCode.INVALID_TEMPLATE_STRING,
       "EOF reached while parsing template string expression",
     );
   },
-
-  eol() {},
 
   return(child) {
     if (child.start === child.end) {
