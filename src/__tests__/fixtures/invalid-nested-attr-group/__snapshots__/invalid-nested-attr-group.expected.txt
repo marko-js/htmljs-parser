@@ -1,0 +1,4 @@
+1╭─ div [a [b]]
+ │  │    │ ╰─ error(MALFORMED_OPEN_TAG:Unexpected "[" character within open tag.)
+ │  │    ╰─ attrName
+ ╰─ ╰─ tagName "div"

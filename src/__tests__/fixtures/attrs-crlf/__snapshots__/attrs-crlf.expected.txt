@@ -1,0 +1,13 @@
+1╭─ <div a
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─  b=1>x</div>
+ │   ││││││ │  ╰─ closeTagEnd(div)
+ │   ││││││ ╰─ closeTagName "div"
+ │   │││││╰─ closeTagStart "</"
+ │   ││││╰─ text
+ │   │││╰─ openTagEnd
+ │   ││╰─ attrValue.value
+ │   │╰─ attrValue "=1"
+ ╰─  ╰─ attrName

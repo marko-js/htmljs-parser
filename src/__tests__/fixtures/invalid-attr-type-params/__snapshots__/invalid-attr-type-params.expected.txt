@@ -1,0 +1,5 @@
+1╭─ <div a<T> b></div>
+ │  ││   │ ╰─ error(INVALID_ATTR_TYPE_PARAMS:Attribute cannot contain type parameters unless it is a shorthand method)
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

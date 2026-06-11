@@ -1,0 +1,4 @@
+1╭─ div; /x
+ │  │   │╰─ error(INVALID_CODE_AFTER_SEMICOLON:A semicolon indicates the end of a line. Only comments may follow it.)
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"

@@ -1,0 +1,8 @@
+1╭─ div a='x'/2
+ │  │   ││╰─ attrValue.value "'x'/2"
+ │  │   │╰─ attrValue "='x'/2"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "div"
+2╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)

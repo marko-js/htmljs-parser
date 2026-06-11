@@ -1,0 +1,5 @@
+1╭─ <div a=`${}`/>
+ │  ││   │    ╰─ error(MALFORMED_PLACEHOLDER:Invalid placeholder, the expression cannot be missing)
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

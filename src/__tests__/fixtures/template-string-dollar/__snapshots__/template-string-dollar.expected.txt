@@ -1,0 +1,7 @@
+1╭─ <div a=`x$y`/>
+ │  ││   │││    ╰─ openTagEnd:selfClosed "/>"
+ │  ││   ││╰─ attrValue.value "`x$y`"
+ │  ││   │╰─ attrValue "=`x$y`"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

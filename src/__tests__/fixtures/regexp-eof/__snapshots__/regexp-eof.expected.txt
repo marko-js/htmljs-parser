@@ -1,0 +1,5 @@
+1╭─ <div a=/abc
+ │  ││   │ ╰─ error(INVALID_REGULAR_EXPRESSION:EOF reached while parsing regular expression)
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

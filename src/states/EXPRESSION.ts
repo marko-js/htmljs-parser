@@ -334,11 +334,8 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           expression,
           ErrorCode.MALFORMED_OPEN_TAG,
           `EOF reached while parsing attribute value for the ${
-            attr.spread
-              ? "..."
-              : attr.name
-                ? `"${this.read(attr.name)}"`
-                : `"default"`
+            // A missing name was reported above, so this is a spread or named attribute.
+            attr.spread ? "..." : `"${this.read(attr.name!)}"`
           } attribute`,
         );
       }

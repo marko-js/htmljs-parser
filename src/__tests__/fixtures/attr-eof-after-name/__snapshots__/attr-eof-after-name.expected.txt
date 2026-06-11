@@ -1,0 +1,5 @@
+1╭─ <div a 
+ │  ││   ├─ error(MALFORMED_OPEN_TAG:EOF reached while parsing attribute "a" for the "div" tag)
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

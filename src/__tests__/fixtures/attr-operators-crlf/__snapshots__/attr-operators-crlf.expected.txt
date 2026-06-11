@@ -1,0 +1,9 @@
+1╭─ div a=x +
+ │  │   ││╰─ attrValue.value "x +\n  y"
+ │  │   │╰─ attrValue "=x +\n  y"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "div"
+2├─   y
+3╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)

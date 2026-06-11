@@ -1,0 +1,8 @@
+1╭─ <div>a / b</div>
+ │  ││  ││    │ │  ╰─ closeTagEnd(div)
+ │  ││  ││    │ ╰─ closeTagName "div"
+ │  ││  ││    ╰─ closeTagStart "</"
+ │  ││  │╰─ text "a / b"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

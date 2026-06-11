@@ -1,0 +1,5 @@
+1╭─ /* c */ x
+ │  │ │     ╰─ error(INVALID_CHARACTER:In concise mode a javascript comment block can only be followed by whitespace characters and a newline.)
+ │  │ ╰─ comment.value " c "
+ ╰─ ╰─ comment "/* c */"
+2╰─ 

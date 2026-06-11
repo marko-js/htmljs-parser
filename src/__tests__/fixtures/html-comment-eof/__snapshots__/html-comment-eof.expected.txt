@@ -1,0 +1,2 @@
+1╭─ <!-- oops
+ ╰─ ╰─ error(MALFORMED_COMMENT:EOF reached while parsing comment)

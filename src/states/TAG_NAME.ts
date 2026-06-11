@@ -170,7 +170,6 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
   },
 
   return(child, tagName) {
-    if ((child as STATE.ExpressionMeta).terminatedByEOL) return;
     if (child.start === child.end) {
       this.emitError(
         child,

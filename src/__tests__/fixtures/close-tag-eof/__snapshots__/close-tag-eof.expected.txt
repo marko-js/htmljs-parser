@@ -1,0 +1,6 @@
+1╭─ <div></div
+ │  ││  │├─ error(MALFORMED_CLOSE_TAG:EOF reached while parsing closing tag)
+ │  ││  │╰─ closeTagStart "</"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

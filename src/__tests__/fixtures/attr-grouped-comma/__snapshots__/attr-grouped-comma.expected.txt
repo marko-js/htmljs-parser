@@ -1,0 +1,10 @@
+1╭─ div [x, y=1, a:b]
+ │  │    │  │││  ╰─ attrName "a:b"
+ │  │    │  ││╰─ attrValue.value
+ │  │    │  │╰─ attrValue "=1"
+ │  │    │  ╰─ attrName
+ │  │    ╰─ attrName
+ ╰─ ╰─ tagName "div"
+2╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)

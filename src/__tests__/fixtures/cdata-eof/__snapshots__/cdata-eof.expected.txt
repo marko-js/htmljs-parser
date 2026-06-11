@@ -1,0 +1,2 @@
+1╭─ <![CDATA[oops
+ ╰─ ╰─ error(MALFORMED_CDATA:EOF reached while parsing CDATA)
