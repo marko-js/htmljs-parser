@@ -25,25 +25,39 @@ export const PARSED_STRING: StateDefinition<ParsedStringMeta> = {
 
   exit() {},
 
-  char(code, str) {
-    if (code === str.quoteCharCode) {
-      this.startText();
-      this.pos++; // skip end quote
-      this.exitState();
-    } else if (!STATE.checkForPlaceholder(this, code)) {
-      this.startText();
+  parse(data, maxPos, str) {
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
+      if (code === str.quoteCharCode) {
+        this.startText();
+        this.pos++; // skip end quote
+        this.exitState();
+        return;
+      } else if (
+        (code === CODE.DOLLAR || code === CODE.BACK_SLASH) &&
+        STATE.checkForPlaceholder(this, code)
+      ) {
+        return;
+      } else {
+        this.startText();
+        // Eagerly consume the run of chars that cannot match a branch above.
+        let next: number;
+        do {
+          this.pos++;
+        } while (
+          this.pos < maxPos &&
+          (next = data.charCodeAt(this.pos)) !== str.quoteCharCode &&
+          next !== CODE.DOLLAR &&
+          next !== CODE.BACK_SLASH
+        );
+      }
     }
-  },
-
-  eof(str) {
     this.emitError(
       str,
       ErrorCode.INVALID_TEMPLATE_STRING,
       "EOF reached while parsing string expression",
     );
   },
-
-  eol() {},
 
   return() {},
 };

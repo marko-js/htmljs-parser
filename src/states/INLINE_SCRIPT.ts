@@ -41,13 +41,9 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
     });
   },
 
-  eol() {},
-  eof() {},
-
-  char(code, inlineScript) {
-    this.forward = 0;
-
-    if (code === CODE.OPEN_CURLY_BRACE) {
+  parse(data, maxPos, inlineScript) {
+    this.consumeWhitespace();
+    if (data.charCodeAt(this.pos) === CODE.OPEN_CURLY_BRACE) {
       inlineScript.block = true;
       this.pos++; // skip {
       this.enterState(STATE.EXPRESSION).shouldTerminate =

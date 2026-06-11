@@ -109,7 +109,6 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
               expr.inType = true;
               expr.forceType = true;
               this.pos += typeStatementMatch.length;
-              this.forward = 0;
               this.consumeWhitespace();
             }
           }
@@ -120,44 +119,53 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
     }
   },
 
-  char(code) {
-    if (
-      code === CODE.DOLLAR &&
-      this.lookAtCharCodeAhead(1) === CODE.OPEN_CURLY_BRACE
-    ) {
-      this.pos += 2; // skip ${
-      this.forward = 0;
-      this.enterState(STATE.EXPRESSION).shouldTerminate =
-        matchesCloseCurlyBrace;
-    } else if (
-      isWhitespaceCode(code) ||
-      code === CODE.EQUAL ||
-      (code === CODE.COLON && this.lookAtCharCodeAhead(1) === CODE.EQUAL) ||
-      code === CODE.OPEN_PAREN ||
-      code === CODE.FORWARD_SLASH ||
-      code === CODE.PIPE ||
-      code === CODE.OPEN_ANGLE_BRACKET ||
-      code === CODE.COMMA ||
-      (this.isConcise
-        ? code === CODE.SEMICOLON
-        : code === CODE.CLOSE_ANGLE_BRACKET)
-    ) {
-      this.activeTag!.shorthandEnd = this.pos;
-      this.exitState();
-    } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
-      this.exitState();
-      const shorthand = this.enterState(TAG_NAME);
-      shorthand.shorthandCode = code;
-      shorthand.quasis[0].start = ++this.pos; // skip . or #
+  parse(data, maxPos) {
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
+
+      // EOL terminates the tag name
+      if (code === CODE.NEWLINE || code === CODE.CARRIAGE_RETURN) {
+        this.activeTag!.shorthandEnd = this.pos;
+        this.exitState();
+        return; // parent handles the newline
+      }
+
+      if (
+        code === CODE.DOLLAR &&
+        data.charCodeAt(this.pos + 1) === CODE.OPEN_CURLY_BRACE
+      ) {
+        this.pos += 2; // skip ${
+        this.enterState(STATE.EXPRESSION).shouldTerminate =
+          matchesCloseCurlyBrace;
+        return;
+      } else if (
+        isWhitespaceCode(code) ||
+        code === CODE.EQUAL ||
+        (code === CODE.COLON && data.charCodeAt(this.pos + 1) === CODE.EQUAL) ||
+        code === CODE.OPEN_PAREN ||
+        code === CODE.FORWARD_SLASH ||
+        code === CODE.PIPE ||
+        code === CODE.OPEN_ANGLE_BRACKET ||
+        code === CODE.COMMA ||
+        (this.isConcise
+          ? code === CODE.SEMICOLON || code === CODE.OPEN_SQUARE_BRACKET
+          : code === CODE.CLOSE_ANGLE_BRACKET)
+      ) {
+        this.activeTag!.shorthandEnd = this.pos;
+        this.exitState();
+        return; // parent handles the terminator char
+      } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
+        this.exitState();
+        const shorthand = this.enterState(TAG_NAME);
+        shorthand.shorthandCode = code as CODE.PERIOD | CODE.NUMBER_SIGN;
+        shorthand.quasis[0].start = ++this.pos; // skip . or #
+        return; // new TAG_NAME starts at pos+1
+      } else {
+        this.pos++;
+      }
     }
-  },
 
-  eol() {
-    this.activeTag!.shorthandEnd = this.pos;
-    this.exitState();
-  },
-
-  eof() {
+    // EOF
     this.exitState();
   },
 

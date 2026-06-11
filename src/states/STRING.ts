@@ -19,22 +19,22 @@ export const STRING: StateDefinition<StringMeta> = {
 
   exit() {},
 
-  char(code, string) {
-    switch (code) {
-      case CODE.BACK_SLASH:
-        // Handle string escape sequence
-        this.pos++; // skip \
-        break;
-      case string.quoteCharCode:
-        this.pos++; // skip ' or "
-        this.exitState();
-        break;
+  parse(data, maxPos, string) {
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
+      switch (code) {
+        case CODE.BACK_SLASH:
+          this.pos += 2; // skip \ and escaped char
+          break;
+        case string.quoteCharCode:
+          this.pos++; // skip closing quote
+          this.exitState();
+          return;
+        default:
+          this.pos++;
+          break;
+      }
     }
-  },
-
-  eol() {},
-
-  eof(string) {
     this.emitError(
       string,
       ErrorCode.INVALID_STRING,

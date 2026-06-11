@@ -100,18 +100,259 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     }
   },
 
-  eol(_, tag) {
-    if (
-      this.isConcise &&
-      tag.stage !== TAG_STAGE.ATTR_GROUP &&
-      !this.consumeWhitespaceIfBefore(",")
-    ) {
-      // In concise mode we always end the open tag unless we're in an attr group or the next line starts with ",".
-      this.exitState();
-    }
-  },
+  parse(data, maxPos, tag) {
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
 
-  eof(tag) {
+      if (code === CODE.NEWLINE || code === CODE.CARRIAGE_RETURN) {
+        const len =
+          code === CODE.CARRIAGE_RETURN &&
+          data.charCodeAt(this.pos + 1) === CODE.NEWLINE
+            ? 2
+            : 1;
+
+        if (this.isConcise && tag.stage !== TAG_STAGE.ATTR_GROUP) {
+          if (this.consumeWhitespaceIfBefore(",")) {
+            this.pos++; // skip ,
+            this.consumeWhitespace();
+            continue;
+          }
+          this.exitState();
+          return; // parent handles newline
+        }
+
+        this.pos += len;
+        continue;
+      }
+
+      if (this.isConcise) {
+        if (code === CODE.SEMICOLON) {
+          this.pos++; // skip ;
+          this.exitState();
+          if (!this.consumeWhitespaceOnLine(0)) {
+            switch (data.charCodeAt(this.pos)) {
+              case CODE.FORWARD_SLASH:
+                switch (data.charCodeAt(this.pos + 1)) {
+                  case CODE.FORWARD_SLASH:
+                    this.enterState(STATE.JS_COMMENT_LINE);
+                    this.pos += 2; // skip //
+                    return;
+                  case CODE.ASTERISK:
+                    this.enterState(STATE.JS_COMMENT_BLOCK);
+                    this.pos += 2; // skip /*
+                    return;
+                }
+                break;
+              case CODE.OPEN_ANGLE_BRACKET:
+                if (this.lookAheadFor("!--")) {
+                  this.enterState(STATE.HTML_COMMENT);
+                  this.pos += 4; // skip <!--
+                  return;
+                }
+                break;
+            }
+
+            this.emitError(
+              this.pos,
+              ErrorCode.INVALID_CODE_AFTER_SEMICOLON,
+              "A semicolon indicates the end of a line. Only comments may follow it.",
+            );
+          }
+          return;
+        }
+
+        if (code === CODE.HYPHEN) {
+          if (data.charCodeAt(this.pos + 1) !== CODE.HYPHEN) {
+            this.emitError(
+              tag,
+              ErrorCode.MALFORMED_OPEN_TAG,
+              '"-" not allowed as first character of attribute name',
+            );
+            return;
+          }
+
+          if (tag.stage === TAG_STAGE.ATTR_GROUP) {
+            this.emitError(
+              this.pos,
+              ErrorCode.MALFORMED_OPEN_TAG,
+              "Attribute group was not properly ended",
+            );
+            return;
+          }
+
+          // The open tag is complete; compute nested indent from next line
+          this.exitState();
+
+          let curPos = this.pos + 1;
+          // Skip until the next newline.
+          while (curPos < maxPos && data.charCodeAt(++curPos) !== CODE.NEWLINE);
+          // Skip the newline itself.
+          const indentStart = ++curPos;
+
+          // Count how many spaces/tabs we have after the newline.
+          while (curPos < maxPos) {
+            if (isIndentCode(data.charCodeAt(curPos))) {
+              curPos++;
+            } else {
+              break;
+            }
+          }
+
+          const indentSize = curPos - indentStart;
+          if (indentSize > this.indent.length) {
+            this.indent = data.slice(indentStart, curPos);
+          }
+
+          this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
+          return; // pos still at the first -, BEGIN_DELIMITED_HTML_BLOCK parses it
+        } else if (code === CODE.OPEN_SQUARE_BRACKET) {
+          if (tag.stage === TAG_STAGE.ATTR_GROUP) {
+            this.emitError(
+              this.pos,
+              ErrorCode.MALFORMED_OPEN_TAG,
+              'Unexpected "[" character within open tag.',
+            );
+            return;
+          }
+
+          tag.stage = TAG_STAGE.ATTR_GROUP;
+          this.pos++;
+          continue;
+        } else if (code === CODE.CLOSE_SQUARE_BRACKET) {
+          if (tag.stage !== TAG_STAGE.ATTR_GROUP) {
+            this.emitError(
+              this.pos,
+              ErrorCode.MALFORMED_OPEN_TAG,
+              'Unexpected "]" character within open tag.',
+            );
+            return;
+          }
+
+          tag.stage = TAG_STAGE.UNKNOWN;
+          this.pos++;
+          continue;
+        }
+      } else {
+        if (code === CODE.CLOSE_ANGLE_BRACKET) {
+          this.pos++; // skip >
+          this.exitState();
+          return;
+        } else if (
+          code === CODE.FORWARD_SLASH &&
+          data.charCodeAt(this.pos + 1) === CODE.CLOSE_ANGLE_BRACKET
+        ) {
+          tag.selfClosed = true;
+          this.pos += 2; // skip />
+          this.exitState();
+          return;
+        }
+      }
+
+      if (code === CODE.FORWARD_SLASH) {
+        switch (data.charCodeAt(this.pos + 1)) {
+          case CODE.FORWARD_SLASH:
+            this.enterState(STATE.JS_COMMENT_LINE);
+            this.pos += 2; // skip //
+            return;
+          case CODE.ASTERISK:
+            this.enterState(STATE.JS_COMMENT_BLOCK);
+            this.pos += 2; // skip /*
+            return;
+        }
+      }
+
+      if (isWhitespaceCode(code)) {
+        this.pos++;
+        continue;
+      } else if (code === CODE.COMMA) {
+        this.pos++; // skip ,
+        this.consumeWhitespace();
+        continue;
+      } else {
+        if (tag.hasAttrs) {
+          this.enterState(STATE.ATTRIBUTE);
+          return; // pos stays at current char
+        } else if (tag.tagName) {
+          switch (code) {
+            case CODE.FORWARD_SLASH: {
+              tag.stage = TAG_STAGE.VAR;
+              this.pos++; // skip /
+
+              if (isWhitespaceCode(data.charCodeAt(this.pos))) {
+                return this.emitError(
+                  this.pos,
+                  ErrorCode.MISSING_TAG_VARIABLE,
+                  "A slash was found that was not followed by a variable name or lhs expression",
+                );
+              }
+
+              const expr = this.enterState(STATE.EXPRESSION);
+              expr.operators = true;
+              expr.terminatedByWhitespace = true;
+              expr.shouldTerminate = this.isConcise
+                ? shouldTerminateConciseTagVar
+                : shouldTerminateHtmlTagVar;
+              return;
+            }
+
+            case CODE.OPEN_PAREN: {
+              if (tag.hasArgs) {
+                this.emitError(
+                  this.pos,
+                  ErrorCode.INVALID_TAG_ARGUMENT,
+                  "A tag can only have one argument",
+                );
+                return;
+              }
+
+              tag.hasArgs = true;
+              tag.stage = TAG_STAGE.ARGUMENT;
+              this.pos++; // skip (
+              this.enterState(STATE.EXPRESSION).shouldTerminate =
+                matchesCloseParen;
+              return;
+            }
+
+            case CODE.PIPE: {
+              if (tag.hasParams) {
+                this.emitError(
+                  this.pos,
+                  ErrorCode.INVALID_TAG_PARAMS,
+                  "A tag can only specify parameters once",
+                );
+                return;
+              }
+
+              tag.hasParams = true;
+              tag.stage = TAG_STAGE.PARAMS;
+              this.pos++; // skip |
+              this.enterState(STATE.EXPRESSION).shouldTerminate = matchesPipe;
+              return;
+            }
+
+            case CODE.OPEN_ANGLE_BRACKET: {
+              tag.stage = TAG_STAGE.TYPES;
+              this.pos++; // skip <
+              const expr = this.enterState(STATE.EXPRESSION);
+              expr.inType = true;
+              expr.forceType = true;
+              expr.shouldTerminate = matchesCloseAngleBracket;
+              return;
+            }
+
+            default:
+              tag.hasAttrs = true;
+              this.enterState(STATE.ATTRIBUTE);
+              return; // pos stays at current char
+          }
+        } else {
+          this.enterState(STATE.TAG_NAME);
+          return; // pos stays at current char
+        }
+      }
+    }
+
+    // EOF
     if (this.isConcise) {
       if (tag.stage === TAG_STAGE.ATTR_GROUP) {
         this.emitError(
@@ -122,244 +363,13 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         return;
       }
 
-      // If we reach EOF inside an open tag when in concise-mode
-      // then we just end the tag and all other open tags on the stack
       this.exitState();
     } else {
-      // Otherwise, in non-concise mode we consider this malformed input
-      // since the end '>' was not found.
       this.emitError(
         tag,
         ErrorCode.MALFORMED_OPEN_TAG,
         "EOF reached while parsing open tag",
       );
-    }
-  },
-
-  char(code, tag) {
-    if (this.isConcise) {
-      if (code === CODE.SEMICOLON) {
-        this.pos++; // skip ;
-        this.exitState();
-        if (!this.consumeWhitespaceOnLine(0)) {
-          switch (this.lookAtCharCodeAhead(0)) {
-            case CODE.FORWARD_SLASH:
-              switch (this.lookAtCharCodeAhead(1)) {
-                case CODE.FORWARD_SLASH:
-                  this.enterState(STATE.JS_COMMENT_LINE);
-                  this.pos += 2; // skip //
-                  return;
-                case CODE.ASTERISK:
-                  this.enterState(STATE.JS_COMMENT_BLOCK);
-                  this.pos += 2; // skip /*
-                  return;
-              }
-              break;
-            case CODE.OPEN_ANGLE_BRACKET:
-              if (this.lookAheadFor("!--")) {
-                // html comment
-                this.enterState(STATE.HTML_COMMENT);
-                this.pos += 4; // <!--
-                return;
-              }
-              break;
-          }
-
-          this.emitError(
-            this.pos,
-            ErrorCode.INVALID_CODE_AFTER_SEMICOLON,
-            "A semicolon indicates the end of a line. Only comments may follow it.",
-          );
-        }
-
-        return;
-      }
-
-      if (code === CODE.HYPHEN) {
-        if (this.lookAtCharCodeAhead(1) !== CODE.HYPHEN) {
-          this.emitError(
-            tag,
-            ErrorCode.MALFORMED_OPEN_TAG,
-            '"-" not allowed as first character of attribute name',
-          );
-          return;
-        }
-
-        if (tag.stage === TAG_STAGE.ATTR_GROUP) {
-          this.emitError(
-            this.pos,
-            ErrorCode.MALFORMED_OPEN_TAG,
-            "Attribute group was not properly ended",
-          );
-          return;
-        }
-
-        // The open tag is complete
-        this.exitState();
-
-        const maxPos = this.maxPos;
-        let curPos = this.pos + 1;
-        // Skip until the next newline.
-        while (
-          curPos < maxPos &&
-          this.data.charCodeAt(++curPos) !== CODE.NEWLINE
-        );
-        // Skip the newline itself.
-        const indentStart = ++curPos;
-
-        // Count how many spaces/tabs we have after the newline.
-        while (curPos < maxPos) {
-          if (isIndentCode(this.data.charCodeAt(curPos))) {
-            curPos++;
-          } else {
-            break;
-          }
-        }
-
-        const indentSize = curPos - indentStart;
-        if (indentSize > this.indent.length) {
-          this.indent = this.data.slice(indentStart, curPos);
-        }
-
-        this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
-        return;
-      } else if (code === CODE.OPEN_SQUARE_BRACKET) {
-        if (tag.stage === TAG_STAGE.ATTR_GROUP) {
-          this.emitError(
-            this.pos,
-            ErrorCode.MALFORMED_OPEN_TAG,
-            'Unexpected "[" character within open tag.',
-          );
-          return;
-        }
-
-        tag.stage = TAG_STAGE.ATTR_GROUP;
-        return;
-      } else if (code === CODE.CLOSE_SQUARE_BRACKET) {
-        if (tag.stage !== TAG_STAGE.ATTR_GROUP) {
-          this.emitError(
-            this.pos,
-            ErrorCode.MALFORMED_OPEN_TAG,
-            'Unexpected "]" character within open tag.',
-          );
-          return;
-        }
-
-        tag.stage = TAG_STAGE.UNKNOWN;
-        return;
-      }
-    } else if (code === CODE.CLOSE_ANGLE_BRACKET) {
-      this.pos++; // skip >
-      this.exitState();
-      return;
-    } else if (
-      code === CODE.FORWARD_SLASH &&
-      this.lookAtCharCodeAhead(1) === CODE.CLOSE_ANGLE_BRACKET
-    ) {
-      tag.selfClosed = true;
-      this.pos += 2; // skip />
-      this.exitState();
-      return;
-    }
-
-    if (code === CODE.FORWARD_SLASH) {
-      // Check next character to see if we are in a comment
-      switch (this.lookAtCharCodeAhead(1)) {
-        case CODE.FORWARD_SLASH:
-          this.enterState(STATE.JS_COMMENT_LINE);
-          this.pos++; // skip /
-          return;
-        case CODE.ASTERISK:
-          this.enterState(STATE.JS_COMMENT_BLOCK);
-          this.pos++; // skip *
-          return;
-      }
-    }
-
-    if (isWhitespaceCode(code)) {
-      // ignore whitespace within element...
-    } else if (code === CODE.COMMA) {
-      this.pos++; // skip ,
-      this.forward = 0;
-      this.consumeWhitespace();
-    } else {
-      this.forward = 0;
-
-      if (tag.hasAttrs) {
-        this.enterState(STATE.ATTRIBUTE);
-      } else if (tag.tagName) {
-        switch (code) {
-          case CODE.FORWARD_SLASH: {
-            tag.stage = TAG_STAGE.VAR;
-            this.pos++; // skip /
-
-            if (isWhitespaceCode(this.lookAtCharCodeAhead(0))) {
-              return this.emitError(
-                this.pos,
-                ErrorCode.MISSING_TAG_VARIABLE,
-                "A slash was found that was not followed by a variable name or lhs expression",
-              );
-            }
-
-            const expr = this.enterState(STATE.EXPRESSION);
-            expr.operators = true;
-            expr.terminatedByWhitespace = true;
-            expr.shouldTerminate = this.isConcise
-              ? shouldTerminateConciseTagVar
-              : shouldTerminateHtmlTagVar;
-            break;
-          }
-
-          case CODE.OPEN_PAREN:
-            if (tag.hasArgs) {
-              this.emitError(
-                this.pos,
-                ErrorCode.INVALID_TAG_ARGUMENT,
-                "A tag can only have one argument",
-              );
-              return;
-            }
-
-            tag.hasArgs = true;
-            tag.stage = TAG_STAGE.ARGUMENT;
-            this.pos++; // skip (
-            this.enterState(STATE.EXPRESSION).shouldTerminate =
-              matchesCloseParen;
-            break;
-
-          case CODE.PIPE:
-            if (tag.hasParams) {
-              this.emitError(
-                this.pos,
-                ErrorCode.INVALID_TAG_PARAMS,
-                "A tag can only specify parameters once",
-              );
-              return;
-            }
-
-            tag.hasParams = true;
-            tag.stage = TAG_STAGE.PARAMS;
-            this.pos++; // skip |
-            this.enterState(STATE.EXPRESSION).shouldTerminate = matchesPipe;
-            break;
-
-          case CODE.OPEN_ANGLE_BRACKET: {
-            tag.stage = TAG_STAGE.TYPES;
-            this.pos++; // skip <
-            const expr = this.enterState(STATE.EXPRESSION);
-            expr.inType = true;
-            expr.forceType = true;
-            expr.shouldTerminate = matchesCloseAngleBracket;
-            break;
-          }
-
-          default:
-            tag.hasAttrs = true;
-            this.enterState(STATE.ATTRIBUTE);
-        }
-      } else {
-        this.enterState(STATE.TAG_NAME);
-      }
     }
   },
 
@@ -406,7 +416,6 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
           }
 
           attr.args = { start, end, value };
-          this.forward = 0;
           tag.hasAttrs = true;
         } else {
           if (typeParams) {

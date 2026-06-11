@@ -58,94 +58,109 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
     this.activeAttr = undefined;
   },
 
-  char(code, attr) {
-    if (isWhitespaceCode(code)) {
-      return;
-    } else if (
-      code === CODE.EQUAL ||
-      (code === CODE.COLON && this.lookAtCharCodeAhead(1) === CODE.EQUAL) ||
-      (code === CODE.PERIOD && this.lookAheadFor(".."))
-    ) {
-      attr.valueStart = this.pos;
-      this.forward = 0;
+  parse(data, maxPos, attr) {
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
 
-      if (code === CODE.COLON) {
+      if (code === CODE.NEWLINE || code === CODE.CARRIAGE_RETURN) {
+        if (this.isConcise) {
+          this.exitState();
+          return; // parent handles newline
+        }
+        this.pos +=
+          code === CODE.CARRIAGE_RETURN &&
+          data.charCodeAt(this.pos + 1) === CODE.NEWLINE
+            ? 2
+            : 1;
+        continue;
+      }
+
+      if (isWhitespaceCode(code)) {
+        this.pos++;
+        continue;
+      }
+
+      if (
+        code === CODE.EQUAL ||
+        (code === CODE.COLON && data.charCodeAt(this.pos + 1) === CODE.EQUAL) ||
+        (code === CODE.PERIOD && this.lookAheadFor(".."))
+      ) {
+        attr.valueStart = this.pos;
+
+        if (code === CODE.COLON) {
+          ensureAttrName(this, attr);
+          attr.bound = true;
+          this.pos += 2; // skip :=
+          this.consumeWhitespace();
+        } else if (code === CODE.PERIOD) {
+          attr.spread = true;
+          this.pos += 3; // skip ...
+        } else {
+          ensureAttrName(this, attr);
+          this.pos++; // skip =
+          this.consumeWhitespace();
+        }
+
+        attr.stage = ATTR_STAGE.VALUE;
+        const expr = this.enterState(STATE.EXPRESSION);
+        expr.operators = true;
+        expr.terminatedByWhitespace = true;
+        expr.shouldTerminate = this.isConcise
+          ? this.activeTag!.stage === TAG_STAGE.ATTR_GROUP
+            ? shouldTerminateConciseGroupedAttrValue
+            : shouldTerminateConciseAttrValue
+          : shouldTerminateHtmlAttrValue;
+        return;
+      } else if (code === CODE.OPEN_PAREN) {
         ensureAttrName(this, attr);
-        attr.bound = true;
-        this.pos += 2; // skip :=
-        this.consumeWhitespace();
-      } else if (code === CODE.PERIOD) {
-        attr.spread = true;
-        this.pos += 3; // skip ...
+        attr.stage = ATTR_STAGE.ARGUMENT;
+        this.pos++; // skip (
+        this.enterState(STATE.EXPRESSION).shouldTerminate = matchesCloseParen;
+        return;
+      } else if (
+        code === CODE.OPEN_ANGLE_BRACKET &&
+        attr.stage === ATTR_STAGE.NAME
+      ) {
+        attr.stage = ATTR_STAGE.TYPE_PARAMS;
+        this.pos++; // skip <
+        const expr = this.enterState(STATE.EXPRESSION);
+        expr.inType = true;
+        expr.forceType = true;
+        expr.shouldTerminate = matchesCloseAngleBracket;
+        return;
+      } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
+        ensureAttrName(this, attr);
+        attr.stage = ATTR_STAGE.BLOCK;
+        this.pos++; // skip {
+        this.enterState(STATE.EXPRESSION).shouldTerminate =
+          matchesCloseCurlyBrace;
+        return;
+      } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
+        if (code === CODE.OPEN_ANGLE_BRACKET) {
+          return this.emitError(
+            this.pos,
+            ErrorCode.INVALID_ATTRIBUTE_NAME,
+            'Invalid attribute name. Attribute name cannot begin with the "<" character.',
+          );
+        }
+
+        attr.stage = ATTR_STAGE.NAME;
+        // Don't advance pos: EXPRESSION starts at current char
+        const expr = this.enterState(STATE.EXPRESSION);
+        expr.terminatedByWhitespace = true;
+        expr.shouldTerminate = this.isConcise
+          ? this.activeTag!.stage === TAG_STAGE.ATTR_GROUP
+            ? shouldTerminateConciseGroupedAttrName
+            : shouldTerminateConciseAttrName
+          : shouldTerminateHtmlAttrName;
+        return;
       } else {
-        ensureAttrName(this, attr);
-        this.pos++; // skip =
-        this.consumeWhitespace();
+        this.exitState();
+        return;
       }
-
-      attr.stage = ATTR_STAGE.VALUE;
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.operators = true;
-      expr.terminatedByWhitespace = true;
-      expr.shouldTerminate = this.isConcise
-        ? this.activeTag!.stage === TAG_STAGE.ATTR_GROUP
-          ? shouldTerminateConciseGroupedAttrValue
-          : shouldTerminateConciseAttrValue
-        : shouldTerminateHtmlAttrValue;
-    } else if (code === CODE.OPEN_PAREN) {
-      ensureAttrName(this, attr);
-      attr.stage = ATTR_STAGE.ARGUMENT;
-      this.pos++; // skip (
-      this.forward = 0;
-      this.enterState(STATE.EXPRESSION).shouldTerminate = matchesCloseParen;
-    } else if (
-      code === CODE.OPEN_ANGLE_BRACKET &&
-      attr.stage === ATTR_STAGE.NAME
-    ) {
-      attr.stage = ATTR_STAGE.TYPE_PARAMS;
-      this.pos++; // skip <
-      this.forward = 0;
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.inType = true;
-      expr.forceType = true;
-      expr.shouldTerminate = matchesCloseAngleBracket;
-    } else if (code === CODE.OPEN_CURLY_BRACE && attr.args) {
-      ensureAttrName(this, attr);
-      attr.stage = ATTR_STAGE.BLOCK;
-      this.pos++; // skip {
-      this.forward = 0;
-      this.enterState(STATE.EXPRESSION).shouldTerminate =
-        matchesCloseCurlyBrace;
-    } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
-      if (code === CODE.OPEN_ANGLE_BRACKET) {
-        return this.emitError(
-          this.pos,
-          ErrorCode.INVALID_ATTRIBUTE_NAME,
-          'Invalid attribute name. Attribute name cannot begin with the "<" character.',
-        );
-      }
-
-      attr.stage = ATTR_STAGE.NAME;
-      this.forward = 0;
-      const expr = this.enterState(STATE.EXPRESSION);
-      expr.terminatedByWhitespace = true;
-      expr.shouldTerminate = this.isConcise
-        ? this.activeTag!.stage === TAG_STAGE.ATTR_GROUP
-          ? shouldTerminateConciseGroupedAttrName
-          : shouldTerminateConciseAttrName
-        : shouldTerminateHtmlAttrName;
-    } else {
-      this.exitState();
     }
-  },
 
-  eol() {
-    if (this.isConcise) {
-      this.exitState();
-    }
-  },
-
-  eof(attr) {
+    // EOF
     if (this.isConcise) {
       this.exitState();
     } else {

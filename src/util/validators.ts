@@ -16,9 +16,7 @@ const ROOT_STATE: StateDefinition = {
     return ROOT_RANGE;
   },
   exit() {},
-  char() {},
-  eol() {},
-  eof() {},
+  parse() {},
   return() {},
 };
 const ROOT_RANGE = {
@@ -70,54 +68,53 @@ function isValid(
   concise: boolean,
   prepare: (expr: STATE.ExpressionMeta, concise: boolean) => void,
 ): Validity {
-  const parser = new Parser({});
+  let hasError = false;
+  const parser = new Parser({
+    onError: () => {
+      // Error counts as invalid only when not at EOF (mid-expression errors).
+      // Non-terminatedByEOL expressions trigger a generic emitError at EOF that
+      // is not a real error for validation purposes.
+      if (parser.pos < parser.maxPos) hasError = true;
+    },
+  });
   const maxPos = (parser.maxPos = data.length);
   parser.pos = 0;
   parser.data = data;
-  parser.indent = "";
-  parser.forward = 1;
   parser.textPos = -1;
+  parser.indent = "";
   parser.isConcise = concise;
   parser.beginMixedMode = parser.endingMixedModeAtEOL = false;
   parser.lines = parser.activeTag = parser.activeAttr = undefined;
   parser.activeState = ROOT_STATE;
   parser.activeRange = ROOT_RANGE;
   const expr = parser.enterState(STATE.EXPRESSION);
-  let isEnclosed = true;
   prepare(expr, concise);
 
-  while (parser.pos < maxPos) {
-    const code = data.charCodeAt(parser.pos);
-
-    if (code === CODE.NEWLINE) {
-      if (isEnclosed && !expr.groupStack.length) isEnclosed = false;
-      parser.forward = 1;
-      parser.activeState.eol.call(parser, 1, parser.activeRange);
-    } else if (
-      code === CODE.CARRIAGE_RETURN &&
-      data.charCodeAt(parser.pos + 1) === CODE.NEWLINE
-    ) {
-      if (isEnclosed && !expr.groupStack.length) isEnclosed = false;
-      parser.forward = 2;
-      parser.activeState.eol.call(parser, 2, parser.activeRange);
-    } else {
-      parser.forward = 1;
-      parser.activeState.char.call(parser, code, parser.activeRange);
-    }
+  while (parser.pos <= maxPos) {
+    const childActive = parser.activeRange !== expr;
+    const startPos = parser.pos;
+    parser.activeState.parse.call(parser, data, maxPos, parser.activeRange);
 
     if (parser.activeRange === ROOT_RANGE) {
+      // expr exited: valid only if it consumed all the input
+      if (parser.pos >= maxPos && !expr.groupStack.length) break;
       return Validity.invalid;
     }
 
-    parser.pos += parser.forward;
+    // Newlines consumed by child states (template literals, comments, escaped
+    // string continuations) still count as unguarded while no group is open.
+    if (childActive && !expr.hadUnguardedNewline && !expr.groupStack.length) {
+      for (let i = startPos; i < parser.pos; i++) {
+        if (data.charCodeAt(i) === CODE.NEWLINE) {
+          expr.hadUnguardedNewline = true;
+          break;
+        }
+      }
+    }
   }
 
-  if (
-    parser.pos === maxPos &&
-    parser.activeRange === expr &&
-    !expr.groupStack.length
-  ) {
-    return isEnclosed ? Validity.enclosed : Validity.valid;
+  if (!hasError && !expr.groupStack.length) {
+    return expr.hadUnguardedNewline ? Validity.valid : Validity.enclosed;
   }
 
   return Validity.invalid;

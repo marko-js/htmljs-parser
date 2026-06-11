@@ -26,6 +26,14 @@ describe("validation helpers", () => {
     it("rejects mismatched closing groups", () => {
       assert.equal(isValidStatement(")"), 0);
     });
+
+    it("treats newlines in template literals as unguarded", () => {
+      assert.equal(isValidStatement("`foo\nbar`"), 1);
+    });
+
+    it("treats newlines in enclosed template literals as guarded", () => {
+      assert.equal(isValidStatement("(`foo\nbar`)"), 2);
+    });
   });
 
   describe("isValidScriptlet", () => {
@@ -101,6 +109,14 @@ describe("validation helpers", () => {
 
     it("accepts continued multiline enclosed logical expression", () => {
       assert.equal(isValidAttrValue("a && (\nb\n)", true), 2);
+    });
+
+    it("accepts keyword operator operand ending the input", () => {
+      assert.equal(isValidAttrValue("a as b", true), 2);
+    });
+
+    it("rejects keyword operator with no operand", () => {
+      assert.equal(isValidAttrValue("a as ", true), 0);
     });
   });
 });

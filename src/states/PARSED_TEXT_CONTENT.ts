@@ -32,49 +32,108 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
 
   exit() {},
 
-  char(code) {
-    switch (code) {
-      case CODE.OPEN_ANGLE_BRACKET:
-        if (this.isConcise || !STATE.checkForClosingTag(this)) {
+  parse(data, maxPos, content) {
+    if (this.pos === maxPos) {
+      htmlEOF.call(this);
+      this.pos++;
+      return;
+    }
+
+    while (this.pos < maxPos) {
+      const code = data.charCodeAt(this.pos);
+
+      if (code === CODE.NEWLINE || code === CODE.CARRIAGE_RETURN) {
+        const len =
+          code === CODE.CARRIAGE_RETURN &&
+          data.charCodeAt(this.pos + 1) === CODE.NEWLINE
+            ? 2
+            : 1;
+
+        const prevState = this.activeState;
+        const prevPos = this.pos;
+        if (STATE.handleDelimitedEOL(this, len, content)) {
+          if (this.activeState !== prevState) return;
+          // Still in this delimited block; skip the newline if it wasn't consumed (eg a blank line).
+          if (this.pos === prevPos) this.pos += len;
+          continue;
+        }
+
+        this.startText();
+        this.pos += len;
+        continue;
+      }
+
+      switch (code) {
+        case CODE.OPEN_ANGLE_BRACKET:
+          if (this.isConcise || !STATE.checkForClosingTag(this)) {
+            this.startText();
+            this.pos++;
+            continue;
+          }
+          return; // checkForClosingTag advanced pos and called exitState
+        case CODE.FORWARD_SLASH:
           this.startText();
-        }
-        break;
-      case CODE.FORWARD_SLASH:
-        this.startText();
-        switch (this.lookAtCharCodeAhead(1)) {
-          case CODE.ASTERISK:
-            this.enterState(STATE.JS_COMMENT_BLOCK);
-            this.pos++; // skip /
-            break;
-          case CODE.FORWARD_SLASH:
-            this.enterState(STATE.JS_COMMENT_LINE);
-            this.pos++; // skip *
-            break;
-        }
-        break;
-      case CODE.BACKTICK:
-        this.startText();
-        this.enterState(STATE.TEMPLATE_STRING);
-        break;
-      case CODE.DOUBLE_QUOTE:
-      case CODE.SINGLE_QUOTE:
-        this.startText();
-        this.enterState(STATE.PARSED_STRING).quoteCharCode = code;
-        break;
+          switch (data.charCodeAt(this.pos + 1)) {
+            case CODE.ASTERISK:
+              this.enterState(STATE.JS_COMMENT_BLOCK);
+              this.pos += 2; // skip /*
+              return;
+            case CODE.FORWARD_SLASH:
+              this.enterState(STATE.JS_COMMENT_LINE);
+              this.pos += 2; // skip //
+              return;
+          }
+          this.pos++;
+          continue;
+        case CODE.BACKTICK:
+          this.startText();
+          this.enterState(STATE.TEMPLATE_STRING);
+          this.pos++; // skip `
+          return;
+        case CODE.DOUBLE_QUOTE:
+        case CODE.SINGLE_QUOTE:
+          this.startText();
+          this.enterState(STATE.PARSED_STRING).quoteCharCode = code;
+          this.pos++; // skip opening quote
+          return;
+        default:
+          if (
+            (code === CODE.DOLLAR || code === CODE.BACK_SLASH) &&
+            STATE.checkForPlaceholder(this, code)
+          ) {
+            return; // checkForPlaceholder entered PLACEHOLDER+EXPRESSION
+          }
 
-      default:
-        if (!STATE.checkForPlaceholder(this, code)) this.startText();
-        break;
+          this.startText();
+          // Eagerly consume the run of chars that cannot match a case above.
+          do {
+            this.pos++;
+          } while (
+            this.pos < maxPos &&
+            !isSpecialParsedTextCode(data.charCodeAt(this.pos))
+          );
+          continue;
+      }
     }
   },
-
-  eol(len, content) {
-    if (!STATE.handleDelimitedEOL(this, len, content)) {
-      this.startText();
-    }
-  },
-
-  eof: htmlEOF,
 
   return() {},
 };
+
+// Matches every char that can begin one of the parse branches above.
+function isSpecialParsedTextCode(code: number) {
+  switch (code) {
+    case CODE.NEWLINE:
+    case CODE.CARRIAGE_RETURN:
+    case CODE.OPEN_ANGLE_BRACKET:
+    case CODE.FORWARD_SLASH:
+    case CODE.BACKTICK:
+    case CODE.DOUBLE_QUOTE:
+    case CODE.SINGLE_QUOTE:
+    case CODE.DOLLAR:
+    case CODE.BACK_SLASH:
+      return true;
+    default:
+      return false;
+  }
+}

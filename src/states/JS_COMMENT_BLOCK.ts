@@ -1,4 +1,4 @@
-import { CODE, ErrorCode, type StateDefinition } from "../internal";
+import { ErrorCode, type StateDefinition } from "../internal";
 
 // We enter STATE.JS_COMMENT_BLOCK after we encounter a "/*" sequence
 // We leave STATE.JS_COMMENT_BLOCK when we see a "*/" sequence.
@@ -16,24 +16,18 @@ export const JS_COMMENT_BLOCK: StateDefinition = {
 
   exit() {},
 
-  char(code) {
-    if (
-      code === CODE.ASTERISK &&
-      this.lookAtCharCodeAhead(1) === CODE.FORWARD_SLASH
-    ) {
-      this.pos += 2; // skip */
-      this.exitState();
+  parse(data, maxPos, comment) {
+    const idx = data.indexOf("*/", this.pos);
+    if (idx === -1) {
+      return this.emitError(
+        comment,
+        ErrorCode.MALFORMED_COMMENT,
+        "EOF reached while parsing multi-line JavaScript comment",
+      );
     }
-  },
 
-  eol() {},
-
-  eof(comment) {
-    this.emitError(
-      comment,
-      ErrorCode.MALFORMED_COMMENT,
-      "EOF reached while parsing multi-line JavaScript comment",
-    );
+    this.pos = idx + 2; // skip */
+    this.exitState();
   },
 
   return() {},

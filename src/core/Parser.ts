@@ -23,9 +23,7 @@ export interface StateDefinition<P extends Meta = Meta> {
     pos: number,
   ) => Partial<P & { state: unknown }>;
   exit: (this: Parser, activeRange: P) => void;
-  char: (this: Parser, code: number, activeRange: P) => void;
-  eol: (this: Parser, length: number, activeRange: P) => void;
-  eof: (this: Parser, activeRange: P) => void;
+  parse: (this: Parser, data: string, maxPos: number, activeRange: P) => void;
   return: (this: Parser, child: Meta, activeRange: P) => void;
 }
 
@@ -35,7 +33,6 @@ export class Parser {
   declare public data: string;
   declare public activeState: StateDefinition;
   declare public activeRange: Meta;
-  declare public forward: number;
   declare public activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
   declare public activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
   declare public indent: string; // Used to build the indent for the current concise line
@@ -79,7 +76,6 @@ export class Parser {
     const { activeRange, activeState } = this;
     const parent = (this.activeRange = activeRange.parent);
     this.activeState = parent.state;
-    this.forward = 0;
     activeRange.end = this.pos;
     activeState.exit.call(this, activeRange);
     this.activeState.return.call(this, activeRange, parent);
@@ -215,7 +211,6 @@ export class Parser {
 
     if (this.lookAheadFor(str, cur)) {
       this.pos = cur;
-      if (this.forward > 1) this.forward = 1;
       return true;
     }
 
@@ -292,10 +287,12 @@ export class Parser {
     this.data = data;
     this.indent = "";
     this.textPos = -1;
-    this.forward = 1;
     this.isConcise = true;
     this.beginMixedMode = this.endingMixedModeAtEOL = false;
     this.lines = this.activeTag = this.activeAttr = undefined;
+    // Drop any state left over from a previous parse so reusing a parser
+    // does not chain (and retain) the old state metas via parent references.
+    this.activeRange = undefined as unknown as Meta;
 
     // Skip the byte order mark (BOM) sequence
     // at the beginning of the file if there is one:
@@ -304,30 +301,8 @@ export class Parser {
     this.pos = data.charCodeAt(0) === 0xfeff ? 1 : 0;
     this.enterState(STATE.CONCISE_HTML_CONTENT);
 
-    while (this.pos < maxPos) {
-      const code = data.charCodeAt(this.pos);
-
-      if (code === CODE.NEWLINE) {
-        this.forward = 1;
-        this.activeState.eol.call(this, 1, this.activeRange);
-      } else if (
-        code === CODE.CARRIAGE_RETURN &&
-        data.charCodeAt(this.pos + 1) === CODE.NEWLINE
-      ) {
-        this.forward = 2;
-        this.activeState.eol.call(this, 2, this.activeRange);
-      } else {
-        this.forward = 1;
-        this.activeState.char.call(this, code, this.activeRange);
-      }
-
-      this.pos += this.forward;
-    }
-
-    while (this.pos === this.maxPos) {
-      this.forward = 1;
-      this.activeState.eof.call(this, this.activeRange);
-      if (this.forward !== 0) break;
+    while (this.pos <= maxPos) {
+      this.activeState.parse.call(this, data, maxPos, this.activeRange);
     }
   }
 }
