@@ -1,0 +1,7 @@
+1╭─ div foo:=bar
+ │  │   │  │ │  ├─ closeTagEnd(div)
+ │  │   │  │ │  ╰─ openTagEnd
+ │  │   │  │ ╰─ attrValue:bound.value "bar"
+ │  │   │  ╰─ attrValue:bound ":=bar"
+ │  │   ╰─ attrName "foo"
+ ╰─ ╰─ tagName "div"

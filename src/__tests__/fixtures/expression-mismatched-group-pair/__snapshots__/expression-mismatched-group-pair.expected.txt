@@ -1,0 +1,5 @@
+1╭─ <div a=(]>
+ │  ││   │ ╰─ error(INVALID_EXPRESSION:Mismatched group. A "]" character was found when ")" was expected.)
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

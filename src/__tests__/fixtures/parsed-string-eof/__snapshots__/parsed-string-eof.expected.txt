@@ -1,0 +1,5 @@
+1╭─ <script>x = "abc
+ │  ││     │    ╰─ error(INVALID_TEMPLATE_STRING:EOF reached while parsing string expression)
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart

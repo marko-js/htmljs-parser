@@ -38,6 +38,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
 
   // Never parses directly: checkForPlaceholder immediately stacks EXPRESSION
   // on top, and return() exits this state as soon as the expression finishes.
+  /* c8 ignore next */
   parse() {},
 
   return(child) {

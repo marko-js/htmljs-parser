@@ -10,6 +10,9 @@ import {
   shouldTerminateHtmlAttrValue,
 } from "../states";
 
+// The stubs only satisfy the StateDefinition interface; the root state is
+// assigned directly (never entered) and the driving loop stops it from parsing.
+/* c8 ignore start */
 const ROOT_STATE: StateDefinition = {
   name: "ROOT",
   enter() {
@@ -19,6 +22,7 @@ const ROOT_STATE: StateDefinition = {
   parse() {},
   return() {},
 };
+/* c8 ignore stop */
 const ROOT_RANGE = {
   state: ROOT_STATE,
   parent: undefined as unknown as Meta,

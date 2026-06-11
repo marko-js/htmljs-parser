@@ -1,0 +1,8 @@
+1╭─ div x=a ? b as T : c
+ │  │   ││╰─ attrValue.value "a ? b as T : c"
+ │  │   │╰─ attrValue "=a ? b as T : c"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "div"
+2╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)

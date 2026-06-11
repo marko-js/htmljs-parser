@@ -42,5 +42,6 @@ export const STRING: StateDefinition<StringMeta> = {
     );
   },
 
+  /* c8 ignore next -- never has child states */
   return() {},
 };

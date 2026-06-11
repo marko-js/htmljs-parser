@@ -1,0 +1,10 @@
+1╭─ <div if(a ? b : c)></div>
+ │  ││   │ ││         ││ │  ╰─ closeTagEnd(div)
+ │  ││   │ ││         ││ ╰─ closeTagName "div"
+ │  ││   │ ││         │╰─ closeTagStart "</"
+ │  ││   │ ││         ╰─ openTagEnd
+ │  ││   │ │╰─ attrArgs.value "a ? b : c"
+ │  ││   │ ╰─ attrArgs "(a ? b : c)"
+ │  ││   ╰─ attrName "if"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

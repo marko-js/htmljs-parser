@@ -1,0 +1,13 @@
+1╭─ div; /* a */
+ │  │   ││ ╰─ comment.value " a "
+ │  │   │╰─ comment "/* a */"
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─ span;<!-- b -->
+ │  │    │   ╰─ comment.value " b "
+ │  │    ├─ comment "<!-- b -->"
+ │  │    ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "span"
+3╭─ 
+ ╰─ ╰─ closeTagEnd(span)

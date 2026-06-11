@@ -229,6 +229,5 @@ function isBeginningOfLine(parser: Parser) {
       return false;
     }
   } while (pos > 0);
-
-  return true;
+  return true; /* c8 ignore next -- unreachable: html mode always begins after a non-whitespace char */
 }

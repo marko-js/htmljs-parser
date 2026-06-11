@@ -43,5 +43,6 @@ export const HTML_COMMENT: StateDefinition = {
     this.exitState();
   },
 
+  /* c8 ignore next -- never has child states */
   return() {},
 };

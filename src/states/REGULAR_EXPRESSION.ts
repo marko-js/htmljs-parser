@@ -65,5 +65,6 @@ export const REGULAR_EXPRESSION: StateDefinition<RegExpMeta> = {
     );
   },
 
+  /* c8 ignore next -- never has child states */
   return() {},
 };

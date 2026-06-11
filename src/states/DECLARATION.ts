@@ -44,6 +44,7 @@ export const DECLARATION: StateDefinition = {
     }
   },
 
+  /* c8 ignore next -- never has child states */
   return() {},
 };
 

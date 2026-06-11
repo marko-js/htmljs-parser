@@ -23,6 +23,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
     };
   },
 
+  /* c8 ignore next -- the root state never exits */
   exit() {},
 
   parse(data, maxPos) {

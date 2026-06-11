@@ -109,14 +109,6 @@ export class Parser {
     return true;
   }
 
-  matchAnyAtPos(a: Range, list: (Range | string)[]) {
-    for (const item of list) {
-      if (this.matchAtPos(a, item)) return true;
-    }
-
-    return false;
-  }
-
   /**
    * Look ahead to see if the given str matches the substring sequence
    * beyond
@@ -223,7 +215,7 @@ export class Parser {
     return this.lookAtCharCodeAhead(behind);
   }
 
-  onlyWhitespaceRemainsOnLine(start = 1) {
+  onlyWhitespaceRemainsOnLine(start: number) {
     const maxOffset = this.maxPos - this.pos;
     let ahead = start;
 

@@ -1,0 +1,9 @@
+1╭─ <script>a
+ │  ││     │╰─ text "a\nb"
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+2╭─ b</script>
+ │   │ │     ╰─ closeTagEnd(script)
+ │   │ ╰─ closeTagName "script"
+ ╰─  ╰─ closeTagStart "</"

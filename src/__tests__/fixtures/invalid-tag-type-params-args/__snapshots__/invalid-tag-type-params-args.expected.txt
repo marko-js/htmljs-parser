@@ -1,0 +1,5 @@
+1╭─ div/v<T>(a) y
+ │  │  ││    ╰─ error(INVALID_TAG_TYPES:Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters.)
+ │  │  │╰─ tagVar.value
+ │  │  ╰─ tagVar "/v"
+ ╰─ ╰─ tagName "div"

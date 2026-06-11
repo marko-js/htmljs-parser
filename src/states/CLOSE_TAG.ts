@@ -37,6 +37,7 @@ export const CLOSE_TAG: StateDefinition = {
     ensureExpectedCloseTag(this, closeTag);
   },
 
+  /* c8 ignore next -- never has child states */
   return() {},
 };
 
@@ -50,17 +51,15 @@ export function checkForClosingTag(parser: Parser) {
   if (!match) {
     const { tagName } = parser.activeTag!;
     const tagNameLen = tagName.end - tagName.start;
-    if (tagNameLen) {
-      skip += tagNameLen; // skip <TAG_NAME/>
-      match =
-        (parser.lookAheadFor("/", curPos) &&
-          parser.lookAheadFor(">", 1 + curPos + tagNameLen) &&
-          parser.matchAtPos(tagName, {
-            start: 1 + curPos,
-            end: 1 + curPos + tagNameLen,
-          })) ||
-        false;
-    }
+    skip += tagNameLen; // skip <TAG_NAME/>
+    match =
+      (parser.lookAheadFor("/", curPos) &&
+        parser.lookAheadFor(">", 1 + curPos + tagNameLen) &&
+        parser.matchAtPos(tagName, {
+          start: 1 + curPos,
+          end: 1 + curPos + tagNameLen,
+        })) ||
+      false;
   }
 
   if (match) {
@@ -70,14 +69,12 @@ export function checkForClosingTag(parser: Parser) {
       end: curPos + 1,
     });
 
-    if (
-      ensureExpectedCloseTag(parser, {
-        start: parser.pos,
-        end: (parser.pos += skip),
-      })
-    ) {
-      parser.exitState();
-    }
+    // Always succeeds since the closing tag name was matched above.
+    ensureExpectedCloseTag(parser, {
+      start: parser.pos,
+      end: (parser.pos += skip),
+    });
+    parser.exitState();
     return true;
   }
 

@@ -1,0 +1,9 @@
+1╭─ <.cls>x</span>
+ │  │││  ││├─ error(MISMATCHED_CLOSING_TAG:The closing "span" tag does not match the corresponding opening "div" tag) "</span>"
+ │  │││  ││╰─ closeTagStart "</"
+ │  │││  │╰─ text
+ │  │││  ╰─ openTagEnd
+ │  ││╰─ tagShorthandClass.quasis[0] "cls"
+ │  │├─ tagShorthandClass ".cls"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart

@@ -1,0 +1,7 @@
+1╭─ <aaa>x</bbb>
+ │  ││  ││├─ error(MISMATCHED_CLOSING_TAG:The closing "bbb" tag does not match the corresponding opening "aaa" tag) "</bbb>"
+ │  ││  ││╰─ closeTagStart "</"
+ │  ││  │╰─ text
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "aaa"
+ ╰─ ╰─ openTagStart
