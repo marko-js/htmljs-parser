@@ -1,13 +1,13 @@
 import {
-  CODE,
-  STATE,
-  isWhitespaceCode,
-  type StateDefinition,
-  Parser,
-  type Meta,
-  ErrorCode,
   isIndentCode,
-} from "../internal";
+  isWhitespaceCode,
+  type Meta,
+  Parser,
+  STATE,
+  type StateDefinition,
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 export interface ExpressionMeta extends Meta {
   groupStack: number[];

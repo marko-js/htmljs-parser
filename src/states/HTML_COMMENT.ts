@@ -1,4 +1,5 @@
-import { ErrorCode, type StateDefinition } from "../internal";
+import type { StateDefinition } from "../internal.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 // We enter STATE.HTML_COMMENT after we encounter a "<--"
 // while in the STATE.HTML_CONTENT.
@@ -27,7 +28,7 @@ export const HTML_COMMENT: StateDefinition = {
     });
   },
 
-  parse(data, maxPos, comment) {
+  parse(data, _maxPos, comment) {
     // The comment ends at the first "-" directly followed by ">", which also
     // matches the final hyphens of "-->", "--->", etc.
     const idx = data.indexOf("->", this.pos);
@@ -43,6 +44,6 @@ export const HTML_COMMENT: StateDefinition = {
     this.exitState();
   },
 
-  /* c8 ignore next -- never has child states */
+  /* node:coverage ignore next */ // never has child states
   return() {},
 };

@@ -1,15 +1,15 @@
 import {
-  TagType,
-  CODE,
-  STATE,
-  isWhitespaceCode,
-  type Range,
-  type ParserOptions as Options,
+  type ErrorCode,
   getLines,
   getLocation,
   getPosition,
-  ErrorCode,
-} from "../internal";
+  isWhitespaceCode,
+  type ParserOptions as Options,
+  type Range,
+  STATE,
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as TagType from "../util/tag-type.ts";
 
 export interface Meta extends Range {
   parent: Meta;
@@ -41,8 +41,11 @@ export class Parser {
   declare public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
   declare public textPos: number; // Used to buffer text that is found within the body of a tag
   declare public lines: undefined | number[]; // Keeps track of line indexes to provide line/column info.
+  declare public options: Options;
 
-  constructor(public options: Options) {}
+  constructor(options: Options) {
+    this.options = options;
+  }
 
   read(range: Range) {
     return this.data.slice(range.start, range.end);
@@ -88,7 +91,7 @@ export class Parser {
     const aPos = a.start;
     const aLen = a.end - aPos;
     let bPos = 0;
-    let bLen = 0;
+    let bLen: number;
     let bSource = this.data;
 
     if (typeof b === "string") {

@@ -1,12 +1,12 @@
 import {
-  CODE,
-  STATE,
-  isWhitespaceCode,
-  type StateDefinition,
-  TagType,
   htmlEOF,
-  ErrorCode,
-} from "../internal";
+  isWhitespaceCode,
+  STATE,
+  type StateDefinition,
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
+import * as TagType from "../util/tag-type.ts";
 
 // In STATE.CONCISE_HTML_CONTENT we are looking for concise tags and text blocks based on indent
 export const CONCISE_HTML_CONTENT: StateDefinition = {
@@ -23,7 +23,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
     };
   },
 
-  /* c8 ignore next -- the root state never exits */
+  /* node:coverage ignore next */ // the root state never exits
   exit() {},
 
   parse(data, maxPos) {

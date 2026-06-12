@@ -1,23 +1,22 @@
-import { type ParserOptions, type Range, Parser } from "./internal";
+import { Parser, type ParserOptions, type Range } from "./internal.ts";
 export {
-  TagType,
   ErrorCode,
   getLines,
   getLocation,
   getPosition,
   type ParserOptions as Handlers,
-  type Position,
   type Location,
-  type Ranges,
+  type Position,
   type Range,
-} from "./internal";
-
+  type Ranges,
+  TagType,
+} from "./internal.ts";
 export {
-  isValidStatement,
-  isValidScriptlet,
   isValidAttrValue,
+  isValidScriptlet,
+  isValidStatement,
   Validity,
-} from "./util/validators";
+} from "./util/validators.ts";
 
 /**
  * Creates a new Marko parser.

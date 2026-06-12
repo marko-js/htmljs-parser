@@ -1,16 +1,17 @@
-import "./build.mts";
+import "./build.ts";
 
+import cp from "child_process";
+import degit from "degit";
+import fs from "fs/promises";
+import { bench, group, run } from "mitata";
 import os from "os";
 import path from "path";
-import fs from "fs/promises";
-import cp from "child_process";
 import { promisify } from "util";
 
-import degit from "degit";
-import { group, bench, run } from "mitata";
-
 const exec = promisify(cp.exec);
-const api = (await import("./dist/index.mjs")) as unknown as typeof import("./src");
+const api = (await import(
+  "./dist/index.mjs" as string
+)) as unknown as typeof import("./src/index.ts");
 const FIXTURES = path.resolve("src/__tests__/fixtures");
 const GREP = new RegExp(process.env.GREP || ".", "g");
 const COMPARE = process.env.COMPARE;
@@ -25,7 +26,7 @@ if (COMPARE) {
   }
 
   const pkg = JSON.parse(
-    await fs.readFile(path.join(cwd, "package.json"), "utf-8")
+    await fs.readFile(path.join(cwd, "package.json"), "utf-8"),
   );
   compareAPI = await import(
     path.join(cwd, pkg.exports?.["."].import ?? pkg.main)

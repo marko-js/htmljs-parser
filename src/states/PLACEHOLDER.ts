@@ -1,12 +1,12 @@
 import {
-  CODE,
+  matchesCloseCurlyBrace,
+  type Meta,
   Parser,
   STATE,
   type StateDefinition,
-  type Meta,
-  ErrorCode,
-  matchesCloseCurlyBrace,
-} from "../internal";
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 interface PlaceholderMeta extends Meta {
   escape: boolean;
@@ -38,7 +38,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
 
   // Never parses directly: checkForPlaceholder immediately stacks EXPRESSION
   // on top, and return() exits this state as soon as the expression finishes.
-  /* c8 ignore next */
+  /* node:coverage ignore next */
   parse() {},
 
   return(child) {

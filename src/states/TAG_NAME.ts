@@ -1,17 +1,17 @@
 import {
-  CODE,
-  STATE,
   isWhitespaceCode,
-  type StateDefinition,
-  type Ranges,
-  type Meta,
-  TagType,
-  ErrorCode,
   matchesCloseCurlyBrace,
-} from "../internal";
+  type Meta,
+  type Ranges,
+  STATE,
+  type StateDefinition,
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
+import * as TagType from "../util/tag-type.ts";
 
 export interface TagNameMeta extends Meta, Ranges.Template {
-  shorthandCode: -1 | CODE.NUMBER_SIGN | CODE.PERIOD;
+  shorthandCode: -1 | typeof CODE.NUMBER_SIGN | typeof CODE.PERIOD;
 }
 
 // We enter STATE.TAG_NAME after we encounter a "<"
@@ -157,7 +157,9 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
       } else if (code === CODE.PERIOD || code === CODE.NUMBER_SIGN) {
         this.exitState();
         const shorthand = this.enterState(TAG_NAME);
-        shorthand.shorthandCode = code as CODE.PERIOD | CODE.NUMBER_SIGN;
+        shorthand.shorthandCode = code as
+          | typeof CODE.PERIOD
+          | typeof CODE.NUMBER_SIGN;
         shorthand.quasis[0].start = ++this.pos; // skip . or #
         return; // new TAG_NAME starts at pos+1
       } else {

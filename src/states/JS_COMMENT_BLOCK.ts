@@ -1,4 +1,5 @@
-import { ErrorCode, type StateDefinition } from "../internal";
+import type { StateDefinition } from "../internal.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 // We enter STATE.JS_COMMENT_BLOCK after we encounter a "/*" sequence
 // We leave STATE.JS_COMMENT_BLOCK when we see a "*/" sequence.
@@ -16,7 +17,7 @@ export const JS_COMMENT_BLOCK: StateDefinition = {
 
   exit() {},
 
-  parse(data, maxPos, comment) {
+  parse(data, _maxPos, comment) {
     const idx = data.indexOf("*/", this.pos);
     if (idx === -1) {
       return this.emitError(
@@ -30,6 +31,6 @@ export const JS_COMMENT_BLOCK: StateDefinition = {
     this.exitState();
   },
 
-  /* c8 ignore next -- never has child states */
+  /* node:coverage ignore next */ // never has child states
   return() {},
 };

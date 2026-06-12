@@ -1,4 +1,6 @@
-import { CODE, type StateDefinition, type Meta, ErrorCode } from "../internal";
+import type { Meta, StateDefinition } from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 interface RegExpMeta extends Meta {
   isInCharSet: boolean;
@@ -65,6 +67,6 @@ export const REGULAR_EXPRESSION: StateDefinition<RegExpMeta> = {
     );
   },
 
-  /* c8 ignore next -- never has child states */
+  /* node:coverage ignore next */ // never has child states
   return() {},
 };

@@ -1,46 +1,7 @@
 {
   "name": "htmljs-parser",
-  "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
   "version": "5.10.2",
-  "devDependencies": {
-    "@changesets/changelog-github": "^0.5.0",
-    "@changesets/cli": "^2.27.1",
-    "@types/degit": "^2.8.6",
-    "@types/mocha": "^10.0.6",
-    "@types/node": "^20.11.16",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "c8": "^11.0.0",
-    "cross-env": "^7.0.3",
-    "degit": "^2.8.4",
-    "esbuild": "0.20.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-import-resolver-typescript": "^3.6.1",
-    "eslint-plugin-import": "^2.29.1",
-    "fast-glob": "^3.3.2",
-    "fixpack": "^4.0.0",
-    "husky": "^9.0.10",
-    "lint-staged": "^15.2.2",
-    "mitata": "^0.1.8",
-    "mocha": "^10.2.0",
-    "mocha-snap": "^5.0.0",
-    "prettier": "^3.2.5",
-    "tsx": "^4.19.2",
-    "typescript": "^5.3.3"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "default": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist",
-    "!**/__tests__",
-    "!**/*.tsbuildinfo"
-  ],
-  "homepage": "https://github.com/marko-js/htmljs-parser",
+  "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
   "keywords": [
     "HTML",
     "JavaScript",
@@ -52,28 +13,60 @@
     "server",
     "template"
   ],
-  "license": "MIT",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "homepage": "https://github.com/marko-js/htmljs-parser",
   "repository": {
     "type": "git",
     "url": "https://github.com/marko-js/htmljs-parser.git"
   },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "!**/__tests__",
+    "!**/*.tsbuildinfo"
+  ],
   "scripts": {
-    "bench": "tsx bench.mts",
-    "build": "tsc -b && tsx build.mts",
+    "bench": "node bench.ts",
+    "build": "tsc -p tsconfig.build.json && node build.ts",
     "change": "changeset add",
-    "ci:test": "c8 npm test -- --forbid-only",
-    "format": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write && (fixpack || true)",
-    "lint": "tsc -b && npm run lint:eslint && npm run lint:prettier -- -l && fixpack",
-    "lint:eslint": "eslint -f visualstudio .",
-    "lint:prettier": "prettier \"./**/*{.ts,.js,.json,.md,.yml,rc}\"",
+    "ci:test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-exclude=\"**/__tests__/**\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=lcov.info \"src/**/__tests__/*.test.ts\"",
+    "format": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write",
+    "lint": "tsc && npm run lint:eslint && npm run lint:prettier -- -l",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier .",
     "prepare": "husky",
     "release": "npm run build && changeset publish",
-    "report": "open ./coverage/lcov-report/index.html",
-    "test": "cross-env NODE_ENV=test mocha \"./src/**/__tests__/*.test.ts\"",
-    "test:update": "npm test -- --update",
+    "test": "node --test --test-reporter=dot \"src/**/__tests__/*.test.ts\"",
+    "test:update": "cross-env UPDATE_SNAPSHOTS=1 npm test",
+    "test:watch": "node --watch --test --test-reporter=dot \"src/**/__tests__/*.test.ts\"",
     "version": "changeset version && npm i --package-lock-only"
   },
-  "types": "dist/index.d.ts"
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.9.3",
+    "cross-env": "^10.1.0",
+    "degit": "^3.4.7",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
+    "eslint-plugin-simple-import-sort": "^13.0.0",
+    "globals": "^17.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
+    "mitata": "^1.0.34",
+    "prettier": "^3.8.4",
+    "prettier-plugin-packagejson": "^3.0.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.0"
+  }
 }

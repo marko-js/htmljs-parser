@@ -1,12 +1,12 @@
 import {
-  Parser,
-  CODE,
-  STATE,
-  isWhitespaceCode,
-  type StateDefinition,
   htmlEOF,
+  isWhitespaceCode,
   type Meta,
-} from "../internal";
+  Parser,
+  STATE,
+  type StateDefinition,
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
 
 export interface HTMLContentMeta extends Meta {
   indent: string;
@@ -228,6 +228,10 @@ function isBeginningOfLine(parser: Parser) {
     } else {
       return false;
     }
+    // The loop exit below is unreachable: html mode always begins after a
+    // non-whitespace char.
+    /* node:coverage disable */
   } while (pos > 0);
-  return true; /* c8 ignore next -- unreachable: html mode always begins after a non-whitespace char */
+  return true;
+  /* node:coverage enable */
 }

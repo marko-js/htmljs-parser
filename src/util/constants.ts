@@ -1,46 +1,5 @@
-export const enum CODE {
-  NUMBER_0 = 48,
-  NUMBER_9 = 57,
-  UPPER_A = 65,
-  UPPER_Z = 90,
-  LOWER_A = 97,
-  LOWER_Z = 122,
-  BACK_SLASH = 92,
-  FORWARD_SLASH = 47,
-  OPEN_ANGLE_BRACKET = 60,
-  CLOSE_ANGLE_BRACKET = 62,
-  EXCLAMATION = 33,
-  QUESTION = 63,
-  OPEN_SQUARE_BRACKET = 91,
-  CLOSE_SQUARE_BRACKET = 93,
-  EQUAL = 61,
-  SINGLE_QUOTE = 39,
-  DOUBLE_QUOTE = 34,
-  BACKTICK = 96,
-  OPEN_PAREN = 40,
-  CLOSE_PAREN = 41,
-  OPEN_CURLY_BRACE = 123,
-  CLOSE_CURLY_BRACE = 125,
-  ASTERISK = 42,
-  HYPHEN = 45,
-  DOLLAR = 36,
-  PERCENT = 37,
-  PERIOD = 46,
-  PLUS = 43,
-  COMMA = 44,
-  COLON = 58,
-  SEMICOLON = 59,
-  NUMBER_SIGN = 35,
-  PIPE = 124,
-  NEWLINE = 10,
-  CARRIAGE_RETURN = 13,
-  SPACE = 32,
-  TAB = 9,
-  AMPERSAND = 38,
-  CARET = 94,
-  TILDE = 126,
-  UNDERSCORE = 95,
-}
+import * as _ErrorCode from "./error-code.ts";
+import * as _TagType from "./tag-type.ts";
 
 // Same format as https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#position
 export interface Position {
@@ -109,44 +68,10 @@ export namespace Ranges {
   }
 }
 
-export enum ErrorCode {
-  EXTRA_CLOSING_TAG,
-  INVALID_ATTRIBUTE_ARGUMENT,
-  INVALID_ATTRIBUTE_NAME,
-  INVALID_ATTRIBUTE_VALUE,
-  INVALID_CHARACTER,
-  INVALID_CODE_AFTER_SEMICOLON,
-  INVALID_EXPRESSION,
-  INVALID_INDENTATION,
-  INVALID_LINE_START,
-  INVALID_REGULAR_EXPRESSION,
-  INVALID_STRING,
-  INVALID_TAG_ARGUMENT,
-  INVALID_TAG_SHORTHAND,
-  INVALID_TEMPLATE_STRING,
-  MALFORMED_CDATA,
-  MALFORMED_CLOSE_TAG,
-  MALFORMED_COMMENT,
-  MALFORMED_DECLARATION,
-  MALFORMED_DOCUMENT_TYPE,
-  MALFORMED_OPEN_TAG,
-  MALFORMED_PLACEHOLDER,
-  MISMATCHED_CLOSING_TAG,
-  MISSING_END_TAG,
-  MISSING_TAG_VARIABLE,
-  RESERVED_TAG_NAME,
-  ROOT_TAG_ONLY,
-  INVALID_TAG_PARAMS,
-  INVALID_TAG_TYPES,
-  INVALID_ATTR_TYPE_PARAMS,
-}
-
-export enum TagType {
-  html,
-  text,
-  void,
-  statement,
-}
+export const ErrorCode = _ErrorCode;
+export const TagType = _TagType;
+export type ErrorCode = (typeof _ErrorCode)[keyof typeof _ErrorCode];
+export type TagType = (typeof _TagType)[keyof typeof _TagType];
 
 export interface ParserOptions {
   onError?(data: Ranges.Error): void;

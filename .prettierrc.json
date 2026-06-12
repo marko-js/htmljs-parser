@@ -1,10 +1,4 @@
 {
-  "overrides": [
-    {
-      "files": "*rc",
-      "options": {
-        "parser": "json"
-      }
-    }
-  ]
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "plugins": ["prettier-plugin-packagejson"]
 }

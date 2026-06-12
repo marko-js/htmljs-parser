@@ -1,5 +1,7 @@
-import { CODE, type Parser } from "../internal";
-import { ErrorCode, type Location, type Position } from "./constants";
+import type { Parser } from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import type { Location, Position } from "./constants.ts";
+import * as ErrorCode from "./error-code.ts";
 
 export function isWhitespaceCode(code: number) {
   // For all practical purposes, the space character (32) and all the

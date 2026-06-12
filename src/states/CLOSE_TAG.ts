@@ -1,9 +1,5 @@
-import {
-  type StateDefinition,
-  Parser,
-  type Range,
-  ErrorCode,
-} from "../internal";
+import { Parser, type Range, type StateDefinition } from "../internal.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 // We enter STATE.CLOSE_TAG after we see "</"
 export const CLOSE_TAG: StateDefinition = {
@@ -22,7 +18,7 @@ export const CLOSE_TAG: StateDefinition = {
 
   exit() {},
 
-  parse(data, maxPos, closeTag) {
+  parse(data, _maxPos, closeTag) {
     const idx = data.indexOf(">", this.pos);
     if (idx === -1) {
       return this.emitError(
@@ -37,7 +33,7 @@ export const CLOSE_TAG: StateDefinition = {
     ensureExpectedCloseTag(this, closeTag);
   },
 
-  /* c8 ignore next -- never has child states */
+  /* node:coverage ignore next */ // never has child states
   return() {},
 };
 

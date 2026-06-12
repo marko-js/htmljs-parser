@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { createParser, isValidAttrValue } from "..";
+import { describe, it } from "node:test";
+
+import { createParser, isValidAttrValue } from "../index.ts";
 
 describe("api", () => {
   it("parses without any handlers registered", () => {

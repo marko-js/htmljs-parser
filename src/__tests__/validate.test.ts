@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { isValidAttrValue, isValidScriptlet, isValidStatement } from "..";
+import { describe, it } from "node:test";
+
+import {
+  isValidAttrValue,
+  isValidScriptlet,
+  isValidStatement,
+} from "../index.ts";
 
 describe("validation helpers", () => {
   describe("isValidStatement", () => {
