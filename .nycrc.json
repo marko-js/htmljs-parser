@@ -1,6 +1,0 @@
-{
-  "parserPlugins": ["objectRestSpread", "typescript"],
-  "reporter": ["text", "lcov"],
-  "include": ["src/**/*.ts"],
-  "exclude": ["**/__tests__"]
-}

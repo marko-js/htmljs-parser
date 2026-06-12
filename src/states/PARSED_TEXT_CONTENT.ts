@@ -1,10 +1,10 @@
 import {
-  STATE,
-  CODE,
-  type StateDefinition,
   htmlEOF,
   type Meta,
-} from "../internal";
+  STATE,
+  type StateDefinition,
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
 
 export interface ParsedTextContentMeta extends Meta {
   indent: string;

@@ -1,18 +1,14 @@
-import {
-  CODE,
-  STATE,
-  Parser,
-  type StateDefinition,
-  type Meta,
-} from "../internal";
+import { type Meta, Parser, STATE, type StateDefinition } from "../internal.ts";
 import {
   shouldTerminateConciseAttrValue,
   shouldTerminateHtmlAttrValue,
-} from "../states";
+} from "../states/index.ts";
+import * as CODE from "../util/codes.ts";
+import * as VALIDITY from "../util/validity.ts";
 
 // The stubs only satisfy the StateDefinition interface; the root state is
 // assigned directly (never entered) and the driving loop stops it from parsing.
-/* c8 ignore start */
+/* node:coverage disable */
 const ROOT_STATE: StateDefinition = {
   name: "ROOT",
   enter() {
@@ -22,7 +18,7 @@ const ROOT_STATE: StateDefinition = {
   parse() {},
   return() {},
 };
-/* c8 ignore stop */
+/* node:coverage enable */
 const ROOT_RANGE = {
   state: ROOT_STATE,
   parent: undefined as unknown as Meta,
@@ -30,11 +26,8 @@ const ROOT_RANGE = {
   end: 0,
 };
 
-export enum Validity {
-  invalid,
-  valid,
-  enclosed,
-}
+export const Validity = VALIDITY;
+export type Validity = (typeof VALIDITY)[keyof typeof VALIDITY];
 
 export function isValidStatement(code: string): Validity {
   return isValid(code, true, prepareStatement);
@@ -102,7 +95,7 @@ function isValid(
     if (parser.activeRange === ROOT_RANGE) {
       // expr exited: valid only if it consumed all the input
       if (parser.pos >= maxPos && !expr.groupStack.length) break;
-      return Validity.invalid;
+      return VALIDITY.invalid;
     }
 
     // Newlines consumed by child states (template literals, comments, escaped
@@ -118,8 +111,8 @@ function isValid(
   }
 
   if (!hasError && !expr.groupStack.length) {
-    return expr.hadUnguardedNewline ? Validity.valid : Validity.enclosed;
+    return expr.hadUnguardedNewline ? VALIDITY.valid : VALIDITY.enclosed;
   }
 
-  return Validity.invalid;
+  return VALIDITY.invalid;
 }

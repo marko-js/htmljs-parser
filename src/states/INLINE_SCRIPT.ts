@@ -1,11 +1,11 @@
 import {
-  CODE,
+  matchesCloseCurlyBrace,
+  type Meta,
   type Range,
   STATE,
   type StateDefinition,
-  type Meta,
-  matchesCloseCurlyBrace,
-} from "../internal";
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
 
 interface ScriptletMeta extends Meta {
   block: boolean;
@@ -41,7 +41,7 @@ export const INLINE_SCRIPT: StateDefinition<ScriptletMeta> = {
     });
   },
 
-  parse(data, maxPos, inlineScript) {
+  parse(data, _maxPos, inlineScript) {
     this.consumeWhitespace();
     if (data.charCodeAt(this.pos) === CODE.OPEN_CURLY_BRACE) {
       inlineScript.block = true;

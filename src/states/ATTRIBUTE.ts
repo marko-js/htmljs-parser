@@ -1,30 +1,22 @@
 import {
-  STATE,
-  CODE,
   isWhitespaceCode,
-  type StateDefinition,
-  type Range,
-  Parser,
-  type Ranges,
-  type Meta,
-  ErrorCode,
   matchesCloseAngleBracket,
   matchesCloseCurlyBrace,
   matchesCloseParen,
-} from "../internal";
-import { TAG_STAGE } from "./OPEN_TAG";
-
-const enum ATTR_STAGE {
-  UNKNOWN,
-  NAME,
-  VALUE,
-  ARGUMENT,
-  TYPE_PARAMS,
-  BLOCK,
-}
+  type Meta,
+  Parser,
+  type Range,
+  type Ranges,
+  STATE,
+  type StateDefinition,
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
+import * as ATTR_STAGE from "./attr-stage.ts";
+import * as TAG_STAGE from "./tag-stage.ts";
 
 export interface AttrMeta extends Meta {
-  stage: ATTR_STAGE;
+  stage: ATTR_STAGE.AttrStage;
   name: undefined | Range;
   valueStart: number;
   args: boolean | Ranges.AttrMethod["params"];

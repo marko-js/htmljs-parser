@@ -1,4 +1,6 @@
-import { CODE, STATE, type StateDefinition, TagType } from "../internal";
+import { STATE, type StateDefinition } from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as TagType from "../util/tag-type.ts";
 
 // We enter STATE.JS_COMMENT_LINE after we encounter a "//" sequence
 // when parsing JavaScript code.
@@ -42,6 +44,6 @@ export const JS_COMMENT_LINE: StateDefinition = {
     this.exitState();
   },
 
-  /* c8 ignore next -- never has child states */
+  /* node:coverage ignore next */ // never has child states
   return() {},
 };

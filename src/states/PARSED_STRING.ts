@@ -1,10 +1,6 @@
-import {
-  CODE,
-  ErrorCode,
-  STATE,
-  type StateDefinition,
-  type Meta,
-} from "../internal";
+import { type Meta, STATE, type StateDefinition } from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 interface ParsedStringMeta extends Meta {
   quoteCharCode: number;

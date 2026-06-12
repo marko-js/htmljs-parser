@@ -1,4 +1,5 @@
-import { ErrorCode, Parser, type StateDefinition } from "../internal";
+import { Parser, type StateDefinition } from "../internal.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 // We enter STATE.CDATA after we see "<![CDATA["
 export const CDATA: StateDefinition = {
@@ -24,7 +25,7 @@ export const CDATA: StateDefinition = {
     });
   },
 
-  parse(data, maxPos, cdata) {
+  parse(data, _maxPos, cdata) {
     const idx = data.indexOf("]]>", this.pos);
     if (idx === -1) {
       return this.emitError(
@@ -38,7 +39,7 @@ export const CDATA: StateDefinition = {
     this.exitState();
   },
 
-  /* c8 ignore next -- never has child states */
+  /* node:coverage ignore next */ // never has child states
   return() {},
 };
 

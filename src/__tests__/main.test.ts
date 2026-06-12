@@ -1,10 +1,21 @@
+import { it } from "node:test";
+
 import fs from "fs";
 import path from "path";
-import snap from "mocha-snap";
-import { createParser, type Position, type Ranges, type Range } from "..";
-import { ErrorCode, getLines, TagType } from "../internal";
 
-const FIXTURES = path.join(__dirname, "fixtures");
+import {
+  createParser,
+  type Position,
+  type Range,
+  type Ranges,
+} from "../index.ts";
+import { ErrorCode, getLines, TagType } from "../internal.ts";
+import snap from "./util/snap.ts";
+
+const FIXTURES = path.join(import.meta.dirname, "fixtures");
+const errorCodeNames = Object.fromEntries(
+  Object.entries(ErrorCode).map(([name, code]) => [code, name]),
+);
 
 for (const entry of fs.readdirSync(FIXTURES)) {
   if (entry.endsWith(".skip")) {
@@ -71,7 +82,10 @@ for (const entry of fs.readdirSync(FIXTURES)) {
     const tagStack: { type: TagType; range: Ranges.Template }[] = [];
     const parser = createParser({
       onError(range) {
-        addRange(`error(${ErrorCode[range.code]}:${range.message})`, range);
+        addRange(
+          `error(${errorCodeNames[range.code]}:${range.message})`,
+          range,
+        );
       },
       onText(range) {
         addRange("text", range);
@@ -277,6 +291,6 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       }
     }
 
-    await snap(result, { dir, ext: ".txt" });
+    await snap(result, { dir, title: entry, ext: ".txt" });
   });
 }

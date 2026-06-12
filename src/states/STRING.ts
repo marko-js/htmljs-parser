@@ -1,4 +1,6 @@
-import { CODE, type StateDefinition, type Meta, ErrorCode } from "../internal";
+import type { Meta, StateDefinition } from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 interface StringMeta extends Meta {
   quoteCharCode: number;
@@ -42,6 +44,6 @@ export const STRING: StateDefinition<StringMeta> = {
     );
   },
 
-  /* c8 ignore next -- never has child states */
+  /* node:coverage ignore next */ // never has child states
   return() {},
 };

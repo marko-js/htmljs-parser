@@ -1,10 +1,10 @@
 import {
-  CODE,
-  ErrorCode,
+  matchesCloseCurlyBrace,
   STATE,
   type StateDefinition,
-  matchesCloseCurlyBrace,
-} from "../internal";
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 export const TEMPLATE_STRING: StateDefinition = {
   name: "TEMPLATE_STRING",

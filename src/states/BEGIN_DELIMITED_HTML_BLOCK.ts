@@ -1,13 +1,13 @@
 import {
-  Parser,
-  CODE,
-  type StateDefinition,
-  STATE,
   htmlEOF,
-  type Meta,
-  ErrorCode,
   isLineCode,
-} from "../internal";
+  type Meta,
+  Parser,
+  STATE,
+  type StateDefinition,
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 export interface DelimitedHTMLBlockMeta extends Meta {
   delimiter: string;

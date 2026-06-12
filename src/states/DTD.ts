@@ -1,4 +1,5 @@
-import { ErrorCode, type StateDefinition } from "../internal";
+import type { StateDefinition } from "../internal.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 // We enter STATE.DTD after we encounter a "<!" while in the STATE.HTML_CONTENT.
 // We leave STATE.DTD if we see a ">".
@@ -26,7 +27,7 @@ export const DTD: StateDefinition = {
     });
   },
 
-  parse(data, maxPos, documentType) {
+  parse(data, _maxPos, documentType) {
     const idx = data.indexOf(">", this.pos);
     if (idx === -1) {
       return this.emitError(
@@ -40,6 +41,6 @@ export const DTD: StateDefinition = {
     this.exitState();
   },
 
-  /* c8 ignore next -- never has child states */
+  /* node:coverage ignore next */ // never has child states
   return() {},
 };

@@ -1,10 +1,6 @@
-import {
-  CODE,
-  Parser,
-  type StateDefinition,
-  type Range,
-  ErrorCode,
-} from "../internal";
+import { Parser, type Range, type StateDefinition } from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
 
 // We enter STATE.DECLARATION after we encounter a "<?"
 // while in the STATE.HTML_CONTENT.
@@ -25,7 +21,7 @@ export const DECLARATION: StateDefinition = {
 
   exit() {},
 
-  parse(data, maxPos, declaration) {
+  parse(data, _maxPos, declaration) {
     const idx = data.indexOf(">", this.pos);
     if (idx === -1) {
       return this.emitError(
@@ -44,7 +40,7 @@ export const DECLARATION: StateDefinition = {
     }
   },
 
-  /* c8 ignore next -- never has child states */
+  /* node:coverage ignore next */ // never has child states
   return() {},
 };
 

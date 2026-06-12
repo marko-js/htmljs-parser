@@ -15,5 +15,5 @@ dist
 *.tsbuildinfo
 
 # Coverage
-.nyc_output
 coverage
+lcov.info

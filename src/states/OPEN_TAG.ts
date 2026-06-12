@@ -1,31 +1,24 @@
 import {
-  CODE,
-  STATE,
-  isWhitespaceCode,
-  type StateDefinition,
-  type Ranges,
-  type Meta,
-  TagType,
-  ErrorCode,
-  matchesPipe,
-  matchesCloseParen,
-  matchesCloseAngleBracket,
   isIndentCode,
-} from "../internal";
-import type { ExpressionMeta } from "./EXPRESSION";
-
-export enum TAG_STAGE {
-  UNKNOWN,
-  VAR,
-  ARGUMENT,
-  TYPES,
-  PARAMS,
-  ATTR_GROUP,
-}
+  isWhitespaceCode,
+  matchesCloseAngleBracket,
+  matchesCloseParen,
+  matchesPipe,
+  type Meta,
+  type Ranges,
+  STATE,
+  type StateDefinition,
+  type TagType as TagTypeValue,
+} from "../internal.ts";
+import * as CODE from "../util/codes.ts";
+import * as ErrorCode from "../util/error-code.ts";
+import * as TagType from "../util/tag-type.ts";
+import type { ExpressionMeta } from "./EXPRESSION.ts";
+import * as TAG_STAGE from "./tag-stage.ts";
 
 export interface OpenTagMeta extends Meta {
-  type: TagType;
-  stage: TAG_STAGE;
+  type: TagTypeValue;
+  stage: TAG_STAGE.TagStage;
   concise: boolean;
   beginMixedMode?: boolean;
   tagName: Ranges.Template;

@@ -1,19 +1,19 @@
 {
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "*.ts"],
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "incremental": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
     "isolatedModules": true,
     "lib": ["dom", "ESNext"],
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "outDir": "dist",
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "skipLibCheck": true,
-    "sourceMap": true,
     "strict": true,
-    "stripInternal": true,
     "target": "ESNext",
+    "types": ["node"],
     "verbatimModuleSyntax": true
   }
 }
