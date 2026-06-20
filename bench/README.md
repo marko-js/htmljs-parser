@@ -103,7 +103,7 @@ re-introducing polymorphism, so they have not been pursued. Parsing with no
 handlers (`{}`) is only ~13% faster, so allocation is not the dominant cost —
 the per-character state-machine work is.
 
-### Bulk (native) text scanning — large win for long runs
+### Bulk (native) text scanning — evaluated, not adopted
 
 The text-consuming states (`HTML_CONTENT`, `PARSED_TEXT_CONTENT`) advance over
 runs of "boring" characters until the next special one. A per-character JS loop
@@ -150,6 +150,8 @@ Results vs the per-character loop:
   work is per-run (a couple of ops + one short-circuiting comparison), not
   per-char, so the common dense case is not measurably affected.
 
-This is a genuine large-scale lever, but the corpus that represents typical
-Marko is dense markup, where it is a wash — the upside is realised only on
-content- or script-heavy templates. Whether to ship it is a workload call.
+**Decision: not adopted.** The corpus that represents typical Marko is dense
+markup, where this is a wash, and the ±1% uncertainty on that common case isn't
+worth the large-but-niche win on content/script-heavy templates plus the added
+code. Worth revisiting if a content-heavy workload becomes a priority; the
+implementation is preserved in git history.

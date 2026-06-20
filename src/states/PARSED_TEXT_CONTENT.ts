@@ -96,7 +96,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
           this.enterState(STATE.PARSED_STRING).quoteCharCode = code;
           this.pos++; // skip opening quote
           return;
-        default: {
+        default:
           if (
             (code === CODE.DOLLAR || code === CODE.BACK_SLASH) &&
             STATE.checkForPlaceholder(this, code)
@@ -105,44 +105,20 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
           }
 
           this.startText();
-          // Consume the run of chars that cannot match a case above. Short runs
-          // use a cheap per-character loop (kept to two comparisons per char by
-          // folding the threshold into the bound); long runs — common in raw
-          // script/style bodies — switch to a much faster native scan.
-          const limit = this.pos + BULK_SCAN_THRESHOLD;
-          const stop = limit < maxPos ? limit : maxPos;
+          // Eagerly consume the run of chars that cannot match a case above.
           do {
             this.pos++;
           } while (
-            this.pos < stop &&
+            this.pos < maxPos &&
             !isSpecialParsedTextCode(data.charCodeAt(this.pos))
           );
-
-          if (
-            this.pos === limit &&
-            limit < maxPos &&
-            !isSpecialParsedTextCode(data.charCodeAt(this.pos))
-          ) {
-            SPECIAL_PARSED_TEXT.lastIndex = this.pos;
-            const next = SPECIAL_PARSED_TEXT.exec(data);
-            this.pos = next === null ? maxPos : next.index;
-          }
           continue;
-        }
       }
     }
   },
 
   return() {},
 };
-
-// Once a text run exceeds this many characters, finishing it with a native
-// scan beats the per-character loop (measured crossover is ~15 chars).
-const BULK_SCAN_THRESHOLD = 16;
-
-// Matches every char that can begin one of the parse branches above:
-// \n \r < / ` " ' $ \ — see isSpecialParsedTextCode for the authoritative list.
-const SPECIAL_PARSED_TEXT = /[\n\r<`"'$/\\]/g;
 
 // Matches every char that can begin one of the parse branches above.
 function isSpecialParsedTextCode(code: number) {
