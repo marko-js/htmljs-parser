@@ -26,11 +26,11 @@ The parser parses fast and the per-change deltas are small (1–3%), so naive
 timing is dominated by noise. The suite offers three tools, in increasing order
 of rigor:
 
-| script | what it's for |
-| --- | --- |
-| `npm run bench` | mitata report: whole-corpus + per-repo throughput. Good overview. |
+| script              | what it's for                                                          |
+| ------------------- | ---------------------------------------------------------------------- |
+| `npm run bench`     | mitata report: whole-corpus + per-repo throughput. Good overview.      |
 | `npm run bench:run` | quick in-process interleaved A/B (current vs baseline). Fast feedback. |
-| `npm run bench:ab` | **process-isolated** A/B with a sign test. Use this to confirm a win. |
+| `npm run bench:ab`  | **process-isolated** A/B with a sign test. Use this to confirm a win.  |
 
 ### A/B workflow
 
@@ -74,3 +74,31 @@ the API).
 - Hoisting monomorphic property reads out of hot loops is neutral — V8 already
   handles them. Look for eliminated work (skipped indirect calls, skipped
   scans), not fewer property reads.
+- The `this.activeState.parse.call(this, …)` dispatch convention is **already
+  optimal**. A microbenchmark of megamorphic dispatch found `fn.call(this, …)`
+  ~14% _faster_ than passing the parser as an explicit first argument
+  (`fn(parser, …)`), so the common "thread context explicitly" refactor would
+  regress. Don't bother rewriting the state method signatures.
+- Eager run-consumption (a tight inner `do { pos++ } while (…)` loop) is a big
+  win for **long** runs — HTML text between tags already uses it — but a
+  _regression_ for short runs: applying it to identifier characters in
+  `EXPRESSION` was measurably slower (2/24 rounds) because expression
+  identifiers are short and the inner-loop overhead isn't amortized. The plain
+  `pos++; continue;` word-character fast path is faster.
+- A whitespace fast path in `EXPRESSION` (skip the termination checks for
+  insignificant whitespace) was only marginal (steady ~+1%, per-file slightly
+  negative) — the extra `isWhitespaceCode` check on every punctuation char
+  roughly cancels the gain. Not worth it.
+
+### Allocation / GC
+
+Per parse of the steady-state corpus the parser makes ~21k handler-payload
+allocations (one range object per `on*` callback) plus a comparable number of
+internal allocations (one `Meta` per `enterState`, a `groupStack: []` per
+`EXPRESSION`, `quasis`/`expressions` per tag). GC is ~10% of wall time. The
+handler payloads are inherent to the API; the internal allocations are
+reducible (e.g. lazy/ shared `groupStack`, sharing an empty `expressions`
+array) but the measured upside is small (~1%) and the changes risk
+re-introducing polymorphism, so they have not been pursued. Parsing with no
+handlers (`{}`) is only ~13% faster, so allocation is not the dominant cost —
+the per-character state-machine work is.
