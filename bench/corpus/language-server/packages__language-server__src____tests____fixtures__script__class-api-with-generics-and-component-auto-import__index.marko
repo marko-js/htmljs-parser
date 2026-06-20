@@ -1,0 +1,8 @@
+export interface Input<T> {
+  value: T
+}
+
+<div onClick("handleClickMissing")/>
+<div onClick("strange-handler")/>
+$ console.log(component.input);
+//                      ^?

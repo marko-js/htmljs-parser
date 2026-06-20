@@ -120,6 +120,16 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         continue;
       }
 
+      // Fast path: an identifier/number character is never whitespace, never
+      // a terminator (no `shouldTerminate` implementation matches a word
+      // character), and is not handled by the switch below, so it just
+      // advances. Short-circuiting here skips the termination checks and the
+      // switch dispatch for the bulk of expression content.
+      if (isWordCode(code)) {
+        this.pos++;
+        continue;
+      }
+
       // Termination checks (no groupStack)
       if (!expression.groupStack.length) {
         if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
@@ -461,6 +471,10 @@ function lookBehindForOperator(
     }
 
     default: {
+      // Every unary keyword ends in a lowercase letter; if the character
+      // before `pos` is not one, no keyword can match.
+      if (code < CODE.LOWER_A || code > CODE.LOWER_Z) return -1;
+
       for (const keyword of expression.inType
         ? tsUnaryKeywords
         : unaryKeywords) {
@@ -510,6 +524,11 @@ function lookAheadForOperator(
     }
 
     default: {
+      // Every binary keyword starts with a lowercase letter; if the character
+      // at `pos` is not one, no keyword can match.
+      const startCode = data.charCodeAt(pos);
+      if (startCode < CODE.LOWER_A || startCode > CODE.LOWER_Z) return -1;
+
       for (const keyword of binaryKeywords) {
         const keywordPos = lookAheadFor(data, pos, keyword);
         if (keywordPos === -1) continue;

@@ -1,0 +1,11 @@
+export interface Input {
+  menuitem?: Marko.AttrTag<{
+    content: Marko.Body<[{
+      foo: string;
+    }]>;
+  }>;
+}
+
+<for|item| of=input.menuitem>
+  <${item.content} foo="foo"/>
+</for>

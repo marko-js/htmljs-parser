@@ -1,0 +1,11 @@
+div data-foo=() => a.b()
+div data-foo=() => {
+  a.b();
+  c.d();
+}
+div data-foo=(a) => b.c()
+div data-foo=(a, b) => {
+  c.d();
+  e.f();
+}
+div data-foo=async () => a.b()

@@ -1,0 +1,78 @@
+my-tag<MyType, MyOtherType> my-attr="my-string"
+my-tag <MyType, MyOtherType>|x|
+my-tag <MyType>|x| my-attr="my-string"
+my-tag<MyType>|x|
+my-tag<MyType1><MyOtherType>|x|
+my-tag<
+  A,
+  Whole,
+  Bunch,
+  Of,
+  Tag,
+  Attribute,
+  Types,
+  That,
+  Need,
+  To,
+  Wrap,
+  To,
+  The,
+  Next,
+  Line
+><
+  A,
+  Whole,
+  Bunch,
+  Of,
+  Tag,
+  Parameter,
+  Types,
+  That,
+  Need,
+  To,
+  Wrap,
+  To,
+  The,
+  Next,
+  Line,
+>|x|
+my-tag <
+  T extends
+    keyof (typeof SuperLongImportedVariableName)["member1"]["member2"]["member3"],
+  K extends T extends string
+    ? MyType["member1"]["member2"]["member3"]
+    : MyOtherType,
+>|x|
+my-tag<{
+  foo: number;
+  bar: number;
+  baz: number;
+  fnA: () => void;
+  fnB: () => void;
+  fnC: () => void;
+}>
+my-tag<{
+  foo: number;
+  bar: number;
+  baz: number;
+  fnA: () => void;
+  fnB: () => void;
+  fnC: () => void;
+}>|x|
+my-tag<{
+  foo: number;
+  bar: number;
+  baz: number;
+  fnA: () => void;
+  fnB: () => void;
+  fnC: () => void;
+}><
+  T extends {
+    foo: number;
+    bar: number;
+    baz: number;
+    fnA: () => void;
+    fnB: () => void;
+    fnC: () => void;
+  },
+>|x|

@@ -1,0 +1,30 @@
+<if=$global.foo>
+  <const/a=["apples", "oranges"] as const/>
+      // ^?
+  <const/b=["slice", "dice"] as const/>
+      // ^?
+  <for|baz| of=b>
+    <const/c=() => a.filter((e) => e.length)/>
+    ${baz}
+//    ^?
+  </for>
+</if>
+
+<if=$global.foo>
+  <const/{ d }={ d: () => 1 } as const/>
+</if>
+<else>
+  <const/{ d }={ d: () => 2 } as const/>
+</else>
+
+
+-- ${() => {
+  a;
+//^?
+  b;
+//^?
+  c;
+//^?
+  d;
+//^?
+}}

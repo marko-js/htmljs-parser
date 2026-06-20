@@ -1,0 +1,14 @@
+<foo>
+  <@section>
+    <const/nested=() => 1>
+  </@section>
+
+  <@section>
+    Bar
+  </@section>
+</foo>
+
+<script>
+  nested;
+  // ^?
+</script>

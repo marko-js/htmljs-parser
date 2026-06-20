@@ -1,0 +1,15 @@
+<my-menu>
+  <for|name| of=["a", "b", "c"]>
+    <@menuitem|{ foo }|>
+      <div>${name} ${foo}</div>
+//                   ^?
+    </@menuitem>
+  </for>
+</my-menu>
+
+<my-menu>
+  <@menuitem|{ foo }|>
+    <div>${foo}</div>
+//         ^?
+  </@menuitem>
+</my-menu>

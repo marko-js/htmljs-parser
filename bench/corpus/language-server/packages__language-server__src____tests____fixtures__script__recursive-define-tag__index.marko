@@ -1,0 +1,20 @@
+export interface Help {
+  children?: Help[];
+}
+
+export interface Input {
+  value: Help[];
+}
+
+<define/Section|{ children = []}: Help|>
+        // ^?
+  <for|{ children }| of=children>
+    <Section children=children/>
+    // ^?
+  </for>
+</define>
+
+<for|help| of=input.value>
+  <Section ...help/>
+  // ^?
+</for>

@@ -1,0 +1,119 @@
+<${custom}>
+  <for>
+    <@a/>
+  </for>
+</>
+
+<let/list=[{
+  value: 1
+}, {
+  value: 2
+}, {
+  value: 3
+}] as const/>
+
+<${custom}>
+  <for of=list>
+    <@a/>
+  </for>
+</>
+
+<${custom}>
+  <for|item, index, all| of=list>
+    <@a>
+      ${item} ${index} ${all}
+//      ^?      ^?       ^?
+    </@a>
+  </for>
+</>
+
+<${custom}>
+  <for|item, index| of=list>
+    <@a>
+      ${item}
+//      ^?
+    </@a>
+    <@b>
+      ${index}
+//      ^?
+    </@b>
+  </for>
+</>
+
+<${custom}>
+  <for|item| of=list>
+    <@a>
+      <const/hoistedFromForOf() { return item.value }>
+    </@a>
+  </for>
+</>
+
+<effect() {
+  hoistedFromForOf;
+//^?
+}/>
+
+<let/record={ a: 1, b: 2 } as const/>
+
+<${custom}>
+  <for|key, value| in=record>
+    <@a>
+      ${key} ${value}
+//      ^?     ^?
+    </@a>
+  </for>
+</>
+
+<${custom}>
+  <for|key| in=record>
+    <@a>
+      <const/hoistedFromForIn() { return key }/>
+    </@a>
+  </for>
+</>
+
+<effect() {
+  hoistedFromForIn;
+//^?
+}/>
+
+<${custom}>
+  <for|index| to=10>
+    <@a>
+      ${index}
+//      ^?
+    </@a>
+  </for>
+</>
+
+
+<${custom}>
+  <for|index| from=1 to=10>
+    <@a>
+      ${index}
+//      ^?
+    </@a>
+  </for>
+</>
+
+<${custom}>
+  <for|index| to=10 step=2>
+    <@a>
+      ${index}
+//      ^?
+    </@a>
+  </for>
+</>
+
+<${custom}>
+  <for|index| to=10>
+    <@a>
+      <const/hoistedFromForTo() { return index }/>
+    </@a>
+  </for>
+</>
+
+<effect() {
+  hoistedFromForTo;
+//^?
+}/>

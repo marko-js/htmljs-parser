@@ -1,0 +1,18 @@
+<div.color-picker-footer>
+  <div.color-picker-selection-container>
+    <for|color| of=input.colors>
+      <div>
+        <!--
+        Listen for the `color-selected` event emitted from the
+        <color-picker-selection> component and handle it in this
+        component's `handleColorSelected` method.
+        NOTE: We pass along the `color` to the event handler method
+        -->
+        <color-picker-selection
+          color=color
+          on-color-selected("handleColorSelected", color)/>
+      </div>
+    </for>
+    <input key="hexInput" placeholder="Hex value" on-input("handleHexInput")/>
+  </div>
+</div>

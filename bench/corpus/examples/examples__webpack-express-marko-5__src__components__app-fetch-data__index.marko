@@ -1,0 +1,88 @@
+import { getUsers } from "../../services/users/load";
+
+class {
+  onInput(input) {
+    const { usersData } = input;
+    let pageIndex = -1;
+    let users = [];
+
+    if (usersData) {
+      users = usersData.users;
+      pageIndex = usersData.pageIndex;
+    }
+
+    this.state = {
+      loading: false,
+      users: users,
+      pageIndex: pageIndex
+    };
+  }
+
+  onMount() {
+    this.pending = Promise.resolve();
+
+    if (this.state.users.length === 0) {
+      this.loadMore();
+    }
+  }
+
+  async loadMore() {
+    const { state } = this;
+
+    state.loading = true;
+    await this.pending;
+
+    try {
+      const usersData = await (this.pending = getUsers({ pageIndex: ++state.pageIndex }));
+      state.users = state.users.concat(usersData.users);
+    } catch (err) {
+      console.log("Fetch failed:", err);
+    }
+
+    state.loading = false;
+  }
+
+  handleLoadMoreClick() {
+    this.loadMore();
+  }
+
+  onUpdate() {
+    if (this.state.pageIndex > 0) {
+      const tableContainer = this.getEl("tableContainer");
+      tableContainer.scrollTop = tableContainer.scrollHeight;
+    }
+  }
+}
+
+<div.app-fetch-data>
+  <div class="table-container" key="tableContainer">
+    <if(state.users.length)>
+      <table>
+        <thead>
+          <tr>
+            <td>ID</td>
+            <td>Avatar</td>
+            <td>Name</td>
+            <td>Email</td>
+          </tr>
+        </thead>
+        <tbody>
+          <for|user| of=state.users>
+            <tr>
+              <td>${user.id}</td>
+              <td>
+                <img src=user.avatar width=50 height=50/>
+              </td>
+              <td>${user.firstName} ${user.lastName}</td>
+              <td>${user.email}</td>
+            </tr>
+          </for>
+        </tbody>
+      </table>
+    </if>
+  </div>
+  <app-button
+    label=(state.users.length ? "Load more users" : "Load users")
+    onClick("handleLoadMoreClick")/>
+  <span class={ loading: state.loading }/>
+</div>

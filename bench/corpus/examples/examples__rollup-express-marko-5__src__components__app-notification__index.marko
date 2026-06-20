@@ -1,0 +1,18 @@
+class {
+  onCreate() {
+    this.state = { visible: false };
+  }
+  onMount() {
+    setTimeout(() => this.state.visible = true, 10);
+  }
+  fadeOut(done) {
+    this.state.visible = false;
+    this.subscribeTo(this.el).once("transitionend", done);
+  }
+}
+
+<div
+  class="app-notification"
+  style=(state.visible && { opacity: "1", maxHeight: 60 })>
+  $!{input.message}
+</div>

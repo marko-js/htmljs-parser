@@ -1,0 +1,32 @@
+static function getClassNameForValue(value) {
+  if (value < 0) {
+    return "negative";
+  } else if (value > 0) {
+    return "positive";
+  }
+}
+
+class {
+  onInput(input) {
+    this.state = {
+      value: input.value || 0
+    };
+  }
+
+  handleIncrementClick(delta) {
+    this.state.value += delta;
+  }
+
+  handleInputKeyUp(event) {
+    const newValue = event.target.value;
+    if (/^-?[0-9]+$/.test(newValue)) {
+      this.state.value = parseInt(newValue, 10);
+    }
+  }
+}
+
+<div class=["number-spinner", getClassNameForValue(state.value)]>
+  <button type="button" onClick("handleIncrementClick", -1)>-</button>
+  <input type="text" value=state.value size="4" onKeyUp("handleInputKeyUp")/>
+  <button type="button" onClick("handleIncrementClick", 1)>+</button>
+</div>

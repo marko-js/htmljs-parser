@@ -1,0 +1,12 @@
+style.less {
+    @my-ruleset: {
+    .my-selector {
+      @media tv {
+        background-color: black;
+      }
+    }
+  };
+@media (orientation:portrait) {
+    @my-ruleset();
+}
+}

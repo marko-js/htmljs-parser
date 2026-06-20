@@ -1,0 +1,9 @@
+export interface Input<T extends { name: string }> {
+  options: T[];
+  onChange: (option: T) => unknown;
+}
+
+-- ${input.options}
+//         ^?
+-- ${input.onChange}
+//         ^?

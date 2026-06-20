@@ -1,0 +1,31 @@
+<foo onclick<A>(event: A){
+  console.log(event.type)
+}/>
+
+<foo onclick<A> (event: A){
+  console.log(event.type)
+}/>
+
+<foo onclick <A>(event: A){
+  console.log(event.type)
+}/>
+
+<foo onclick <A> (event: A){
+  console.log(event.type)
+}/>
+
+<foo onclick<A, B = string>(event: A & B){
+  console.log(event.type)
+}/>
+
+<foo onclick<A, B = string> (event: A & B){
+  console.log(event.type)
+}/>
+
+<foo onclick <A, B = string>(event: A & B){
+  console.log(event.type)
+}/>
+
+<foo onclick <A, B = string> (event: A & B){
+  console.log(event.type)
+}/>

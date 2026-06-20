@@ -1,0 +1,19 @@
+<my-layout>
+  <@section>
+    <for|name| of=["a", "b", "c"]>
+      <@item|{ label }|>
+        <div>${name} ${label}</div>
+//                     ^?
+      </@item>
+    </for>
+  </@section>
+</my-layout>
+
+<my-layout>
+  <@section>
+    <@item|{ label }|>
+      <div>${label}</div>
+//           ^?
+    </@item>
+  </@section>
+</my-layout>

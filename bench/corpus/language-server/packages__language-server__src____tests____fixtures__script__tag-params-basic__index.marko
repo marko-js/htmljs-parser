@@ -1,0 +1,15 @@
+<test-tag|a, b|>
+//        ^? ^?
+  ${a} ${b}
+//  ^?   ^?
+</test-tag>
+
+<test-tag|a|>
+//        ^?
+  <const/hoistedFromTestTag = () => a/>
+</test-tag>
+
+-- ${() => {
+  hoistedFromTestTag
+//^?
+}}

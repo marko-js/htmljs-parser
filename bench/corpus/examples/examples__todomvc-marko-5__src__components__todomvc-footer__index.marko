@@ -1,0 +1,55 @@
+import todoApp from "../../pages/app.js";
+
+class {
+  setFilter(filter, event) {
+    todoApp.filter = filter;
+    event.preventDefault();
+  }
+
+  clearCompleted() {
+    todoApp.clearCompleted();
+  }
+}
+
+$ const remainingTodosWord = input.remainingCount > 1 ? "items" : "item";
+
+<footer.footer>
+  <span.todo-count>
+    <strong>${input.remainingCount}</strong> ${remainingTodosWord} left
+  </span>
+
+  <ul.filters>
+    <li>
+      <a
+        href="#/"
+        class={ selected: input.filter === "all" }
+        on-click("setFilter", "all")>
+        All
+      </a>
+    </li>
+
+    <li>
+      <a
+        href="#/active"
+        class={ selected: input.filter === "active" }
+        on-click("setFilter", "active")>
+        Active
+      </a>
+    </li>
+
+    <li>
+      <a
+        href="#/completed"
+        class={ selected: input.filter === "completed" } 
+        on-click("setFilter", "completed")>
+        Completed
+      </a>
+    </li>
+  </ul>
+
+  <if(input.completedCount > 0)>
+    <button.clear-completed on-click("clearCompleted")>
+      Clear completed (${input.completedCount})
+    </button>
+  </if>
+</footer>

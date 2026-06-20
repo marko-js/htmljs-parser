@@ -1,0 +1,20 @@
+style.scss {
+    @function color-yiq($color) {
+  $r: red($color);$g: green($color);$b: blue($color);
+
+  $yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+  @if ($yiq >= $yiq-contrasted-threshold) {
+    @return $yiq-text-dark;
+} @else {
+    @return $yiq-text-light;
+  }
+}
+
+@each $color, $value in $colors {
+  .swatch-#{$color} {
+    color: color-yiq($value);
+    background-color: #{$value};
+  }
+}
+}

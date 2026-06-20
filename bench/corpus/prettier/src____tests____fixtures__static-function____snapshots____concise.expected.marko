@@ -1,0 +1,24 @@
+static function getAnchorName(section) {
+  if (!section.anchorName) {
+    section.anchorName = section.title.replace(/[^a-zA-Z]+/g, "-");
+  }
+
+  return section.anchorName;
+}
+
+static function sum(a, b) {
+  return a + b;
+}
+
+div -- ${sum(1, 2)}
+
+div class="app-sections"
+  div class="tableOfContents"
+    ul
+      li for(section in data.sections)
+        a href="#${getAnchorName(section)}" -- ${section.title}
+  div class="sections-ctr"
+    div class="section" for(section in data.sections)
+      h2 id=getAnchorName(section) -- ${section.title}
+      div class="section-body"
+        include(section)

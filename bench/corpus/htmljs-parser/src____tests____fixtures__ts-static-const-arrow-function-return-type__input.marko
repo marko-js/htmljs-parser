@@ -1,0 +1,19 @@
+static const a = (a: number, b: number): string => {
+  if (a < b) {
+    return "foo";
+  } else {
+    return "bar";
+  }
+};
+
+static const b = (a: number, b: number): () => string => () => {
+  if (a < b) {
+    return "foo";
+  } else {
+    return "bar";
+  }
+};
+
+static const c = (a: number, b: number): string => a < b ? "foo" : "bar";
+
+static const d = (a: number, b: number): () => string => () => a < b ? "foo" : "bar";

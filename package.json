@@ -35,7 +35,12 @@
     "!**/*.tsbuildinfo"
   ],
   "scripts": {
-    "bench": "node bench.ts",
+    "bench": "node bench/bench.ts",
+    "bench:run": "node --expose-gc bench/run.ts",
+    "bench:ab": "node bench/ab.ts",
+    "bench:snapshot": "node bench/snapshot.ts",
+    "bench:collect": "node bench/collect.ts",
+    "bench:dist": "node bench.ts",
     "build": "tsc -p tsconfig.build.json && node build.ts",
     "change": "changeset add",
     "ci:test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-exclude=\"**/__tests__/**\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=lcov.info \"src/**/__tests__/*.test.ts\"",

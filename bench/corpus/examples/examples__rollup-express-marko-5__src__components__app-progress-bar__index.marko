@@ -1,0 +1,30 @@
+<div class="app-progress-bar">
+  <if(input.steps)>
+    <for|step, i| of=input.steps>
+      <div
+        class=["progress-step", { active: i === state.activeIndex }]
+        onClick("handleStepClick", i)>
+        <a href="#" class="progress-step">
+          <span>
+            <if(step.label)>${step.label}</if>
+            <else>
+              <${step.renderBody}/>
+            </else>
+          </span>
+          <div class="completion-icon"/>
+        </a>
+        <div class="progress-step-end">
+          <svg
+            class="progress-step-end"
+            viewBox="0 0 125 100"
+            overflow="visible"
+            enable-background="new 0 0 100 100"
+            preserveAspectRatio="none">
+            <polygon points="0,0 25,0 125,50 25,100 0,100" fill="white"/>
+            <polygon class="progress-step-end" points="0,0 100,50 0,100"/>
+          </svg>
+        </div>
+      </div>
+    </for>
+  </if>
+</div>

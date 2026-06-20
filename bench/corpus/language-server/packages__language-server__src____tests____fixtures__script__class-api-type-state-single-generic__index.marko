@@ -1,0 +1,21 @@
+export interface Input<T extends string> {
+  name: T
+}
+
+class {
+  declare state: {
+    name: T;
+//        ^?
+  }
+  onCreate(input: Input<T>) {
+    this.state = { name: input.name };
+//                             ^?
+  }
+  onMount() {
+    this.state.name;
+//             ^?
+  }
+}
+
+-- ${state.name}
+//         ^?

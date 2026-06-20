@@ -1,0 +1,26 @@
+import Child from "<child>";
+
+<child>
+  <@foo bar/>
+  <@foo|data|>
+    ${data}
+    //^?
+  </@foo>
+</child>
+
+<Child>
+  <@foo bar/>
+  <@foo|data|>
+    ${data}
+    //^?
+  </@foo>
+</Child>
+
+// This errors for now, because `typeof (some + expression)` is not allowed
+<${true && Child}>
+  <@foo bar/>
+  <@foo|data|>
+    ${data}
+    //^?
+  </@foo>
+</>

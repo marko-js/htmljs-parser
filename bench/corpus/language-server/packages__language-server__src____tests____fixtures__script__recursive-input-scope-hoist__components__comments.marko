@@ -1,0 +1,10 @@
+static interface Comment {
+  id: string;
+  renderBody: Marko.Body;
+  comment?: Marko.AttrTag<Comment>;
+}
+export interface Input {
+  comment: Marko.AttrTag<Comment>;
+}
+
+// Empty

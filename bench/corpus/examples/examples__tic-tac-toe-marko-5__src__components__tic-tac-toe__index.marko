@@ -1,0 +1,82 @@
+import TicTacToe from "./TicTacToe";
+
+class {
+  onCreate() {
+    this.ticTacToe = new TicTacToe();
+  }
+
+  onMount() {
+    this.ticTacToe.on("change", () => {
+      this.forceUpdate();
+    });
+  }
+
+  handleCellClick(rowIndex, colIndex) {
+    if (this.ticTacToe.makeMove("X", rowIndex, colIndex)) {
+      if (!this.ticTacToe.isGameOver) {
+        setTimeout(() => {
+          this.ticTacToe.computerMakeMove("O");
+        }, 1000);
+      }
+    }
+  }
+
+  newGame() {
+    this.ticTacToe.newGame();
+  }
+}
+
+$ const {
+  board,
+  currentPlayer,
+  isGameOver,
+  winningPlayer
+} = component.ticTacToe;
+
+<macro|{ className, player }| name="player-icon">
+  <div.player-icon class=[className, player]>
+    <span/>
+  </div>
+</macro>
+
+<div.tic-tac-toe>
+  <div.current-player class=currentPlayer>
+    <if(!isGameOver)>
+      <player-icon
+        className=["current-player", currentPlayer === "X" && "active"]
+        player="X"/>
+
+      <player-icon
+        className=["current-player", currentPlayer === "O" && "active"]
+        player="O"/>
+    </if>
+  </div>
+
+  <div.board-container>
+    <for|rowIndex, row| in=board>
+      <div.row>
+        <for|colIndex, player| in=row>
+          <div.cell
+            class=[`row-${rowIndex}`, `col-${colIndex}`]
+            on-click("handleCellClick", rowIndex, colIndex)>
+            <player-icon className="cell" player=player/>
+          </div>
+        </for>
+      </div>
+    </for>
+
+    <div.overlay class=[isGameOver && "game-over"]>
+      <if(winningPlayer)>
+        <player-icon className="winner" player=winningPlayer/>
+        <h2.winner>WINNER!</h2>
+      </if>
+      <else>
+        <h2.winner>DRAW!</h2>
+      </else>
+    </div>
+  </div>
+
+  <button.new-game type="button" on-click("newGame")>
+    New Game
+  </button>
+</div>

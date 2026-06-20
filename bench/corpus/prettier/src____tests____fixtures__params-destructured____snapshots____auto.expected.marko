@@ -1,0 +1,17 @@
+<macro name="recursive">
+  <await(generator.next())>
+    <@then|{ value, done }|>
+      <div>
+        <ul>
+          <li>${value}</li>
+        </ul>
+        <ul>
+          <li>${value}</li>
+        </ul>
+        <ul>
+          <li>${value}</li>
+        </ul>
+      </div>
+    </@then>
+  </await>
+</macro>

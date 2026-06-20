@@ -1,0 +1,8 @@
+export interface Input<T> {
+  value: T,
+  then?: Marko.AttrTag<{
+    content: Marko.Body<[T]>;
+  }>;
+}
+
+<${input.then}(input.value)/>

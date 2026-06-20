@@ -1,0 +1,11 @@
+my-component
+  while(x > 0)
+    @body -- Content
+  for|item| of=list
+    @item -- ${item}
+  if(show)
+    @header -- Header
+  else-if(other)
+    @footer -- Footer
+  else
+    @fallback -- Default

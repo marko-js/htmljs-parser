@@ -1,0 +1,35 @@
+$ let i = 0;
+
+<${custom}>
+  <while(++i < 10)>
+//         ^?
+    <@a>
+      ${i}
+//      ^?
+    </@a>
+  </while>
+</>
+
+$ let done = false;
+$ i = 0;
+
+<${custom}>
+  <while(!done)>
+//        ^?
+    <@a>
+      ${done}
+//      ^?
+      <if(++i === 5)>
+        $ done = true;
+      </if>
+    </@a>
+  </while>
+</>
+
+<${custom}>
+  <while>
+    <@a>
+      No Condition.
+    </@a>
+  </while>
+</>

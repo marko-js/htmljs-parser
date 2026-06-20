@@ -1,0 +1,55 @@
+import todoApp from '../../pages/app.js'
+
+static function getTodoData() {
+  let remainingCount = 0;
+  let completedCount = 0;
+  const filter = todoApp.filter;
+  const filteredTodos = todoApp.todos.filter(todo => {
+    if (todo.completed) {
+      completedCount++;
+    } else {
+      remainingCount++;
+    }
+
+    if (todo.pending) {
+      return true;
+    } else if (filter === "active") {
+      return !todo.completed;
+    } else if (filter === "completed") {
+      return todo.completed;
+    } else {
+      return true;
+    }
+  });
+
+  return {
+    todos: filteredTodos,
+    remainingCount: remainingCount,
+    completedCount: completedCount,
+    filter: filter
+  };
+}
+
+class {
+  onMount() {
+    // Subscribe to the change state event. In response
+    // to a state change event we will rerender the entire
+    // app using the new state.
+    this.subscribeTo(todoApp).on("change", () => {
+      this.forceUpdate();
+    });
+  }
+}
+
+style {
+  @import url("https://unpkg.com/todomvc-app-css@2.2.0/index.css");
+}
+
+<section.todoapp>
+  <todomvc-header/>
+  <if(todoApp.todos.length)>
+    $ const todoData = getTodoData();
+    <todomvc-main ...todoData/>
+    <todomvc-footer ...todoData/>
+  </if>
+</section>

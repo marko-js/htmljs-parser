@@ -1,0 +1,41 @@
+$ let done = false;
+$ let i = 0;
+
+<${custom}>
+  <while(!done)>
+//        ^?
+    $ i++;
+//    ^?
+    <@a>
+      ${done}
+//      ^?
+      <if(i === 5)>
+        $ done = true;
+      </if>
+    </@a>
+  </while>
+</>
+
+<${custom}>
+  <for|index| from=1 to=10>
+    $ const doubleIndex = index * 2;
+//          ^?
+    <@a>
+      ${doubleIndex}
+//      ^?
+    </@a>
+  </for>
+</>
+
+<${custom} x=1>
+  <if=x>
+    $ const a = 1 as const;
+//          ^?
+    <@a a=a/>
+  </if>
+  <else>
+    $ const b = 2 as const;
+//          ^?
+    <@b b=b/>
+  </else>
+</>

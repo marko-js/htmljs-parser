@@ -17,3 +17,8 @@ dist
 # Coverage
 coverage
 lcov.info
+
+# bench baseline snapshot (local A/B only)
+bench/.baseline/
+*.cpuprofile
+isolate-*.log

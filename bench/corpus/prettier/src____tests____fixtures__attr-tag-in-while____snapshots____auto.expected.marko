@@ -1,0 +1,17 @@
+<my-component>
+  <while(x > 0)>
+    <@body>Content</@body>
+  </while>
+  <for|item| of=list>
+    <@item>${item}</@item>
+  </for>
+  <if(show)>
+    <@header>Header</@header>
+  </if>
+  <else-if(other)>
+    <@footer>Footer</@footer>
+  </else-if>
+  <else>
+    <@fallback>Default</@fallback>
+  </else>
+</my-component>

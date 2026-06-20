@@ -1,0 +1,9330 @@
+<div>
+  <h1>Hello!</h1>
+  <app-sections>
+    <@section title="Buttons">
+      <table>
+        <tr>
+          <td>
+            <b>Primary:</b>
+          </td>
+          <td>
+            <app-button label="small" size="small" variant="primary"/>
+            <app-button label="normal" size="normal" variant="primary"/>
+            <app-button label="large" size="large" variant="primary"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Secondary:&nbsp;</b>
+          </td>
+          <td>
+            <app-button label="small" size="small" variant="secondary"/>
+            <app-button label="normal" size="normal" variant="secondary"/>
+            <app-button label="large" size="large" variant="secondary"/>
+          </td>
+        </tr>
+      </table>
+      <div>
+        <app-button
+          label=`Change Button Size - ${state.buttonSize}`
+          size=state.buttonSize
+          variant="primary"
+          onClick("handleChangeButtonSizeClick")/>
+        <app-button
+          label=`Change Button Variant - ${state.buttonVariant}`
+          variant=state.buttonVariant
+          onClick("handleChangeButtonVariantClick")/>
+      </div>
+    </@section>
+    <@section title="Checkboxes">
+      <p>
+        <app-checkbox
+          label="Foo"
+          data={
+            name: "foo"
+          }
+          checked=state.checked.foo
+          onToggle("handleCheckboxToggle")/>
+        <app-checkbox
+          label="Bar"
+          data={
+            name: "bar"
+          }
+          checked=state.checked.bar
+          onToggle("handleCheckboxToggle")/>
+        <app-checkbox
+          label="Baz"
+          data={
+            name: "baz"
+          }
+          checked=state.checked.baz
+          onToggle("handleCheckboxToggle")/>
+      </p>
+      <p>
+        <app-checkbox
+          label="Bar"
+          data={
+            name: "bar"
+          }
+          checked=state.checked.bar
+          onToggle("handleCheckboxToggle")/>
+      </p>
+      <p>
+        <b>Checked</b>:
+        <ul>
+          <for|key, value| in=state.checked>
+            <if(value)>
+              <li>${key}</li>
+            </if>
+          </for>
+        </ul>
+      </p>
+      <p>
+        <app-checkbox
+          label="Foo"
+          checked
+          data={
+            name: "foo"
+          }
+          key="toggleCheckbox"/>
+        <app-button
+          label="Toggle Checkbox"
+          size="small"
+          variant="primary"
+          onClick("handleToggleCheckboxButtonClick")/>
+      </p>
+    </@section>
+    <@section title="Overlays">
+      <app-button
+        label="Show Overlay"
+        variant="primary"
+        onClick("handleShowOverlayButtonClick")/>
+      <app-button
+        label="Show Notification"
+        variant="primary"
+        onClick("handleShowNotificationButtonClick")/>
+      <app-notifications key="notifications"/>
+      <app-overlay
+        onOk("handleOverlayOk")
+        onCancel("handleOverlayCancel")
+        onHide("handleOverlayHide")
+        onShow("handleOverlayShow")
+        key="overlay"
+        visible=state.overlayVisible>
+        <h2>Overlay Demo</h2>
+        This is an overlay!
+      </app-overlay>
+    </@section>
+    <@section title="Tabs">
+      <h3>Static tabs</h3>
+      <app-tabs>
+        <@tab label="Home">Content for Home</@tab>
+        <@tab label="Profile">Content for Profile</@tab>
+        <@tab label="Messages">Content for Messages</@tab>
+      </app-tabs>
+      <h3>Dynamic tabs</h3>
+      <app-tabs>
+        <for|tabIndex, tab| in=state.dynamicTabs>
+          <@tab label=("Tab " + tabIndex)>
+            Content for tab ${tabIndex}: ${tab.timestamp}
+          </@tab>
+        </for>
+      </app-tabs>
+      <app-button label="Add Tab" onClick("handleAddTabButtonClick")/>
+    </@section>
+    <@section title="Miscellaneous">
+      <app-progress-bar>
+        <@step name="contact-info">Contact Info</@step>
+        <@step name="interests">Interests</@step>
+        <@step name="family">Family</@step>
+      </app-progress-bar>
+      <br/>
+      <app-number-spinner/>
+      <br/>
+      <app-state-select/>
+    </@section>
+    <@section title="Client-side Rendering">
+      <app-button label="Render a button" onClick("handleRenderButtonClick")/>
+      <app-button label="Render a checkbox" onClick("handleRenderCheckboxButtonClick")/>
+      <app-button
+        label="Render a progress bar"
+        onClick("handleRenderProgressBarButtonClick")/>
+      <div key="renderTarget" class="render-target" no-update-body/>
+    </@section>
+    <@section title="Fetch data">
+      <app-fetch-data/>
+    </@section>
+    <@section title="Markdown">
+      <app-markdown>
+        ---
+
+        > This section demonstrates Markdown in Marko
+
+        ## Marko Features
+
+        - High performance
+        - Small
+        - Intuitive
+
+        # H1
+        ## H2
+        ### H3
+        #### H4
+        ##### H5
+        ###### H6
+
+        [markojs.com](http://markojs.com/)
+
+        _emphasis_
+        __strong__
+
+        ---
+      </app-markdown>
+    </@section>
+  </app-sections>
+</div>
+
+<div>
+  <h1>Hello!</h1>
+  <app-sections>
+    <@section title="Buttons">
+      <table>
+        <tr>
+          <td>
+            <b>Primary:</b>
+          </td>
+          <td>
+            <app-button label="small" size="small" variant="primary"/>
+            <app-button label="normal" size="normal" variant="primary"/>
+            <app-button label="large" size="large" variant="primary"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Secondary:&nbsp;</b>
+          </td>
+          <td>
+            <app-button label="small" size="small" variant="secondary"/>
+            <app-button label="normal" size="normal" variant="secondary"/>
+            <app-button label="large" size="large" variant="secondary"/>
+          </td>
+        </tr>
+      </table>
+      <div>
+        <app-button
+          label=`Change Button Size - ${state.buttonSize}`
+          size=state.buttonSize
+          variant="primary"
+          onClick("handleChangeButtonSizeClick")/>
+        <app-button
+          label=`Change Button Variant - ${state.buttonVariant}`
+          variant=state.buttonVariant
+          onClick("handleChangeButtonVariantClick")/>
+      </div>
+    </@section>
+    <@section title="Checkboxes">
+      <p>
+        <app-checkbox
+          label="Foo"
+          data={
+            name: "foo"
+          }
+          checked=state.checked.foo
+          onToggle("handleCheckboxToggle")/>
+        <app-checkbox
+          label="Bar"
+          data={
+            name: "bar"
+          }
+          checked=state.checked.bar
+          onToggle("handleCheckboxToggle")/>
+        <app-checkbox
+          label="Baz"
+          data={
+            name: "baz"
+          }
+          checked=state.checked.baz
+          onToggle("handleCheckboxToggle")/>
+      </p>
+      <p>
+        <app-checkbox
+          label="Bar"
+          data={
+            name: "bar"
+          }
+          checked=state.checked.bar
+          onToggle("handleCheckboxToggle")/>
+      </p>
+      <p>
+        <b>Checked</b>:
+        <ul>
+          <for|key, value| in=state.checked>
+            <if(value)>
+              <li>${key}</li>
+            </if>
+          </for>
+        </ul>
+      </p>
+      <p>
+        <app-checkbox
+          label="Foo"
+          checked
+          data={
+            name: "foo"
+          }
+          key="toggleCheckbox"/>
+        <app-button
+          label="Toggle Checkbox"
+          size="small"
+          variant="primary"
+          onClick("handleToggleCheckboxButtonClick")/>
+      </p>
+    </@section>
+    <@section title="Overlays">
+      <app-button
+        label="Show Overlay"
+        variant="primary"
+        onClick("handleShowOverlayButtonClick")/>
+      <app-button
+        label="Show Notification"
+        variant="primary"
+        onClick("handleShowNotificationButtonClick")/>
+      <app-notifications key="notifications"/>
+      <app-overlay
+        onOk("handleOverlayOk")
+        onCancel("handleOverlayCancel")
+        onHide("handleOverlayHide")
+        onShow("handleOverlayShow")
+        key="overlay"
+        visible=state.overlayVisible>
+        <h2>Overlay Demo</h2>
+        This is an overlay!
+      </app-overlay>
+    </@section>
+    <@section title="Tabs">
+      <h3>Static tabs</h3>
+      <app-tabs>
+        <@tab label="Home">Content for Home</@tab>
+        <@tab label="Profile">Content for Profile</@tab>
+        <@tab label="Messages">Content for Messages</@tab>
+      </app-tabs>
+      <h3>Dynamic tabs</h3>
+      <app-tabs>
+        <for|tabIndex, tab| in=state.dynamicTabs>
+          <@tab label=("Tab " + tabIndex)>
+            Content for tab ${tabIndex}: ${tab.timestamp}
+          </@tab>
+        </for>
+      </app-tabs>
+      <app-button label="Add Tab" onClick("handleAddTabButtonClick")/>
+    </@section>
+    <@section title="Miscellaneous">
+      <app-progress-bar>
+        <@step name="contact-info">Contact Info</@step>
+        <@step name="interests">Interests</@step>
+        <@step name="family">Family</@step>
+      </app-progress-bar>
+      <br/>
+      <app-number-spinner/>
+      <br/>
+      <app-state-select/>
+    </@section>
+    <@section title="Client-side Rendering">
+      <app-button label="Render a button" onClick("handleRenderButtonClick")/>
+      <app-button label="Render a checkbox" onClick("handleRenderCheckboxButtonClick")/>
+      <app-button
+        label="Render a progress bar"
+        onClick("handleRenderProgressBarButtonClick")/>
+      <div key="renderTarget" class="render-target" no-update-body/>
+    </@section>
+    <@section title="Fetch data">
+      <app-fetch-data/>
+    </@section>
+  </app-sections>
+</div>
+
+<div>
+  <h1>Hello!</h1>
+  <app-sections>
+    <@section title="Buttons">
+      <table>
+        <tr>
+          <td>
+            <b>Primary:</b>
+          </td>
+          <td>
+            <app-button label="small" size="small" variant="primary"/>
+            <app-button label="normal" size="normal" variant="primary"/>
+            <app-button label="large" size="large" variant="primary"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Secondary:&nbsp;</b>
+          </td>
+          <td>
+            <app-button label="small" size="small" variant="secondary"/>
+            <app-button label="normal" size="normal" variant="secondary"/>
+            <app-button label="large" size="large" variant="secondary"/>
+          </td>
+        </tr>
+      </table>
+      <div>
+        <app-button
+          label=`Change Button Size - ${state.buttonSize}`
+          size=state.buttonSize
+          variant="primary"
+          onClick("handleChangeButtonSizeClick")/>
+        <app-button
+          label=`Change Button Variant - ${state.buttonVariant}`
+          variant=state.buttonVariant
+          onClick("handleChangeButtonVariantClick")/>
+      </div>
+    </@section>
+    <@section title="Checkboxes">
+      <p>
+        <app-checkbox
+          label="Foo"
+          data={
+            name: "foo"
+          }
+          checked=state.checked.foo
+          onToggle("handleCheckboxToggle")/>
+        <app-checkbox
+          label="Bar"
+          data={
+            name: "bar"
+          }
+          checked=state.checked.bar
+          onToggle("handleCheckboxToggle")/>
+        <app-checkbox
+          label="Baz"
+          data={
+            name: "baz"
+          }
+          checked=state.checked.baz
+          onToggle("handleCheckboxToggle")/>
+      </p>
+      <p>
+        <app-checkbox
+          label="Bar"
+          data={
+            name: "bar"
+          }
+          checked=state.checked.bar
+          onToggle("handleCheckboxToggle")/>
+      </p>
+      <p>
+        <b>Checked</b>:
+        <ul>
+          <for|key, value| in=state.checked>
+            <if(value)>
+              <li>${key}</li>
+            </if>
+          </for>
+        </ul>
+      </p>
+      <p>
+        <app-checkbox
+          label="Foo"
+          checked
+          data={
+            name: "foo"
+          }
+          key="toggleCheckbox"/>
+        <app-button
+          label="Toggle Checkbox"
+          size="small"
+          variant="primary"
+          onClick("handleToggleCheckboxButtonClick")/>
+      </p>
+    </@section>
+    <@section title="Overlays">
+      <app-button
+        label="Show Overlay"
+        variant="primary"
+        onClick("handleShowOverlayButtonClick")/>
+      <app-button
+        label="Show Notification"
+        variant="primary"
+        onClick("handleShowNotificationButtonClick")/>
+      <app-notifications key="notifications"/>
+      <app-overlay
+        onOk("handleOverlayOk")
+        onCancel("handleOverlayCancel")
+        onHide("handleOverlayHide")
+        onShow("handleOverlayShow")
+        key="overlay"
+        visible=state.overlayVisible>
+        <h2>Overlay Demo</h2>
+        This is an overlay!
+      </app-overlay>
+    </@section>
+    <@section title="Tabs">
+      <h3>Static tabs</h3>
+      <app-tabs>
+        <@tab label="Home">Content for Home</@tab>
+        <@tab label="Profile">Content for Profile</@tab>
+        <@tab label="Messages">Content for Messages</@tab>
+      </app-tabs>
+      <h3>Dynamic tabs</h3>
+      <app-tabs>
+        <for|tabIndex, tab| in=state.dynamicTabs>
+          <@tab label=("Tab " + tabIndex)>
+            Content for tab ${tabIndex}: ${tab.timestamp}
+          </@tab>
+        </for>
+      </app-tabs>
+      <app-button label="Add Tab" onClick("handleAddTabButtonClick")/>
+    </@section>
+    <@section title="Miscellaneous">
+      <app-progress-bar>
+        <@step name="contact-info">Contact Info</@step>
+        <@step name="interests">Interests</@step>
+        <@step name="family">Family</@step>
+      </app-progress-bar>
+      <br/>
+      <app-number-spinner/>
+      <br/>
+      <app-state-select/>
+    </@section>
+    <@section title="Fetch data">
+      <app-fetch-data/>
+    </@section>
+  </app-sections>
+</div>
+
+a = x as string a
+a = x as keyof other a
+a= await y a
+a= new y a
+a= void y a
+a= typeof y a
+a= class A extends Y {} a
+a=x . y a
+a=x ! y a
+a=x * y a
+a=x / y a
+a=x ** y a
+a=x % y a
+a=x & y a
+a=x && y a
+a=x ^ y a
+a=x ~ y a
+a=x | y a
+a=x || y a
+a=x ?? y a
+a=x ? y : z a
+a=x == y a
+a=x === y a
+a=x != y a
+a=x !== y a
+a=x <= y a
+a=x >= y a
+a=x &= y a
+a=x &&= y a
+a=x |= y a
+a=x ||= y a
+a=x ^= y a
+a=x ~= y a
+a=x >>= y a
+a=x >>>= y a
+a=x -= y a
+a=x /= y a
+a=x *= y a
+a=x **= y a
+a=x %= y a
+a=x += y a
+a=x in;
+a=x in y a
+a=x in=y
+a=x in, y
+a=x instanceof y a
+a=x satisfies y a
+a=x ++ + y a
+a=x+ ++ y a
+a=x ++ y a
+a=x > y a
+a=x >> y a
+a=x >>> y a
+a=x ( y ) a
+a=x { y } a
+a=x => y a
+a=x => ( y ) a
+a=x => { y } a
+a=( x ) { y } a
+a = (x) => { console.log("y") } a
+a = async x => { console.log("y") } a
+a = function (x) { console.log("y") } a
+a = x => { console.log("y") } a
+a = async function (x) { console.log("y") } a
+
+<a= await y a/>
+<a= new y a/>
+<a= void y a/>
+<a= typeof y a/>
+<a= class A extends Y {} a/>
+<a=x . y a/>
+<a=x ! y a/>
+<a=x * y a/>
+<a=x / y a/>
+<a=x ** y a/>
+<a=x % y a/>
+<a=x & y a/>
+<a=x && y a/>
+<a=x ^ y a/>
+<a=x ~ y a/>
+<a=x | y a/>
+<a=x || y a/>
+<a=x ?? y a/>
+<a=x ? y : z a/>
+<a=x == y a/>
+<a=x === y a/>
+<a=x != y a/>
+<a=x !== y a/>
+<a=x <= y a/>
+<a=x >= y </a>
+<a=x &= y a/>
+<a=x &&= y a/>
+<a=x |= y a/>
+<a=x ||= y a/>
+<a=x ^= y a/>
+<a=x ~= y a/>
+<a=x >>= y </a>
+<a=x >>>= y </a>
+<a=x -= y a/>
+<a=x /= y a/>
+<a=x *= y a/>
+<a=x **= y a/>
+<a=x %= y a/>
+<a=x += y a/>
+<a=x in;/>
+<a=x in y a/>
+<a=x in=y/>
+<a=x in, y/>
+<a=x instanceof y a/>
+<a=x satisfies y a/>
+<a=x ++ + y a/>
+<a=x + ++ y a/>
+<a=typeof ++ y a/>
+<a=typeof y ++ a/>
+<a=x ++ y a/>
+<a=x > y </a>
+<a=x >> y </a>
+<a=x >>> y </a>
+<a=x ( y ) a/>
+<a=x { y } a/>
+<a=x => y a/>
+<a=x => ( y ) a/>
+<a=x => { y } a/>
+<a=( x ) { y } a/>
+<a= (x) => { console.log("y") } a/>
+<a= async x => { console.log("y") } a/>
+<a= function (x) { console.log("y") } a/>
+<a= x => { console.log("y") } a/>
+<a= async function (x) { console.log("y") } a/>
+<a= x / (y[z])/>
+import { getUsers } from "../../services/users/load";
+
+class {
+  onInput(input) {
+    const { usersData } = input;
+    let pageIndex = -1;
+    let users = [];
+
+    if (usersData) {
+      users = usersData.users;
+      pageIndex = usersData.pageIndex;
+    }
+
+    this.state = {
+      loading: false,
+      users: users,
+      pageIndex: pageIndex
+    };
+  }
+
+  onMount() {
+    this.pending = Promise.resolve();
+
+    if (this.state.users.length === 0) {
+      this.loadMore();
+    }
+  }
+
+  async loadMore() {
+    const { state } = this;
+
+    state.loading = true;
+    await this.pending;
+
+    try {
+      const usersData = await (this.pending = getUsers({ pageIndex: ++state.pageIndex }));
+      state.users = state.users.concat(usersData.users);
+    } catch (err) {
+      console.log("Fetch failed:", err);
+    }
+
+    state.loading = false;
+  }
+
+  handleLoadMoreClick() {
+    this.loadMore();
+  }
+
+  onUpdate() {
+    if (this.state.pageIndex > 0) {
+      const tableContainer = this.getEl("tableContainer");
+      tableContainer.scrollTop = tableContainer.scrollHeight;
+    }
+  }
+}
+
+<div.app-fetch-data>
+  <div class="table-container" key="tableContainer">
+    <if(state.users.length)>
+      <table>
+        <thead>
+          <tr>
+            <td>ID</td>
+            <td>Avatar</td>
+            <td>Name</td>
+            <td>Email</td>
+          </tr>
+        </thead>
+        <tbody>
+          <for|user| of=state.users>
+            <tr>
+              <td>${user.id}</td>
+              <td>
+                <img src=user.avatar width=50 height=50 alt="User Avatar"/>
+              </td>
+              <td>${user.firstName} ${user.lastName}</td>
+              <td>${user.email}</td>
+            </tr>
+          </for>
+        </tbody>
+      </table>
+    </if>
+  </div>
+  <app-button
+    label=(state.users.length ? "Load more users" : "Load users")
+    onClick("handleLoadMoreClick")/>
+  <span class={ loading: state.loading }/>
+</div>
+
+<const/x=""/>
+
+<div onClick() {
+  x = "Hello!";
+
+  {
+    let x = 1;
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let { x } = { x: 1 };
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let { y: x } = { y: 1 };
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let { y: {}, ...x } = { y: 1, x: 2 };
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let [x] = [1];
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let [,...x] = [1];
+    x = "Hello!";
+    console.log(x);
+  }
+
+
+  {
+    for (let x = 0; x < 10; x++) {
+      x = "Hello!";
+      console.log(x);
+    }
+  }
+
+  {
+    for (let x of [1, 2, 3]) {
+      x = "Hello!";
+      console.log(x);
+    }
+  }
+
+  {
+    for (let x in { a: 1, b: 2, c: 3 }) {
+      x = "Hello!";
+      console.log(x);
+    }
+  }
+
+  testA(1);
+  function testA(x: number) {
+    x = "Hello!";
+    console.log(x);
+  }
+
+  (function testB(x: number) {
+    x = "Hello!";
+    console.log(x);
+  })(1);
+
+  ((x: number) => {
+    x = "Hello!";
+    console.log(x);
+  })(1);
+
+  ({
+    testC(x: number) {
+      x = "Hello!";
+      console.log(x);
+    }
+  });
+
+  class TestD {
+    testD(x: number) {
+      x = "Hello!";
+      this.#testE(1);
+      console.log(x);
+    }
+    #testE(x: number) {
+      x = "Hello!";
+      console.log(x);
+    }
+  }
+
+  new TestD().testD(1);
+
+  {
+    class x {
+      constructor() {
+        x = "Hello!";
+      }
+    }
+    new x();
+    x = "Hello!";
+  }
+
+  (class x {
+    constructor() {
+      x = "Hello!";
+    }
+  });
+
+  (class {
+    constructor() {
+      x = "Hello!";
+    }
+  });
+
+  (() => {
+    function x() {
+      x = "Hello!";
+    }
+
+    x = "Hello!";
+    x();
+  })();
+
+  try {
+    x = "Hello!";
+  } catch (x) {
+    x = "Hello!";
+    console.log(x);
+  }
+
+  try {
+    x = "Hello!";
+  } catch {
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let a: { x: number } | undefined = { x: 1 };
+
+    a.x = 2;
+    a.x++;
+    console.log(a.x);
+
+    a = undefined;
+  }
+}/>
+import { getUsers } from "../../services/users/load";
+
+class {
+  onInput(input) {
+    const { usersData } = input;
+    let pageIndex = -1;
+    let users = [];
+
+    if (usersData) {
+      users = usersData.users;
+      pageIndex = usersData.pageIndex;
+    }
+
+    this.state = {
+      loading: false,
+      users: users,
+      pageIndex: pageIndex
+    };
+  }
+
+  onMount() {
+    this.pending = Promise.resolve();
+
+    if (this.state.users.length === 0) {
+      this.loadMore();
+    }
+  }
+
+  async loadMore() {
+    const { state } = this;
+
+    state.loading = true;
+    await this.pending;
+
+    try {
+      const usersData = await (this.pending = getUsers({ pageIndex: ++state.pageIndex }));
+      state.users = state.users.concat(usersData.users);
+    } catch (err) {
+      console.log("Fetch failed:", err);
+    }
+
+    state.loading = false;
+  }
+
+  handleLoadMoreClick() {
+    this.loadMore();
+  }
+
+  onUpdate() {
+    if (this.state.pageIndex > 0) {
+      const tableContainer = this.getEl("tableContainer");
+      tableContainer.scrollTop = tableContainer.scrollHeight;
+    }
+  }
+}
+
+<div.app-fetch-data>
+  <div class="table-container" key="tableContainer">
+    <if(state.users.length)>
+      <table>
+        <thead>
+          <tr>
+            <td>ID</td>
+            <td>Avatar</td>
+            <td>Name</td>
+            <td>Email</td>
+          </tr>
+        </thead>
+        <tbody>
+          <for|user| of=state.users>
+            <tr>
+              <td>${user.id}</td>
+              <td>
+                <img src=user.avatar width=50 height=50/>
+              </td>
+              <td>${user.firstName} ${user.lastName}</td>
+              <td>${user.email}</td>
+            </tr>
+          </for>
+        </tbody>
+      </table>
+    </if>
+  </div>
+  <app-button
+    label=(state.users.length ? "Load more users" : "Load users")
+    onClick("handleLoadMoreClick")/>
+  <span class={ loading: state.loading }/>
+</div>
+
+import TicTacToe from "./TicTacToe";
+
+class {
+  onCreate() {
+    this.ticTacToe = new TicTacToe();
+  }
+
+  onMount() {
+    this.ticTacToe.on("change", () => {
+      this.forceUpdate();
+    });
+  }
+
+  handleCellClick(rowIndex, colIndex) {
+    if (this.ticTacToe.makeMove("X", rowIndex, colIndex)) {
+      if (!this.ticTacToe.isGameOver) {
+        setTimeout(() => {
+          this.ticTacToe.computerMakeMove("O");
+        }, 1000);
+      }
+    }
+  }
+
+  newGame() {
+    this.ticTacToe.newGame();
+  }
+}
+
+$ const {
+  board,
+  currentPlayer,
+  isGameOver,
+  winningPlayer
+} = component.ticTacToe;
+
+<macro|{ className, player }| name="player-icon">
+  <div.player-icon class=[className, player]>
+    <span/>
+  </div>
+</macro>
+
+<div.tic-tac-toe>
+  <div.current-player class=currentPlayer>
+    <if(!isGameOver)>
+      <player-icon
+        className=["current-player", currentPlayer === "X" && "active"]
+        player="X"/>
+
+      <player-icon
+        className=["current-player", currentPlayer === "O" && "active"]
+        player="O"/>
+    </if>
+  </div>
+
+  <div.board-container>
+    <for|rowIndex, row| in=board>
+      <div.row>
+        <for|colIndex, player| in=row>
+          <div.cell
+            class=[`row-${rowIndex}`, `col-${colIndex}`]
+            on-click("handleCellClick", rowIndex, colIndex)>
+            <player-icon className="cell" player=player/>
+          </div>
+        </for>
+      </div>
+    </for>
+
+    <div.overlay class=[isGameOver && "game-over"]>
+      <if(winningPlayer)>
+        <player-icon className="winner" player=winningPlayer/>
+        <h2.winner>WINNER!</h2>
+      </if>
+      <else>
+        <h2.winner>DRAW!</h2>
+      </else>
+    </div>
+  </div>
+
+  <button.new-game type="button" on-click("newGame")>
+    New Game
+  </button>
+</div>
+
+import FancyButton from "<fancy-button>";
+import { get } from "@ebay/retriever";
+/** Hi */
+export interface Input {
+  year: number,
+  isSmartOnly: boolean,
+  type: string,
+  mobileList: Array<Mobile>,
+  renderBody: Marko.Body
+}
+
+class {
+    declare state: {
+        something: boolean;
+    }
+    onMount() {
+        console.log("mounted");
+    }
+    handleClick(ev: MouseEvent) {
+        console.log("clicked");
+    }
+}
+
+$ const person = {
+    name: "Frank",
+    age: 32
+};
+
+static {
+    function greet() {
+        return "hello world";
+    }
+}
+
+static var useA = true;
+
+static type Mobile = {
+    brandName: string;
+};
+
+$ {
+    const year: number = input.year;
+    const isSmartOnly: boolean = input.isSmartOnly;
+    const type: string = component.input.type;
+
+    const mobiles:Array<Mobile> = component.input.mobileList;
+
+    mobiles.forEach((mobile:Mobile) => {
+        console.log(mobile.brandName);
+    });
+}
+
+<div class="mobiles__list" onClick("handleClick")>
+    <p id="p">Year: ${year}</p>
+
+    <if(isSmartOnly)>
+      <span class="sub-note">isSmartPhone: ${isSmartOnly}</span>
+    </if>
+
+    <span class="sub-note">phoneType: ${type}</span>
+    $ {
+        const mobiles:Array<Mobile> = component.input.mobileList;
+        mobiles.forEach((mobile:Mobile) => {
+            console.log(mobile.brandName);
+        });
+    }
+
+    <for|mobile, i, all| of=mobiles>
+      <span id=i>${mobile} ${i} ${all.length}</span>
+    </for>
+
+    <div.container>
+        <${input.renderBody}/>
+    </div>
+    <FancyButton something=true>${type}</FancyButton>
+    <div>Hello $!{"<b>World</b>"}</div>
+    <div>Placeholder example: <code>\${someValue}</code></div>
+
+    <Missing/>
+    <complex-missing/>
+</div>
+
+a= await
+y a
+a= new
+y a
+a= void
+y a
+a= typeof
+y a
+a= class
+Y {} a
+a=x .
+y a
+a=x !
+y a
+a=x *
+y a
+a=x /
+y a
+a=x **
+y a
+a=x %
+y a
+a=x &
+y a
+a=x &&
+y a
+a=x ^
+y a
+a=x ~
+y a
+a=x |
+y a
+a=x ||
+y a
+a=x ??
+y a
+a=x ?
+y :
+z a
+a=x ==
+y a
+a=x ===
+y a
+a=x !=
+y a
+a=x !==
+y a
+a=x <=
+y a
+a=x >=
+y a
+a=x &=
+y a
+a=x &&=
+y a
+a=x |=
+y a
+a=x ||=
+y a
+a=x ^=
+y a
+a=x ~=
+y a
+a=x >>=
+y a
+a=x >>>=
+y a
+a=x -=
+y a
+a=x /=
+y a
+a=x *=
+y a
+a=x **=
+y a
+a=x %=
+y a
+a=x +=
+y a
+a=x ++ +
+y a
+a=x +
+++ y a
+a=x >>
+y a
+a=x >>>
+y a
+a=x =>
+y a
+a=x =>
+( y ) a
+a= (x) =>
+{ console.log("y") } a
+a= async
+x =>
+{ console.log("y") }
+a
+a= function
+(x) { console.log("y") }
+a
+a= x =>
+{ console.log("y") }
+a
+a= async
+function
+(x) { console.log("y") }
+a
+
+<a= await
+y a/>
+<a= new
+y a/>
+<a= void
+y a/>
+<a= typeof
+y a/>
+<a= class
+Y
+{} a/>
+<a=x .
+y a/>
+<a=x !
+y a/>
+<a=x *
+y a/>
+<a=x /
+y a/>
+<a=x **
+y a/>
+<a=x %
+y a/>
+<a=x &
+y a/>
+<a=x &&
+y a/>
+<a=x ^
+y a/>
+<a=x ~
+y a/>
+<a=x |
+y a/>
+<a=x ||
+y a/>
+<a=x ??
+y a/>
+<a=x ?
+y :
+z a/>
+<a=x ==
+y a/>
+<a=x ===
+y a/>
+<a=x !=
+y a/>
+<a=x !==
+y a/>
+<a=x <=
+y a/>
+<a=x >=
+y </a>
+<a=x &=
+y a/>
+<a=x &&=
+y a/>
+<a=x |=
+y a/>
+<a=x ||=
+y a/>
+<a=x ^=
+y a/>
+<a=x ~=
+y a/>
+<a=x >>=
+y </a>
+<a=x >>>=
+y </a>
+<a=x -=
+y a/>
+<a=x /=
+y a/>
+<a=x *=
+y a/>
+<a=x **=
+y a/>
+<a=x %=
+y a/>
+<a=x +=
+y a/>
+<a=x ++ +
+y a/>
+<a=x +
+++ y a/>
+<a=x >>
+y </a>
+<a=x >>>
+y </a>
+<a=x
+( y ) a/>
+<a=x
+{ y } a/>
+<a=x
+=>
+y a/>
+<a=x
+=>
+( y ) a/>
+<a=x
+=>
+{ y } a/>
+<a=( x )
+{ y } a/>
+<a= (x)
+=>
+{ console.log("y") } a/>
+<a= async
+x
+=>
+{ console.log("y") }
+a/>
+<a= function
+(x)
+{ console.log("y") }
+a/>
+<a= x
+=>
+{ console.log("y") }
+a/>
+<a= async
+function
+(x)
+{ console.log("y") }
+a/>
+<let/list=[{
+  value: 1
+}, {
+  value: 2
+}, {
+  value: 3
+}] as const/>
+
+<for of=list>
+  Repeated!
+</for>
+
+<for|item, index, all| of=list>
+  ${item} ${index} ${all}
+//  ^?      ^?       ^?
+</for>
+
+<for of=list by=(item, index) => `${item}-${index}`>
+//               ^?    ^?
+</for>
+
+<for|item| of=list>
+  <const/hoistedFromForOf = () => item.value/>
+</for>
+
+<for|item| of=list></for>
+
+<effect() {
+  hoistedFromForOf;
+//^?
+}/>
+
+<let/record={ a: 1, b: 2 } as const/>
+
+<for|key, value| in=record>
+  ${key} ${value}
+//  ^?     ^?
+</for>
+
+<for in=record by=(value, key) => `${value}-${key}`>
+//                 ^?     ^?
+</for>
+
+<for|key| in=record>
+  <const/hoistedFromForIn = () => key/>
+</for>
+
+<effect() {
+  hoistedFromForIn;
+//^?
+}/>
+
+<for|index| to=10>
+  ${index}
+//  ^?
+</for>
+
+<for to=10 by=(index) => `${index}`>
+//             ^?
+</for>
+
+<for|index| from=1 to=10>
+  ${index}
+//  ^?
+</for>
+
+<for|index| to=10 step=2>
+  ${index}
+//  ^?
+</for>
+
+<for|index| to=10>
+  <const/hoistedFromForTo = () => index/>
+</for>
+
+<effect() {
+  hoistedFromForUntil;
+//^?
+}/>
+
+<for|index| until=10>
+  ${index}
+//  ^?
+</for>
+
+<for until=10 by=(index) => `${index}`>
+//             ^?
+</for>
+
+<for|index| from=1 until=10>
+  ${index}
+//  ^?
+</for>
+
+<for|index| until=10 step=2>
+  ${index}
+//  ^?
+</for>
+
+<for|index| until=10>
+  <const/hoistedFromForUntil = () => index/>
+</for>
+
+<effect() {
+  hoistedFromForUntil;
+//^?
+}/>
+
+
+<for|index|>
+  Should error
+</for>
+
+p
+  -- I want to use${" "}
+  em -- emphasis
+  -- ,${" "}
+  strong -- strong text
+  -- ${" "}, and${" "}
+  sup -- super
+  sup -- duper
+  -- ${" "}
+  sub -- subscripts
+  -- ${" "}without a bunch of newlines.
+
+p
+  -- whentagcontentuses
+  strong
+    a href="smooshcase.com" -- smoosh
+    -- case
+  -- itshouldbepreserved
+
+div class="a11y-pattern-content"
+  p -- Provide an accessible label to an element or widget.
+  p
+    -- These two attributes${" "}
+    strong -- must
+
+    strong -- not
+    --
+    ${" "}be used on elements or widgets that already have a non-ARIA labelling mechanism
+    in place. Examples of non-ARIA labelling mechanisms are the${" "}
+    --
+    code -- &lt;label&gt;
+    -- ${" "}tag for form inputs, and inner text for buttons.
+  pre
+    code class="language-html"
+      --
+      &lt;a href=&quot;javascript:;&quot; id=&quot;share&quot;&gt;Share on Facebook&lt;/a&gt;
+
+      &lt;script&gt;
+        $(&quot;#share&quot;).on(&quot;click&quot;, function (e) {
+
+        });
+      &lt;/script&gt;
+
+      --
+  p
+    -- The table tags should only be used to represent${" "}
+    a href="components/table" -- tabular relationships between data
+    --
+    . The table tags have semantics that will cause problems for screen reader
+    users if used for layout.
+    --
+
+import todoApp from '../../pages/app.js'
+
+static function getTodoData() {
+  let remainingCount = 0;
+  let completedCount = 0;
+  const filter = todoApp.filter;
+  const filteredTodos = todoApp.todos.filter(todo => {
+    if (todo.completed) {
+      completedCount++;
+    } else {
+      remainingCount++;
+    }
+
+    if (todo.pending) {
+      return true;
+    } else if (filter === "active") {
+      return !todo.completed;
+    } else if (filter === "completed") {
+      return todo.completed;
+    } else {
+      return true;
+    }
+  });
+
+  return {
+    todos: filteredTodos,
+    remainingCount: remainingCount,
+    completedCount: completedCount,
+    filter: filter
+  };
+}
+
+class {
+  onMount() {
+    // Subscribe to the change state event. In response
+    // to a state change event we will rerender the entire
+    // app using the new state.
+    this.subscribeTo(todoApp).on("change", () => {
+      this.forceUpdate();
+    });
+  }
+}
+
+style {
+  @import url("https://unpkg.com/todomvc-app-css@2.2.0/index.css");
+}
+
+<section.todoapp>
+  <todomvc-header/>
+  <if(todoApp.todos.length)>
+    $ const todoData = getTodoData();
+    <todomvc-main ...todoData/>
+    <todomvc-footer ...todoData/>
+  </if>
+</section>
+
+<p>
+  I want to use <em>emphasis</em>, <strong>strong text</strong> , and <sup>
+    super
+  </sup><sup>duper</sup> <sub>subscripts</sub> without a bunch of newlines.
+</p>
+
+<p>
+  whentagcontentuses<strong>
+    <a href="smooshcase.com">smoosh</a>case
+  </strong>itshouldbepreserved
+</p>
+
+<div class="a11y-pattern-content">
+  <p>Provide an accessible label to an element or widget.</p>
+  <p>
+    These two attributes <strong>must</strong><strong>not</strong> be used on
+    elements or widgets that already have a non-ARIA labelling mechanism in
+    place. Examples of non-ARIA labelling mechanisms are the
+    <code>&lt;label&gt;</code> tag for form inputs, and inner text for buttons.
+  </p>
+  <pre><code class="language-html">&lt;a href=&quot;javascript:;&quot; id=&quot;share&quot;&gt;Share on Facebook&lt;/a&gt;
+
+&lt;script&gt;
+  $(&quot;#share&quot;).on(&quot;click&quot;, function (e) {
+    
+  });
+&lt;/script&gt;
+</code></pre>
+  <p>
+    The table tags should only be used to represent
+    <a href="components/table">tabular relationships between data</a>. The table tags
+    have semantics that will cause problems for screen reader users if used for layout.
+  </p>
+</div>
+
+<p>
+  I want to use <em>emphasis</em>, <strong>strong text</strong>
+  , and <sup>super</sup><sup>duper</sup> <sub>subscripts</sub> without a bunch of newlines.
+</p>
+
+<p>
+  whentagcontentuses<strong><a href="smooshcase.com">smoosh</a>case</strong>itshouldbepreserved
+</p>
+
+<div class="a11y-pattern-content">
+  <p>Provide an accessible label to an element or widget.</p>
+  <p>
+    These two attributes
+    <strong>must</strong>
+
+    <strong>not</strong>
+    be used on elements or widgets that already have a non-ARIA labelling
+    mechanism in place. Examples of non-ARIA labelling mechanisms are the
+    <code>&lt;label&gt;</code> tag for form inputs, and inner text for buttons.
+  </p>
+    <pre><code class="language-html">&lt;a href=&quot;javascript:;&quot; id=&quot;share&quot;&gt;Share on Facebook&lt;/a&gt;
+
+&lt;script&gt;
+  $(&quot;#share&quot;).on(&quot;click&quot;, function (e) {
+    
+  });
+&lt;/script&gt;
+</code></pre>
+  <p>
+    The table tags should only be used to represent <a href="components/table">tabular relationships between data
+    </a>. The table tags have semantics that will cause problems for screen
+    reader users if used for layout.
+  </p>
+</div>
+<my-tag<MyType, MyOtherType> my-attr="my-string"/>
+<my-tag <MyType, MyOtherType>|x|/>
+<my-tag <MyType>|x| my-attr="my-string"/>
+<my-tag<MyType>|x|/>
+<my-tag<MyType1><MyOtherType>|x|/>
+<my-tag<
+  A,
+  Whole,
+  Bunch,
+  Of,
+  Tag,
+  Attribute,
+  Types,
+  That,
+  Need,
+  To,
+  Wrap,
+  To,
+  The,
+  Next,
+  Line
+><
+  A,
+  Whole,
+  Bunch,
+  Of,
+  Tag,
+  Parameter,
+  Types,
+  That,
+  Need,
+  To,
+  Wrap,
+  To,
+  The,
+  Next,
+  Line,
+>|x|/>
+<my-tag <
+  T extends
+    keyof (typeof SuperLongImportedVariableName)["member1"]["member2"]["member3"],
+  K extends T extends string
+    ? MyType["member1"]["member2"]["member3"]
+    : MyOtherType,
+>|x|/>
+<my-tag<{
+  foo: number;
+  bar: number;
+  baz: number;
+  fnA: () => void;
+  fnB: () => void;
+  fnC: () => void;
+}>/>
+<my-tag<{
+  foo: number;
+  bar: number;
+  baz: number;
+  fnA: () => void;
+  fnB: () => void;
+  fnC: () => void;
+}>|x|/>
+<my-tag<{
+  foo: number;
+  bar: number;
+  baz: number;
+  fnA: () => void;
+  fnB: () => void;
+  fnC: () => void;
+}><
+  T extends {
+    foo: number;
+    bar: number;
+    baz: number;
+    fnA: () => void;
+    fnB: () => void;
+    fnC: () => void;
+  },
+>|x|/>
+
+import imgCO from "./assets/CO.png";
+import imgCA from "./assets/CA.png";
+static const states = [
+  {
+    name: "Colorado",
+    value: "CO",
+    img: imgCO
+  },
+  {
+    name: "California",
+    value: "CA",
+    img: imgCA
+  }
+];
+
+class {
+  onInput() {
+    this.state = {
+      stateIndex: null
+    };
+  }
+
+  handleSelectChange(event, selectEl) {
+    if (selectEl.selectedIndex === 0) {
+      this.state.stateIndex = null;
+    } else {
+      this.state.stateIndex = selectEl.selectedIndex - 1;
+    }
+  }
+}
+
+style {
+  .state-icon {
+    width: 75px;
+    height: 50px;
+  }
+}
+
+<div>
+  <h3>Choose a state</h3>
+  <select onChange("handleSelectChange")>
+    <option value="" selected=(state.stateIndex == null)>(choose a state)</option>
+    <for|stateInfo, i| of=states>
+      <option value=stateInfo.value selected=(state.stateIndex === i)>
+        ${stateInfo.name}
+      </option>
+    </for>
+  </select>
+  <if(state.stateIndex != null)>
+    $ const selectedState = states[state.stateIndex];
+    <div>You selected: ${selectedState.value}</div>
+    <img src=selectedState.img alt=`${selectedState.value} flag`/>
+  </if>
+</div>
+
+import todoApp from "../../pages/app.js";
+
+class {
+  setFilter(filter, event) {
+    todoApp.filter = filter;
+    event.preventDefault();
+  }
+
+  clearCompleted() {
+    todoApp.clearCompleted();
+  }
+}
+
+$ const remainingTodosWord = input.remainingCount > 1 ? "items" : "item";
+
+<footer.footer>
+  <span.todo-count>
+    <strong>${input.remainingCount}</strong> ${remainingTodosWord} left
+  </span>
+
+  <ul.filters>
+    <li>
+      <a
+        href="#/"
+        class={ selected: input.filter === "all" }
+        on-click("setFilter", "all")>
+        All
+      </a>
+    </li>
+
+    <li>
+      <a
+        href="#/active"
+        class={ selected: input.filter === "active" }
+        on-click("setFilter", "active")>
+        Active
+      </a>
+    </li>
+
+    <li>
+      <a
+        href="#/completed"
+        class={ selected: input.filter === "completed" } 
+        on-click("setFilter", "completed")>
+        Completed
+      </a>
+    </li>
+  </ul>
+
+  <if(input.completedCount > 0)>
+    <button.clear-completed on-click("clearCompleted")>
+      Clear completed (${input.completedCount})
+    </button>
+  </if>
+</footer>
+
+my-tag<MyType, MyOtherType> my-attr="my-string"
+my-tag <MyType, MyOtherType>|x|
+my-tag <MyType>|x| my-attr="my-string"
+my-tag<MyType>|x|
+my-tag<MyType1><MyOtherType>|x|
+my-tag<
+  A,
+  Whole,
+  Bunch,
+  Of,
+  Tag,
+  Attribute,
+  Types,
+  That,
+  Need,
+  To,
+  Wrap,
+  To,
+  The,
+  Next,
+  Line
+><
+  A,
+  Whole,
+  Bunch,
+  Of,
+  Tag,
+  Parameter,
+  Types,
+  That,
+  Need,
+  To,
+  Wrap,
+  To,
+  The,
+  Next,
+  Line,
+>|x|
+my-tag <
+  T extends
+    keyof (typeof SuperLongImportedVariableName)["member1"]["member2"]["member3"],
+  K extends T extends string
+    ? MyType["member1"]["member2"]["member3"]
+    : MyOtherType,
+>|x|
+my-tag<{
+  foo: number;
+  bar: number;
+  baz: number;
+  fnA: () => void;
+  fnB: () => void;
+  fnC: () => void;
+}>
+my-tag<{
+  foo: number;
+  bar: number;
+  baz: number;
+  fnA: () => void;
+  fnB: () => void;
+  fnC: () => void;
+}>|x|
+my-tag<{
+  foo: number;
+  bar: number;
+  baz: number;
+  fnA: () => void;
+  fnB: () => void;
+  fnC: () => void;
+}><
+  T extends {
+    foo: number;
+    bar: number;
+    baz: number;
+    fnA: () => void;
+    fnB: () => void;
+    fnC: () => void;
+  },
+>|x|
+
+<let/show=true/>
+<let/showAlt=false/>
+
+<if>
+  Hi
+</if>
+
+<if=show>
+  Hi
+</if>
+
+<if(show)>
+  Hi
+</if>
+
+<div>
+  <if>
+    Hello
+  </if>
+  World
+</div>
+
+<if=show>
+  Hi
+</if>
+<else>
+  Goodbye
+</else>
+
+<if=show>
+  <const/a = () => 0 as const/>
+</if>
+
+<if=show>
+  <const/b = () => 1 as const/>
+</if>
+<else if=showAlt>
+  <const/c = () => 2 as const/>
+</else>
+<else>
+  <const/d = () => 3 as const/>
+</else>
+
+<if=show></if>
+<else>
+  <const/e = () => 4 as const/>
+</else>
+
+<if=show></if>
+<else-if=showAlt></else-if>
+<else>
+  <const/f = () => 4 as const/>
+</else>
+
+<if=show>
+  <const/g = () => 5 as const/>
+</if>
+<else>
+  <const/g = () => 6 as const/>
+</else>
+
+<if(show)></if>
+<else-if(showAlt)>
+  <if(show)>
+  </if>
+  <else-if(showAlt)>
+    <const/h = () => 7 as const/>
+  </else-if>
+  <else>
+    <const/i = () => 8 as const/>
+  </else>
+</else-if>
+
+<if=show>
+  Hi
+</if>
+<else-if>
+  Hi
+</else-if>
+
+<if(show,)>
+  Hi
+</if>
+
+<if(show, )>
+  Hi
+</if>
+
+<if(show, y)>
+  Hi
+</if>
+
+<if(show,  y, )>
+  Hi
+</if>
+
+
+<effect() {
+  a;
+//^?
+  b;
+//^?
+  c;
+//^?
+  d;
+//^?
+  e;
+//^?
+  f;
+//^?
+  g;
+//^?
+  h;
+//^?
+  i;
+//^?
+}/>
+
+a=x .y a
+a=x !y a
+a=x *y a
+a=x /y a
+a=x **y a
+a=x %y a
+a=x &y a
+a=x &&y a
+a=x ^y a
+a=x ~y a
+a=x |y a
+a=x ||y a
+a=x ??y a
+a=x ?y :z a
+a=x ==y a
+a=x ===y a
+a=x !=y a
+a=x !==y a
+a=x <=y a
+a=x >=y a
+a=x &=y a
+a=x &&=y a
+a=x |=y a
+a=x ||=y a
+a=x ^=y a
+a=x ~=y a
+a=x >>=y a
+a=x >>>=y a
+a=x -=y a
+a=x /=y a
+a=x *=y a
+a=x **=y a
+a=x %=y a
+a=x +=y a
+a=x++ +y a
+a=x+ ++y a
+a=x >y a
+a=x >>y a
+a=x >>>y a
+a=x (y ) a
+a=x {y } a
+a=x =>y a
+a=x => (y ) a
+a=x => {y } a
+a=( x ) {y } a
+
+<a=x .y a/>
+<a=x !y a/>
+<a=x *y a/>
+<a=x /y a/>
+<a=x **y a/>
+<a=x %y a/>
+<a=x &y a/>
+<a=x &&y a/>
+<a=x ^y a/>
+<a=x ~y a/>
+<a=x |y a/>
+<a=x ||y a/>
+<a=x ??y a/>
+<a=x ?y :z a/>
+<a=x ==y a/>
+<a=x ===y a/>
+<a=x !=y a/>
+<a=x !==y a/>
+<a=x <=y a/>
+<a=x >=y </a>
+<a=x &=y a/>
+<a=x &&=y a/>
+<a=x |=y a/>
+<a=x ||=y a/>
+<a=x ^=y a/>
+<a=x ~=y a/>
+<a=x >>=y </a>
+<a=x >>>=y </a>
+<a=x -=y a/>
+<a=x /=y a/>
+<a=x *=y a/>
+<a=x **=y a/>
+<a=x %=y a/>
+<a=x +=y a/>
+<a=x++ +y a/>
+<a=x+ ++y a/>
+<a=x >y </a>
+<a=x >>y </a>
+<a=x >>>y </a>
+<a=x (y ) a/>
+<a=x {y } a/>
+<a=x =>y a/>
+<a=x => (y ) a/>
+<a=x => {y } a/>
+<a=( x ) {y } a/>
+
+a=x. y a
+a=x! y a
+a=x* y a
+a=x/ y a
+a=x** y a
+a=x% y a
+a=x& y a
+a=x&& y a
+a=x^ y a
+a=x~ y a
+a=x| y a
+a=x|| y a
+a=x?? y a
+a=x? y: z a
+a=x== y a
+a=x=== y a
+a=x!= y a
+a=x!== y a
+a=x<= y a
+a=x>= y a
+a=x&= y a
+a=x&&= y a
+a=x|= y a
+a=x||= y a
+a=x^= y a
+a=x~= y a
+a=x>>= y a
+a=x>>>= y a
+a=x-= y a
+a=x/= y a
+a=x*= y a
+a=x**= y a
+a=x%= y a
+a=x+= y a
+a=x++ + y a
+a=x+ ++ y a
+a=x> y a
+a=x>> y a
+a=x>>> y a
+a=x( y) a
+a=x{ y} a
+a=x=> y a
+a=x=> (y ) a
+a=x=> {y } a
+a=(x ) {y } a
+
+<a=x. y a/>
+<a=x! y a/>
+<a=x* y a/>
+<a=x/ y a/>
+<a=x** y a/>
+<a=x% y a/>
+<a=x& y a/>
+<a=x&& y a/>
+<a=x^ y a/>
+<a=x~ y a/>
+<a=x| y a/>
+<a=x|| y a/>
+<a=x?? y a/>
+<a=x? y: z a/>
+<a=x== y a/>
+<a=x=== y a/>
+<a=x!= y a/>
+<a=x!== y a/>
+<a=x<= y a/>
+<a=x>= y </a>
+<a=x&= y a/>
+<a=x&&= y a/>
+<a=x|= y a/>
+<a=x||= y a/>
+<a=x^= y a/>
+<a=x~= y a/>
+<a=x>>= y </a>
+<a=x>>>= y </a>
+<a=x-= y a/>
+<a=x/= y a/>
+<a=x*= y a/>
+<a=x**= y a/>
+<a=x%= y a/>
+<a=x+= y a/>
+<a=x++ + y a/>
+<a=x+ ++ y a/>
+<a=x> y </a>
+<a=x>> y </a>
+<a=x>>> y </a>
+<a=x(y ) a/>
+<a=z {y } a/>
+<a=x=> y a/>
+<a=x=> (y ) a/>
+<a=x=> {y } a/>
+<a=(x ) {y } a/>
+
+import imgCO from "./assets/CO.png";
+import imgCA from "./assets/CA.png";
+static const states = [
+  {
+    name: "Colorado",
+    value: "CO",
+    img: imgCO
+  },
+  {
+    name: "California",
+    value: "CA",
+    img: imgCA
+  }
+];
+
+class {
+  onInput() {
+    this.state = {
+      stateIndex: null
+    };
+  }
+
+  handleSelectChange(event, selectEl) {
+    if (selectEl.selectedIndex === 0) {
+      this.state.stateIndex = null;
+    } else {
+      this.state.stateIndex = selectEl.selectedIndex - 1;
+    }
+  }
+}
+
+style {
+  .state-icon {
+    width: 75px;
+    height: 50px;
+  }
+}
+
+<div>
+  <h3>Choose a state</h3>
+  <select onChange("handleSelectChange")>
+    <option value="" selected=(state.stateIndex == null)>(choose a state)</option>
+    <for|stateInfo, i| of=states>
+      <option value=stateInfo.value selected=(state.stateIndex === i)>
+        ${stateInfo.name}
+      </option>
+    </for>
+  </select>
+  <if(state.stateIndex != null)>
+    <div>You selected: ${states[state.stateIndex].value}</div>
+    <img src=states[state.stateIndex].img/>
+  </if>
+</div>
+
+static const x = 1;
+static const y = 2;
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+</>
+
+<${custom} x=1>
+  <if=x></if>
+  <else>
+    <@a/>
+  </else>
+</>
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+  <else>
+    <@b/>
+  </else>
+</>
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+  <else if=y>
+    <@b/>
+  </else>
+  <else-if=!y>
+    <@c/>
+  </else-if>
+  <else>
+    <@d/>
+  </else>
+</>
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+  <else-if>
+    <@b/>
+  </else-if>
+</>
+
+<${custom} x=1>
+  <if(x)>
+    <@a/>
+  </if>
+</>
+
+<${custom} x=1>
+  <if>
+    <@a/>
+  </if>
+</>
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+
+  <if=y>
+    <@b/>
+  </if>
+</>
+
+<${custom} x=1>
+  // hi
+  <@a b=1>
+    <const/hoistedFromStaticMember = () => 1 as const/>
+    hi!
+  </@a>
+
+  <@b/>
+
+  <if=x>
+    <@b>
+      <const/hoistedFromDynamicMember = () => 2 as const/>
+    </>
+  </if>
+
+  <if=y>
+    <@a/>
+  </if>
+</>
+
+<effect() {
+  hoistedFromStaticMember;
+//^?
+  hoistedFromDynamicMember; // TODO: this should be better and include `undefined` as a possible value
+//^?
+}/>
+
+import FancyButton from "<fancy-button>";
+import { get } from "@ebay/retriever";
+/** Hi */
+export interface Input {
+  year: number,
+  isSmartOnly: boolean,
+  type: string,
+  mobileList: Array<Mobile>,
+  renderBody: Marko.Body
+}
+
+static {
+    function greet() {
+        return "hello world";
+    }
+}
+
+static var useA = true;
+
+<const/{ year, isSmartOnly, type, mobileList, renderBody } = input/>
+
+<div class="mobiles__list">
+    <p id="p">Year: ${year}</p>
+
+    <if=isSmartOnly>
+      <span class="sub-note">isSmartPhone: ${isSmartOnly}</span>
+    </if>
+
+    <span class="sub-note">phoneType: ${type}</span>
+
+    <for|mobile, i, all| of=mobileList>
+//                          ^?
+      <span id=i>${mobile} ${i} ${all.length}</span>
+//                 ^?        ^?
+    </for>
+
+    <div.container>
+        <${renderBody}/>
+    </div>
+    <FancyButton no-update something=true>${type}</FancyButton>
+    <div>Hello $!{"<b>World</b>"}</div>
+    <div>Placeholder example: <code>\${someValue}</code></div>
+</div>
+
+<return=1/>
+
+class {
+  onInput(input) {
+    this.state = {
+      checked: input.checked === true
+    };
+  }
+
+  isChecked() {
+    return this.state.checked === true;
+  }
+
+  setChecked(newChecked) {
+    this.state.checked = newChecked;
+  }
+
+  toggle() {
+    this.state.checked = !this.state.checked;
+  }
+
+  handleClick() {
+    const newChecked = !this.state.checked;
+    let defaultPrevented = false;
+
+    this.emit("toggle", {
+      checked: newChecked,
+      data: this.input.data,
+      preventDefault() {
+        defaultPrevented = true;
+      }
+    });
+
+    if (!defaultPrevented) {
+      this.state.checked = newChecked;
+    }
+  }
+}
+
+$ const {
+  label,
+  class: className,
+  ...attrs
+} = input;
+
+<app-button
+  key="button"
+  ...attrs
+  class=[
+    "app-checkbox",
+    className,
+    { checked: state.checked }
+  ]
+  onClick("handleClick")>
+  <span class="app-checkbox-icon"/>
+  <span key="checkboxLabel">
+    <if(label)>
+      ${label}
+    </if>
+    <else>
+      <${input.renderBody}/>
+    </else>
+  </span>
+</app-button>
+
+<div.mouse-mask style=`--mouse-x:${state.x};--mouse-y:${state.y};`/>
+
+class {
+  onCreate() {
+    this.state = { x: "center", y: "center" };
+    this.boundMove = this.move.bind(this);
+  }
+  onMount() {
+    window.addEventListener("mousemove", this.boundMove);
+  }
+  onDestroy() {
+    window.removeEventListener("mousemove", this.boundMove);
+  }
+  move(e) {
+    this.state.x = e.clientX + "px";
+    this.state.y = e.clientY + "px";
+  }
+}
+
+style {
+  .mouse-mask {    
+    position: fixed;
+    top:0; bottom:0; right:0; left:0;
+    touch-action: none;
+    pointer-events: none;
+    inset: 0;
+    background-color: transparent;
+    backdrop-filter: grayscale(100%) brightness(30%);
+    -webkit-backdrop-filter: grayscale(100%) brightness(30%);
+    
+    mask-image: radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y), 
+      transparent 15%,
+      black 50%
+    );
+    -webkit-mask-image: radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y), 
+      transparent 15%,
+      black 50%
+    );
+  }
+}
+<my-tag<MyType, MyOtherType> my-attr="my-string" />
+<my-tag <MyType, MyOtherType>|x| />
+<my-tag
+  <MyType>|x|
+  my-attr="my-string"
+/>
+<my-tag<MyType>|x|/>
+<my-tag<MyType1><MyOtherType>|x| />
+<my-tag<A, Whole, Bunch, Of, Tag, Attribute, Types, That, Need, To, Wrap, To, The, Next, Line>
+  <A, Whole, Bunch, Of, Tag, Parameter, Types, That, Need, To, Wrap, To, The, Next, Line>|x| />
+<my-tag <T extends keyof (typeof SuperLongImportedVariableName)["member1"]["member2"]["member3"], K extends (T extends string ? MyType["member1"]["member2"]["member3"] : MyOtherType)>|x| />
+<my-tag<{ foo: number, bar: number, baz: number, fnA: () => void, fnB: () => void, fnC: () => void }> />
+<my-tag<{ foo: number, bar: number, baz: number, fnA: () => void, fnB: () => void, fnC: () => void }>|x| />
+<my-tag<{ foo: number, bar: number, baz: number, fnA: () => void, fnB: () => void, fnC: () => void }> <T extends { foo: number, bar: number, baz: number, fnA: () => void, fnB: () => void, fnC: () => void }>|x|/>
+// newline continuations only work for html mode or enclosed concice attr groups.
+// here we sanity check that is the case.
+a=x
+.b
+
+<a=x
+.y a/>
+<a=x
+! y a/>
+<a=x
+* y a/>
+<a=x
+/ y a/>
+<a=x
+** y a/>
+<a=x
+% y a/>
+<a=x
+& y a/>
+<a=x
+&& y a/>
+<a=x
+^ y a/>
+<a=x
+~ y a/>
+<a=x
+| y a/>
+<a=x
+|| y a/>
+<a=x
+?? y a/>
+<a=x
+? y
+: z a/>
+<a=x
+== y a/>
+<a=x
+=== y a/>
+<a=x
+!= y a/>
+<a=x
+!== y a/>
+<a=x
+<= y a/>
+<a=x
+>= y </a>
+<a=x
+&= y a/>
+<a=x
+&&= y a/>
+<a=x
+|= y a/>
+<a=x
+||= y a/>
+<a=x
+^= y a/>
+<a=x
+~= y a/>
+<a=x
+>>= y </a>
+<a=x
+>>>= y </a>
+<a=x
+-= y a/>
+<a=x
+/= y a/>
+<a=x
+*= y a/>
+<a=x
+**= y a/>
+<a=x
+%= y a/>
+<a=x
++= y a/>
+<a=x ++
++ y a/>
+<a=x +
+++ y a/>
+<a=x
+>>y </a>
+<a=x
+>>> y </a>
+<a=x
+( y ) a/>
+<a=x
+{ y } a/>
+<a=x
+=>
+y a/>
+<a=x
+=>
+( y ) a/>
+<a=x
+=>
+{ y } a/>
+<a=( x )
+{ y } a/>
+<a= (x)
+=>
+{ console.log("y") } a/>
+<a= async
+x
+=>
+{ console.log("y") }
+a/>
+<a= function
+(x)
+{ console.log("y") }
+a/>
+<a= x
+=>
+{ console.log("y") }
+a/>
+<a= async
+function
+(x)
+{ console.log("y") }
+a/>
+<foo onclick(event){}/>
+
+<foo onclick(event){ 
+  console.log("hello"); 
+  event.preventDefault();
+}/>
+
+<foo onclick(event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}/>
+
+<foo onclick (event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}/>
+
+<foo(event){ 
+  console.log("hello"); 
+  event.preventDefault();
+}/>
+
+<foo(event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}/>
+
+<foo (event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}/>
+
+foo onclick(event){ 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+foo onclick(event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+foo onclick (event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+foo(event){ 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+foo(event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+foo (event) { 
+  console.log("hello"); 
+  event.preventDefault();
+}
+
+<a b() { c / (d) }/>
+
+<div class="app-progress-bar">
+  <if(input.steps)>
+    <for|step, i| of=input.steps>
+      <div
+        class=["progress-step", { active: i === state.activeIndex }]
+        onClick("handleStepClick", i)>
+        <a href="#" class="progress-step">
+          <span>
+            <if(step.label)>${step.label}</if>
+            <else>
+              <${step.renderBody}/>
+            </else>
+          </span>
+          <div class="completion-icon"/>
+        </a>
+        <div class="progress-step-end">
+          <svg
+            class="progress-step-end"
+            viewBox="0 0 125 100"
+            overflow="visible"
+            enable-background="new 0 0 100 100"
+            preserveAspectRatio="none">
+            <polygon points="0,0 25,0 125,50 25,100 0,100" fill="white"/>
+            <polygon class="progress-step-end" points="0,0 100,50 0,100"/>
+          </svg>
+        </div>
+      </div>
+    </for>
+  </if>
+</div>
+
+<div data-value=(
+  a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+)/>
+
+div data-value=(
+  a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+)
+
+class {
+  onInput(input) {
+    let activeIndex = 0;
+
+    if (input.tabs) {
+      input.tabs.forEach((tab, i) => {
+        if (tab.active) {
+          activeIndex = i;
+        }
+      });
+    }
+
+    this.state = { activeIndex };
+  }
+
+  setActiveIndex(newActiveIndex) {
+    this.state.activeIndex = newActiveIndex;
+  }
+
+  handleTabClick(tabIndex, event) {
+    this.setActiveIndex(tabIndex);
+    event.preventDefault();
+  }
+}
+
+<div class="app-tabs">
+  <ul class="tab-nav">
+    <for|tab, i| of=input.tabs>
+      <li class=["tab", { active: i === state.activeIndex }]>
+        <a href="#" onClick("handleTabClick", i)>
+          ${tab.label}
+        </a>
+      </li>
+    </for>
+  </ul>
+  <div style="clear: both"/>
+  <div class="tab-panes">
+    <for|tab, i| of=input.tabs>
+      <div class=["tab-pane", { active: i === state.activeIndex }]>
+        <${tab.renderBody}/>
+      </div>
+    </for>
+  </div>
+</div>
+
+<for|i| from=1 to=2>
+  <div
+    class=[input.class, i === 1 ? "mouse-mask-base" : "mouse-mask"] 
+    style=`--mouse-x:${state.x}px;--mouse-y:${state.y}px;` 
+    on-mousemove("move")>
+    <${input.renderBody}/>
+  </div>
+</for>
+
+class {
+  onCreate() {
+    this.state = { x: 0, y: 0 };
+  }
+  move(e) {
+    this.state.x = e.clientX;
+    this.state.y = e.clientY;
+  }
+}
+
+style {
+  .mouse-mask,
+  .mouse-mask-base {
+    position: absolute;
+  }
+  .mouse-mask-base {
+    filter: grayscale(100%) brightness(50%);
+  }
+  .mouse-mask {
+    --mouse-x: 0px;
+    --mouse-y: 0px;
+    mask-image: radial-gradient(circle, black 20%, transparent 70%);
+    mask-repeat: no-repeat;
+    mask-size: 100vmin 100vmin;
+    -webkit-mask-position-x: calc(var(--mouse-x) - 50vmin);
+    -webkit-mask-position-y: calc(var(--mouse-y) - 50vmin);
+    background: transparent;
+  }
+}
+
+<for|i| from=1 to=2>
+  <div 
+    class=[input.class, i === 1 ? "mouse-mask-base" : "mouse-mask"] 
+    style=`--mouse-x:${state.x}px;--mouse-y:${state.y}px;` 
+    on-mousemove("move")>
+    <${input.renderBody}/>
+  </div>
+</for>
+
+class {
+  onCreate() {
+    this.state = { x: 0, y: 0 };
+  }
+  move(e) {
+    this.state.x = e.clientX;
+    this.state.y = e.clientY;
+  }
+}
+
+style {
+  .mouse-mask,
+  .mouse-mask-base {
+    position: absolute;
+  }
+  .mouse-mask-base {
+    filter: grayscale(100%) brightness(50%);
+  }
+  .mouse-mask {
+    --mouse-x: 0px;
+    --mouse-y: 0px;
+    mask-image: radial-gradient(circle, black 20%, transparent 70%);
+    mask-repeat: no-repeat;
+    mask-size: 100vmin 100vmin;
+    -webkit-mask-position-x: calc(var(--mouse-x) - 50vmin);
+    -webkit-mask-position-y: calc(var(--mouse-y) - 50vmin);
+    background: transparent;
+  }
+}
+<div data-widget="my-really-awesome-weidget-this-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going END"
+    data-widget2="my-really-awesome-weidget-this-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going END"
+    another-attribute="foo">
+    <div data-widget="my-really-awesome-weidget-this-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going END">
+        Hello World
+    </div>
+</div>
+<div
+  data-widget="my-really-awesome-weidget-this-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going END"
+  data-widget2="my-really-awesome-weidget-this-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going END"
+  another-attribute="foo"
+>
+  <div data-widget="my-really-awesome-weidget-this-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going END">
+    Hello World
+  </div>
+</div>
+
+static function getClassNameForValue(value) {
+  if (value < 0) {
+    return "negative";
+  } else if (value > 0) {
+    return "positive";
+  }
+}
+
+class {
+  onInput(input) {
+    this.state = {
+      value: input.value || 0
+    };
+  }
+
+  handleIncrementClick(delta) {
+    this.state.value += delta;
+  }
+
+  handleInputKeyUp(event) {
+    const newValue = event.target.value;
+    if (/^-?[0-9]+$/.test(newValue)) {
+      this.state.value = parseInt(newValue, 10);
+    }
+  }
+}
+
+<div class=["number-spinner", getClassNameForValue(state.value)]>
+  <button type="button" onClick("handleIncrementClick", -1)>-</button>
+  <input type="text" aria-label="Current Number" value=state.value size="4" onKeyUp("handleInputKeyUp")/>
+  <button type="button" onClick("handleIncrementClick", 1)>+</button>
+</div>
+
+div
+  ,data-widget="my-really-awesome-weidget-this-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going END"
+  ,data-widget2="my-really-awesome-weidget-this-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going END"
+  ,another-attribute="foo"
+  div data-widget="my-really-awesome-weidget-this-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going-keeps-going-and-going-and-going END" --
+    Hello World
+
+static function getClassNameForValue(value) {
+  if (value < 0) {
+    return "negative";
+  } else if (value > 0) {
+    return "positive";
+  }
+}
+
+class {
+  onInput(input) {
+    this.state = {
+      value: input.value || 0
+    };
+  }
+
+  handleIncrementClick(delta) {
+    this.state.value += delta;
+  }
+
+  handleInputKeyUp(event) {
+    const newValue = event.target.value;
+    if (/^-?[0-9]+$/.test(newValue)) {
+      this.state.value = parseInt(newValue, 10);
+    }
+  }
+}
+
+<div class=["number-spinner", getClassNameForValue(state.value)]>
+  <button type="button" onClick("handleIncrementClick", -1)>-</button>
+  <input type="text" value=state.value size="4" onKeyUp("handleInputKeyUp")/>
+  <button type="button" onClick("handleIncrementClick", 1)>+</button>
+</div>
+
+<div class=(
+  [
+    "test-class",
+    input.mobile && input.thing !== false && "test-class-thing",
+    input.mobile && "test-class-mobile",
+  ]
+    .filter((className) => className)
+    .join(" ")
+)/>
+<div data-current-text=(
+  current &&
+  current
+    .replace("{page_number}", "{item_number}")
+    .replace("{current_page}", "{item_number}")
+)/>
+
+<div
+  class=(
+    [
+      "test-class",
+      input.mobile && input.thing !== false && "test-class-thing",
+      input.mobile && "test-class-mobile",
+    ]
+      .filter((className) => className)
+      .join(" ")
+  )
+  data-current-text=(
+    current &&
+    current
+      .replace("{page_number}", "{item_number}")
+      .replace("{current_page}", "{item_number}")
+  )
+/>
+
+class {
+  handleClick(event) {
+    // Every Widget instance is also an EventEmitter instance.
+    // We will emit a custom "click" event when a DOM click event
+    // is triggered
+    this.emit("click", {
+      event: event // Pass along the DOM event in case it is helpful to others
+    });
+  }
+}
+
+$ const {
+  label,
+  class: className,
+  size = "normal",
+  variant = "primary",
+  ...attrs
+} = input;
+
+<button
+  ...attrs
+  class=[
+    className,
+    "app-button",
+    variant !== "primary" && `app-button-${variant}`,
+    size !== "normal" && `app-button-${size}`
+  ]
+  onClick("handleClick")>
+  <span>
+    <if(label)>
+      ${label}
+    </if>
+    <else>
+      <${input.renderBody}/>
+    </else>
+  </span>
+</button>
+
+div class=(
+  [
+    "test-class",
+    input.mobile && input.thing !== false && "test-class-thing",
+    input.mobile && "test-class-mobile",
+  ]
+    .filter((className) => className)
+    .join(" ")
+)
+div data-current-text=(
+  current &&
+  current
+    .replace("{page_number}", "{item_number}")
+    .replace("{current_page}", "{item_number}")
+)
+
+div
+  ,class=(
+    [
+      "test-class",
+      input.mobile && input.thing !== false && "test-class-thing",
+      input.mobile && "test-class-mobile",
+    ]
+      .filter((className) => className)
+      .join(" ")
+  )
+  ,data-current-text=(
+    current &&
+    current
+      .replace("{page_number}", "{item_number}")
+      .replace("{current_page}", "{item_number}")
+  )
+
+import { animateIn, animateOut } from "./animations";
+
+<li
+  class={ completed: input.completed, editing: state.isEditing }
+  on-detach(animateOut)
+  on-attach(animateIn)>
+  <div.view>
+    <input.toggle
+      type="checkbox"
+      checked=input.completed
+      aria-label="Toggle todo completed"
+      on-change("handleCheckboxChange")/>
+
+    <label on-dblclick("handleLabelDblClick")>
+      ${input.title}
+    </label>
+
+    <button.destroy on-click("removeTodo") aria-label="Delete todo"/>
+  </div>
+
+  <input.edit
+    title="Enter the new todo title"
+    type="text"
+    value=state.editingTitle
+    key="titleInput"
+    on-blur("saveEdit")
+    on-change("saveEdit")
+    on-keydown("handleInputKeyDown")/>
+</li>
+
+static function getAnchorName(section) {
+  if (!section.anchorName) {
+    section.anchorName = section.title.replace(/[^a-zA-Z]+/g, '-');
+  }
+
+  return section.anchorName;
+}
+
+static function sum(a, b) {
+    return a + b;
+};
+
+<div>${sum(1, 2)}</div>
+
+<div class="app-sections">
+  <div class="tableOfContents">
+    <ul>
+      <li for(section in data.sections)>
+        <a href="#${getAnchorName(section)}">${section.title}</a>
+      </li>
+    </ul>
+  </div>
+  <div class="sections-ctr">
+    <div class="section" for(section in data.sections)>
+      <h2 id=getAnchorName(section)>${section.title}</h2>
+      <div class="section-body">
+        <include(section)/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div.string class="blue"/>
+<div.string_list class=["blue"]/>
+
+<div.templatestring class=`${blue}`/>
+<div.templatestring_list class=[`${blue}`]/>
+
+<div.dynamic class=blue/>
+<div.dynamic_list class=[blue]/>
+
+<div.mixed_list class=["red", blue, "green", yellow]/>
+<div.long_list class=[
+  red,
+  yellow,
+  (() => "blue")(),
+  orange,
+  ...colorList.map((item) => item.color),
+  green,
+]/>
+<div.long_item class=(
+  ["red", "orange", "yellow", "green", "blue", "indigo", "violet"]
+    .filter((color) => color.indexOf("e") >= 0)
+    .map((color) => color.toUpperCase())
+)/>
+
+<div.multiple class=["red"] class="blue"/>
+<div.multiple class="red" class=["blue"]/>
+
+<div.multiple class={ blue: maybeBlue }/>
+
+static function getAnchorName(section) {
+  if (!section.anchorName) {
+    section.anchorName = section.title.replace(/[^a-zA-Z]+/g, "-");
+  }
+
+  return section.anchorName;
+}
+
+static function sum(a, b) {
+  return a + b;
+}
+
+<div>${sum(1, 2)}</div>
+
+<div class="app-sections">
+  <div class="tableOfContents">
+    <ul>
+      <li for(section in data.sections)>
+        <a href="#${getAnchorName(section)}">${section.title}</a>
+      </li>
+    </ul>
+  </div>
+  <div class="sections-ctr">
+    <div class="section" for(section in data.sections)>
+      <h2 id=getAnchorName(section)>${section.title}</h2>
+      <div class="section-body">
+        <include(section)/>
+      </div>
+    </div>
+  </div>
+</div>
+
+static function getAnchorName(section) {
+  if (!section.anchorName) {
+    section.anchorName = section.title.replace(/[^a-zA-Z]+/g, "-");
+  }
+
+  return section.anchorName;
+}
+
+<div class="app-sections">
+  <div class="tableOfContents">
+    <ul>
+      <for|section| of=input.sections>
+        <li>
+          <a href=`#${getAnchorName(section)}`>${section.title}</a>
+        </li>
+      </for>
+    </ul>
+  </div>
+  <div class="sections-ctr">
+    <for|section| of=input.sections>
+      <div class="section">
+        <h2 id=getAnchorName(section)>${section.title}</h2>
+        <div class="section-body">
+          <${section.renderBody}/>
+        </div>
+      </div>
+    </for>
+  </div>
+</div>
+
+--
+This is top-level text
+--
+p
+    --
+    This is text that spans multiple lines.
+
+    <strong>You can throw in some HTML markup if you want!</strong>
+    --
+p
+    -----
+    If you really want to you can change the block delimiter for the following
+    reasons:
+    - Avoid accidentally ending a block
+    - To improve readability
+    -----
+i -- This text will be in italics
+b
+    -- This text will be bold
+    -- This is okay too
+app-hello
+    -- ${data.name} some html - <b>bold</b>
+
+pre
+    --
+    foo
+    --
+
+p
+    --
+    before
+    ${"placeholder"}
+    after
+    --
+
+p
+    --
+    before
+    <!--comment-->
+    after
+    --
+
+p
+    --
+    before
+    <div/>
+    after
+    --
+
+<div.string class="blue"/>
+<div.string_list class=["blue"]/>
+
+<div.templatestring class=`${blue}`/>
+<div.templatestring_list class=[`${blue}`]/>
+
+<div.dynamic class=blue/>
+<div.dynamic_list class=[blue]/>
+
+<div.mixed_list class=["red", blue, "green", yellow]/>
+<div.long_list class=[red, yellow, (() => "blue")(), orange, ...colorList.map((item) => item.color), green]/>
+<div.long_item class=["red", "orange", "yellow", "green", "blue", "indigo", "violet"].filter((color) => color.indexOf('e') >= 0).map((color) => color.toUpperCase())/>
+
+<div.multiple class=["red"] class="blue" />
+<div.multiple class="red" class=["blue"] />
+
+<div.multiple class={ blue: maybeBlue } />
+
+div.string class="blue"
+div.string_list class=["blue"]
+
+div.templatestring class=`${blue}`
+div.templatestring_list class=[`${blue}`]
+
+div.dynamic class=blue
+div.dynamic_list class=[blue]
+
+div.mixed_list class=["red", blue, "green", yellow]
+div.long_list class=[
+  red,
+  yellow,
+  (() => "blue")(),
+  orange,
+  ...colorList.map((item) => item.color),
+  green,
+]
+div.long_item class=(
+  ["red", "orange", "yellow", "green", "blue", "indigo", "violet"]
+    .filter((color) => color.indexOf("e") >= 0)
+    .map((color) => color.toUpperCase())
+)
+
+div.multiple class=["red"] class="blue"
+div.multiple class="red" class=["blue"]
+
+div.multiple class={ blue: maybeBlue }
+
+<let/x=1/>
+
+<div data-function() {
+  x++;
+}/>
+
+<div data-function(y = x++) {
+  y;
+}/>
+
+<div data-function=() => {
+  x++;
+}/>
+
+<div data-function=(y = x++) => {
+  y;
+}/>
+
+<div data-function=function () {
+  x++;
+}/>
+
+<div data-function=function (y = x++) {
+  y;
+}/>
+
+<div data-function() {
+  function testA() {
+    x++;
+  }
+
+  function testB(y = x++) {
+    y;
+  }
+
+  class TestC {
+    constructor() {
+      this.#privateMethodA;
+      this.#privateMethodB;
+    }
+    methodA() {
+      x++;
+    }
+    methodB(y = x++) {
+      y;
+    }
+    #privateMethodA() {
+      x++;
+    }
+    #privateMethodB(y = x++) {
+      y;
+    }
+  }
+
+  testA;
+  testB;
+  TestC;
+}/>
+
+export interface Input {
+  tab?: Marko.AttrTag<{
+    href: string;
+    title: string;
+  }>;
+  option: any;
+}
+
+<for|{ href, title }| of=input.tab>
+    // ^?
+  <a href=href>
+    ${title}
+    // ^?
+  </a>
+</for>
+
+<select>
+  <for|{ value, content }| of=input.option>
+      // ^?
+    <option value=value>
+      ${content}
+      // ^?
+    </option>
+  </for>
+</select>
+
+<my-select>
+  <for|{ href, title }| of=input.tab>
+      // ^?
+    <@option value=href>
+      // ^?
+      ${title}
+    </@option>
+  </for>
+  <for|{ value, content }| of=input.option>
+      // ^?
+    <@option value=value>
+      // ^?
+      ${content}
+    </@option>
+  </for>
+</my-select>
+
+import logoURL from "./logo.svg";
+<app-layout title="Welcome to Marko">
+  <mouse-mask.container>
+    <header>
+      <img.logo src=logoURL alt="Marko"/>
+    </header>
+    <main>
+      <p>Edit <code>./pages/index.marko</code> and save to reload.</p>
+      <a href="https://markojs.com/docs/getting-started">
+        Learn Marko
+      </a>
+    </main>
+  </mouse-mask>
+</app-layout>
+
+style {
+  .container {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size:2em; 
+    color: #fff;
+    background: #111;
+    height:100%;
+    width:100%;
+  }
+  img.logo {
+    width:400px;
+  }
+}
+
+import todoApp from "../../pages/app.js";
+
+static function isToggleAllChecked(todos) {
+  for (const todo of todos) {
+    if (!todo.completed) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+class {
+  handleToggleAllOnChange(event) {
+    todoApp.toggleAllTodosCompleted(event.target.checked);
+  }
+}
+
+<section.main>
+  <input.toggle-all
+    id:scoped="toggle"
+    type="checkbox"
+    checked=isToggleAllChecked(input.todos)
+    on-change("handleToggleAllOnChange")/>
+  <label for:scoped="toggle"/>
+
+  <ul.todo-list>
+    <for|todo| of=input.todos>
+      <todomvc-todo-item key=`todo-${todo.id}` ...todo/>
+    </for>
+  </ul>
+</section>
+
+import logo from "./logo.svg";
+<app-layout title="Welcome to Marko">
+  <mouse-mask.container>
+    <header>
+      <img.logo src=logo alt="Marko"/>
+    </header>
+    <main>
+      <p>Edit <code>./pages/index.marko</code> and save to reload.</p>
+      <a href="https://markojs.com/docs/getting-started">
+        Learn Marko
+      </a>
+    </main>
+  </mouse-mask>
+</app-layout>
+
+style {
+  .container {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size:2em; 
+    color: #fff;
+    background: #111;
+    height:100%;
+    width:100%;
+  }
+  img.logo {
+    width:400px;
+  }
+}
+
+<div.color-picker-footer>
+  <div.color-picker-selection-container>
+    <for|color| of=input.colors>
+      <div>
+        <!--
+        Listen for the `color-selected` event emitted from the
+        <color-picker-selection> component and handle it in this
+        component's `handleColorSelected` method.
+        NOTE: We pass along the `color` to the event handler method
+        -->
+        <color-picker-selection
+          color=color
+          on-color-selected("handleColorSelected", color)/>
+      </div>
+    </for>
+    <input key="hexInput" placeholder="Hex value" on-input("handleHexInput")/>
+  </div>
+</div>
+
+<div class=["app-overlay", { visible: state.visible }]>
+  <div class="app-overlay-mask" onClick("handleMaskClick")/>
+  <div
+    class="app-overlay-container"
+    style={ width: input.width || "80%" }>
+    <div class="app-overlay-body" key="body">
+      <${input.renderBody}/>
+    </div>
+    <div class="app-overlay-footer">
+      <app-button
+        label="Cancel"
+        size="large"
+        variant="secondary"
+        onClick("handleCancelButtonClick")/>
+      <app-button
+        label="Done"
+        size="large"
+        variant="primary"
+        onClick("handleDoneButtonClick")/>
+    </div>
+  </div>
+</div>
+
+static function getAnchorName(section) {
+  if (!section.anchorName) {
+    section.anchorName = section.title.replace(/[^a-zA-Z]+/g, "-");
+  }
+
+  return section.anchorName;
+}
+
+static function sum(a, b) {
+  return a + b;
+}
+
+div -- ${sum(1, 2)}
+
+div class="app-sections"
+  div class="tableOfContents"
+    ul
+      li for(section in data.sections)
+        a href="#${getAnchorName(section)}" -- ${section.title}
+  div class="sections-ctr"
+    div class="section" for(section in data.sections)
+      h2 id=getAnchorName(section) -- ${section.title}
+      div class="section-body"
+        include(section)
+
+<!-- Inline styles! -->
+style {
+  .color-picker-header {
+    width: 200px;
+    height: 100px;
+    border-radius: 20px 20px 0 0;
+    font: 30px Arial;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    color: white;
+  }
+  .color-picker-header > p {
+    padding-top: 1.15em;
+    margin: 0;
+  }
+}
+
+<!--
+In Marko, we immediately start writing a single JavaScript statement by using
+`$`. For multiple JavaScript statements, use `$ { /* JavaScript here */ }
+-->
+
+$ const { color } = input;
+
+<div.color-picker-header style={ backgroundColor: color }>
+  <p>${color}</p>
+</div>
+
+<div class= ["test-class", input.mobile && input.thing !== false && "test-class-thing", input.mobile && "test-class-mobile"].filter(className => className).join(" ")/>
+<div data-current-text=(current && current.replace("{page_number}", "{item_number}").replace("{current_page}", "{item_number}"))/>
+
+<div class= ["test-class", input.mobile && input.thing !== false && "test-class-thing", input.mobile && "test-class-mobile"].filter(className => className).join(" ") data-current-text=(current && current.replace("{page_number}", "{item_number}").replace("{current_page}", "{item_number}"))/>
+<div.container>
+  <header>
+    <img.logo src="./logo.svg" alt="Marko"/>
+  </header>
+  <main>
+    <p>Edit <code>./src/routes/_index/+page.marko</code> and save to reload.</p>
+    <a href="https://markojs.com/docs/getting-started">
+      Learn Marko
+    </a>
+  </main>
+</div>
+<mouse-mask/>
+
+style {
+  .container {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(1em, 2vw, 2em); 
+    padding: 1em;
+    box-sizing: border-box;
+    height:100%;
+    width:100%;
+  }
+  img.logo {
+    width:12em;
+  }
+}
+
+<div
+    style={
+                        "background-color": imageCreative.contentBackgroundColor
+                    }>
+<div
+    class="test"
+    style={
+                        "background-color": imageCreative.contentBackgroundColor
+                    }>
+<div
+    class="test"
+    style={
+                        "background-color": imageCreative.contentBackgroundColor
+                    }>
+<div
+    style={
+                        "background-color": imageCreative.contentBackgroundColor
+                    }/>
+</div>
+</div>
+</div>
+<html-script nonce=$global.cspNonce type="speculationrules">
+  {
+    "prerender": [
+      {
+        "where": { "href_matches": "/*" },
+        "eagerness": "moderate"
+      }
+    ]
+  }
+</html-script>
+
+<html-script type="application/json">{ "hello": ${
+  JSON.stringify(world)
+}, "and-a-lot-more": "stuff-in-here-to-line-break" }</html-script>
+<html-script type="application/json">
+  {
+    "hello": 345873495873985893,
+    "and-a-lot-more": "stuff-in-here-to-line-break"
+  }
+</html-script>
+
+<html-script type="unknown">${foo}</html-script>
+
+$ let done = false;
+$ let i = 0;
+
+<${custom}>
+  <while(!done)>
+//        ^?
+    $ i++;
+//    ^?
+    <@a>
+      ${done}
+//      ^?
+      <if(i === 5)>
+        $ done = true;
+      </if>
+    </@a>
+  </while>
+</>
+
+<${custom}>
+  <for|index| from=1 to=10>
+    $ const doubleIndex = index * 2;
+//          ^?
+    <@a>
+      ${doubleIndex}
+//      ^?
+    </@a>
+  </for>
+</>
+
+<${custom} x=1>
+  <if=x>
+    $ const a = 1 as const;
+//          ^?
+    <@a a=a/>
+  </if>
+  <else>
+    $ const b = 2 as const;
+//          ^?
+    <@b b=b/>
+  </else>
+</>
+
+<foo onclick<A>(event: A){
+  console.log(event.type)
+}/>
+
+<foo onclick<A> (event: A){
+  console.log(event.type)
+}/>
+
+<foo onclick <A>(event: A){
+  console.log(event.type)
+}/>
+
+<foo onclick <A> (event: A){
+  console.log(event.type)
+}/>
+
+<foo onclick<A, B = string>(event: A & B){
+  console.log(event.type)
+}/>
+
+<foo onclick<A, B = string> (event: A & B){
+  console.log(event.type)
+}/>
+
+<foo onclick <A, B = string>(event: A & B){
+  console.log(event.type)
+}/>
+
+<foo onclick <A, B = string> (event: A & B){
+  console.log(event.type)
+}/>
+
+style {
+  header {
+    font-size: 2.5em;
+    font-weight: 300;
+    background-color: #f1f1f1;
+    padding: 1em;
+  }
+  body {
+    font-family: "Helvetica Neue", Roboto, "Arial Nova", "Segoe UI", Arial,
+      sans-serif;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .color-picker-container {
+    padding-top: 2em;
+    position: absolute;
+    left: 50%;
+    margin-left: -96px;
+  }
+  .logo {
+    height: 2.2em;
+  }
+}
+
+<header>
+  <img src="./logo.png" alt="marko logo" class="logo"/>
+  <div>${input.title}</div>
+</header>
+
+<div>
+  <let/{ a, b, c = "default" as const, nested: { d }, "some-alias": e, ["computed"]: f, ...g } = {
+    a: 1,
+    b: "hello!",
+    c: undefined,
+    nested: {
+      d: 2,
+      dChange(v: number) {
+
+      }
+    },
+    "some-alias": 3,
+    computed: 4,
+    other: true,
+  } as const/>
+
+  <let/[h, i, , ...j]=[1, 2, 3, 4, 5] as const/>
+  ${() => {
+    a;
+  //^?
+    b;
+  //^?
+    c;
+  //^?
+    d;
+  //^?
+    e;
+  //^?
+    f;
+  //^?
+    g;
+  //^?
+    h;
+  //^?
+    i;
+  //^?
+    j;
+  //^?
+  }}
+</div>
+
+
+<html-script nonce=$global.cspNonce type="speculationrules">
+  {
+    "prerender": [{
+      "where": { "href_matches": "/*" },
+      "eagerness": "moderate"
+    }]
+  }
+</html-script>
+
+<html-script type="application/json">{ "hello": ${JSON.stringify(world)}, "and-a-lot-more": "stuff-in-here-to-line-break" }</html-script>
+<html-script type="application/json">{ "hello": 345873495873985893, "and-a-lot-more": "stuff-in-here-to-line-break" }</html-script>
+
+<html-script type="unknown">${foo}</html-script>
+
+<${
+  a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+}/>
+
+html-script nonce=$global.cspNonce type="speculationrules" --
+  {
+    "prerender": [
+      {
+        "where": { "href_matches": "/*" },
+        "eagerness": "moderate"
+      }
+    ]
+  }
+
+html-script type="application/json"
+  --
+  { "hello": ${
+    JSON.stringify(world)
+  }, "and-a-lot-more": "stuff-in-here-to-line-break" }
+  --
+html-script type="application/json" --
+  {
+    "hello": 345873495873985893,
+    "and-a-lot-more": "stuff-in-here-to-line-break"
+  }
+
+html-script type="unknown" -- ${foo}
+
+import todoApp from '../../pages/app.js'
+
+class {
+  handleFormSubmit(event) {
+    const titleInput = this.getEl("new-todo");
+    const todoTitle = titleInput.value;
+
+    todoApp.addNewTodo({
+      title: todoTitle
+    });
+
+    titleInput.value = "";
+    event.preventDefault();
+  }
+}
+
+style {
+  .header form {
+    margin: 0;
+  }
+}
+
+<header.header>
+  <h1>todos</h1>
+  <form on-submit("handleFormSubmit")>
+    <input.new-todo key="new-todo" placeholder="What needs to be done?"/>
+  </form>
+</header>
+
+${
+  a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+    .a()
+}
+
+<foo<A>(event: A){
+  console.log(event.type)
+}/>
+
+<foo<A> (event: A){
+  console.log(event.type)
+}/>
+
+<foo <A>(event: A){
+  console.log(event.type)
+}/>
+
+<foo <A> (event: A){
+  console.log(event.type)
+}/>
+
+<foo<A, B = string>(event: A & B){
+  console.log(event.type)
+}/>
+
+<foo<A, B = string> (event: A & B){
+  console.log(event.type)
+}/>
+
+<foo <A, B = string>(event: A & B){
+  console.log(event.type)
+}/>
+
+<foo <A, B = string> (event: A & B){
+  console.log(event.type)
+}/>
+
+<my-table>
+  <for|row| of=[
+    { foo: "a", bar: "b" },
+    { foo: "c", bar: "d" },
+  ]>
+    <@row>
+    // ^?
+      <@cell>${row.foo}</@cell>
+      // ^?     ^?
+      <@cell>${row.bar}</@cell>
+    </@row>
+  </for>
+</my-table>
+
+<my-table>
+  <for|row| of=[
+    { foo: "a", bar: "b" },
+    { foo: "c", bar: "d" },
+  ] as const>
+    <@row>
+    // ^?
+      <@cell>${row.foo}</@cell>
+      // ^?     ^?
+      <@cell>${row.bar}</@cell>
+    </@row>
+  </for>
+</my-table>
+static console.log("hello");
+static {
+  console.log("a");
+  console.log("b");
+}
+static {
+  console.log("a");
+  console.log("b");
+  console.log("c");
+  console.log("d");
+  console.log("e");
+  console.log("f");
+  console.log("g");
+}
+
+static console.log(
+  new Map([
+    ["a", 1],
+    ["b", 1],
+    ["c", 1],
+    ["d", 1],
+    ["e", 1],
+    ["f", 1],
+    ["g", 1],
+    ["h", 1],
+    ["i", 1],
+  ]),
+);
+server console.log("server!");
+client console.log("client!");
+
+import getDefaultColors from '../../util/getDefaultColors.js'
+
+class {
+  onInput(input) {
+    var colors = input.colors || getDefaultColors();
+
+    this.state = {
+      selectedColor: colors[0],
+      colors
+    };
+  }
+
+  handleColorSelected(color) {
+    this.state.selectedColor = color;
+  }
+}
+
+<div>
+  <color-picker-header color=state.selectedColor/>
+  <color-picker-footer colors=state.colors on-color-selected("handleColorSelected")/>
+</div>
+
+<const/value = "hi"/>
+
+<div#test/>
+<div#test-${value}/>
+<div#${value}-test/>
+<div#${value}-test-${value}/>
+
+<div.test/>
+<div.hello.world/>
+<div.test-${value}/>
+<div.${value}-test/>
+<div.${value}-test-${value}/>
+
+<test-tag#test/>
+<test-tag#test-${value}/>
+<test-tag#${value}-test/>
+<test-tag#${value}-test-${value}/>
+
+<test-tag.test/>
+<test-tag.hello.world/>
+<test-tag.test-${value}/>
+<test-tag.${value}-test/>
+<test-tag.${value}-test-${value}/>
+
+style.scss {
+  @function color-yiq($color) {
+    $r: red($color);
+    $g: green($color);
+    $b: blue($color);
+
+    $yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+    @if ($yiq >= $yiq-contrasted-threshold) {
+      @return $yiq-text-dark;
+    } @else {
+      @return $yiq-text-light;
+    }
+  }
+
+  @each $color, $value in $colors {
+    .swatch-#{$color} {
+      color: color-yiq($value);
+      background-color: #{$value};
+    }
+  }
+}
+
+class {
+  handleColorSelected() {
+    this.emit("color-selected");
+  }
+}
+
+style {
+  .color-picker-selection {
+    width: 25px;
+    height: 25px;
+    border-radius: 5px 5px 5px 5px;
+    display: flex;
+    flex-direction: column;
+    margin: 5px 0px 0px 5px;
+    float: left;
+  }
+}
+
+<div.color-picker-selection
+  on-click("handleColorSelected")
+  on-touchstart("handleColorSelected")
+  style={
+    backgroundColor: input.color
+  }/>
+
+<div style={
+  "background-color": imageCreative.contentBackgroundColor,
+}>
+  <div
+    class="test"
+    style={
+      "background-color": imageCreative.contentBackgroundColor,
+    }
+  >
+    <div
+      class="test"
+      style={
+        "background-color": imageCreative.contentBackgroundColor,
+      }
+    >
+      <div style={
+        "background-color": imageCreative.contentBackgroundColor,
+      }/>
+    </div>
+  </div>
+</div>
+
+<if(
+  thisPerson.address &&
+    thisPerson.phone &&
+    thisPerson.age &&
+    thisPerson.nationality,
+)>
+  <person-card
+    address=thisPerson.address
+    phone=thisPerson.phone
+    age=thisPerson.age
+  />
+</if>
+
+<if(
+  thisPerson.address &&
+    thisPerson.phone &&
+    thisPerson.age &&
+    thisPerson.nationality,
+)>
+  <person-card
+    address=thisPerson.address
+    phone=thisPerson.phone
+    age=thisPerson.age
+  />
+</if>
+
+div
+  ,a=1
+  ,b=1
+  ,c=1
+  ,d=1
+  ,e=1
+  ,f=1
+  ,g=1
+  ,h=1
+  ,i=1
+  ,j=1
+  ,k=1
+  ,l=1
+  ,m=1
+  ,n=1
+  ,o=1
+  ,p=1
+  ,q=1
+  ,r=1
+  ,s=1
+  ,t=1
+  ,u=1
+  ,v=1
+  ,w=1
+  ,x=1
+  ,y=1
+  ,z=1
+  ,a=1
+  ,b=1
+  ,c=1
+  ,d=1
+  ,e=1
+  ,f=1
+  ,g=1
+  ,h=1
+  ,i=1
+  ,j=1
+  ,k=1
+  ,l=1
+  ,m=1
+  ,n=1
+  ,o=1
+  ,p=1
+  ,q=1
+  ,r=1
+  ,s=1
+  ,t=1
+  ,u=1
+  ,v=1
+  ,w=1
+  ,x=1
+  ,y=1
+  ,z=1
+  ,a=1
+  ,b=1
+  ,c=1
+  ,d=1
+  ,e=1
+  ,f=1
+  ,g=1
+  ,h=1
+
+import logoUrl from "./logo.png";
+
+style {
+  header {
+    font-size: 2em;
+    font-weight: 300;
+    background-color: #f1f1f1;
+    padding: 38px 10px;
+    text-align: center;
+  }
+  body {
+    font-family: "Helvetica Neue", Roboto, "Arial Nova", "Segoe UI", Arial,
+      sans-serif;
+    margin: 0 auto;
+  }
+  .logo {
+    height: 2.2em;
+  }
+}
+
+<header>
+  <img src=logoUrl class="logo"/>
+  <div>${input.title}</div>
+</header>
+
+static const a = (a: number, b: number): string => {
+  if (a < b) {
+    return "foo";
+  } else {
+    return "bar";
+  }
+};
+
+static const b = (a: number, b: number): () => string => () => {
+  if (a < b) {
+    return "foo";
+  } else {
+    return "bar";
+  }
+};
+
+static const c = (a: number, b: number): string => a < b ? "foo" : "bar";
+
+static const d = (a: number, b: number): () => string => () => a < b ? "foo" : "bar";
+
+<div data-value=a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a()></div>
+
+<div aria-hidden="true">
+	<a href="/" style="position:absolute; top:-999em">Link</a>
+</div>
+
+<div aria-hidden="true">
+	<input aria-disabled="true" />
+</div>
+
+<div aria-hidden="true">
+    <div aria-hidden="false">
+        <button>Some button</button>
+    </div>
+</div>
+
+<p tabindex="0" aria-hidden="true">Some text</p>
+
+<details aria-hidden="true">
+    <summary>Some button</summary>
+    <p>Some details</p>
+</details>
+import logoUrl from "./marko.png";
+
+style {
+  header {
+    font-size: 2em;
+    font-weight: 300;
+    background-color: #f1f1f1;
+    padding: 38px 10px;
+    text-align: center;
+  }
+  body {
+    font-family: "Helvetica Neue", Roboto, "Arial Nova", "Segoe UI", Arial,
+      sans-serif;
+    margin: 0 auto;
+  }
+}
+
+<header>
+  <img src=logoUrl width=320 height=176 alt="Marko Logo"/>
+  <div>${input.title}</div>
+</header>
+
+<html>
+  <head>
+    <title>Marko | Color Picker</title>
+  </head>
+  <body>
+    <sample-header title="Color Picker"/>
+    <div class="color-picker-container">
+      <color-picker colors=[
+        "#333745",
+        "#E63462",
+        "#FE5F55",
+        "#C7EFCF",
+        "#EEF5DB",
+        "#00B4A6",
+        "#007DB6",
+        "#FFE972",
+        "#9C7671",
+        "#0C192B"
+      ]/>
+    </div>
+  </body>
+</html>
+
+style {
+  header {
+    font-size: 2.5em;
+    font-weight: 300;
+    background-color: #f1f1f1;
+    padding: 1em;
+  }
+  body {
+    font-family: "Helvetica Neue", Roboto, "Arial Nova", "Segoe UI", Arial,
+      sans-serif;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .logo {
+    height: 2.2em;
+  }
+}
+
+<header>
+  <img src="./logo.png" alt="marko logo" class="logo"/>
+  <div>${input.title}</div>
+</header>
+
+if(
+  thisPerson.address &&
+    thisPerson.phone &&
+    thisPerson.age &&
+    thisPerson.nationality,
+)
+  person-card
+    ,address=thisPerson.address
+    ,phone=thisPerson.phone
+    ,age=thisPerson.age
+
+if(
+  thisPerson.address &&
+    thisPerson.phone &&
+    thisPerson.age &&
+    thisPerson.nationality,
+)
+  person-card
+    ,address=thisPerson.address
+    ,phone=thisPerson.phone
+    ,age=thisPerson.age
+
+<if=$global.foo>
+  <const/a=["apples", "oranges"] as const/>
+      // ^?
+  <const/b=["slice", "dice"] as const/>
+      // ^?
+  <for|baz| of=b>
+    <const/c=() => a.filter((e) => e.length)/>
+    ${baz}
+//    ^?
+  </for>
+</if>
+
+<if=$global.foo>
+  <const/{ d }={ d: () => 1 } as const/>
+</if>
+<else>
+  <const/{ d }={ d: () => 2 } as const/>
+</else>
+
+
+-- ${() => {
+  a;
+//^?
+  b;
+//^?
+  c;
+//^?
+  d;
+//^?
+}}
+
+<if(thisPerson.address && thisPerson.phone && thisPerson.age && thisPerson.nationality)>
+  <person-card
+    address=thisPerson.address
+    phone=thisPerson.phone
+    age=thisPerson.age
+  />
+</if>
+
+<if(
+  thisPerson.address &&
+  thisPerson.phone &&
+  thisPerson.age &&
+  thisPerson.nationality,
+)>
+  <person-card
+    address=thisPerson.address
+    phone=thisPerson.phone
+    age=thisPerson.age
+  />
+</if>
+
+class {
+    handleClick(ev: MouseEvent) {
+        console.log(ev);
+    }
+    specialClick(value: number, ev: MouseEvent) {
+        console.log(value, ev);
+    }
+}
+
+<fancy-button onClick("handleClick")/>
+//                     ^?
+
+<fancy-button onClick("specialClick", 1)/>
+//                     ^?
+
+<fancy-button onClick((ev) => {
+//                     ^?
+    console.log(ev);
+//              ^?
+})/>
+
+style.scss {
+    @function color-yiq($color) {
+  $r: red($color);$g: green($color);$b: blue($color);
+
+  $yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+  @if ($yiq >= $yiq-contrasted-threshold) {
+    @return $yiq-text-dark;
+} @else {
+    @return $yiq-text-light;
+  }
+}
+
+@each $color, $value in $colors {
+  .swatch-#{$color} {
+    color: color-yiq($value);
+    background-color: #{$value};
+  }
+}
+}
+
+app-markdown
+    ---
+    ```xml
+    <!DOCTYPE html>
+    html lang="en"
+        head
+            <title>Marko Templating Engine</title>
+        body
+            <h1>
+                Hello ${data.name}!
+            </h1>
+            ul if(notEmpty(data.colors))
+                li for(color in data.colors)
+                    ${color}
+            div else
+                - No colors!
+    ```
+    ---
+
+<foo<A>|data: A|>
+  hi
+</>
+
+<foo<A> |data: A|>
+  hi
+</>
+
+<foo <A>|data: A|>
+  hi
+</>
+
+<foo <A> |data: A|>
+  hi
+</>
+
+<foo<A, B = string>|data: A & B|>
+  hi
+</>
+
+<foo<A, B = string> |data: A & B|>
+  hi
+</>
+
+<foo <A, B = string>|data: A & B|>
+  hi
+</>
+
+<foo <A, B = string> |data: A & B|>
+  hi
+</>
+
+<foo()<A> |data: A|>
+  hi
+</>
+
+<foo/x<A> |data: A|>
+  hi
+</>
+
+<foo<string><A> |data: A|>
+  hi
+</>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Marko Templating Engine</title>
+  </head>
+  <body>
+    <h1 class="super-duper-long__class-name">Hello ${data.name}!</h1>
+    <h2
+      class="super-duper-long__class-name"
+      data-test="test attribute data"
+      data-more="more attribute data"
+      style="display: inline;"
+    >
+      Hello ${data.name}!
+    </h2>
+  </body>
+</html>
+
+div style={
+  "background-color": imageCreative.contentBackgroundColor,
+}
+  div
+    ,class="test"
+    ,style={
+      "background-color": imageCreative.contentBackgroundColor,
+    }
+    div
+      ,class="test"
+      ,style={
+        "background-color": imageCreative.contentBackgroundColor,
+      }
+      div style={
+        "background-color": imageCreative.contentBackgroundColor,
+      }
+
+static console.log("hello");
+static { console.log("a"); console.log("b"); }
+static { console.log("a"); console.log("b"); console.log("c"); console.log("d"); console.log("e"); console.log("f"); console.log("g"); }
+
+static console.log(new Map([["a", 1],["b", 1],["c", 1],["d", 1],["e", 1],["f", 1],["g", 1],["h", 1],["i", 1]]));
+server console.log("server!");
+client console.log("client!");
+
+class {
+  onCreate() {
+    this.state = { count: 0 };
+  }
+  increment(delta) {
+    this.state.count += delta;
+  }
+}
+
+$ var count = state.count;
+
+<div.click-count>
+  <div.count class={
+      positive: count > 0,
+      negative: count < 0
+    }>
+    ${count}
+  </div>
+  <button on-click('increment', -1)>
+    -1
+  </button>
+  <button on-click('increment', 1)>
+    +1
+  </button>
+</div>
+
+$ let i = 0;
+
+<${custom}>
+  <while(++i < 10)>
+//         ^?
+    <@a>
+      ${i}
+//      ^?
+    </@a>
+  </while>
+</>
+
+$ let done = false;
+$ i = 0;
+
+<${custom}>
+  <while(!done)>
+//        ^?
+    <@a>
+      ${done}
+//      ^?
+      <if(++i === 5)>
+        $ done = true;
+      </if>
+    </@a>
+  </while>
+</>
+
+<${custom}>
+  <while>
+    <@a>
+      No Condition.
+    </@a>
+  </while>
+</>
+
+import style from "./styles.module.css";
+export interface Input {
+  multiplier?: number;
+}
+class {
+  declare state: {
+    count: number;
+  };
+
+  onCreate() {
+    this.state = {
+      count: 0,
+    };
+  }
+
+  increment() {
+    this.state.count++;
+    this.emit("increment");
+  }
+}
+
+<button class=style.test onClick("increment")>
+  ${state.count * (input.multiplier ?? 1)}
+</button>
+
+$ console.log("hello");
+$ {
+  console.log("a");
+  console.log("b");
+}
+$ {
+  console.log("a");
+  console.log("b");
+  console.log("c");
+  console.log("d");
+  console.log("e");
+  console.log("f");
+  console.log("g");
+}
+
+$ console.log(
+  new Map([
+    ["a", 1],
+    ["b", 1],
+    ["c", 1],
+    ["d", 1],
+    ["e", 1],
+    ["f", 1],
+    ["g", 1],
+    ["h", 1],
+    ["i", 1],
+  ]),
+);
+
+var a = 'foo' instanceof String
+
+tag a = 'foo' instanceof = String
+tag a = 'foo' instanceof := String
+tag a = 'foo' instanceof= String
+tag a = 'foo' instanceof;
+
+tag a = 'foo' instanceof-test;
+tag a = 'foo' instanceof_test;
+
+tag a = 'foo' instanceof, b
+
+<tag a = 'foo' instanceof></tag>
+<tag a = 'foo' instanceof/>
+
+tag a = 'foo' instanceofthing String
+
+tag a = 'foo' instanceof
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Marko Templating Engine</title>
+    </head>
+    <body>
+        <h1 class="super-duper-long__class-name">Hello ${data.name}!</h1>
+        <h2 class="super-duper-long__class-name" data-test="test attribute data" data-more="more attribute data" style="display: inline;">Hello ${data.name}!</h2>
+    </body>
+</html>
+
+class {
+  onCreate() {
+    this.state = { visible: false };
+  }
+  onMount() {
+    setTimeout(() => this.state.visible = true, 10);
+  }
+  fadeOut(done) {
+    this.state.visible = false;
+    this.subscribeTo(this.el).once("transitionend", done);
+  }
+}
+
+<div
+  class="app-notification"
+  style=(state.visible && { opacity: "1", maxHeight: 60 })>
+  $!{input.message}
+</div>
+
+<div
+  a=1
+  b=1
+  c=1
+  d=1
+  e=1
+  f=1
+  g=1
+  h=1
+  i=1
+  j=1
+  k=1
+  l=1
+  m=1
+  n=1
+  o=1
+  p=1
+  q=1
+  r=1
+  s=1
+  t=1
+  u=1
+  v=1
+  w=1
+  x=1
+  y=1
+  z=1
+  a=1
+  b=1
+  c=1
+  d=1
+  e=1
+  f=1
+  g=1
+  h=1
+  i=1
+  j=1
+  k=1
+  l=1
+  m=1
+  n=1
+  o=1
+  p=1
+  q=1
+  r=1
+  s=1
+  t=1
+  u=1
+  v=1
+  w=1
+  x=1
+  y=1
+  z=1
+  a=1
+  b=1
+  c=1
+  d=1
+  e=1
+  f=1
+  g=1
+  h=1
+/>
+
+<div
+  data-foo="foo"
+  data-bar="bar"
+  data-hello="hello"
+  data-world="world"
+  class="my-class"
+  data-widget="my-really-awesome-widget"
+>
+  Hello World
+</div>
+
+<div
+  data-foo="foo"
+  data-bar="bar"
+  data-hello="hello"
+  data-world="world"
+  class="my-class"
+  data-widget="my-really-awesome-widget-that-breaks-the-line-because-its-long"
+>
+  Hello World
+</div>
+
+div class="hello"
+    // This is a line comment
+    -- <span>Welcome to <b>Marko</b></span>
+    -- Foo
+    <!--
+    This is a multiline HTML comment
+      This is indented further
+    Line 3
+    -->
+    -- Bar
+    <!-- This is another comment -->
+    -- Test
+    <!-- This
+    is an odd comment -->
+    ---
+    Hello <!-- This is an inline comment --> World
+    ---
+
+div
+  ,data-foo="foo"
+  ,data-bar="bar"
+  ,data-hello="hello"
+  ,data-world="world"
+  ,class="my-class"
+  ,data-widget="my-really-awesome-widget" -- Hello World
+
+div
+  ,data-foo="foo"
+  ,data-bar="bar"
+  ,data-hello="hello"
+  ,data-world="world"
+  ,class="my-class"
+  ,data-widget="my-really-awesome-widget-that-breaks-the-line-because-its-long" --
+  Hello World
+
+class {
+  onCreate() {
+    this.state = { count: 0 };
+  }
+  increment(delta) {
+    this.state.count += delta;
+  }
+}
+
+$ var count = state.count;
+
+<div.click-count>
+  <div.count class={
+    positive: count > 0,
+    negative: count < 0,
+  }>
+    ${count}
+  </div>
+  <button on-click("increment", -1)>-1</button>
+  <button on-click("increment", 1)>+1</button>
+</div>
+
+style {
+  @import "./thing.css";
+  body {
+    color: blue;
+  }
+}
+
+style.less {
+  @import "./thing.css";
+  body {
+    &nested {
+      color: blue;
+    }
+  }
+}
+
+<style>
+  @import "./thing.css";
+  body {
+    color: blue;
+  }
+</style>
+
+<style.less>
+  @import "./thing.css";
+  body {
+    &nested {
+      color: blue;
+    }
+  }
+</style>
+
+style.unknown {
+  foo;
+  bar
+}
+
+style {
+  @import "./thing.css";
+  body { color: blue; }
+}
+
+style.less {
+  @import "./thing.css";
+  body {
+    &nested {
+      color: blue;
+    }
+  }
+}
+
+<style>
+  @import "./thing.css";
+  body { color: blue; }
+</style>
+
+<style.less>
+  @import "./thing.css";
+  body {
+    &nested {
+      color: blue;
+    }
+  }
+</style>
+
+style.unknown {
+  foo;
+  bar
+}
+
+style {
+  @import "./thing.css";
+  body {
+    color: blue;
+  }
+}
+
+style.less {
+  @import "./thing.css";
+  body {
+    &nested {
+      color: blue;
+    }
+  }
+}
+
+style --
+  @import "./thing.css";
+  body {
+    color: blue;
+  }
+
+style.less --
+  @import "./thing.css";
+  body {
+    &nested {
+      color: blue;
+    }
+  }
+
+style.unknown {
+  foo;
+  bar
+}
+
+import Child from "<child>";
+
+<child>
+  <@foo bar/>
+  <@foo|data|>
+    ${data}
+    //^?
+  </@foo>
+</child>
+
+<Child>
+  <@foo bar/>
+  <@foo|data|>
+    ${data}
+    //^?
+  </@foo>
+</Child>
+
+// This errors for now, because `typeof (some + expression)` is not allowed
+<${true && Child}>
+  <@foo bar/>
+  <@foo|data|>
+    ${data}
+    //^?
+  </@foo>
+</>
+<div data-foo="foo" data-bar="bar" data-hello="hello" data-world="world" class="my-class" data-widget="my-really-awesome-widget">
+    Hello World
+</div>
+
+<div data-foo="foo" data-bar="bar" data-hello="hello" data-world="world" class="my-class" data-widget="my-really-awesome-widget-that-breaks-the-line-because-its-long">
+    Hello World
+</div>
+static const todos = [
+  {
+    title: "Learn marko",
+    completed: true,
+    id: 0
+  },
+  {
+    title: "Build an awesome web app",
+    completed: false,
+    id: 1
+  },
+  {
+    title: "Profit",
+    completed: false,
+    id: 2
+  }
+];
+
+style {
+  @import url("https://unpkg.com/todomvc-app-css@2.2.0/index.css");
+}
+
+<todomvc-main todos=todos/>
+
+<div>
+     // This is a comment
+     This is some real text
+     /* But this is a comment */
+     And this is more text
+     <!-- and this is a comment -->
+     But this, this is not a http://comment.com
+     And yet this is a //comment
+     And also /* this is a comment */
+     Because a//comment must be preceded by whitespace.
+</div>
+
+<let/x=1/>
+<let/y=[2]/>
+
+<button onClick() {
+  [x] = [2];
+  ({ a: x } = { a: 3 });
+  [x = 5, ...y] = [1];
+  for (x of [1, 2]) {
+    console.log(x);
+  }
+}>patterns</button>
+
+<my-tag|x|>
+  // The tag param shadows the outer `x` so this is not a tag var mutation.
+  <button onClick() { x = 2; console.log(x) }>shadowed</button>
+</my-tag>
+
+<div
+  data-foo="foo"
+  data-bar="bar"
+  data-hello="hello"
+  data-world="world"
+  class="my-class"
+  data-widget="my-really-awesome-widget"
+>
+  <div
+    data-foo="foo"
+    data-bar="bar"
+    data-hello="hello"
+    data-world="world"
+    class="my-class"
+    data-widget="my-really-awesome-widget"
+  >
+    Hello World
+  </div>
+</div>
+
+<!DOCTYPE html>
+html lang="en"
+  head
+    title -- Marko Templating Engine
+  body
+    h1 class="super-duper-long__class-name" -- Hello ${data.name}!
+    h2
+      ,class="super-duper-long__class-name"
+      ,data-test="test attribute data"
+      ,data-more="more attribute data"
+      ,style="display: inline;" -- Hello ${data.name}!
+
+<my-layout>
+  <@section>
+    <for|name| of=["a", "b", "c"]>
+      <@item|{ label }|>
+        <div>${name} ${label}</div>
+//                     ^?
+      </@item>
+    </for>
+  </@section>
+</my-layout>
+
+<my-layout>
+  <@section>
+    <@item|{ label }|>
+      <div>${label}</div>
+//           ^?
+    </@item>
+  </@section>
+</my-layout>
+
+div class="hello"
+    // This is a line comment
+    -- <span>Welcome to <b>Marko</b></span>
+    -- Foo
+    <!--
+    This is a multiline HTML comment
+      This is indented further
+    Line 3
+    -->
+    -- Bar
+    <!-- This is another comment -->
+    -- Test
+    <!-- This
+    is an odd comment -->
+    ---
+    Hello World
+    ---
+
+<${foo}/someVar>
+</>
+
+<let/foo/>
+<let/foo=1/>
+<let/foo = 1/>
+<let/foo + 1/>
+<let/foo:string/>
+<let/foo : string/>
+<let/foo: typeof bar extends y ? a : b x=2/>
+<let/{ x, y }/>
+
+<const/fn:any() {
+  console.log("hi");
+}/>
+
+<button/loginButton>
+  login
+</>
+<button/loginButton >
+  login
+</>
+
+<div/ref/>
+<div/ref />
+
+<div#ab.cd/ref/>
+
+class {
+  onCreate() {
+    this.state = { count: 0 };
+  }
+  increment(delta) {
+    this.state.count += delta;
+  }
+}
+
+$ var count = state.count;
+
+div.click-count
+  div.count class={
+    positive: count > 0,
+    negative: count < 0,
+  } -- ${count}
+  button on-click("increment", -1) -- -1
+  button on-click("increment", 1) -- +1
+
+<foo<A>>
+  hi
+</>
+
+<foo<A> >
+  hi
+</>
+
+<foo<A, B = string>>
+  hi
+</>
+
+<foo<A, B = string> >
+  hi
+</>
+
+<foo<A>(bar)>
+  hi
+</>
+
+<foo<A> (bar)>
+  hi
+</>
+
+<foo<A, B = string>(bar)>
+  hi
+</>
+
+<foo<A, B = string> (bar)>
+  hi
+</>
+
+
+<foo<A> (bar) {
+  
+}>
+  hi
+</>
+
+<foo <A> (bar) {
+  
+}>
+  hi
+</>
+
+<foo <A>(bar) {
+  
+}>
+  hi
+</>
+
+div
+  ,data-foo="foo"
+  ,data-bar="bar"
+  ,data-hello="hello"
+  ,data-world="world"
+  ,class="my-class"
+  ,data-widget="my-really-awesome-widget"
+  div
+    ,data-foo="foo"
+    ,data-bar="bar"
+    ,data-hello="hello"
+    ,data-world="world"
+    ,class="my-class"
+    ,data-widget="my-really-awesome-widget" -- Hello World
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Marko Templating Engine</title>
+    </head>
+    <body>
+        <h1>Hello ${data.name}!</h1>
+        <ul if(notEmpty(data.colors))>
+            <li for(color in data.colors)>${color}</li>
+        </ul>
+        <div else>No colors!</div>
+    </body>
+</html>
+
+<my-component>
+  <while(x > 0)>
+    <@body>Content</@body>
+  </while>
+  <for|item| of=list>
+    <@item>${item}</@item>
+  </for>
+  <if(show)>
+    <@header>Header</@header>
+  </if>
+  <else-if(other)>
+    <@footer>Footer</@footer>
+  </else-if>
+  <else>
+    <@fallback>Default</@fallback>
+  </else>
+</my-component>
+
+div class="hello"
+  // This is a line comment
+  span
+    -- Welcome to${" "}
+    b -- Marko
+  ---
+  Foo<!--
+  This is a multiline HTML comment
+    This is indented further
+  Line 3
+  -->Bar<!-- This is another comment -->Test<!-- This
+  is an odd comment -->Hello <!-- This is an inline comment --> World
+  ---
+
+static {
+  var todos = [
+    {
+      title: "Learn marko",
+      completed: true,
+      id: 0
+    },
+    {
+      title: "Build an awesome web app",
+      completed: false,
+      id: 1
+    },
+    {
+      title: "Profit",
+      completed: false,
+      id: 2
+    }
+  ];
+}
+
+<todomvc-app todos=todos filter="all"/>
+
+<p id="fail1" style="line-height: 1.5 !important;">Paragraph</p>
+<p id="fail2" style="letter-spacing: 100em !important;">Paragraph</p>
+<p id="fail3" style="word-spacing: -.4ch !important;">Paragraph</p>
+<p id="fail4" style="word-spacing: 200%; letter-spacing: 50rem !important; line-height: 3;">Paragraph</p>
+export interface Help {
+  children?: Help[];
+}
+
+export interface Input {
+  value: Help[];
+}
+
+<define/Section|{ children = []}: Help|>
+        // ^?
+  <for|{ children }| of=children>
+    <Section children=children/>
+    // ^?
+  </for>
+</define>
+
+<for|help| of=input.value>
+  <Section ...help/>
+  // ^?
+</for>
+
+div, class="a", id="c"
+
+div,
+    class="a",
+    id="c"
+
+div , class="a", id="c"
+
+div ,
+    class="a",
+    id="c"
+
+div
+    ,class="a"
+    ,id="c"
+
+<div, class="a", id="c"/>
+
+<div,
+    class="a",
+    id="c"/>
+
+<div , class="a", id="c"/>
+
+<div ,
+    class="a",
+    id="c"/>
+
+<div
+    ,class="a"
+    ,id="c"/>
+
+<macro name="recursive">
+  <await(generator.next())>
+    <@then|{ value, done }|>
+      <div>
+        <ul>
+          <li>${value}</li>
+        </ul>
+        <ul>
+          <li>${value}</li>
+        </ul>
+        <ul>
+          <li>${value}</li>
+        </ul>
+      </div>
+    </@then>
+  </await>
+</macro>
+
+<div data-foo="foo" data-bar="bar" data-hello="hello" data-world="world" class="my-class" data-widget="my-really-awesome-widget">
+    <div data-foo="foo" data-bar="bar" data-hello="hello" data-world="world" class="my-class" data-widget="my-really-awesome-widget">
+        Hello World
+    </div>
+</div>
+$ console.log("hello");
+$ console.log("a"); console.log("b");
+$ console.log("a"); console.log("b"); console.log("c"); console.log("d"); console.log("e"); console.log("f"); console.log("g");
+
+$ console.log(new Map([["a", 1],["b", 1],["c", 1],["d", 1],["e", 1],["f", 1],["g", 1],["h", 1],["i", 1]]));
+
+<tag|input: (Marko.HTML.A | Marko.HTML.Button)|/>
+<tag|a: string, b: (A | B)|/>
+<tag|{ a }: (A | B)|/>
+<tag|fn: ((a: string) => A | B)|/>
+<tag|input: A & B|/>
+<tag|
+  input: (
+    | Marko.Component.Input.LongNameA
+    | Marko.Component.Input.LongNameB
+    | Marko.Component.Input.LongNameC
+  ),
+|/>
+
+<div class="hello">
+  // This is a line comment
+  <span>Welcome to <b>Marko</b></span>Foo<!--
+  This is a multiline HTML comment
+    This is indented further
+  Line 3
+  -->Bar<!-- This is another comment -->Test<!-- This
+  is an odd comment -->Hello <!-- This is an inline comment --> World
+</div>
+
+<!DOCTYPE html>
+html lang="en"
+    head
+        title -- Marko Templating Engine
+    body
+        <h1>
+            Hello ${data.name}!
+        </h1>
+        ul if(notEmpty(data.colors))
+            li for(color in data.colors)
+                -- ${color}
+        div else
+            -- No colors!
+
+<test-tag|a|>
+  ${a}
+//  ^?
+</test-tag>
+
+<test-tag|a|>
+  <return=a/>
+</test-tag>
+
+<test-tag>
+  <return="b" as const/>
+</test-tag>
+
+<test-tag>
+  <return="c" as const/>
+</test-tag>
+
+<test-tag>
+  <let/hoisted= () => 1 as const/>
+  <return="b" as const/>
+</test-tag>
+
+-- ${() => {
+  hoisted;
+//^?
+}}
+
+style {
+  .marko-header {
+    font-size: 2.5em;
+    font-weight: 300;
+    padding: 1em;
+    line-height: 1.5em;
+    text-align: center;
+  }
+  .logo {
+    height: 2.2em;
+  }
+}
+
+<header.marko-header>
+  <img src="./logo.png" alt="marko logo" class="logo"/>
+  <div>${input.title}</div>
+</header>
+
+<app-markdown>
+  ```xml
+  <!DOCTYPE html>
+  html lang="en" head${" "}
+  <title>Marko Templating Engine</title>
+  ${" "}body${" "}
+  <h1>${" "}Hello ${data.name}!${" "}</h1>
+  ${" "}ul if(notEmpty(data.colors)) li for(color in data.colors) ${color} div else
+  - No colors! ```
+</app-markdown>
+
+span.a -- hi
+
+span.b
+  -- hi
+
+span.c
+  -- hi
+  -- you
+
+span.d --
+  hi
+
+span.e --
+  hi
+  you
+
+span.f
+  --
+  hi
+  --
+
+span.g
+  --
+  hi
+  you
+  --
+
+<span.h>hi</span>
+
+<span.i>
+  hi</span>
+
+<span.j>
+  hi
+</span>
+
+<span.k>
+  hi
+  </span>
+
+<span.l>  
+hi
+</span>
+
+<span.m>
+  hi
+  you
+</span>
+
+style {
+  .app-notifications {
+    position: fixed;
+    top: 0px;
+    width: 500px;
+    left: 50%;
+    margin-left: -250px;
+  }
+}
+
+<div class="app-notifications">
+  <for|notification| of=state.notifications>
+    <app-notification key=notification.id ...notification/>
+  </for>
+</div>
+
+app-markdown
+  -- ```xml
+  <!DOCTYPE html>
+  -- html lang="en" head${" "}
+  title -- Marko Templating Engine
+  -- ${" "}body${" "}
+  h1 -- ${" "}Hello ${data.name}!${" "}
+  --
+  ${" "}ul if(notEmpty(data.colors)) li for(color in data.colors) ${color} div else
+  - No colors! ```
+  --
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Marko Templating Engine</title>
+  </head>
+  <body>
+    <h1>Hello ${data.name}!</h1>
+    <ul if(notEmpty(data.colors))>
+      <li for(color in data.colors)>${color}</li>
+    </ul>
+    <div else>No colors!</div>
+  </body>
+</html>
+
+tag|input: (Marko.HTML.A | Marko.HTML.Button)|
+tag|a: string, b: (A | B)|
+tag|{ a }: (A | B)|
+tag|fn: ((a: string) => A | B)|
+tag|input: A & B|
+tag|
+  input: (
+    | Marko.Component.Input.LongNameA
+    | Marko.Component.Input.LongNameB
+    | Marko.Component.Input.LongNameC
+  ),
+|
+
+<tag|input: (Marko.HTML.A | Marko.HTML.Button)|/>
+<tag|a: string, b: (A | B)|/>
+<tag|{ a }: (A | B)|/>
+<tag|fn: (a: string) => (A | B)|/>
+<tag|input: (A & B)|/>
+<tag|input: (Marko.Component.Input.LongNameA | Marko.Component.Input.LongNameB | Marko.Component.Input.LongNameC)|/>
+
+$ let i = 0;
+
+<while(++i < 10)>
+//       ^?
+  ${i}
+//  ^?
+</while>
+
+$ i = 0;
+<while(++i < 10)></while>
+//       ^?
+
+$ let done = false;
+$ i = 0;
+<while(!done)>
+//      ^?
+  ${done}
+//  ^?
+  <if(++i === 5)>
+    $ done = true;
+  </if>
+</while>
+
+<while>
+  No Condition.
+</while>
+
+div class="hello"
+  // This is a line comment
+  span
+    -- Welcome to${" "}
+    b -- Marko
+  ---
+  Foo<!--
+  This is a multiline HTML comment
+    This is indented further
+  Line 3
+  -->Bar<!-- This is another comment -->Test<!-- This
+  is an odd comment -->Hello World
+  ---
+
+export interface Input {
+  section?: Marko.AttrTag<{
+    item?: Marko.AttrTag<{
+      content: Marko.Body<[{
+        label: string;
+      }]>;
+    }>;
+  }>;
+}
+
+<for|section| of=input.section>
+  <for|item| of=section.item>
+    <${item.content} label="label"/>
+  </for>
+</for>
+
+style {
+  @import url("https://unpkg.com/todomvc-app-css@2.2.0/index.css");
+}
+
+<section.main>
+  <ul.todo-list>
+    <todomvc-todo-item title="Learn Marko" completed=false id="fake1"/>
+    <todomvc-todo-item title="Learn Marko" completed=true id="fake2"/>
+  </ul>
+</section>
+
+<comments>
+  <@comment#a>
+    <@comment#b>
+//    ^?
+      <let/b = () => "b" as const/>
+    </@comment>
+    <let/a = () => "a" as const/>
+  </@comment>
+  <@comment#c>
+    <let/c = () => "c" as const/>
+  </@comment>
+</comments>
+
+<effect() {
+  a;
+//^?
+  b;
+//^?
+  c;
+//^?
+}/>
+<!DOCTYPE html>
+html lang="en"
+    head
+        title -- Marko Templating Engine
+    body
+        h1 -- Hello ${data.name}!
+        ul if(notEmpty(data.colors))
+            li for(color in data.colors)
+                -- ${color}
+        div else
+            -- No colors!
+
+tag a = function (x) { console.log("y") } b
+tag a = (x) => { console.log("y") } b
+tag a = x => { console.log("y") } b
+tag a = x => y b
+tag a = x => y + 1 b
+tag a = x => y = 1 b
+tag a = async x => { console.log("y") } b
+tag a = async function (x) { console.log("y") } b
+style {
+  @import url("https://unpkg.com/todomvc-app-css@2.2.0/index.css");
+}
+
+<div.todoapp>
+  <todomvc-footer remaining-count=5 completed-count=10 filter="all"/>
+</div>
+<div.todoapp>
+  <todomvc-footer remaining-count=20 completed-count=4 filter="completed"/>
+</div>
+
+static const x: number = 3 as const;
+static function xPlus(val: number) {
+  return x + val;
+}
+static let xMap = new Map<string, number>();
+
+$ const y: number = 3 as const;
+$ function yPlus(val: number) {
+  return x + val;
+}
+$ let yMap = new Map<string, number>();
+
+static const x:   number = 3   as  const
+static function xPlus(val: number) { return x + val }
+static let xMap = new Map<  string , number  >()
+
+$ const y : number  = 3 as const
+$ function yPlus(val: number) { return x + val }
+$ let yMap=new Map<string,number>(  )
+<div class="hello">
+  // This is a line comment
+  <span>Welcome to <b>Marko</b></span>Foo<!--
+  This is a multiline HTML comment
+    This is indented further
+  Line 3
+  -->Bar<!-- This is another comment -->Test<!-- This
+  is an odd comment -->Hello World
+</div>
+
+<app-layout>
+  <@head>
+    <title>UI Components Playground</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700"
+      media="all"
+      rel="stylesheet"/>
+  </@head>
+  <@body>
+    <app-main/>
+  </@body>
+</app-layout>
+
+<my-menu>
+  <for|name| of=["a", "b", "c"]>
+    <@menuitem|{ foo }|>
+      <div>${name} ${foo}</div>
+//                   ^?
+    </@menuitem>
+  </for>
+</my-menu>
+
+<my-menu>
+  <@menuitem|{ foo }|>
+    <div>${foo}</div>
+//         ^?
+  </@menuitem>
+</my-menu>
+
+<div a=1 b=1 c=1 d=1 e=1 f=1 g=1 h=1 i=1 j=1 k=1 l=1 m=1 n=1 o=1 p=1 q=1 r=1 s=1 t=1 u=1 v=1 w=1 x=1 y=1 z=1 a=1 b=1 c=1 d=1 e=1 f=1 g=1 h=1 i=1 j=1 k=1 l=1 m=1 n=1 o=1 p=1 q=1 r=1 s=1 t=1 u=1 v=1 w=1 x=1 y=1 z=1 a=1 b=1 c=1 d=1 e=1 f=1 g=1 h=1></div>
+
+<div>
+  ${input.text}${" "}
+  <div/>
+</div>
+
+<div>
+  <div/>
+  ${" "}
+  <div/>
+</div>
+
+<div>
+  <span><span>A</span>${" "}</span> <span><span>B</span></span>${" "}
+  <span><span>C</span></span>${" "}
+</div>
+
+<div>${" "}${input.text}</div>
+-- ${" "}
+
+import CustomTagA from "<TestTagA>";
+import CustomTagB from "<TestTagB>";
+
+<const/TestTagA = CustomTagA/>
+<TestTagA a="hello"/>
+<TestTagB b="hello"/>
+
+<div>
+  <const/TestTagA = CustomTagB/>
+  <TestTagA a="hello"/>
+</div>
+
+<TestTagA a="hello"/>
+
+div a=1 b=1 c=1 d=1 e=1 f=1 g=1 h=1 i=1 j=1 k=1 l=1 m=1 n=1 o=1 p=1 q=1 r=1 s=1 t=1 u=1 v=1 w=1 x=1 y=1 z=1 a=1 b=1 c=1 d=1 e=1 f=1 g=1 h=1 i=1 j=1 k=1 l=1 m=1 n=1 o=1 p=1 q=1 r=1 s=1 t=1 u=1 v=1 w=1 x=1 y=1 z=1 a=1 b=1 c=1 d=1 e=1 f=1 g=1 h=1
+
+<macro name="recursive">
+  <await(generator.next())>
+    <@then|{ value, done}|>
+      <div>
+        <ul><li>${value}</li></ul>
+        <ul><li>${value}</li></ul>
+        <ul><li>${value}</li></ul>
+      </div>
+    </@then>
+  </await>
+</macro>
+
+<div title="banner 1" role="banner"/>
+<div title="banner 2" role="banner"/>
+
+<div title="contentinfo 1" role="contentinfo"/>
+<div title="contentinfo 2" role="contentinfo"/>
+
+<div title="main 1" role="main"/>
+<div title="main 2" role="main"/>
+
+<div data-foo=a||b data-bar=(a || b)>
+
+</div>
+
+<const/foobarfoo=aaaaaaaaaaaaaaaaaa && bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/>
+<const/foobarfoo=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa && bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/>
+
+div data-foo=a || b data-bar=a || b
+
+const/foobarfoo=(
+  aaaaaaaaaaaaaaaaaa && bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+)
+const/foobarfoo=(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &&
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+)
+
+<html-script type="module">
+    console.log('hello');
+</html-script>
+
+<html-script type="text/javascript">
+    console.log('world');
+</html-script>
+
+<html-script type="application/javascript">
+    console.log('foo');
+</html-script>
+
+class {
+    onCreate() {
+        this.state = {
+            count:0
+        };
+    }
+    increment() {
+        this.state.count++;
+    }
+}
+
+<div>The current count is ${state.count}</div>
+<button on-click('increment')>+1</button>
+<foo value=1 as const>
+  <@then|foo|>
+    //   ^?
+    ${foo}
+  </@then>
+</foo>
+
+<foo value=1 as const>
+  <for|i| of=[1]>
+    <@then|foo|>
+      //   ^?
+      ${i}
+      //^?
+      ${foo}
+      //^?
+    </@then>
+  </for>
+</foo>
+
+<${a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a().a()}/>
+
+div
+  -- ${input.text}${" "}
+  div
+
+div
+  div
+  -- ${" "}
+  div
+
+div
+  span
+    span -- A
+    -- ${" "}
+  -- ${" "}
+  span
+    span -- B
+  -- ${" "}
+  span
+    span -- C
+  -- ${" "}
+
+div -- ${" "}${input.text}
+-- ${" "}
+
+<!DOCTYPE html>
+html lang="en"
+  head
+    title -- Marko Templating Engine
+  body
+    h1 -- Hello ${data.name}!
+    ul if(notEmpty(data.colors))
+      li for(color in data.colors) -- ${color}
+    div else -- No colors!
+
+<html-script type="module">console.log("hello");</html-script>
+
+<html-script type="text/javascript">console.log("world");</html-script>
+
+<html-script type="application/javascript">console.log("foo");</html-script>
+
+class {
+  onCreate() {
+    this.state = {
+      count: 0,
+    };
+  }
+  increment() {
+    this.state.count++;
+  }
+}
+
+<div>The current count is ${state.count}</div>
+<button on-click("increment")>+1</button>
+
+<div>${" "}This has whitespace after the opening.</div>
+
+<div>This has whitespace before the closing.${" "}</div>
+
+<div>
+  ${" "}This has whitespace after the opening and before the closing.${" "}
+</div>
+
+<list>
+  <for of=[1, 2, 3]>
+    <@item size="small"/>
+          // ^?
+  </for>
+  <for of=[1, 2, 3]>
+    <@item size="small"/>
+          // ^?
+    <@item size="huge"/>
+          // ^?
+  </for>
+</list>
+
+<use-reducer/[
+  item1,
+  item2,
+  item3,
+  item4,
+  item5,
+  item6,
+  item7,
+  item8,
+  item9,
+  item10,
+  item11,
+  item12,
+  item13,
+  item14,
+  item15,
+  item16,
+  item17,
+  item18,
+  item19,
+]/>
+
+<use-reducer/{
+  item1,
+  item2,
+  item3,
+  item4,
+  item5,
+  item6,
+  item7,
+  item8,
+  item9,
+  item10,
+  item11,
+  item12,
+  item13,
+  item14,
+  item15,
+  item16,
+  item17,
+  item18,
+  item19,
+}/>
+
+tag a = class b {}
+
+tag a = class {}, b
+
+<tag a = class {}></tag>
+
+<tag a = class {}/>
+
+tag a = classthing b
+
+tag a = testclass b
+
+tag a = test_class b
+
+tag a = test$class b
+
+tag a = test+class b {}
+
+<let/someCondition=false/>
+<${custom}>
+    <@header>...</@header>
+   <if(someCondition)>
+      //^?
+      <@footer>...</@footer>
+    </if>
+    <for|x| of=[1]>${x}</for>
+    //               ^?
+</>
+
+use-reducer/[
+  item1,
+  item2,
+  item3,
+  item4,
+  item5,
+  item6,
+  item7,
+  item8,
+  item9,
+  item10,
+  item11,
+  item12,
+  item13,
+  item14,
+  item15,
+  item16,
+  item17,
+  item18,
+  item19,
+]
+
+use-reducer/{
+  item1,
+  item2,
+  item3,
+  item4,
+  item5,
+  item6,
+  item7,
+  item8,
+  item9,
+  item10,
+  item11,
+  item12,
+  item13,
+  item14,
+  item15,
+  item16,
+  item17,
+  item18,
+  item19,
+}
+
+<script>
+  "this is a ${test}"
+  "this is a \${test}"
+  "/*"
+  "//"
+  'this is a ${test}'
+  'this is a \${test}'
+  '/*'
+  '//'
+  `this is a ${test}`
+  `this is a \${test}`
+  `/*`
+  `//`
+</script>
+
+$ {
+  before;
+  // middle
+  after;
+  //end
+}
+
+$ {
+  /* leading */ const x = foo;
+}
+
+
+<div>
+  $ {
+    // comment
+        /* other 
+comment */ /* third comment */
+}
+  $ {
+    // just one
+  }
+</div>
+<div>
+  ${input.text} <div/>
+</div>
+
+<div>
+  <div/> <div/>
+</div>
+
+<div>
+  <span><span>A</span> </span> <span><span>B</span></span> <span><span>C</span></span> 
+</div>
+
+<div> ${input.text}</div> 
+my-component
+  while(x > 0)
+    @body -- Content
+  for|item| of=list
+    @item -- ${item}
+  if(show)
+    @header -- Header
+  else-if(other)
+    @footer -- Footer
+  else
+    @fallback -- Default
+
+class {
+  onCreate() {
+    this.state = {
+      count: 0,
+    };
+  }
+  increment() {
+    this.state.count++;
+  }
+}
+
+div -- The current count is ${state.count}
+button on-click("increment") -- +1
+
+macro name="recursive"
+  await(generator.next())
+    @then|{ value, done }|
+      div
+        ul
+          li -- ${value}
+        ul
+          li -- ${value}
+        ul
+          li -- ${value}
+
+<test-tag|a, b|>
+//        ^? ^?
+  ${a} ${b}
+//  ^?   ^?
+</test-tag>
+
+<test-tag|a|>
+//        ^?
+  <const/hoistedFromTestTag = () => a/>
+</test-tag>
+
+-- ${() => {
+  hoistedFromTestTag
+//^?
+}}
+
+<html-script>
+    window.bla = ${JSON.stringify(input.bla)};
+</html-script>
+
+<html-script>
+    window.a = ${JSON.stringify(input.a)};
+    window.b = ${JSON.stringify(input.b)};
+</html-script>
+
+<div> 
+  This has whitespace after the opening.
+</div>
+
+<div>
+  This has whitespace before the closing. 
+</div>
+
+<div> 
+  This has whitespace after the opening and before the closing. 
+</div>
+
+<loader|data| value() {
+//      ^?    ^?
+  return 1;
+}>
+  
+</loader>
+
+<loader|data| value() {
+//      ^?    ^?
+  return "hi" as const;
+}>
+
+</loader>
+
+<loader|data|>
+//      ^?
+  
+</loader>
+
+div -- ${" "}This has whitespace after the opening.
+
+div -- This has whitespace before the closing.${" "}
+
+div -- ${" "}This has whitespace after the opening and before the closing.${" "}
+
+<my-select>
+  <@option>One</@option>
+  <@option>Two</@option>
+  <@option>Three</@option>
+</my-select>
+
+<my-dialog>
+  <@header>Head</@header>
+  Body
+  <@footer>Foot</@footer>
+</my-dialog>
+
+export interface Input {
+  menuitem?: Marko.AttrTag<{
+    content: Marko.Body<[{
+      foo: string;
+    }]>;
+  }>;
+}
+
+<for|item| of=input.menuitem>
+  <${item.content} foo="foo"/>
+</for>
+
+<div data-foo=(() => a.b())/>
+<div data-foo=(() => { a.b(); c.d(); })/>
+<div data-foo=((a) => b.c())/>
+<div data-foo=((a, b) => { c.d(); e.f(); })/>
+<div data-foo=(async () => a.b())/>
+<div data-foo=() => a.b()/>
+<div data-foo=() => {
+  a.b();
+  c.d();
+}/>
+<div data-foo=(a) => b.c()/>
+<div data-foo=(a, b) => {
+  c.d();
+  e.f();
+}/>
+<div data-foo=async () => a.b()/>
+
+var colors=['red', 'green', 'blue']
+<div>
+    <span class="foo">
+        Hello ${data.name}!
+        </span>
+</div> <b>This is not
+    allowed</b>
+p class="foo"
+    <span>Test</span>
+<html-script>window.bla = ${JSON.stringify(input.bla)};</html-script>
+
+<html-script>
+  window.a = ${JSON.stringify(input.a)};
+  window.b = ${JSON.stringify(input.b)};
+</html-script>
+
+var colors=['red', 'green', 'blue']
+<div>
+    <span class="foo">
+        Hello ${data.name}!
+        </span>
+</div> <b>This is after the span</b>
+p class="foo"
+    <span>Test</span>
+$ {
+    var data = {
+        a:1
+        b:2
+    };
+
+    function foo() {
+        console.log([
+            { hello:'world' }
+        ]);
+
+        return null;
+    }
+
+    foo();
+}
+style.less {
+  @my-ruleset: {
+    .my-selector {
+      @media tv {
+        background-color: black;
+      }
+    }
+  };
+  @media (orientation: portrait) {
+    @my-ruleset();
+  }
+}
+
+html-script type="module" -- console.log("hello");
+
+html-script type="text/javascript" -- console.log("world");
+
+html-script type="application/javascript" -- console.log("foo");
+
+static interface Comment {
+  id: string;
+  renderBody: Marko.Body;
+  comment?: Marko.AttrTag<Comment>;
+}
+export interface Input {
+  comment: Marko.AttrTag<Comment>;
+}
+
+// Empty
+
+$ {
+  before;
+  // middle
+  after;
+  //end
+}
+
+$ /* leading */ const x = foo;
+
+<div>
+  $ {
+    // comment
+    /* other 
+comment */ /* third comment */
+  }
+  $ // just one
+</div>
+
+<custom-tag id="hello"></custom-tag>
+<custom-tag#hello/>
+<custom-tag#hello${aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa && bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}/>
+
+style.less {
+    @my-ruleset: {
+    .my-selector {
+      @media tv {
+        background-color: black;
+      }
+    }
+  };
+@media (orientation:portrait) {
+    @my-ruleset();
+}
+}
+
+export interface Input {
+  renderBody: Marko.Body<["a", "b"]>
+}
+
+<${input.renderBody}("a", "b") />
+
+<${input.renderBody}("a", "c") />
+
+<${input.renderBody}("a", "b", "c") />
+
+<div foo="bar" /*this is a comment*/ hello="world" /* this is another comment */ ></div>
+<div foo="bar" // this is a test
+     hello="world" // this is another test
+></div>
+<let/x=1/>
+
+<button onClick() {
+  x++;
+//^?
+}>Click me</>
+
+<foo>
+  <let/y="hello"/>
+  <button onClick() {
+    x++;
+//  ^?
+    y = "goodbye";
+//  ^?
+  }>Click me</>
+</foo>
+
+<foo/>
+<foo|a, b|/>
+<foo|
+  {
+    aaaaaaaaaa: renamed1 = 1,
+    bbbbbbbbbb: renamed2 = 2,
+    cccccccccc: renamed3 = 3,
+  },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+|/>
+
+<foo a="\${test" b="\\${test}" c="\$!{test" d="\\$!{test}">
+
+</foo>
+<a>
+    \${test
+</a>
+<b>
+    \\${test}
+</b>
+<c>
+    \$!{test
+</c>
+<d>
+    \\$!{test}
+</d>
+
+<e>\${</e>
+
+<li role="none" id="global-attr" aria-hidden="true"></li>
+
+<button id="natively-focusable" role="none"></button>
+
+<li role="presentation" id="tabindex" tabindex="0"></li>
+<${custom}>
+  <@b/>
+
+  <@a b=1>
+    <const/hoistedFromStaticMember = () => 1 as const/>
+    hi!
+  </@a>
+
+  <@b c=2/>
+</>
+
+<effect() {
+  hoistedFromStaticMember;
+//^?
+}/>
+
+<custom-tag id="hello"/>
+<custom-tag#hello/>
+<custom-tag#hello${
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &&
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+}/>
+
+div data-foo=() => a.b()
+div data-foo=() => {
+  a.b();
+  c.d();
+}
+div data-foo=(a) => b.c()
+div data-foo=(a, b) => {
+  c.d();
+  e.f();
+}
+div data-foo=async () => a.b()
+
+$ {
+  before;
+  // middle
+  after;
+  //end
+}
+
+$ /* leading */ const x = foo;
+
+div
+  $ {
+    // comment
+    /* other 
+comment */ /* third comment */
+  }
+  $ // just one
+
+<custom-tag|
+  a,
+  b,
+  c,
+  d,
+  e,
+  f,
+  g,
+  h,
+  i,
+  j,
+  k,
+  l,
+  m,
+  n,
+  o,
+  p,
+  q,
+  r,
+  s,
+  t,
+  u,
+  v,
+  w,
+  x,
+  y,
+  z,
+|>
+  ${a}
+</custom-tag>
+
+<color-picker-footer colors=[
+  "#333745",
+  "#E63462",
+  "#FE5F55",
+  "#C7EFCF",
+  "#EEF5DB",
+  "#00B4A6",
+  "#007DB6",
+  "#FFE972",
+  "#9C7671",
+  "#0C192B"
+]/>
+
+<div>
+  <let/x=1/>
+  ${x}
+  <button/el onClick() {
+    x = 2;
+    x++;
+    ++x;
+  }>
+    
+  </button>
+</div>
+
+<effect() {
+  console.log(el())
+//            ^?
+}/>
+
+foo
+foo|a, b|
+foo|
+  {
+    aaaaaaaaaa: renamed1 = 1,
+    bbbbbbbbbb: renamed2 = 2,
+    cccccccccc: renamed3 = 3,
+  },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+|
+
+custom-tag id="hello"
+custom-tag#hello
+custom-tag#hello${
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &&
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+}
+
+<!-- This is a top level comment -->
+export interface Input {
+  name: string;
+}
+
+// This is another top level JS style comment. 
+<div>Hello ${input.name}</div>
+
+pre
+  ---------------------
+     ---   ---   ---
+   --- -- -- ---  ---
+  ---   ---   ---  ---
+   ---       ---  ---
+    ---     ---  ---
+  ---------------------
+<use-reducer/[item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17, item18, item19] />
+
+<use-reducer/{item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17, item18, item19} />
+
+<!-- This is a top level comment -->
+export interface Input {
+  name: string;
+}
+
+// This is another top level JS style comment.
+<div>Hello ${input.name}</div>
+
+<color-picker colors=[
+  "#333745",
+  "#E63462",
+  "#FE5F55",
+  "#C7EFCF",
+  "#EEF5DB",
+  "#00B4A6",
+  "#007DB6",
+  "#FFE972",
+  "#9C7671",
+  "#0C192B"
+]/>
+
+html-script -- window.bla = ${JSON.stringify(input.bla)};
+
+html-script --
+  window.a = ${JSON.stringify(input.a)};
+  window.b = ${JSON.stringify(input.b)};
+
+<!-- This is a top level comment -->
+export interface Input {
+  name: string;
+}
+
+// This is another top level JS style comment.
+div -- Hello ${input.name}
+
+<test-tag/result <A>|data: A| data=1 as const>
+//                         ^?
+  <return={ result: data }/>
+//                  ^?
+</>
+
+-- ${result}
+//   ^?
+<div pattern=/[abc/] /></div>
+<div pattern=/[a-z/] /></div>
+<div pattern=/[^abc/] /></div>
+<div pattern=/[a\]b/] /></div>
+<div pattern=/[\w\s/] /></div>
+
+div
+    ---
+    This is
+    multi-line text
+    ---
+    span -- This is body text of span
+        -- This is also body text of span
+    -- Hello Universe
+<html>
+  <head>
+    <title>Marko | Tic-Tac-Toe</title>
+  </head>
+  <body>
+    <sample-header title="Tic-Tac-Toe"/>
+    <tic-tac-toe/>
+  </body>
+</html>
+
+custom-tag|
+  a,
+  b,
+  c,
+  d,
+  e,
+  f,
+  g,
+  h,
+  i,
+  j,
+  k,
+  l,
+  m,
+  n,
+  o,
+  p,
+  q,
+  r,
+  s,
+  t,
+  u,
+  v,
+  w,
+  x,
+  y,
+  z,
+| -- ${a}
+
+export interface Input {
+  name: string;
+}
+
+export interface Input {
+  other: string;
+}
+
+-- ${input.name}
+//         ^?
+-- ${input.other}
+//         ^?
+<div>
+  <span.this.bad.boy.gotta.break>A</span>${" "}
+  <span.this.bad.boy.gotta.break>B</span>${" "}
+  <span.this.bad.boy.gotta.break>C</span>
+</div>
+
+<div foo/>
+<div foo(
+  { aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+)/>
+-- ${test}
+<div>${Hello}</div>
+
+<custom-tag id=(
+  "hello" // this comment should not be removed
+)></custom-tag>
+
+<custom-tag
+  id="hello" // this comment should not be removed
+/>
+
+<custom-tag/{
+  a,
+  b,
+  c,
+  d,
+  e,
+  f,
+  g,
+  h,
+  i,
+  j,
+  k,
+  l,
+  m,
+  n,
+  o,
+  p,
+  q,
+  r,
+  s,
+  t,
+  u,
+  v,
+  w,
+  x,
+  y,
+  z,
+}/>
+
+<let/a = { b: 1, bChange(_value: number) {} }/>
+
+<child value:parseInt:=a["b"]/>
+//      ^?    ^?
+
+<child value:Boolean:=a["b"]/>
+//      ^?    ^?
+
+// Single-line comment */ // \n
+
+/*
+multi-line
+  comment
+  <!--
+
+    */
+
+<!--
+  HTML
+    Comment
+        */
+  */ //
+\n
+    */
+                  -->
+<foo||/>
+<foo|a, b|/>
+<foo|{ aaaaaaaaaa: renamed1 = 1, bbbbbbbbbb: renamed2 = 2, cccccccccc: renamed3 = 3 }, aaaaaaaaaa, bbbbbbbbbb, cccccccccc|/>
+
+custom-tag/{
+  a,
+  b,
+  c,
+  d,
+  e,
+  f,
+  g,
+  h,
+  i,
+  j,
+  k,
+  l,
+  m,
+  n,
+  o,
+  p,
+  q,
+  r,
+  s,
+  t,
+  u,
+  v,
+  w,
+  x,
+  y,
+  z,
+}
+
+<html>
+  <head>
+    <title>Marko | TodoMVC</title>
+  </head>
+  <body>
+    <sample-header title="TodoMVC"/>
+    <todomvc-app/>
+  </body>
+</html>
+
+class {
+    // Comments in a class
+    aFunction() {
+        // Test comment
+    }
+}
+
+<div data-test=(
+    // This was important
+    "test"
+)/>
+
+<div/>
+<custom-tag/>
+<area/>
+<base/>
+<br/>
+<col/>
+<embed/>
+<hr/>
+<img/>
+<input/>
+<keygen/>
+<link/>
+<meta/>
+<param/>
+<source/>
+<track/>
+<wbr/>
+
+<div data=1 data=.5 data=1.5 data=1.5e10 data=1.5e+10 data=1.5e-10 data=-1 data=-.5 data=-1.5 data=-1.5e10 data=-1.5e+10 data=-1.5e-10></div>
+<let/a = { b: 1, bChange(_value: number) {} }/>
+
+<child value:parseInt:=a.b/>
+//      ^?    ^?
+
+<child value:Boolean:=a.b/>
+//      ^?    ^?
+
+<div foo()/>
+<div foo({ aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 }, aaaaaaaaaa, bbbbbbbbbb, cccccccccc)/>
+-- ${test}
+
+<div>${Hello}</div>
+
+<custom-tag value=new Map([
+  ["a", 1],
+  ["b", 1],
+  ["c", 1],
+  ["d", 1],
+  ["e", 1],
+  ["f", 1],
+  ["g", 1],
+  ["h", 1],
+  ["i", 1],
+])/>
+
+<html-script>
+    const x = "${input.a}${input.b}";
+</html-script>
+
+<html-script>
+    const y = "prefix_${input.val}_suffix";
+</html-script>
+
+a href="http://www.ebay.com",
+  target="_blank",
+  bar,
+  style="background-color: yellow",
+  class="foo"
+  -- This is the body of the a tag
+/**
+ * @typedef {{
+ * foo: Marko.AttrTag<{
+ *   bar?: boolean;
+ *   renderBody?: Marko.Body<[{a: string, b: number}]>
+ * }>
+ * }} Input
+ */
+
+<fancy-button color="red" fanciness=5/>
+//            ^?          ^?
+
+<regular-button size="large">body</regular-button>
+//              ^?
+
+div foo
+div foo(
+  { aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+)
+-- ${test}
+div -- ${Hello}
+
+<custom-tag id=(
+  "hello" // this comment should not be removed
+)/>
+
+<custom-tag id=(
+  "hello" // this comment should not be removed
+)/>
+
+div
+  span.this.bad.boy.gotta.break -- A
+  -- ${" "}
+  span.this.bad.boy.gotta.break -- B
+  -- ${" "}
+  span.this.bad.boy.gotta.break -- C
+
+custom-tag value=new Map([
+  ["a", 1],
+  ["b", 1],
+  ["c", 1],
+  ["d", 1],
+  ["e", 1],
+  ["f", 1],
+  ["g", 1],
+  ["h", 1],
+  ["i", 1],
+])
+
+style {
+  invalid { color blue; }
+}
+
+style
+  --
+
+    body
+        color: blue;
+
+  --
+
+script
+  --
+
+    console->log(
+    'a'
+    );
+
+  --
+
+class {
+  declare state: {
+    name: string;
+  }
+  onMount() {
+    this.state.name;
+//             ^?
+}
+}
+
+-- ${state.name}
+//         ^?
+<script() {
+    console.log('Foo');
+    if (test) {
+
+    }
+}/>
+
+<script value=() => {
+    console.log('Foo');
+    if (test) {
+
+    }
+}/>
+
+a [ href="http://www.ebay.com"
+  target="_blank"
+  style="background-color: yellow"
+    class="foo" ]
+  -- This is the body of the a tag
+<div>
+  <span.this.bad.boy.gotta.break>A</span> <span.this.bad.boy.gotta.break>B</span> <span.this.bad.boy.gotta.break>C</span>
+</div>
+
+a [href="http://www.ebay.com"
+  target="_blank"
+  style="background-color: yellow"
+    class="foo"]
+  -- This is the body of the a tag
+custom-tag id=(
+  "hello" // this comment should not be removed
+)
+
+custom-tag id=(
+  "hello" // this comment should not be removed
+)
+
+<let/b = 1/>
+//   ^?  ^?
+
+<child value:parseInt:=b/>
+//      ^?    ^?       ^?
+
+<child value:Boolean:=b/>
+//      ^?    ^?      ^?
+
+class {
+  // Comments in a class
+  aFunction() {
+    // Test comment
+  }
+}
+
+<div data-test=(
+  // This was important
+  "test"
+)/>
+
+a [ href="http://www.ebay.com"
+  target="_blank"
+  style="background-color: yellow"
+    class]
+  -- This is the body of the a tag
+<html-script>const x = "${input.a}${input.b}";</html-script>
+
+<html-script>const y = "prefix_${input.val}_suffix";</html-script>
+
+export interface Input {
+  foo: Marko.AttrTag<{
+    bar?: boolean;
+    renderBody?: Marko.Body<[{a: string, b: number}]>
+  }>
+}
+
+style {
+  invalid { color blue; }
+}
+
+<style>
+  body 
+      color: blue;
+</style>
+
+<script>
+  console->log(
+  'a'
+  );
+</script>
+
+div
+    --
+    Hello World
+    Hello Again
+
+script --
+    console.log('foo');
+    alert('bar');
+
+--
+Multi-line text
+Reached EOF
+export interface Comment {
+  id: string;
+  comments?: Comment[];
+}
+export interface Input {
+  comments: Comment[];
+}
+
+// Empty
+
+class {
+  // Comments in a class
+  aFunction() {
+    // Test comment
+  }
+}
+
+div data-test=(
+  // This was important
+  "test"
+)
+
+pre
+  ----
+     ---   ---   ---
+   --- -- -- ---  ---
+  ---   ---   ---  ---
+   ---       ---  ---
+    ---     ---  ---
+  ----
+
+<lifecycle<{ foo: number, bar: number, baz: number,
+fn: () => void }>
+  foo=1
+  bar=2
+  baz=3
+  fn() {}
+  onUpdate() {
+
+  }
+/>
+
+<custom-tag
+  data-attr-a
+  data-attr-b
+  data-attr-c
+  data-attr-d
+  data-attr-e
+  preserve-attr-a
+  not-preserve-attr-a
+/>
+
+<div data-value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"></div>
+
+<custom-tag value=new Map([["a", 1],["b", 1],["c", 1],["d", 1],["e", 1],["f", 1],["g", 1],["h", 1],["i", 1]])></custom-tag>
+
+<foo/>
+<foo(
+  { aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+)/>
+<foo(a, b)/>
+
+<script() {
+  console.log("Foo");
+  if (test) {
+  }
+}/>
+
+<script value=() => {
+  console.log("Foo");
+  if (test) {
+  }
+}/>
+
+<div value=x as Promise<Array<Record<string, number>>> />
+<div value=x as Promise< Array< Record< string, number > > > />
+
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"/>
+    <lasso-head />
+</head>
+<test-tag>
+  <@item x=1/>
+</test-tag>
+
+<test-tag>
+  <@item x=1>
+    Hello!
+  </>
+
+  <@item>
+    Hello!
+  </>
+</test-tag>
+
+style {
+  @import url("https://unpkg.com/todomvc-app-css@2.2.0/index.css");
+}
+
+<div.todoapp>
+  <todomvc-header/>
+</div>
+
+<div data-value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"/>
+
+my-select
+  @option -- One
+  @option -- Two
+  @option -- Three
+
+my-dialog
+  @header -- Head
+  -- Body
+  @footer -- Foot
+
+<a x:=foo>test</a>
+<a x := foo>test</a>
+<a:=foo>test</a>
+<a := foo>test</a>
+<a/bar:=foo>test</a>
+<a/bar := foo>test</a>
+<div foo/>
+<div foo(
+  { aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+)/>
+
+div data-value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+<my-component>
+  <@section>
+    <@header>Title</@header>
+    <@content>Body</@content>
+  </@section>
+</my-component>
+
+script() {
+  console.log("Foo");
+  if (test) {
+  }
+}
+
+script value=() => {
+  console.log("Foo");
+  if (test) {
+  }
+}
+
+pre
+  --
+
+                      This whitespace
+          should be preserved.
+
+  --
+
+pre --   And this also ${" "}
+
+$ {
+    var bgColor = getRandomColor();
+    var textColor = isLight(bgColor)
+        ? 'black'
+        : 'white';
+}
+
+a [ href=['foo']
+  target="_blank"
+  style="background-color: yellow"
+    class]
+  -- This is the body of the a tag
+<let/count=0/>
+<button
+    onClick() {
+        count++
+        console.log("hello")
+    }
+>
+    ${count}
+</button>
+
+a [ href=['foo']
+  target="_blank"
+  style="background-color: yellow"
+    class
+  -- This is the body of the a tag
+foo
+foo(
+  { aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+)
+foo(a, b)
+
+<div onClick("handleClickMissing")/>
+<div onClick("strange-handler")/>
+$ console.log(component);
+//            ^?
+<foo()/>
+<foo({ aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 }, aaaaaaaaaa, bbbbbbbbbb, cccccccccc)/>
+<foo(a, b)/>
+a [ foo=bar ] target="_blank" [
+  style="background-color: yellow"
+    class]
+  -- This is the body of the a tag
+div foo
+div foo(
+  { aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+)
+
+<html-script type="importmap">
+    {
+      "imports": {
+          "foo": "/bar.js"
+      }
+    }
+</html-script>
+
+p class="foo"
+    <!--
+    A multiline HTML comment
+    should be okay
+    -->
+div class="bar" -- <!-- test -->
+<div value=x as Map<string, Array<Record<K, V>>> />
+<div value=x satisfies Map<string, Array<Record<K, V>>> />
+
+<script>// this is a comment</script>
+
+<div>
+  <script>// this is a comment</script>
+  <span>hi</span>
+</div>
+
+<foo/>
+<foo(
+  { aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+)/>
+
+<!DOCTYPE html>
+html [lang="en"]
+  body
+    h1 -- Title
+    script
+      ---
+      var a = 'marko';
+      ---
+<div foo()/>
+<div foo({ aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 }, aaaaaaaaaa, bbbbbbbbbb, cccccccccc)/>
+
+custom-tag value=new Map([["a", 1],["b", 1],["c", 1],["d", 1],["e", 1],["f", 1],["g", 1],["h", 1],["i", 1]])
+
+pre
+  --
+                    This whitespace
+        should be preserved.
+  --
+
+pre --  And this also ${" "}
+
+<test-tag({ value: "hello!" })/>
+<test-tag("hello!")/>
+<test-tag("hello!", 1)/>
+<test-tag("hello!", 1, 2)/>
+
+<pre>
+                    This whitespace
+        should be preserved.
+</pre>
+
+<pre>  And this also  </pre>
+
+<custom-tag|a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z|>${a}</custom-tag>
+
+<a href="google.com" accesskey="g">Link to Google</a>
+<a href="github.com" accesskey="g">Link to GitHub</a>
+<pre>
+                    This whitespace
+        should be preserved.
+</pre>
+
+<pre>  And this also  </pre>
+$ var foo;
+$ if (condition1) {
+    foo = 1;
+} else if (condition2) {
+    foo = 2;
+} else {
+    foo = 3;
+}
+html-script -- const x = "${input.a}${input.b}";
+
+html-script -- const y = "prefix_${input.val}_suffix";
+
+$ {
+  const isWebpSupported = $global.request.headers
+    .get("accept")
+    ?.includes("image/webp");
+}
+
+p class="foo"
+    <![CDATA[Hello World]]> This is after CDATA
+div class="bar" -- <![CDATA[Hello World]]>
+head
+    script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"
+    lasso-head
+div class="hello"
+    <span>
+        Welcome to the
+        wonderful world of <b>Marko</b>
+    </span>
+
+pre
+  --
+                    This whitespace
+        should be preserved.
+  --
+
+pre --  And this also  
+
+foo
+foo(
+  { aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 },
+  aaaaaaaaaa,
+  bbbbbbbbbb,
+  cccccccccc,
+)
+
+     // I am indented, and that is OK, but the following is not
+    var colors=['red', 'green', 'blue']
+let/a:(B | C) = D
+
+let/a: (B | C) = D
+
+let/a : (B | C) = D
+
+let/a :(B | C) = D
+
+let/a: B & (C | D) = D
+
+span; // Hello World
+
+span; /* Hello World */
+
+span; <!-- Hello World -->
+
+span; Hello World
+    -- Bar
+<li>
+    <a.nav-link class=(id === currentPage && 'active') href=href>
+        ${title}
+    </a>
+</li>
+<pre>                  This whitespace
+      should be preserved.</pre>
+
+<pre> And this also  </pre>
+
+<foo()/>
+<foo({ aaaaaaaaaa: 1, bbbbbbbbbb: 2, cccccccccc: 3 }, aaaaaaaaaa, bbbbbbbbbb, cccccccccc)/>
+
+<!DOCTYPE html>
+html lang="en"
+  head
+    meta charset="UTF-8"
+    title -- Document
+  body -- Test
+
+<html-script type="importmap">
+  {
+    "imports": {
+      "foo": "/bar.js"
+    }
+  }
+</html-script>
+
+<list>
+  <@a>
+    <for of=[1, 2, 3]>
+      <@b size="small"/>
+      //  ^?
+    </for>
+  </>
+</list>
+<custom-tag=(function () {console.log("hi")
+})></custom-tag>
+
+<custom-tag() {console.log("hi")
+}/>
+
+<div data-foo={ a: 1, b: 2 } data-bar={ a: 1, b: 2 }>
+  <div data-indented={ a: 1, b: 2 }/>
+</div>
+
+<script>
+    var foo = `Text 1: ${content}`;
+    // ${foo}
+    /*
+        ${bar}
+    */
+</script>
+
+<#foo>Hello</>
+<#foo.bar name="Frank"></>
+<.bar.baz></.bar.baz>
+<div.foo></>
+<span.foo></span.foo>
+<html lang="en" xml:lang="es">
+  <head>
+    <title>Conflicting Languages</title>
+  </head>
+</html>
+<for(element in blah)>
+    <${element.foo}>
+        <include("foo")/>
+    </${element.foo}>
+</for>
+div a=class Test extends Other { hello() {} }
+div a=input.class Test extends Other { hello() {} }
+$ {
+  var bgColor = getRandomColor();
+  var textColor = isLight(bgColor) ? "black" : "white";
+}
+
+<div data=/foo//>
+<div data=/foo/></div>
+<div data=/flag/i></div>
+<div data=/with space/></div>
+p
+  /*
+  This is a
+  multiline comment
+  */ This is not okay
+  -- This is the body of the p tag
+<style.js/{ title }>
+  export const title = style({
+    backgroundColor: "red",
+  });
+</style>
+
+<custom-tag/{ a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z }/>
+
+<span ...a/>
+<span a ...b/>
+<span a ...b ...c/>
+<span a ...b c ...d/>
+<span a ...b c ...d e/>
+
+var pageTitle="Marko Templating Engine"
+var currentPage='home'
+
+<!DOCTYPE html>
+html lang="en"
+<custom-tag=function () {
+  console.log("hi");
+}/>
+
+<custom-tag() {
+  console.log("hi");
+}/>
+
+<!DOCTYPE html>
+html [lang="en"]
+  body
+    h1 -- Title
+    script
+      -- var a = 'marko';
+div
+custom-tag
+area
+base
+br
+col
+embed
+hr
+img
+input
+keygen
+link
+meta
+param
+source
+track
+wbr
+
+<div data-foo={a:1,b:2
+} data-bar={ a: 1, b: 2 }>
+  <div data-indented={a:1, b:2}/>
+</div>
+textarea
+  --
+
+                      This whitespace
+          should be preserved.
+
+  --
+
+export interface Input {
+  value: number | string;
+  valueChange?(next: string): void;
+}
+
+<div class="hello">
+  <span>Welcome to the wonderful world of <b>Marko</b></span>
+</div>
+
+$ const isWebpSupported = $global.request.headers.get("accept")?.includes("image/webp");
+
+export interface Input {
+  value: number | string;
+  valueChange?(next: string): void;
+}
+<textarea>
+                    This whitespace
+        should be preserved.
+</textarea>
+
+<style.js/{ title }>
+  export const title = style({
+backgroundColor: "red" });
+</style>
+
+﻿style {
+    .example {
+        margin-left: calc((-100% / 12 - 200px) / 2);
+    }
+}
+
+<let/size = 1/>
+<h${size}>
+  Hello
+</>
+
+<${"hello"}>
+  World
+</>
+
+<${"hello"}-world/>
+
+
+custom-tag=function () {
+  console.log("hi");
+}
+
+custom-tag() {
+  console.log("hi");
+}
+
+div data-foo={ a: 1, b: 2 } data-bar={ a: 1, b: 2 }
+  div data-indented={ a: 1, b: 2 }
+
+div class="hello"
+  span
+    -- Welcome to the wonderful world of${" "}
+    b -- Marko
+
+<textarea>
+                    This whitespace
+        should be preserved.
+</textarea>
+style.js/{ title } --
+  export const title = style({
+    backgroundColor: "red",
+  });
+
+<!DOCTYPE html>
+html [lang="en"]
+  body
+    h1 -- Title
+    script -- var a = 'marko';
+div --
+    Hello World
+    Hello Again
+    --
+    span --
+         Goodbye
+         --
+<div data-foo=(function () {})>
+
+</div>
+
+<div data-foo=(async function () {})>
+
+</div>
+html-script type="importmap" --
+  {
+    "imports": {
+      "foo": "/bar.js"
+    }
+  }
+
+<div data=('a') a=a+b b='foo'+'bar' template-string=`foo`></div>
+span test='123'"abc"
+const/$hoistedEl=$el
+div/$el
+  // ^?
+script --
+  $el;  
+  //^?
+  $hoistedEl;
+  //^?
+
+<effect() {
+  $signal.onabort = () => {
+// ^?
+    console.log('aborted');
+  };
+}/>
+
+<div>
+  <if(true)>
+    $ {
+      console.log('Hello World!');
+    }
+  </if>
+</div>
+export interface Input {
+  message: string;
+}
+
+<div>Hello ${input.message}</div>
+
+let/count=0
+button onClick() {
+  count++;
+  console.log("hello");
+} -- ${count}
+
+a [ href=['foo']
+  target="_blank"
+  style="background-color: yellow"
+    class
+<let/a = { b: 1, bChange(value: number) {} }/>
+
+<let/b := a["b"]/>
+//   ^?   ^?
+p
+  /*
+  This is a
+  multiline comment
+  */
+  -- This is the body of the p tag
+export interface Input { message: string }
+
+<div>Hello ${input.message}</div>
+
+$ {
+    var name = 'Frank';
+    console.log(`Hello ${name}!`);
+}
+
+<div>
+</div>
+<for(element in blah)>
+  <${element.foo}>
+    <include("foo")/>
+  </>
+</for>
+
+div class="hello"
+    <span>
+        Welcome to the <b>Marko</b>
+    </span>
+
+<attrs/{
+  greeting = "Hello",
+  firstName,
+  lastName,
+  ...otherAttrs,
+}/>
+
+div
+    span
+        ---
+        Test
+        <b>Hello World</b>
+        ---
+<let/a = { b: 1, bChange(v: 1) {} }/>
+
+<let/b := a["b"] as 1/>
+//   ^?   ^?
+
+<let/a = 1/>
+
+<let/b := a/>
+//   ^?   ^?
+<div onClick() {
+  a++;
+  b++;
+}/>
+
+<let/a = { b: 1, bChange(value: number) {} }/>
+
+<let/b := a.b/>
+//   ^?   ^?
+<div>
+    Hello \\${data.name}!
+    Messages: \\$!{data.messagesHtml}
+</div>
+div
+  // This is a single line comment
+  -- This is the body of the div tag
+<html lang="35">
+  <head>
+    <title>Language 35</title>
+  </head>
+</html>
+
+<.hello/$el/>
+//      ^?
+<script>
+  const el = $el();
+  //    ^?
+</script>
+
+<ul.features>
+    <li for(feature in [])>
+        ${feature}
+    </li>
+</>
+<div>
+    Hello \${data.name}!
+    Messages: \$!{data.messagesHtml}
+</div>
+<script>alert("Hello ${xyz}!")</script>
+<script>alert('${xyz}')</script>
+<div value=fn as <T>(x: T) => T />
+<div value=fn as < T >(x: T) => T />
+
+<div>
+    Hello ${data.name}!
+    Messages: $!{data.messagesHtml}
+</div>
+<test a = 123 + 456 b = 789></test>
+<test a = 123 b = 456 + 789></test>
+<html-script>
+  const match = url.match(/page=(\\d+)/);
+</html-script>
+
+<div no-update-if(Math.random() > 0.5)/>
+
+<div no-update-if("test")/>
+
+<${x}(y)/>
+<${x}|y|/>
+<tag.x(y)/>
+<tag.x|y|/>
+<tag#x(y)/>
+<tag#x|y|/>
+test
+    <foo>
+    <![CDATA[[if lt IE 9]><div><![endif]]]>
+    </foo>
+<custom data=`${`Hello ${data.firstName + data.lastName}`}`></custom>
+<let/value = 1/>
+<button onClick() {
+  value++;
+}/>
+
+<return=value/>
+
+<div data-foo=function () {}/>
+
+<div data-foo=async function () {}/>
+
+$ {
+  var name = "Frank";
+  console.log(`Hello ${name}!`);
+}
+
+<div/>
+
+<div>
+  <if(true)>
+    $ console.log("Hello World!");
+  </if>
+</div>
+
+<div>
+    Hello World
+    <span>
+        Hello Universe
+    </>
+</>
+
+div foo=readonly bar=true
+div foo=val as readonly string[] bar=true
+
+<div role="region">Region 1</div>
+<div role="region">Region 2</div>
+
+<div data-x=#2/>
+
+<div onClick(a, %b) {
+  console.log(#hello!);
+}/>
+
+div class="hello"
+  span
+    -- Welcome to the${" "}
+    b -- Marko
+
+<attrs/{ greeting = "Hello", firstName, lastName, ...otherAttrs }/>
+
+<div>
+  $ let i = 10;
+  <while(i--)>
+    <test/>
+  </while>
+</div>
+
+<div>Hello \\${data.name}! Messages: \\$!{data.messagesHtml}</div>
+
+<html-script>const match = url.match(/page=(\\d+)/);</html-script>
+
+<div>
+    BEFORE<![CDATA[<within><!-- just text -->]]>AFTER
+</div>
+$ $global.
+
+<header>
+  <img.logo src=logo alt="Marko"/>
+</header>
+
+my-component
+  @section
+    @header -- Title
+    @content -- Body
+
+<div class="hello"><span>Welcome to the <b>Marko</b></span></div>
+
+$ {
+  var name = "Frank";
+  console.log(`Hello ${name}!`);
+}
+
+div
+
+﻿style.scss {
+  .foo {
+    grid: "left right" / 3fr 7fr;
+  }
+}
+
+<script>
+    console.log('Foo');
+    if (test) {
+
+    }
+</script>
+attrs/{ greeting = "Hello", firstName, lastName, ...otherAttrs }
+
+<div>Hello \${data.name}! Messages: \$!{data.messagesHtml}</div>
+
+<script>console.log('<div>Hello ${input.name}</div>');</script>
+
+<button role="heading" aria-level="3">
+  header button
+</button>
+<html-style>
+    .foo {
+        color: red;
+    }
+</html-style>
+
+<html-script defer>
+    console.log('deferred');
+</html-script>
+
+<custom data=("Hello $!{name}!" + " This is a test.")></custom>
+$ {
+    var href = `https://ebay.com`;
+    console.log(href);
+}
+div data-foo=function () {}
+
+div data-foo=async function () {}
+
+<div>
+    Hello <!-- This is an inline comment --> World
+</div>
+div -- Hello \\${data.name}! Messages: \\$!{data.messagesHtml}
+
+<div>Hello ${data.name}! Messages: $!{data.messagesHtml}</div>
+
+div
+  span
+    -- Hello${" "}a
+    b
+      a href="#" -- World
+
+div
+  span
+    -- Hello${" "}
+    b
+      a href="#" -- World
+
+p
+    ---
+    Hello <strong>Frank</strong>
+    Line 2
+    ---
+<custom name="Hello $!{name}!">
+    Hello $!{name}!
+</custom>
+$ var str /* test */ = '' /**
+* Test
+*/
+
+<div>
+  Hello
+</div>
+#foo -- Hello
+#foo.bar name="Frank"
+.bar.baz
+div.foo
+span.foo
+export interface Input {
+  value: [string, number?]
+}
+<div/>
+
+<div data-foo=x = 1>
+  <!--
+  wow I'm over here
+  -->
+</div>
+
+div -- Hello \${data.name}! Messages: \$!{data.messagesHtml}
+
+<div id:scoped/>
+<div id="hi"/>
+<div class:no-update="hi"/>
+
+export interface Input {
+  value: any;
+  valueChange: any;
+}
+export interface Input {
+  onClick(ev: MouseEvent): void;
+}
+
+
+//^?
+$ console.log("hello");
+$ console.log("world");
+
+//^?
+
+// Should be resistant to syntax errors.
+<let/{ %x } = 1/>
+
+
+<div><span>Hello a<b><a href="#">World</a></b></span></div>
+
+<custom name="Hello ${name}!">
+    Hello ${name}!
+</custom>
+<h1></h1>
+<h2></h2>
+<h3></h3>
+<h4></h4>
+<h5></h5>
+<h6></h6>
+<script>
+  console.log("Foo");
+  if (test) {
+  }
+</script>
+
+div -- Hello ${data.name}! Messages: $!{data.messagesHtml}
+
+<div><span>Hello <b><a href="#">World</a></b></span></div>
+
+<div value=x as Array<T> />
+<div value=x as Array< T > />
+
+<div data-foo=(x = 1)>
+  <!--
+wow I'm over here
+-->
+</div>
+<div>Hello <!-- This is an inline comment --> World</div>
+
+<div/>
+// this is
+// multiple lines
+// of comments
+<div/>
+
+div
+  span
+    -- Hello a
+    b
+      a href="#" -- World
+
+<html-script defer>console.log("deferred");</html-script>
+
+<div><span>Hello <b><a href="#">World</a></b></span></div>
+<assign data.someArray[0].doSomething('test').hello=1+1/>
+div class="foo"
+    span class="bar"
+    span class="baz"
+<div value=x as A & B<T> />
+<div value=x as A & B< T > />
+export interface Input {
+  id: string,
+  class: string
+}
+
+<div/>
+// this is
+// multiple lines
+// of comments
+<div/>
+for(element in blah)
+  ${element.foo}
+    include("foo")
+
+<let/x,y=1/>
+<let/x ,y=1/>
+<let/x, y=1/>
+<let/x , y=1/>
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<div>Hello</div>
+<html-style>
+  .foo {
+    color: red;
+  }
+</html-style>
+
+html-script -- const match = url.match(/page=(\\d+)/);
+
+<a a=123+256 b c= d=(a + (1/2) /* comment */)>test</a>
+<?xml version="1.0" encoding="UTF-8">
+<div>Hello</div>
+div -- Hello <!-- This is an inline comment --> World
+
+<if(true)>
+    <strong>Marko is awesome</strong>
+</if>
+<html-comment>This is an HTML comment</html-comment>
+
+$ { hello() };
+
+$ { hello() }  ;
+
+$ { hello() };  
+
+
+<let/a = { b: 1 }/>
+
+<let/b := a["b"]/>
+//   ^?   ^?
+<${1 as any as Marko.Template<{ x: string }>} x=1/>
+
+<div  ...a  b=2
+  ...c d=2 ...e ...(f || g)>
+
+</div>
+div data-foo=x = 1
+  <!--
+  wow I'm over here
+  -->
+
+div
+// this is
+// multiple lines
+// of comments
+div
+
+<for|x, y, { destrucure=default }| of=array></for>
+<div class="foo" ...myCustomAttrs foo="bar"></div>
+$ var html = `
+<!doctype html>
+<div>${bar}</div>
+`
+script --
+  console.log("Foo");
+  if (test) {
+  }
+
+div
+  if(true)
+    $ console.log("Hello World!");
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<let/a = { b: 1 }/>
+
+<let/b := a.b/>
+//   ^?   ^?
+<fancy-button something=true>
+  
+</fancy-button>
+
+<my-tag|name|>
+//      ^?
+  Hi ${name}
+</my-tag>
+
+<div data-foo=a?b:c data-bar=(a ? b : c)>
+
+</div>
+<if=(current >= 0)>
+
+</>
+
+<if=(current > 0)>
+</>
+
+<if(true)><strong>Marko is awesome</strong></if>
+
+<div>
+  <span>stuff</span>${" "}more stuff
+</div>
+<for (x in ["Hello ${name}!", "(World)"])></for>
+$ var str = '' // a string
+
+<div>
+  Hello
+</div>
+export interface Input {
+  a: string;
+}
+
+<div/>
+
+export interface Input {
+  b: string;
+}
+
+<div/>
+
+<div data-foo=(/abc/) data-bar=(/a bc/)>
+
+</div>
+<div data-foo=`bar` data-bar=tag`thing`>
+
+</div>
+<let/count=1 />
+<const/doubleCount=count * 2 />
+
+<div>
+    <span>
+        foo
+    </span>
+
+</div>
+<p>
+  <strong>strong text</strong>
+  , and
+</p>
+
+﻿<lasso-page package-path="./browser.json"/>
+
+style/style --
+  header {
+    color: green
+  }
+
+<p lang="invalid">
+  This isn't a language
+</p>
+$ console.log({
+       foo: 'bar'+
+       1
+});
+div -- The next line has spaces on it
+   
+span
+div data-foo=(a ? b : c) data-bar=(a ? b : c)
+
+html-script defer -- console.log("deferred");
+
+<effect() {
+  console.log("Hello again");
+}/>
+
+<for(var i = 0; i < 10; i++) if(x > y)></for>
+<div foo='\"hello\"'>
+    Hello World!
+</div>
+<custom name=("Hello ${name}!")>TEST</custom>
+div class="foo" ...myCustomAttrs
+    span.bar
+<div data-foo=a ? b : c data-bar=a ? b : c/>
+
+<div>
+    ${foo} (<span>${bar}</span>)
+</div>
+<custom-tag|someVar|>${someVar}</custom-tag>
+
+img src="marko.png"
+    This is not allowed!
+$ {
+    var foo = 123;
+    /\d/.test(foo);
+}
+<lasso-page package-path="./browser.json"/>
+
+<let/x=1/>
+<return:=x as 1 | 2/>
+      // ^?
+<div data-foo=[1,2] data-bar=[1, 2]>
+
+</div>
+div
+    -- Foo
+    <!-- a
+    -->
+    -- Bar
+$ console.log('Hello World!');
+
+<div>
+</div>
+<hello message=`Hello
+    ${foo}!`></hello>
+<custom name="${'some text'}">TEST</custom>
+<custom name="Hello ${name}!">TEST</custom>
+$ {
+    var foo = 123;
+    var bar = 1/2;
+}
+$ {
+    var foo = 123;
+    var bar = 456;
+}
+<div data-foo=a+b data-bar=(a + b)>
+
+</div>
+html-style --
+  .foo {
+    color: red;
+  }
+
+effect() {
+  console.log("Hello again");
+}
+
+p
+  strong -- strong text
+  -- ${" "}, and
+
+<color-picker-selection color="#333745"/>
+
+<hello message=`${`hi ${name}`}!`></hello>
+<div class="foo" \\${myCustomAttrs}></div>
+var pageTitle = 1+2;
+var pageTitle = "hi";
+<input type="checkbox" disabled checked/>
+
+<const/a = 1/>
+
+<let/b := a/>
+//   ^?   ^?
+<let/b = 1/>
+//   ^?  ^?
+<child value:=b/>
+<if=(current >= 0)/>
+
+<if=(current > 0)/>
+
+<div data-foo=`bar` data-bar=tag`thing`/>
+
+div
+  -- ${foo} (
+  span -- ${bar}
+  -- )
+
+<effect() {console.log("Hello again")} />
+
+div
+  span -- stuff
+  -- ${" "}more stuff
+
+<p><strong>strong text</strong> , and</p>
+
+<for(x in y)></for>
+<ab('c')/>
+<a('b')/>
+
+<a a=123+456/* test */ b=a+'123'>test</a>
+var isString=typeof 'hello' === 'string'
+
+<script>/* Copyright $!{date} */</script>
+<div class="foo" \${myCustomAttrs}></div>
+<div>
+    <span>Hello World</span>
+</div>
+<div value=fn as (x: number) => string />
+<blink>
+  This shouldn't be here
+</blink>
+<marquee>
+  Should not be used
+</marquee>
+<html-script type=module>x</html-script>
+
+<div><span>stuff</span> more stuff</div>
+
+var foo = typeof 'foo',bar=typeof 'bar'
+
+<div class="foo" ...myCustomAttrs></div>
+<foo/var|param|>
+  Hello ${param}
+</foo>
+export interface Input {
+  %: string;
+}
+
+<div ...a b=2 ...c d=2 ...e ...f || g/>
+
+<div>${foo} (<span>${bar}</span>)</div>
+
+html-comment -- This is an HTML comment
+
+let/count=1
+const/doubleCount=count * 2
+
+<color-picker-header color="#333745"/>
+
+<hello message=`${
+    foo
+}!`></hello>
+<![CDATA[[if lt IE 9]><div><![endif]]]>
+<?xml version="1.0" encoding="UTF-8" ?>
+a
+    b
+        c
+        c2
+    b2
+a2
+
+<div aria-pressed="true">Click me</div>
+<div data-foo=[1, 2] data-bar=[1, 2]/>
+
+div data-foo=`bar` data-bar=tag`thing`
+
+$ console.log("Hello World!");
+
+<div/>
+
+<pre>Hello<strong>world</strong></pre>
+
+<script>// Copyright ${date}
+</script>
+script
+    p - This is not allowed
+div
+$ {
+    /* foo */
+    var foo = 123;
+}
+$ var foo = () => {
+    return 123;
+};
+static type Foo = Array<
+  Bar
+>
+
+div
+
+<div data-foo=/abc/ data-bar=/a bc//>
+
+if(true)
+  strong -- Marko is awesome
+
+$ console.log({
+  foo: "bar" + 1,
+});
+
+<use-reducer/{ greeting = "Hello" }/>
+
+<script>
+\${test}
+\\${test}
+</script>
+p role="text"
+  -- body text
+  button
+<button tabindex=3>My Button</button>
+<div data-foo=a + b data-bar=a + b/>
+
+div ...a b=2 ...c d=2 ...e ...f || g
+
+<div class="foo ${data.className}"/>
+
+<use-reducer/{greeting = "Hello"} />
+
+<div foo = 1 + 2, bar = x / y></div>
+var test = typeof 'foo' === 'string'
+div class="foo"
+    span class="bar"
+div data-foo=[1, 2] data-bar=[1, 2]
+
+$ console.log("Hello World!");
+
+div
+
+<div><span>Hello World</span></div>
+
+<use-reducer/{ item1, ...others }/>
+
+a foo=a++ bar=b--
+a foo=++a bar=--b
+<div data-foo="Hello ${foo}"></div>
+<div class="foo" ...myCustomAttrs/>
+var colors=['red', 'green', 'blue']
+$ {
+    // foo
+    var foo = 123;
+}
+div
+    span
+        -- Hello World
+div data-foo=/abc/ data-bar=/a bc/
+
+<![CDATA[Some text inside CDATA]]>
+
+<use-reducer/[item1, ...others] />
+
+use-reducer/{ greeting = "Hello" }
+
+<use-reducer/{item1, ...others} />
+
+<use-reducer/{ state, dispatch }/>
+
+<div foo = 1+ 2, bar = x /y></div>
+<div value=x as keyof typeof T />
+
+div data-foo=a + b data-bar=a + b
+
+<custom-tag="hello"></custom-tag>
+
+<div data-foo="foo\\nbar">
+
+</div>
+<![CDATA[Some text inside CDATA]]>
+<div>
+  Foo<!-- a
+  -->Bar
+</div>
+
+div class="foo ${data.className}"
+
+custom-tag|someVar| -- ${someVar}
+
+<use-reducer/[item1, ...others]/>
+
+<a=test b=2/>
+<if=(a && b)>
+</if>
+<custom data="${
+abc
+}"></custom>
+<var date=new Date(2000, 1, 1)/>
+
+<style>
+    .foo {
+    }
+</style>
+pre
+  -- Hello
+  strong -- world
+
+<use-reducer/[state, dispatch]/>
+
+<use-reducer/[state,dispatch] />
+
+use-reducer/{ item1, ...others }
+
+<use-reducer/{state,dispatch} />
+
+<test a=123 b=456, c=789></test>
+tagname <span>hello frank</span>
+div;  
+span --
+  text
+span2
+
+div class="foo"
+span class="bar"
+const/foo:Bar<
+  A,
+  B
+> = baz
+
+<body aria-hidden="true"></body>
+if=current >= 0
+
+if=current > 0
+
+var date = new Date(2000, 1, 1)
+
+$ var foo = {
+    bar: 'foo'
+};
+
+use-reducer/{ state, dispatch }
+
+<span data-foo="\$name"></span>
+<a data={
+    "a": "{b}"
+}></a>
+<div data-foo="\\${foo}"></div>
+<custom data="${abc}"></custom>
+<span>
+    <div.color/>
+</span>
+<div data-value=(a > b)></div>
+
+$ var foo = {
+  bar: "foo",
+};
+
+use-reducer/[item1, ...others]
+
+<div foo = 1, +2 = true></div>
+<div data-foo="\${foo}"></div>
+p
+    <b>Hello</b>
+        BAD
+<script>Hello ${xyz}!</script>
+<foo-${bar} hello="world">
+</>
+<div data-foo=(x = 1)>
+
+</div>
+var date=new Date(2000, 1, 1)
+
+<style>
+  .foo {
+  }
+</style>
+
+use-reducer/[state, dispatch]
+
+<div data-foo="${foo}"></div>
+div
+  span --
+    a
+ 
+    b
+
+div; /* a */
+span;<!-- b -->
+
+<span>
+    <div#foo/>
+</span>
+p
+    -- Line 1
+    -- Line 2
+var foo = new Date(2000,0,1)
+
+<div></div>
+
+
+<span>
+
+</span>
+<div role="fake-role"></div>
+
+<b>
+    <i/>
+    <span/>
+</b>
+import { foo } from "./bar";
+
+html-script type=module -- x
+
+tag a = 'foo' instanceof   
+
+<a data=((a-b)/2 + ")")></a>
+<a data=((a-b)/2 + ')')></a>
+b selected something test=/*
+div
+  span --
+    a
+ 
+    b
+
+<foo<{ bar: () => void }>/>
+
+<${custom}|a, %b|>
+  Hi
+</>
+
+<div data-foo="foo\\nbar"/>
+
+div --
+  Foo<!-- a
+  -->Bar
+
+import { foo } from './bar';
+div
+    span -- Hello World
+
+<lifecycle<> onMount() {}/>
+
+<div><span>foo</span></div>
+
+<div data="
+abc
+124"></div>
+<div hello=({ a: /[}]/ })/>
+<div#foo>Hello World</div>
+
+div#foo
+    -- Hello World
+
+<var foo=123 bar="hello"/>
+
+<div class="simple"></div>
+<div class='simple'></div>
+<div data=undefined></div>
+<foo a="1", b="2" c="3" />
+<foo a="1" b="2", c="3" />
+<!-- Copyright ${date} -->
+<span></span><div>
+</div>
+
+div /* c */ a=1
+span // d
+
+<let/b := a/>
+//   ^?   ^?
+<div data-value=(a > b)/>
+
+div
+  span -- Hello World
+
+<hello/>
+// bar
+
+<again/>
+
+<for of=[1]/>
+
+<foo bar/>
+
+var foo = 123 bar='hello'
+
+<div if(a ? b : c)></div>
+a b=c -- y
+
+a [b=c -- y]
+
+<a data=123 data=abc></a>
+span -- Hello <b>test</b>
+<foo invalid="${;"></foo>
+<a foo="bar" baz="</a>"/>
+div
+  static const x = 1
+
+div data-foo="foo\\nbar"
+
+$ const arr = [1, 2, 3];
+
+<div if (x > y)>
+</div>
+
+<div>Hello ${xyz}!</div>
+foo
+bar
+
+    baz -- test
+<test-tag<string> a=1/>
+
+<MyInput value:=value/>
+
+var foo=123 bar="hello"
+
+<div foo='a'+bar></div>
+$ const arr = [1, 2, 3]
+div#foo -- Hello World
+
+lifecycle onMount() {}
+
+<div data=false></div>
+var decade = '1960\'s'
+<#foo.bar>
+</#foo.bar>
+<static const x = 1/>
+
+oneOrTwo/y
+      // ^?
+<div data-foo=x = 1/>
+
+<custom-tag="hello"/>
+
+style --
+  .foo {
+  }
+
+<custom-tag/someVar/>
+
+<div if(x > y)></div>
+div[a=1 b]
+  span[c]
+
+<div data=null></div>
+<div data=true></div>
+div x=a ? b as T : c
+
+<a data=123"abc"></a>
+<a><!--<b></b>--></a>
+div
+  span --
+    t
+ 
+<script>a
+b</script>
+<img src="foo.png"/>
+
+<${myTagName}#foo></>
+div -- 
+  hello
+div2
+
+<div foo = bar></div>
+MyInput value:=value
+
+div data-value=a > b
+
+$ var foo =
+  "bar";
+
+<for (x in y)></for>
+<div a
+ b=1>x</div>
+tag $ var foo = 123;
+<foo-${bar}-baz>
+</>
+hello
+// bar
+
+again
+
+<div.foo${bar}baz/>
+
+for of=[1]
+
+foo bar
+
+var foo=void false
+
+<a a=(1>2)>test</a>
+span -- Hello World
+textarea -- Hello
+p
+div data-foo=x = 1
+
+custom-tag="hello"
+
+<b><i/><span/></b>
+
+hello
+// bar
+
+again
+$ var foo = "bar";
+
+<div> ${" "} </div>
+custom-tag/someVar
+
+div [x, y=1, a:b]
+
+var foo = 5 - data
+--
+hi
+--
+
+--
+foo
+
+
+<${test} foo=123/>
+$ var foo = /[[]/;
+<a>1 < > <> 2<</a>
+<${foo}>
+</${foo}>
+<div><img/></div>
+
+<div.foo.${bar}/>
+
+<div>${" "}</div>
+
+-- Hello!${world}
+
+div
+  span -- foo
+
+<a a=1/2>test</a>
+<a a=1>2>test</a>
+<a = test b = 2/>
+p
+    ---
+    ---
+div.foo${bar}baz
+
+div a=x +
+  y
+
+<var foo='bar'/>
+<div>a / b</div>
+$ var foo = /{/;
+$ var foo = 123;
+.${data.foo}-bar
+span.${data.foo}
+#${data.foo}-bar
+span#${data.foo}
+<foo-${bar}>
+</>
+<${foo}-bar>
+</>
+div.foo${bar}baz
+<#foo.bar.baz/>
+
+<let/myVar=2 />
+
+-- ${data.name}
+${test} foo=123
+.bar${data.foo}
+div#foo.bar.baz
+#bar${data.foo}
+div.foo.${bar}
+
+<div.foo.bar/>
+
+div [foo:=bar]
+<div a=`x$y`/>
+<${someVar}/>
+
+div.foo.${bar}
+div -- ${" "}
+
+<a b>test</a>
+<a=test,b=2/>
+<script>a</>b
+<#foo>
+</div>
+---
+test
+---
+
+b
+  i
+  span
+
+#foo.bar.baz
+
+div foo:=bar
+-- ${value} 
+div a='x'/2
+
+div a=`x`/2
+
+<${foo}>
+</>
+foo
+bar
+
+baz
+<test-tag/>
+
+div.foo.bar
+
+#foo.bar.baz
+let/myVar=2
+
+<div></div>
+
+div a--b=1
+
+div<T>(a) y
+div#foo.bar
+div/v, a=1
+
+-- Hi
+// ^?
+class {
+
+}
+
+${someVar}
+
+div.foo.bar
+<div.foo/>
+
+<div#foo/>
+
+<aBcDefg/>
+
+<var foo/>
+<#foo>
+</>
+$ { x } ;
+class {}
+
+$ // +
+a
+#foo.bar
+div.foo
+
+div#foo
+
+aBcDefg
+
+---
+---
+div#foo
+div.foo
+<div/>
+
+// foo
+<a />
+#foo
+div
+
+--

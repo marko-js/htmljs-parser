@@ -1,0 +1,81 @@
+import FancyButton from "<fancy-button>";
+import { get } from "@ebay/retriever";
+/** Hi */
+export interface Input {
+  year: number,
+  isSmartOnly: boolean,
+  type: string,
+  mobileList: Array<Mobile>,
+  renderBody: Marko.Body
+}
+
+class {
+    declare state: {
+        something: boolean;
+    }
+    onMount() {
+        console.log("mounted");
+    }
+    handleClick(ev: MouseEvent) {
+        console.log("clicked");
+    }
+}
+
+$ const person = {
+    name: "Frank",
+    age: 32
+};
+
+static {
+    function greet() {
+        return "hello world";
+    }
+}
+
+static var useA = true;
+
+static type Mobile = {
+    brandName: string;
+};
+
+$ {
+    const year: number = input.year;
+    const isSmartOnly: boolean = input.isSmartOnly;
+    const type: string = component.input.type;
+
+    const mobiles:Array<Mobile> = component.input.mobileList;
+
+    mobiles.forEach((mobile:Mobile) => {
+        console.log(mobile.brandName);
+    });
+}
+
+<div class="mobiles__list" onClick("handleClick")>
+    <p id="p">Year: ${year}</p>
+
+    <if(isSmartOnly)>
+      <span class="sub-note">isSmartPhone: ${isSmartOnly}</span>
+    </if>
+
+    <span class="sub-note">phoneType: ${type}</span>
+    $ {
+        const mobiles:Array<Mobile> = component.input.mobileList;
+        mobiles.forEach((mobile:Mobile) => {
+            console.log(mobile.brandName);
+        });
+    }
+
+    <for|mobile, i, all| of=mobiles>
+      <span id=i>${mobile} ${i} ${all.length}</span>
+    </for>
+
+    <div.container>
+        <${input.renderBody}/>
+    </div>
+    <FancyButton something=true>${type}</FancyButton>
+    <div>Hello $!{"<b>World</b>"}</div>
+    <div>Placeholder example: <code>\${someValue}</code></div>
+
+    <Missing/>
+    <complex-missing/>
+</div>

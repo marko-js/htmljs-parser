@@ -1,0 +1,26 @@
+$ let i = 0;
+
+<while(++i < 10)>
+//       ^?
+  ${i}
+//  ^?
+</while>
+
+$ i = 0;
+<while(++i < 10)></while>
+//       ^?
+
+$ let done = false;
+$ i = 0;
+<while(!done)>
+//      ^?
+  ${done}
+//  ^?
+  <if(++i === 5)>
+    $ done = true;
+  </if>
+</while>
+
+<while>
+  No Condition.
+</while>

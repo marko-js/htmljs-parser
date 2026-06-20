@@ -1,0 +1,18 @@
+<define/Foo|input: any|>
+  <${input.section}/>
+</>
+
+<Foo>
+  <@section>
+    <const/nested=() => 1>
+  </@section>
+
+  <@section>
+    Bar
+  </@section>
+</Foo>
+
+<script>
+  nested;
+  // ^?
+</script>

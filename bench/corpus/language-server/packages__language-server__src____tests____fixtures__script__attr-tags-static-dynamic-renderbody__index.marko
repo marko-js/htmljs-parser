@@ -1,0 +1,10 @@
+<let/someCondition=false/>
+<${custom}>
+    <@header>...</@header>
+   <if(someCondition)>
+      //^?
+      <@footer>...</@footer>
+    </if>
+    <for|x| of=[1]>${x}</for>
+    //               ^?
+</>

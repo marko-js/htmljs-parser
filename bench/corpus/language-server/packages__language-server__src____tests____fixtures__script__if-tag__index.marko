@@ -1,0 +1,117 @@
+<let/show=true/>
+<let/showAlt=false/>
+
+<if>
+  Hi
+</if>
+
+<if=show>
+  Hi
+</if>
+
+<if(show)>
+  Hi
+</if>
+
+<div>
+  <if>
+    Hello
+  </if>
+  World
+</div>
+
+<if=show>
+  Hi
+</if>
+<else>
+  Goodbye
+</else>
+
+<if=show>
+  <const/a = () => 0 as const/>
+</if>
+
+<if=show>
+  <const/b = () => 1 as const/>
+</if>
+<else if=showAlt>
+  <const/c = () => 2 as const/>
+</else>
+<else>
+  <const/d = () => 3 as const/>
+</else>
+
+<if=show></if>
+<else>
+  <const/e = () => 4 as const/>
+</else>
+
+<if=show></if>
+<else-if=showAlt></else-if>
+<else>
+  <const/f = () => 4 as const/>
+</else>
+
+<if=show>
+  <const/g = () => 5 as const/>
+</if>
+<else>
+  <const/g = () => 6 as const/>
+</else>
+
+<if(show)></if>
+<else-if(showAlt)>
+  <if(show)>
+  </if>
+  <else-if(showAlt)>
+    <const/h = () => 7 as const/>
+  </else-if>
+  <else>
+    <const/i = () => 8 as const/>
+  </else>
+</else-if>
+
+<if=show>
+  Hi
+</if>
+<else-if>
+  Hi
+</else-if>
+
+<if(show,)>
+  Hi
+</if>
+
+<if(show, )>
+  Hi
+</if>
+
+<if(show, y)>
+  Hi
+</if>
+
+<if(show,  y, )>
+  Hi
+</if>
+
+
+<effect() {
+  a;
+//^?
+  b;
+//^?
+  c;
+//^?
+  d;
+//^?
+  e;
+//^?
+  f;
+//^?
+  g;
+//^?
+  h;
+//^?
+  i;
+//^?
+}/>

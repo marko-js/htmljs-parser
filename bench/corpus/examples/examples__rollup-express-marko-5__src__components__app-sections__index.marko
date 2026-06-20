@@ -1,0 +1,29 @@
+static function getAnchorName(section) {
+  if (!section.anchorName) {
+    section.anchorName = section.title.replace(/[^a-zA-Z]+/g, "-");
+  }
+
+  return section.anchorName;
+}
+
+<div class="app-sections">
+  <div class="tableOfContents">
+    <ul>
+      <for|section| of=input.sections>
+        <li>
+          <a href=`#${getAnchorName(section)}`>${section.title}</a>
+        </li>
+      </for>
+    </ul>
+  </div>
+  <div class="sections-ctr">
+    <for|section| of=input.sections>
+      <div class="section">
+        <h2 id=getAnchorName(section)>${section.title}</h2>
+        <div class="section-body">
+          <${section.renderBody}/>
+        </div>
+      </div>
+    </for>
+  </div>
+</div>

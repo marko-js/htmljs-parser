@@ -1,0 +1,10 @@
+macro name="recursive"
+  await(generator.next())
+    @then|{ value, done }|
+      div
+        ul
+          li -- ${value}
+        ul
+          li -- ${value}
+        ul
+          li -- ${value}

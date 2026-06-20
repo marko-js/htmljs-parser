@@ -1,0 +1,26 @@
+<test-tag|a|>
+  ${a}
+//  ^?
+</test-tag>
+
+<test-tag|a|>
+  <return=a/>
+</test-tag>
+
+<test-tag>
+  <return="b" as const/>
+</test-tag>
+
+<test-tag>
+  <return="c" as const/>
+</test-tag>
+
+<test-tag>
+  <let/hoisted= () => 1 as const/>
+  <return="b" as const/>
+</test-tag>
+
+-- ${() => {
+  hoisted;
+//^?
+}}

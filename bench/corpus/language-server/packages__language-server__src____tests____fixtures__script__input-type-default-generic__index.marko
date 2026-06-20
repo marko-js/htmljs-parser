@@ -1,0 +1,12 @@
+export interface Input<T = string> {
+//                     ^?
+  options: T[];
+//         ^?
+  onChange: (option: T) => unknown;
+//                   ^?
+}
+
+-- ${input.options}
+//         ^?
+-- ${input.onChange}
+//         ^?

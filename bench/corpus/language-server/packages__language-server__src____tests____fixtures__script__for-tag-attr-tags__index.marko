@@ -1,0 +1,27 @@
+<my-table>
+  <for|row| of=[
+    { foo: "a", bar: "b" },
+    { foo: "c", bar: "d" },
+  ]>
+    <@row>
+    // ^?
+      <@cell>${row.foo}</@cell>
+      // ^?     ^?
+      <@cell>${row.bar}</@cell>
+    </@row>
+  </for>
+</my-table>
+
+<my-table>
+  <for|row| of=[
+    { foo: "a", bar: "b" },
+    { foo: "c", bar: "d" },
+  ] as const>
+    <@row>
+    // ^?
+      <@cell>${row.foo}</@cell>
+      // ^?     ^?
+      <@cell>${row.bar}</@cell>
+    </@row>
+  </for>
+</my-table>

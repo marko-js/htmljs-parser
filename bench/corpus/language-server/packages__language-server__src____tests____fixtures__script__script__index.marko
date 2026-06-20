@@ -1,0 +1,23 @@
+export interface Input<T extends string> {
+  name: T
+}
+
+<div>
+  <let/x=1/>
+  <const/y="hi"/>
+  <const/promise=Promise.resolve("world")/>
+  <script>
+    console.log(x);
+//              ^?
+    console.log(y);
+//              ^?
+    console.log(input.name);
+//                    ^?
+
+    const resolved = await promise;
+    console.log(resolved);
+    //          ^?
+    x = 2;
+    y = "bye";
+  </script>
+</div>

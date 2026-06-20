@@ -1,0 +1,22 @@
+export interface Input<FirstName extends string, LastName extends string> {
+  firstName: FirstName,
+  lastName: LastName,
+}
+
+class {
+  declare state: {
+    name: `${FirstName} ${LastName}`;
+//  ^?
+  }
+  onCreate(input: Input<FirstName, LastName>) {
+    this.state = { name: `${input.firstName} ${input.lastName}` };
+//                                ^?                 ^?
+  }
+  onMount() {
+    this.state.name;
+//             ^?
+  }
+}
+
+-- ${state.name}
+//         ^?

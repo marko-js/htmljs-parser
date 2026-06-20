@@ -1,0 +1,53 @@
+import imgCO from "./assets/CO.png";
+import imgCA from "./assets/CA.png";
+static const states = [
+  {
+    name: "Colorado",
+    value: "CO",
+    img: imgCO
+  },
+  {
+    name: "California",
+    value: "CA",
+    img: imgCA
+  }
+];
+
+class {
+  onInput() {
+    this.state = {
+      stateIndex: null
+    };
+  }
+
+  handleSelectChange(event, selectEl) {
+    if (selectEl.selectedIndex === 0) {
+      this.state.stateIndex = null;
+    } else {
+      this.state.stateIndex = selectEl.selectedIndex - 1;
+    }
+  }
+}
+
+style {
+  .state-icon {
+    width: 75px;
+    height: 50px;
+  }
+}
+
+<div>
+  <h3>Choose a state</h3>
+  <select onChange("handleSelectChange")>
+    <option value="" selected=(state.stateIndex == null)>(choose a state)</option>
+    <for|stateInfo, i| of=states>
+      <option value=stateInfo.value selected=(state.stateIndex === i)>
+        ${stateInfo.name}
+      </option>
+    </for>
+  </select>
+  <if(state.stateIndex != null)>
+    <div>You selected: ${states[state.stateIndex].value}</div>
+    <img src=states[state.stateIndex].img/>
+  </if>
+</div>

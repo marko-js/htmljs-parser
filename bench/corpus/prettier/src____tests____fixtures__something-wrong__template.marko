@@ -1,0 +1,25 @@
+class {
+  onCreate() {
+    this.state = { count: 0 };
+  }
+  increment(delta) {
+    this.state.count += delta;
+  }
+}
+
+$ var count = state.count;
+
+<div.click-count>
+  <div.count class={
+      positive: count > 0,
+      negative: count < 0
+    }>
+    ${count}
+  </div>
+  <button on-click('increment', -1)>
+    -1
+  </button>
+  <button on-click('increment', 1)>
+    +1
+  </button>
+</div>

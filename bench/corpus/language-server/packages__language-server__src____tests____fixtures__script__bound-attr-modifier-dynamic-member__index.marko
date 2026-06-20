@@ -1,0 +1,7 @@
+<let/a = { b: 1, bChange(_value: number) {} }/>
+
+<child value:parseInt:=a["b"]/>
+//      ^?    ^?
+
+<child value:Boolean:=a["b"]/>
+//      ^?    ^?

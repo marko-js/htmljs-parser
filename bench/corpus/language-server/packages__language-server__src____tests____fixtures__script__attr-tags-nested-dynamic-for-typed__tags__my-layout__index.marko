@@ -1,0 +1,15 @@
+export interface Input {
+  section?: Marko.AttrTag<{
+    item?: Marko.AttrTag<{
+      content: Marko.Body<[{
+        label: string;
+      }]>;
+    }>;
+  }>;
+}
+
+<for|section| of=input.section>
+  <for|item| of=section.item>
+    <${item.content} label="label"/>
+  </for>
+</for>

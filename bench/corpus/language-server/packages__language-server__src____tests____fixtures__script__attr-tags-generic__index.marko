@@ -1,0 +1,18 @@
+<foo value=1 as const>
+  <@then|foo|>
+    //   ^?
+    ${foo}
+  </@then>
+</foo>
+
+<foo value=1 as const>
+  <for|i| of=[1]>
+    <@then|foo|>
+      //   ^?
+      ${i}
+      //^?
+      ${foo}
+      //^?
+    </@then>
+  </for>
+</foo>

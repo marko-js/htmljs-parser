@@ -1,0 +1,5 @@
+export interface Input<TData = string> {
+  renderBody: Marko.Body<[TData], void>;
+  value?: () => TData;
+  key?: string;
+}

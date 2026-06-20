@@ -1,0 +1,97 @@
+static const x = 1;
+static const y = 2;
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+</>
+
+<${custom} x=1>
+  <if=x></if>
+  <else>
+    <@a/>
+  </else>
+</>
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+  <else>
+    <@b/>
+  </else>
+</>
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+  <else if=y>
+    <@b/>
+  </else>
+  <else-if=!y>
+    <@c/>
+  </else-if>
+  <else>
+    <@d/>
+  </else>
+</>
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+  <else-if>
+    <@b/>
+  </else-if>
+</>
+
+<${custom} x=1>
+  <if(x)>
+    <@a/>
+  </if>
+</>
+
+<${custom} x=1>
+  <if>
+    <@a/>
+  </if>
+</>
+
+<${custom} x=1>
+  <if=x>
+    <@a/>
+  </if>
+
+  <if=y>
+    <@b/>
+  </if>
+</>
+
+<${custom} x=1>
+  // hi
+  <@a b=1>
+    <const/hoistedFromStaticMember = () => 1 as const/>
+    hi!
+  </@a>
+
+  <@b/>
+
+  <if=x>
+    <@b>
+      <const/hoistedFromDynamicMember = () => 2 as const/>
+    </>
+  </if>
+
+  <if=y>
+    <@a/>
+  </if>
+</>
+
+<effect() {
+  hoistedFromStaticMember;
+//^?
+  hoistedFromDynamicMember; // TODO: this should be better and include `undefined` as a possible value
+//^?
+}/>

@@ -1,0 +1,16 @@
+export interface Input<T extends string> {
+  name: T
+}
+
+<div>
+  <let/x=() => 1/>
+  ${new Thing()}
+//      ^?
+  ${x}
+//  ^?
+  ${input.name}
+//        ^?
+</div>
+
+-- ${x}
+//   ^?

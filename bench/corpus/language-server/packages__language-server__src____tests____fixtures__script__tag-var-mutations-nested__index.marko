@@ -1,0 +1,16 @@
+<let/x=1/>
+
+<button onClick() {
+  x++;
+//^?
+}>Click me</>
+
+<foo>
+  <let/y="hello"/>
+  <button onClick() {
+    x++;
+//  ^?
+    y = "goodbye";
+//  ^?
+  }>Click me</>
+</foo>

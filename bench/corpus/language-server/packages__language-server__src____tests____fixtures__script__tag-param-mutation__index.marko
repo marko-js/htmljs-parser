@@ -1,0 +1,18 @@
+<let/string="bar"/>
+  //  ^?
+<test-tag|val|>
+  <button onClick() { string = val }>
+                  //   ^?      ^?
+    ${val}
+  </button>
+</test-tag>
+
+<for|_unused| of=[]>
+  <let/inputId=""/>
+  <input id=inputId>
+</for>
+
+<button onClick() {
+  inputId;
+  // ^?
+}>Body to prevent a11y error</button>

@@ -1,0 +1,58 @@
+<let/x=1/>
+
+<div data-function() {
+  x++;
+}/>
+
+<div data-function(y = x++) {
+  y;
+}/>
+
+<div data-function=() => {
+  x++;
+}/>
+
+<div data-function=(y = x++) => {
+  y;
+}/>
+
+<div data-function=function () {
+  x++;
+}/>
+
+<div data-function=function (y = x++) {
+  y;
+}/>
+
+<div data-function() {
+  function testA() {
+    x++;
+  }
+
+  function testB(y = x++) {
+    y;
+  }
+
+  class TestC {
+    constructor() {
+      this.#privateMethodA;
+      this.#privateMethodB;
+    }
+    methodA() {
+      x++;
+    }
+    methodB(y = x++) {
+      y;
+    }
+    #privateMethodA() {
+      x++;
+    }
+    #privateMethodB(y = x++) {
+      y;
+    }
+  }
+
+  testA;
+  testB;
+  TestC;
+}/>

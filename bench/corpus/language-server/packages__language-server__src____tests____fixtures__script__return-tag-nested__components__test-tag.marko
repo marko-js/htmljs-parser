@@ -1,0 +1,5 @@
+export interface Input {
+  renderBody: Marko.Body<["a"], { value: "a" | "b" }>
+}
+
+<${input.renderBody}("a") />

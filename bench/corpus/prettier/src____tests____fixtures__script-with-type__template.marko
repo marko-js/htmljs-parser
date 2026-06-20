@@ -1,0 +1,13 @@
+<html-script nonce=$global.cspNonce type="speculationrules">
+  {
+    "prerender": [{
+      "where": { "href_matches": "/*" },
+      "eagerness": "moderate"
+    }]
+  }
+</html-script>
+
+<html-script type="application/json">{ "hello": ${JSON.stringify(world)}, "and-a-lot-more": "stuff-in-here-to-line-break" }</html-script>
+<html-script type="application/json">{ "hello": 345873495873985893, "and-a-lot-more": "stuff-in-here-to-line-break" }</html-script>
+
+<html-script type="unknown">${foo}</html-script>

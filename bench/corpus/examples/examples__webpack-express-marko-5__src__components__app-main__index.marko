@@ -1,0 +1,185 @@
+<div>
+  <h1>Hello!</h1>
+  <app-sections>
+    <@section title="Buttons">
+      <table>
+        <tr>
+          <td>
+            <b>Primary:</b>
+          </td>
+          <td>
+            <app-button label="small" size="small" variant="primary"/>
+            <app-button label="normal" size="normal" variant="primary"/>
+            <app-button label="large" size="large" variant="primary"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Secondary:&nbsp;</b>
+          </td>
+          <td>
+            <app-button label="small" size="small" variant="secondary"/>
+            <app-button label="normal" size="normal" variant="secondary"/>
+            <app-button label="large" size="large" variant="secondary"/>
+          </td>
+        </tr>
+      </table>
+      <div>
+        <app-button
+          label=`Change Button Size - ${state.buttonSize}`
+          size=state.buttonSize
+          variant="primary"
+          onClick("handleChangeButtonSizeClick")/>
+        <app-button
+          label=`Change Button Variant - ${state.buttonVariant}`
+          variant=state.buttonVariant
+          onClick("handleChangeButtonVariantClick")/>
+      </div>
+    </@section>
+    <@section title="Checkboxes">
+      <p>
+        <app-checkbox
+          label="Foo"
+          data={
+            name: "foo"
+          }
+          checked=state.checked.foo
+          onToggle("handleCheckboxToggle")/>
+        <app-checkbox
+          label="Bar"
+          data={
+            name: "bar"
+          }
+          checked=state.checked.bar
+          onToggle("handleCheckboxToggle")/>
+        <app-checkbox
+          label="Baz"
+          data={
+            name: "baz"
+          }
+          checked=state.checked.baz
+          onToggle("handleCheckboxToggle")/>
+      </p>
+      <p>
+        <app-checkbox
+          label="Bar"
+          data={
+            name: "bar"
+          }
+          checked=state.checked.bar
+          onToggle("handleCheckboxToggle")/>
+      </p>
+      <p>
+        <b>Checked</b>:
+        <ul>
+          <for|key, value| in=state.checked>
+            <if(value)>
+              <li>${key}</li>
+            </if>
+          </for>
+        </ul>
+      </p>
+      <p>
+        <app-checkbox
+          label="Foo"
+          checked
+          data={
+            name: "foo"
+          }
+          key="toggleCheckbox"/>
+        <app-button
+          label="Toggle Checkbox"
+          size="small"
+          variant="primary"
+          onClick("handleToggleCheckboxButtonClick")/>
+      </p>
+    </@section>
+    <@section title="Overlays">
+      <app-button
+        label="Show Overlay"
+        variant="primary"
+        onClick("handleShowOverlayButtonClick")/>
+      <app-button
+        label="Show Notification"
+        variant="primary"
+        onClick("handleShowNotificationButtonClick")/>
+      <app-notifications key="notifications"/>
+      <app-overlay
+        onOk("handleOverlayOk")
+        onCancel("handleOverlayCancel")
+        onHide("handleOverlayHide")
+        onShow("handleOverlayShow")
+        key="overlay"
+        visible=state.overlayVisible>
+        <h2>Overlay Demo</h2>
+        This is an overlay!
+      </app-overlay>
+    </@section>
+    <@section title="Tabs">
+      <h3>Static tabs</h3>
+      <app-tabs>
+        <@tab label="Home">Content for Home</@tab>
+        <@tab label="Profile">Content for Profile</@tab>
+        <@tab label="Messages">Content for Messages</@tab>
+      </app-tabs>
+      <h3>Dynamic tabs</h3>
+      <app-tabs>
+        <for|tabIndex, tab| in=state.dynamicTabs>
+          <@tab label=("Tab " + tabIndex)>
+            Content for tab ${tabIndex}: ${tab.timestamp}
+          </@tab>
+        </for>
+      </app-tabs>
+      <app-button label="Add Tab" onClick("handleAddTabButtonClick")/>
+    </@section>
+    <@section title="Miscellaneous">
+      <app-progress-bar>
+        <@step name="contact-info">Contact Info</@step>
+        <@step name="interests">Interests</@step>
+        <@step name="family">Family</@step>
+      </app-progress-bar>
+      <br/>
+      <app-number-spinner/>
+      <br/>
+      <app-state-select/>
+    </@section>
+    <@section title="Client-side Rendering">
+      <app-button label="Render a button" onClick("handleRenderButtonClick")/>
+      <app-button label="Render a checkbox" onClick("handleRenderCheckboxButtonClick")/>
+      <app-button
+        label="Render a progress bar"
+        onClick("handleRenderProgressBarButtonClick")/>
+      <div key="renderTarget" class="render-target" no-update-body/>
+    </@section>
+    <@section title="Fetch data">
+      <app-fetch-data/>
+    </@section>
+    <@section title="Markdown">
+      <app-markdown>
+        ---
+
+        > This section demonstrates Markdown in Marko
+
+        ## Marko Features
+
+        - High performance
+        - Small
+        - Intuitive
+
+        # H1
+        ## H2
+        ### H3
+        #### H4
+        ##### H5
+        ###### H6
+
+        [markojs.com](http://markojs.com/)
+
+        _emphasis_
+        __strong__
+
+        ---
+      </app-markdown>
+    </@section>
+  </app-sections>
+</div>

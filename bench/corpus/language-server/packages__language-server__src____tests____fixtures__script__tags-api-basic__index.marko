@@ -1,0 +1,45 @@
+import FancyButton from "<fancy-button>";
+import { get } from "@ebay/retriever";
+/** Hi */
+export interface Input {
+  year: number,
+  isSmartOnly: boolean,
+  type: string,
+  mobileList: Array<Mobile>,
+  renderBody: Marko.Body
+}
+
+static {
+    function greet() {
+        return "hello world";
+    }
+}
+
+static var useA = true;
+
+<const/{ year, isSmartOnly, type, mobileList, renderBody } = input/>
+
+<div class="mobiles__list">
+    <p id="p">Year: ${year}</p>
+
+    <if=isSmartOnly>
+      <span class="sub-note">isSmartPhone: ${isSmartOnly}</span>
+    </if>
+
+    <span class="sub-note">phoneType: ${type}</span>
+
+    <for|mobile, i, all| of=mobileList>
+//                          ^?
+      <span id=i>${mobile} ${i} ${all.length}</span>
+//                 ^?        ^?
+    </for>
+
+    <div.container>
+        <${renderBody}/>
+    </div>
+    <FancyButton no-update something=true>${type}</FancyButton>
+    <div>Hello $!{"<b>World</b>"}</div>
+    <div>Placeholder example: <code>\${someValue}</code></div>
+</div>
+
+<return=1/>

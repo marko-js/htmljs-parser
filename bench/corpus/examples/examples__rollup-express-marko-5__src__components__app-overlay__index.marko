@@ -1,0 +1,22 @@
+<div class=["app-overlay", { visible: state.visible }]>
+  <div class="app-overlay-mask" onClick("handleMaskClick")/>
+  <div
+    class="app-overlay-container"
+    style={ width: input.width || "80%" }>
+    <div class="app-overlay-body" key="body">
+      <${input.renderBody}/>
+    </div>
+    <div class="app-overlay-footer">
+      <app-button
+        label="Cancel"
+        size="large"
+        variant="secondary"
+        onClick("handleCancelButtonClick")/>
+      <app-button
+        label="Done"
+        size="large"
+        variant="primary"
+        onClick("handleDoneButtonClick")/>
+    </div>
+  </div>
+</div>

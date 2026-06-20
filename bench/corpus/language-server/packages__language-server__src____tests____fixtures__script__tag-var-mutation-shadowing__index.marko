@@ -1,0 +1,155 @@
+<const/x=""/>
+
+<div onClick() {
+  x = "Hello!";
+
+  {
+    let x = 1;
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let { x } = { x: 1 };
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let { y: x } = { y: 1 };
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let { y: {}, ...x } = { y: 1, x: 2 };
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let [x] = [1];
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let [,...x] = [1];
+    x = "Hello!";
+    console.log(x);
+  }
+
+
+  {
+    for (let x = 0; x < 10; x++) {
+      x = "Hello!";
+      console.log(x);
+    }
+  }
+
+  {
+    for (let x of [1, 2, 3]) {
+      x = "Hello!";
+      console.log(x);
+    }
+  }
+
+  {
+    for (let x in { a: 1, b: 2, c: 3 }) {
+      x = "Hello!";
+      console.log(x);
+    }
+  }
+
+  testA(1);
+  function testA(x: number) {
+    x = "Hello!";
+    console.log(x);
+  }
+
+  (function testB(x: number) {
+    x = "Hello!";
+    console.log(x);
+  })(1);
+
+  ((x: number) => {
+    x = "Hello!";
+    console.log(x);
+  })(1);
+
+  ({
+    testC(x: number) {
+      x = "Hello!";
+      console.log(x);
+    }
+  });
+
+  class TestD {
+    testD(x: number) {
+      x = "Hello!";
+      this.#testE(1);
+      console.log(x);
+    }
+    #testE(x: number) {
+      x = "Hello!";
+      console.log(x);
+    }
+  }
+
+  new TestD().testD(1);
+
+  {
+    class x {
+      constructor() {
+        x = "Hello!";
+      }
+    }
+    new x();
+    x = "Hello!";
+  }
+
+  (class x {
+    constructor() {
+      x = "Hello!";
+    }
+  });
+
+  (class {
+    constructor() {
+      x = "Hello!";
+    }
+  });
+
+  (() => {
+    function x() {
+      x = "Hello!";
+    }
+
+    x = "Hello!";
+    x();
+  })();
+
+  try {
+    x = "Hello!";
+  } catch (x) {
+    x = "Hello!";
+    console.log(x);
+  }
+
+  try {
+    x = "Hello!";
+  } catch {
+    x = "Hello!";
+    console.log(x);
+  }
+
+  {
+    let a: { x: number } | undefined = { x: 1 };
+
+    a.x = 2;
+    a.x++;
+    console.log(a.x);
+
+    a = undefined;
+  }
+}/>

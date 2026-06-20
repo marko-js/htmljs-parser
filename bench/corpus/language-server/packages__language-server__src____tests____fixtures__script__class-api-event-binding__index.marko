@@ -1,0 +1,20 @@
+class {
+    handleClick(ev: MouseEvent) {
+        console.log(ev);
+    }
+    specialClick(value: number, ev: MouseEvent) {
+        console.log(value, ev);
+    }
+}
+
+<fancy-button onClick("handleClick")/>
+//                     ^?
+
+<fancy-button onClick("specialClick", 1)/>
+//                     ^?
+
+<fancy-button onClick((ev) => {
+//                     ^?
+    console.log(ev);
+//              ^?
+})/>

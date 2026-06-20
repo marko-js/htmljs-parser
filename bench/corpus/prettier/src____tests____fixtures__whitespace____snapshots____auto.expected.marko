@@ -1,0 +1,34 @@
+<p>
+  I want to use <em>emphasis</em>, <strong>strong text</strong> , and <sup>
+    super
+  </sup><sup>duper</sup> <sub>subscripts</sub> without a bunch of newlines.
+</p>
+
+<p>
+  whentagcontentuses<strong>
+    <a href="smooshcase.com">smoosh</a>case
+  </strong>itshouldbepreserved
+</p>
+
+<div class="a11y-pattern-content">
+  <p>Provide an accessible label to an element or widget.</p>
+  <p>
+    These two attributes <strong>must</strong><strong>not</strong> be used on
+    elements or widgets that already have a non-ARIA labelling mechanism in
+    place. Examples of non-ARIA labelling mechanisms are the
+    <code>&lt;label&gt;</code> tag for form inputs, and inner text for buttons.
+  </p>
+  <pre><code class="language-html">&lt;a href=&quot;javascript:;&quot; id=&quot;share&quot;&gt;Share on Facebook&lt;/a&gt;
+
+&lt;script&gt;
+  $(&quot;#share&quot;).on(&quot;click&quot;, function (e) {
+    
+  });
+&lt;/script&gt;
+</code></pre>
+  <p>
+    The table tags should only be used to represent
+    <a href="components/table">tabular relationships between data</a>. The table tags
+    have semantics that will cause problems for screen reader users if used for layout.
+  </p>
+</div>

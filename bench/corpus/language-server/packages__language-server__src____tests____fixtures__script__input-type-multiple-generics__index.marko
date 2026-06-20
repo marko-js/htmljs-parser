@@ -1,0 +1,8 @@
+export interface Input<FirstName extends string, LastName extends string, Extra> {
+  firstName: FirstName,
+  lastName: LastName,
+  fullName: `${FirstName} ${LastName}`
+}
+
+-- ${input.fullName}
+//         ^?

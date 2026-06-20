@@ -1,0 +1,41 @@
+<div>
+  <let/{ a, b, c = "default" as const, nested: { d }, "some-alias": e, ["computed"]: f, ...g } = {
+    a: 1,
+    b: "hello!",
+    c: undefined,
+    nested: {
+      d: 2,
+      dChange(v: number) {
+
+      }
+    },
+    "some-alias": 3,
+    computed: 4,
+    other: true,
+  } as const/>
+
+  <let/[h, i, , ...j]=[1, 2, 3, 4, 5] as const/>
+  ${() => {
+    a;
+  //^?
+    b;
+  //^?
+    c;
+  //^?
+    d;
+  //^?
+    e;
+  //^?
+    f;
+  //^?
+    g;
+  //^?
+    h;
+  //^?
+    i;
+  //^?
+    j;
+  //^?
+  }}
+</div>
+

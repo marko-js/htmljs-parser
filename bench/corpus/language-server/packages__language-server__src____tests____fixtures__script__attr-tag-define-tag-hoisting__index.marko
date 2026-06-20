@@ -1,0 +1,17 @@
+define/Foo|input: { section: Marko.AttrTag<{ content: Marko.Body }> }|
+  ${input.section}
+
+<Foo>
+  <@section>
+    <const/nested=() => 1>
+  </@section>
+
+  <@section>
+    Bar
+  </@section>
+</Foo>
+
+<script>
+  nested;
+  // ^?
+</script>

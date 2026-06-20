@@ -1,0 +1,21 @@
+<comments>
+  <@comment#a>
+    <@comment#b>
+//    ^?
+      <let/b = () => "b" as const/>
+    </@comment>
+    <let/a = () => "a" as const/>
+  </@comment>
+  <@comment#c>
+    <let/c = () => "c" as const/>
+  </@comment>
+</comments>
+
+<effect() {
+  a;
+//^?
+  b;
+//^?
+  c;
+//^?
+}/>

@@ -1,0 +1,42 @@
+export interface Input {
+  tab?: Marko.AttrTag<{
+    href: string;
+    title: string;
+  }>;
+  option: any;
+}
+
+<for|{ href, title }| of=input.tab>
+    // ^?
+  <a href=href>
+    ${title}
+    // ^?
+  </a>
+</for>
+
+<select>
+  <for|{ value, content }| of=input.option>
+      // ^?
+    <option value=value>
+      ${content}
+      // ^?
+    </option>
+  </for>
+</select>
+
+<my-select>
+  <for|{ href, title }| of=input.tab>
+      // ^?
+    <@option value=href>
+      // ^?
+      ${title}
+    </@option>
+  </for>
+  <for|{ value, content }| of=input.option>
+      // ^?
+    <@option value=value>
+      // ^?
+      ${content}
+    </@option>
+  </for>
+</my-select>

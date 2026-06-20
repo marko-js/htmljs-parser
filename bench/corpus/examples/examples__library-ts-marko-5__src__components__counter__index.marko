@@ -1,0 +1,24 @@
+import style from "./styles.module.css";
+export interface Input {
+  multiplier?: number;
+}
+class {
+  declare state: {
+    count: number;
+  };
+
+  onCreate() {
+    this.state = {
+      count: 0,
+    };
+  }
+
+  increment() {
+    this.state.count++;
+    this.emit("increment");
+  }
+}
+
+<button class=style.test onClick("increment")>
+  ${state.count * (input.multiplier ?? 1)}
+</button>

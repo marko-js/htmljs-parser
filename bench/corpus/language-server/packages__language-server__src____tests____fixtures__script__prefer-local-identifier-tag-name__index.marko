@@ -1,0 +1,13 @@
+import CustomTagA from "<TestTagA>";
+import CustomTagB from "<TestTagB>";
+
+<const/TestTagA = CustomTagA/>
+<TestTagA a="hello"/>
+<TestTagB b="hello"/>
+
+<div>
+  <const/TestTagA = CustomTagB/>
+  <TestTagA a="hello"/>
+</div>
+
+<TestTagA a="hello"/>

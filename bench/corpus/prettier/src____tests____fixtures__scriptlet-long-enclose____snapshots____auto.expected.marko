@@ -1,0 +1,5 @@
+$ {
+  const isWebpSupported = $global.request.headers
+    .get("accept")
+    ?.includes("image/webp");
+}

@@ -1,0 +1,16 @@
+<let/x=1/>
+<let/y=[2]/>
+
+<button onClick() {
+  [x] = [2];
+  ({ a: x } = { a: 3 });
+  [x = 5, ...y] = [1];
+  for (x of [1, 2]) {
+    console.log(x);
+  }
+}>patterns</button>
+
+<my-tag|x|>
+  // The tag param shadows the outer `x` so this is not a tag var mutation.
+  <button onClick() { x = 2; console.log(x) }>shadowed</button>
+</my-tag>
