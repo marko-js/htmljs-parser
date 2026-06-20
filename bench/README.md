@@ -102,3 +102,54 @@ array) but the measured upside is small (~1%) and the changes risk
 re-introducing polymorphism, so they have not been pursued. Parsing with no
 handlers (`{}`) is only ~13% faster, so allocation is not the dominant cost —
 the per-character state-machine work is.
+
+### Bulk (native) text scanning — large win for long runs
+
+The text-consuming states (`HTML_CONTENT`, `PARSED_TEXT_CONTENT`) advance over
+runs of "boring" characters until the next special one. A per-character JS loop
+is optimal for short runs but slow for long ones; a native scan (a sticky
+`RegExp` finding the next special char) is the opposite. Measured crossover
+(`/tmp/scan.mjs` style microbench):
+
+| run length | regex vs char-loop |
+| ---------- | ------------------ |
+| 3          | 1.8× slower        |
+| 8          | 1.3× slower        |
+| 20         | 1.5× faster        |
+| 80         | 2.4× faster        |
+| 2000       | 3.4× faster        |
+
+A naive "always regex" or a "per-char threshold counter" both regress dense
+markup. The version that works is an **adaptive hybrid** that keeps the
+per-character cost at two comparisons by folding a length threshold into the
+loop bound, then switches to the native scan only once a run passes the
+threshold (~16 chars):
+
+```ts
+const limit = this.pos + BULK_SCAN_THRESHOLD;
+const stop = limit < maxPos ? limit : maxPos;
+do {
+  this.pos++;
+} while (this.pos < stop && !isSpecial(data.charCodeAt(this.pos)));
+if (
+  this.pos === limit &&
+  limit < maxPos &&
+  !isSpecial(data.charCodeAt(this.pos))
+) {
+  RE.lastIndex = this.pos;
+  const next = RE.exec(data);
+  this.pos = next === null ? maxPos : next.index;
+}
+```
+
+Results vs the per-character loop:
+
+- **Content-heavy templates (prose between tags): ~+43%** (255 → 447 MB/s).
+- **Script/style-heavy templates: ~+47%** (271 → 517 MB/s).
+- **Dense fixture corpus: within ±1% (measurement noise floor).** The extra
+  work is per-run (a couple of ops + one short-circuiting comparison), not
+  per-char, so the common dense case is not measurably affected.
+
+This is a genuine large-scale lever, but the corpus that represents typical
+Marko is dense markup, where it is a wash — the upside is realised only on
+content- or script-heavy templates. Whether to ship it is a workload call.

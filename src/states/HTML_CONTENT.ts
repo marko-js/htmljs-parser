@@ -165,13 +165,30 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       }
 
       this.startText();
-      // Eagerly consume the run of chars that cannot match a branch above.
+      // Consume the run of chars that cannot match a branch above. Short runs
+      // (the common case in dense markup) use a cheap per-character loop, kept
+      // to the same two comparisons per char as a plain scan by folding the
+      // threshold into the loop bound. Only once a run proves long do we switch
+      // to a native scan, which is several times faster than the JS loop but
+      // too costly to set up for the short runs that dominate dense markup.
+      const limit = this.pos + BULK_SCAN_THRESHOLD;
+      const stop = limit < maxPos ? limit : maxPos;
       do {
         this.pos++;
       } while (
-        this.pos < maxPos &&
+        this.pos < stop &&
         !isSpecialHtmlContentCode(data.charCodeAt(this.pos))
       );
+
+      if (
+        this.pos === limit &&
+        limit < maxPos &&
+        !isSpecialHtmlContentCode(data.charCodeAt(this.pos))
+      ) {
+        SPECIAL_HTML_CONTENT.lastIndex = this.pos;
+        const next = SPECIAL_HTML_CONTENT.exec(data);
+        this.pos = next === null ? maxPos : next.index;
+      }
     }
   },
 
@@ -201,6 +218,14 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
     }
   },
 };
+
+// Once a text run exceeds this many characters, finishing it with a native
+// scan beats the per-character loop (measured crossover is ~15 chars).
+const BULK_SCAN_THRESHOLD = 16;
+
+// Matches every char that can begin one of the parse branches above:
+// \n \r (EOL), < (tag), $ (placeholder/inline script), / (comment), \ (escape).
+const SPECIAL_HTML_CONTENT = /[\n\r<$/\\]/g;
 
 // Matches every char that can begin one of the parse branches above.
 function isSpecialHtmlContentCode(code: number) {
