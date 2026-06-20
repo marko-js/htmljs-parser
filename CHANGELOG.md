@@ -1,5 +1,23 @@
 # htmljs-parser
 
+## 5.11.0
+
+### Minor Changes
+
+- [#222](https://github.com/marko-js/htmljs-parser/pull/222) [`221d3b7`](https://github.com/marko-js/htmljs-parser/commit/221d3b71d71593f63347a01cb8a0d195377fe7b2) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Replace TypeScript enums with erasable const modules so the source runs directly under node's type stripping. The public `TagType`, `ErrorCode`, and `Validity` values keep their runtime shape and values, and their types are now the equivalent literal unions. Constant values remain fully inlined in the published bundles.
+
+### Patch Changes
+
+- [#223](https://github.com/marko-js/htmljs-parser/pull/223) [`3c95d7f`](https://github.com/marko-js/htmljs-parser/commit/3c95d7f088d96cea92ca034ccf1fa70c173d6a6c) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Speed up expression parsing by skipping work that provably cannot match. An
+  identifier/number character is never whitespace, never a terminator (no
+  `shouldTerminate` implementation matches a word character), and is not handled
+  by the expression switch, so it now takes a fast path that just advances the
+  position. The unary/binary operator keyword scans also bail out immediately when
+  the surrounding character cannot start or end a keyword. This improves
+  steady-state parsing throughput with no behavior change.
+
+- [#220](https://github.com/marko-js/htmljs-parser/pull/220) [`85c8973`](https://github.com/marko-js/htmljs-parser/commit/85c8973693a005f925738f5f03a90a3221005b70) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Refactor parser to allow individual states to process multiple characters. This allows for eager scanning, simplifies things some, and improves performance by about 30% in realworld tempaltes.
+
 ## 5.10.2
 
 ### Patch Changes

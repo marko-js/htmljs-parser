@@ -1,6 +1,6 @@
 {
   "name": "htmljs-parser",
-  "version": "5.10.2",
+  "version": "5.11.0",
   "description": "An HTML parser recognizes content and string placeholders and allows JavaScript expressions as attribute values",
   "keywords": [
     "HTML",
