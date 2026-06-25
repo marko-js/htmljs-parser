@@ -253,6 +253,16 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           this.pos++;
           break;
         case CODE.OPEN_CURLY_BRACE:
+          if (expression.inType && !expression.forceType) {
+            const prevPos = lookBehindWhile(
+              isWhitespaceCode,
+              data,
+              this.pos - 1,
+            );
+            if (lookBehindForOperator(expression, data, prevPos) === -1) {
+              expression.inType = false;
+            }
+          }
           expression.groupStack.push(CODE.CLOSE_CURLY_BRACE);
           this.pos++;
           break;

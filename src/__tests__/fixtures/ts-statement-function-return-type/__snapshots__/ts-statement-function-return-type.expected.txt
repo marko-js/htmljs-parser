@@ -1,0 +1,23 @@
+1╭─ export function a(): b {
+ ╰─ ╰─ tagName "export"
+2├─   return c > d;
+3├─ }
+4╭─ 
+ ╰─ ╰─ openTagEnd
+5╭─ static function e<T>(x: T): Array<T> {
+ ╰─ ╰─ tagName "static"
+6├─   return x > 0 ? f : g;
+7├─ }
+8╭─ 
+ ╰─ ╰─ openTagEnd
+9╭─ export function h(): { i: 1 } {
+ ╰─ ╰─ tagName "export"
+10├─   return j > k;
+11├─ }
+12╭─ 
+  ╰─ ╰─ openTagEnd
+13╭─ div
+  ╰─ ╰─ tagName "div"
+14╭─ 
+  │  ├─ openTagEnd
+  ╰─ ╰─ closeTagEnd(div)
