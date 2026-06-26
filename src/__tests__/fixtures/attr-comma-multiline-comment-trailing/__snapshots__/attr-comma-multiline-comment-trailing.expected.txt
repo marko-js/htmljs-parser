@@ -1,0 +1,12 @@
+1╭─ div
+ ╰─ ╰─ tagName "div"
+2╭─   ,foo=bar
+ │     │  │╰─ attrValue.value "bar"
+ │     │  ╰─ attrValue "=bar"
+ ╰─    ╰─ attrName "foo"
+3╭─   // trailing comment
+ │  │ │ ╰─ comment.value " trailing comment"
+ │  │ ╰─ comment "// trailing comment"
+ ╰─ ╰─ openTagEnd
+4╭─ 
+ ╰─ ╰─ closeTagEnd(div)
