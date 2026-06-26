@@ -1,5 +1,23 @@
 # htmljs-parser
 
+## 5.12.0
+
+### Minor Changes
+
+- [#225](https://github.com/marko-js/htmljs-parser/pull/225) [`4d28e16`](https://github.com/marko-js/htmljs-parser/commit/4d28e1671e645642bebeae7e75e6d226f5ba0ce7) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Support comments between concise mode line attributes.
+
+### Patch Changes
+
+- [#224](https://github.com/marko-js/htmljs-parser/pull/224) [`aaeb3fd`](https://github.com/marko-js/htmljs-parser/commit/aaeb3fd2e3616137b5ef7c13bfe0c71a820b6686) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix a spurious "Mismatched group" error when a `>` (or other comparison) appears in the body of a statement function that declares a return type, e.g.:
+
+  ```marko
+  export function a(): b {
+    return c > d;
+  }
+  ```
+
+  Previously the type-parsing state from the return type annotation leaked into the function body, so a `>` was treated as a closing generic bracket. A `{` that follows a completed type now correctly ends the annotation and parses the block as a value.
+
 ## 5.11.0
 
 ### Minor Changes
