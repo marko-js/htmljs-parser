@@ -1,5 +1,6 @@
 import {
   isIndentCode,
+  isLineCode,
   isWhitespaceCode,
   matchesCloseAngleBracket,
   matchesCloseParen,
@@ -105,13 +106,40 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             : 1;
 
         if (this.isConcise && tag.stage !== TAG_STAGE.ATTR_GROUP) {
-          if (this.consumeWhitespaceIfBefore(",")) {
-            this.pos++; // skip ,
+          let cur = this.pos;
+          while (cur < maxPos) {
+            const peek = data.charCodeAt(cur);
+            if (isWhitespaceCode(peek)) {
+              cur++;
+            } else if (
+              peek === CODE.FORWARD_SLASH &&
+              data.charCodeAt(cur + 1) === CODE.FORWARD_SLASH
+            ) {
+              // line comment
+              cur += 2;
+              while (cur < maxPos && !isLineCode(data.charCodeAt(cur))) cur++;
+            } else if (
+              peek === CODE.FORWARD_SLASH &&
+              data.charCodeAt(cur + 1) === CODE.ASTERISK
+            ) {
+              // block comment
+              const end = data.indexOf("*/", cur + 2);
+              if (end === -1) break;
+              cur = end + 2;
+            } else {
+              break;
+            }
+          }
+
+          // comma continues the open tag with another line attribute
+          if (data.charCodeAt(cur) === CODE.COMMA) {
+            this.pos = cur + 1;
             this.consumeWhitespace();
             continue;
           }
+
           this.exitState();
-          return; // parent handles newline
+          return;
         }
 
         this.pos += len;

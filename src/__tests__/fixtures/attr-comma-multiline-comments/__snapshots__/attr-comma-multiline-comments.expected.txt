@@ -1,0 +1,19 @@
+1╭─ div
+ ╰─ ╰─ tagName "div"
+2╭─   ,foo=bar
+ │     │  │╰─ attrValue.value "bar"
+ │     │  ╰─ attrValue "=bar"
+ ╰─    ╰─ attrName "foo"
+3├─   // comment
+4╭─   ,bar=baz
+ │     │  │╰─ attrValue.value "baz"
+ │     │  ╰─ attrValue "=baz"
+ ╰─    ╰─ attrName "bar"
+5├─   /* block */
+6╭─   ,qux=qux
+ │     │  │╰─ attrValue.value "qux"
+ │     │  ╰─ attrValue "=qux"
+ ╰─    ╰─ attrName "qux"
+7╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)
