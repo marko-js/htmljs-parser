@@ -124,5 +124,35 @@ describe("validation helpers", () => {
     it("rejects keyword operator with no operand", () => {
       assert.equal(isValidAttrValue("a as ", true), 0);
     });
+
+    it("treats a trailing line comment as unguarded", () => {
+      assert.equal(isValidAttrValue('"hello" // c', false), 1);
+      assert.equal(isValidAttrValue('"hello" // c', true), 1);
+      assert.equal(isValidAttrValue("foo // c", false), 1);
+      assert.equal(isValidAttrValue("1 + 2 // c", false), 1);
+      assert.equal(isValidAttrValue('"hello" /* c */ // d', false), 1);
+    });
+
+    it("keeps a self-closing block comment enclosed", () => {
+      assert.equal(isValidAttrValue('"hello" /* c */', false), 2);
+    });
+
+    it("keeps a line comment guarded by a group enclosed", () => {
+      assert.equal(isValidAttrValue('("hello" // c\n)', false), 2);
+    });
+
+    it("treats a newline after a value as unguarded", () => {
+      assert.equal(isValidAttrValue('"hello"\n// c', false), 1);
+    });
+  });
+
+  describe("trailing line comments", () => {
+    it("downgrades statements with a trailing line comment", () => {
+      assert.equal(isValidStatement("foo // c"), 1);
+    });
+
+    it("downgrades scriptlets with a trailing line comment", () => {
+      assert.equal(isValidScriptlet("foo // c"), 1);
+    });
   });
 });

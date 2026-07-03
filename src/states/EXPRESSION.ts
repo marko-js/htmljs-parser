@@ -385,6 +385,15 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   return(child, expression) {
     if (child.state === STATE.JS_COMMENT_LINE) {
       expression.wasComment = true;
+      // A line comment that runs to the end of the input (rather than being
+      // terminated by a newline or a closing tag) consumes everything that
+      // would follow it on the line, exactly like an unguarded newline. Flag
+      // it as unguarded so the value is not classified as `enclosed` (safe to
+      // inline verbatim) by the validation helpers — otherwise emitting it
+      // bare would comment out whatever comes next.
+      if (this.pos === this.maxPos && !expression.groupStack.length) {
+        expression.hadUnguardedNewline = true;
+      }
     }
   },
 };
