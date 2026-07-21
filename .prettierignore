@@ -1,5 +1,5 @@
 .vscode
-package-lock.json
+pnpm-lock.yaml
 CHANGELOG.md
 node_modules
 coverage

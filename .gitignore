@@ -17,3 +17,7 @@ dist
 # Coverage
 coverage
 lcov.info
+
+# Other lockfiles
+package-lock.json
+yarn.lock

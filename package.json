@@ -39,16 +39,16 @@
     "build": "tsc -p tsconfig.build.json && node build.ts",
     "change": "changeset add",
     "ci:test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-exclude=\"**/__tests__/**\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=lcov.info \"src/**/__tests__/*.test.ts\"",
-    "format": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write",
-    "lint": "tsc && npm run lint:eslint && npm run lint:prettier -- -l",
+    "format": "pnpm run lint:eslint --fix && pnpm run lint:prettier --write",
+    "lint": "tsc && pnpm run lint:eslint && pnpm run lint:prettier -l",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier .",
     "prepare": "husky",
-    "release": "npm run build && changeset publish",
+    "release": "pnpm run build && changeset publish",
     "test": "node --test --test-reporter=dot \"src/**/__tests__/*.test.ts\"",
-    "test:update": "cross-env UPDATE_SNAPSHOTS=1 npm test",
+    "test:update": "cross-env UPDATE_SNAPSHOTS=1 pnpm test",
     "test:watch": "node --watch --test --test-reporter=dot \"src/**/__tests__/*.test.ts\"",
-    "version": "changeset version && npm i --package-lock-only"
+    "version": "changeset version && pnpm install --lockfile-only"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",
@@ -68,5 +68,6 @@
     "prettier-plugin-packagejson": "^3.0.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0"
-  }
+  },
+  "packageManager": "pnpm@11.15.1"
 }
