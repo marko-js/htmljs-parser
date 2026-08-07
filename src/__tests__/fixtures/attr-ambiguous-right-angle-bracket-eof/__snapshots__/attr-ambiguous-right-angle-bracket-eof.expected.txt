@@ -1,0 +1,9 @@
+1╭─ <if=a > b + c
+ │  ││ ││ │╰─ text " b + c"
+ │  ││ ││ ╰─ openTagEnd
+ │  ││ │╰─ attrValue.value
+ │  ││ ├─ attrValue "=a"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName "if"
+ │  ├─ error(MISSING_END_TAG:Missing ending "if" tag) "<if=a >"
+ ╰─ ╰─ openTagStart

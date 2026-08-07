@@ -1,0 +1,5 @@
+1╭─ <if=a > b[0] / c>Hi</if>
+ │  ││ │╰─ error(AMBIGUOUS_ATTRIBUTE_VALUE:Ambiguous ">" in attribute. A ">" preceded by whitespace ends the tag. If "a > b[0] / c" was intended as a single expression, wrap it in parentheses, eg "=(a > b[0] / c)". If the tag was instead meant to end at the first ">", leaving "b[0] / c>" as body content, remove the whitespace before that ">".) "a > b[0] / c"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName "if"
+ ╰─ ╰─ openTagStart

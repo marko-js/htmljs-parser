@@ -96,6 +96,16 @@ export function htmlEOF(this: Parser) {
   }
 }
 
+export function isWordCode(code: number) {
+  return (
+    (code >= CODE.UPPER_A && code <= CODE.UPPER_Z) ||
+    (code >= CODE.LOWER_A && code <= CODE.LOWER_Z) ||
+    (code >= CODE.NUMBER_0 && code <= CODE.NUMBER_9) ||
+    code == CODE.DOLLAR ||
+    code === CODE.UNDERSCORE
+  );
+}
+
 export function matchesCloseAngleBracket(code: number) {
   return code === CODE.CLOSE_ANGLE_BRACKET;
 }

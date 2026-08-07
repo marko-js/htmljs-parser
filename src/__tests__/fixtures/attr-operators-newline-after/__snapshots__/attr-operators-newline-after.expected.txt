@@ -683,17 +683,14 @@
    │    │╰─ openTagEnd:selfClosed "/>"
    ╰─   ╰─ attrName
 159╭─ <a=x >=
-   │  ││││ │╰─ text "=\ny "
-   │  ││││ ╰─ openTagEnd
-   │  │││╰─ attrValue.value
-   │  ││├─ attrValue "=x"
+   │  │││╰─ attrValue.value "x >=\ny"
+   │  ││├─ attrValue "=x >=\ny"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
-160╭─ y </a>
-   │    │ │╰─ closeTagEnd(a)
-   │    │ ╰─ closeTagName
-   ╰─   ╰─ closeTagStart "</"
+160╭─ y a/>
+   │    │╰─ openTagEnd:selfClosed "/>"
+   ╰─   ╰─ attrName
 161╭─ <a=x &=
    │  │││╰─ attrValue.value "x &=\ny"
    │  ││├─ attrValue "=x &=\ny"

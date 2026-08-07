@@ -1,0 +1,5 @@
+1╭─ <input value=count > 10/>
+ │  ││     │     ╰─ error(AMBIGUOUS_ATTRIBUTE_VALUE:Ambiguous ">" in attribute. A ">" preceded by whitespace ends the tag. If "count > 10" was intended as a single expression, wrap it in parentheses, eg "=(count > 10)". If the tag was instead meant to end at the first ">", leaving "10/>" as body content, remove the whitespace before that ">".) "count > 10"
+ │  ││     ╰─ attrName "value"
+ │  │╰─ tagName "input"
+ ╰─ ╰─ openTagStart

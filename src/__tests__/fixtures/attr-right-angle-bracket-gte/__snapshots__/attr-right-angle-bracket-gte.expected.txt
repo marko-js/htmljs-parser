@@ -1,0 +1,11 @@
+1╭─ <if=count >= 10>Hi</if>
+ │  ││ ││          ││ │ │ ╰─ closeTagEnd(if)
+ │  ││ ││          ││ │ ╰─ closeTagName "if"
+ │  ││ ││          ││ ╰─ closeTagStart "</"
+ │  ││ ││          │╰─ text "Hi"
+ │  ││ ││          ╰─ openTagEnd
+ │  ││ │╰─ attrValue.value "count >= 10"
+ │  ││ ├─ attrValue "=count >= 10"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName "if"
+ ╰─ ╰─ openTagStart

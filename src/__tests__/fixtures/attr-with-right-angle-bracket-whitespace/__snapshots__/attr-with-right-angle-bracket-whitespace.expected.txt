@@ -1,0 +1,48 @@
+1╭─ <div class=foo > Hello</div>
+ │  ││   │    ││   ││     │ │  ╰─ closeTagEnd(div)
+ │  ││   │    ││   ││     │ ╰─ closeTagName "div"
+ │  ││   │    ││   ││     ╰─ closeTagStart "</"
+ │  ││   │    ││   │╰─ text " Hello"
+ │  ││   │    ││   ╰─ openTagEnd
+ │  ││   │    │╰─ attrValue.value "foo"
+ │  ││   │    ╰─ attrValue "=foo"
+ │  ││   ╰─ attrName "class"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <span class=sep > >> </span>
+ │  ││    │    ││   ││   │ │   ╰─ closeTagEnd(span)
+ │  ││    │    ││   ││   │ ╰─ closeTagName "span"
+ │  ││    │    ││   ││   ╰─ closeTagStart "</"
+ │  ││    │    ││   │╰─ text " >> "
+ │  ││    │    ││   ╰─ openTagEnd
+ │  ││    │    │╰─ attrValue.value "sep"
+ │  ││    │    ╰─ attrValue "=sep"
+ │  ││    ╰─ attrName "class"
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
+3╭─ <div class=foo > 10 items></div>
+ │  ││   │    ││   ││         │ │  ╰─ closeTagEnd(div)
+ │  ││   │    ││   ││         │ ╰─ closeTagName "div"
+ │  ││   │    ││   ││         ╰─ closeTagStart "</"
+ │  ││   │    ││   │╰─ text " 10 items>"
+ │  ││   │    ││   ╰─ openTagEnd
+ │  ││   │    │╰─ attrValue.value "foo"
+ │  ││   │    ╰─ attrValue "=foo"
+ │  ││   ╰─ attrName "class"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╭─ <div
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+5╭─   class=foo
+ │    │    │╰─ attrValue.value "foo"
+ │    │    ╰─ attrValue "=foo"
+ ╰─   ╰─ attrName "class"
+6╭─ >
+ ╰─ ╰─ openTagEnd
+7╭─   10>text
+ ╰─ ╰─ text "\n  10>text\n"
+8╭─ </div>
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
+ ╰─ ╰─ closeTagStart "</"

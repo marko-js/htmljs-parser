@@ -1,6 +1,7 @@
 import {
   isIndentCode,
   isWhitespaceCode,
+  isWordCode,
   type Meta,
   Parser,
   STATE,
@@ -606,16 +607,6 @@ function canFollowDivision(code: number) {
 
 function isWordOrPeriodCode(code: number) {
   return code === CODE.PERIOD || isWordCode(code);
-}
-
-function isWordCode(code: number) {
-  return (
-    (code >= CODE.UPPER_A && code <= CODE.UPPER_Z) ||
-    (code >= CODE.LOWER_A && code <= CODE.LOWER_Z) ||
-    (code >= CODE.NUMBER_0 && code <= CODE.NUMBER_9) ||
-    code == CODE.DOLLAR ||
-    code === CODE.UNDERSCORE
-  );
 }
 
 function lookAheadWhile(

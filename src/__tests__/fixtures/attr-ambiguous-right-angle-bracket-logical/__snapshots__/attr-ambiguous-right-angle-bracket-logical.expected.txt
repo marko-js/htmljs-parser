@@ -1,0 +1,5 @@
+1╭─ <if=count > 10 && flag>Hi</if>
+ │  ││ │╰─ error(AMBIGUOUS_ATTRIBUTE_VALUE:Ambiguous ">" in attribute. A ">" preceded by whitespace ends the tag. If "count > 10 && flag" was intended as a single expression, wrap it in parentheses, eg "=(count > 10 && flag)". If the tag was instead meant to end at the first ">", leaving "10 && flag>" as body content, remove the whitespace before that ">".) "count > 10 && flag"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName "if"
+ ╰─ ╰─ openTagStart

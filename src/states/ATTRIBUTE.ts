@@ -1,5 +1,7 @@
 import {
+  isIndentCode,
   isWhitespaceCode,
+  isWordCode,
   matchesCloseAngleBracket,
   matchesCloseCurlyBrace,
   matchesCloseParen,
@@ -177,6 +179,10 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         };
 
         this.options.onAttrName?.(attr.name);
+
+        if (!this.isConcise && detectAmbiguousCloseAngleBracket(this, child)) {
+          return;
+        }
         break;
       }
       case ATTR_STAGE.ARGUMENT: {
@@ -276,6 +282,10 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           );
         }
 
+        if (!this.isConcise && detectAmbiguousCloseAngleBracket(this, child)) {
+          return;
+        }
+
         if (attr.spread) {
           this.options.onAttrSpread?.({
             start: attr.valueStart,
@@ -303,6 +313,162 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
     }
   },
 };
+
+/**
+ * In HTML mode a ">" after an unenclosed attribute always ends the tag, but a
+ * whitespace preceded ">" is often intended as a comparison operator, eg
+ * `<if=count > 10>` which actually parses as `<if=count>` followed by the
+ * body content " 10>". Both interpretations are valid so this is truly
+ * ambiguous; rather than silently picking one, when the attribute is
+ * followed by whitespace and a ">" this looks ahead for the telltale tail of
+ * a split expression — operator connected operands ending in a second ">"
+ * (or "/>") on the same line — and reports an error that shows how to
+ * disambiguate. Anything else (including anything this lookahead does not
+ * understand, such as string literals) keeps the existing tag-end behavior.
+ */
+function detectAmbiguousCloseAngleBracket(parser: Parser, child: Meta) {
+  const { data, maxPos } = parser;
+  let pos = parser.pos;
+
+  // Only an expression that stopped at horizontal whitespace followed by ">"
+  // on the same line is ambiguous.
+  if (!isIndentCode(data.charCodeAt(pos))) return false;
+  do pos++;
+  while (isIndentCode(data.charCodeAt(pos)));
+  if (data.charCodeAt(pos) !== CODE.CLOSE_ANGLE_BRACKET) return false;
+
+  let sawOperand = false;
+  // Set when an operand ended and another operand would need an operator
+  // between them, eg text like "10 items>" is not a split expression.
+  let operatorPending = false;
+  // Tracks "(" and "[" nesting; the tag can only end at the top level.
+  let groupDepth = 0;
+  // A whitespace preceded ">=" is always continued as a comparison by
+  // shouldTerminateHtmlAttrValue, so the ">" here is never part of a ">=".
+  let lookPos = pos + 1;
+
+  for (; lookPos < maxPos; lookPos++) {
+    const code = data.charCodeAt(lookPos);
+
+    // A ">=" (anywhere) or a grouped ">" is a comparison, not the tag end.
+    if (
+      code === CODE.CLOSE_ANGLE_BRACKET &&
+      (groupDepth || data.charCodeAt(lookPos + 1) === CODE.EQUAL)
+    ) {
+      if (data.charCodeAt(lookPos + 1) === CODE.EQUAL) lookPos++; // skip =
+      operatorPending = false;
+      continue;
+    }
+
+    if (
+      !groupDepth &&
+      (code === CODE.CLOSE_ANGLE_BRACKET ||
+        (code === CODE.FORWARD_SLASH &&
+          data.charCodeAt(lookPos + 1) === CODE.CLOSE_ANGLE_BRACKET))
+    ) {
+      // Ignore horizontal whitespace between the final operand and the ">".
+      let exprEnd = lookPos;
+      while (isIndentCode(data.charCodeAt(exprEnd - 1))) exprEnd--;
+      if (sawOperand && isOperandEndCode(data.charCodeAt(exprEnd - 1))) {
+        const expression = data.slice(child.start, exprEnd);
+        const tail = data
+          .slice(pos + 1, lookPos + (code === CODE.FORWARD_SLASH ? 2 : 1))
+          .trim();
+        parser.emitError(
+          { start: child.start, end: exprEnd },
+          ErrorCode.AMBIGUOUS_ATTRIBUTE_VALUE,
+          'Ambiguous ">" in attribute. A ">" preceded by whitespace ends the tag. If "' +
+            expression +
+            '" was intended as a single expression, wrap it in parentheses, eg "=(' +
+            expression +
+            ')". If the tag was instead meant to end at the first ">", leaving "' +
+            tail +
+            '" as body content, remove the whitespace before that ">".',
+        );
+        return true;
+      }
+      return false;
+    }
+
+    if (isWordCode(code)) {
+      if (operatorPending) return false;
+      sawOperand = true;
+      continue;
+    }
+
+    if (isIndentCode(code)) {
+      if (sawOperand && isOperandEndCode(data.charCodeAt(lookPos - 1))) {
+        operatorPending = true;
+      }
+      continue;
+    }
+
+    switch (code) {
+      case CODE.EQUAL:
+        // An "=>" arrow connects operands; a bare "=" is not understood.
+        if (data.charCodeAt(lookPos + 1) !== CODE.CLOSE_ANGLE_BRACKET) {
+          return false;
+        }
+        lookPos++; // skip the ">" of "=>"
+        operatorPending = false;
+        continue;
+      case CODE.FORWARD_SLASH: {
+        // A "/" is only understood as division; where a regex could start
+        // (no operand before it) this does not look like a split expression.
+        let prevPos = lookPos - 1;
+        while (isIndentCode(data.charCodeAt(prevPos))) prevPos--;
+        if (!isOperandEndCode(data.charCodeAt(prevPos))) return false;
+        operatorPending = false;
+        continue;
+      }
+      case CODE.OPEN_PAREN:
+        groupDepth++;
+        operatorPending = false;
+        continue;
+      case CODE.OPEN_SQUARE_BRACKET:
+        groupDepth++;
+        operatorPending = false;
+        continue;
+      case CODE.CLOSE_PAREN:
+      case CODE.CLOSE_SQUARE_BRACKET:
+        // An unmatched closer means this is not a split expression.
+        if (!groupDepth) return false;
+        groupDepth--;
+        operatorPending = false;
+        continue;
+      case CODE.AMPERSAND:
+      case CODE.ASTERISK:
+      case CODE.CARET:
+      case CODE.COLON:
+      case CODE.EXCLAMATION:
+      case CODE.HYPHEN:
+      case CODE.PERCENT:
+      case CODE.PERIOD:
+      case CODE.PIPE:
+      case CODE.PLUS:
+      case CODE.QUESTION:
+      case CODE.TILDE:
+        operatorPending = false;
+        continue;
+      default:
+        // Newlines, "<", quotes, and anything else not recognized above
+        // means this does not look like a split expression.
+        return false;
+    }
+  }
+
+  return false;
+}
+
+function isOperandEndCode(code: number) {
+  switch (code) {
+    case CODE.CLOSE_PAREN:
+    case CODE.CLOSE_SQUARE_BRACKET:
+      return true;
+    default:
+      return isWordCode(code);
+  }
+}
 
 function ensureAttrName(parser: Parser, attr: AttrMeta) {
   if (!attr.name) {
@@ -341,11 +507,20 @@ export function shouldTerminateHtmlAttrValue(
       return true;
     case CODE.FORWARD_SLASH:
       return data.charCodeAt(pos + 1) === CODE.CLOSE_ANGLE_BRACKET;
-    case CODE.CLOSE_ANGLE_BRACKET:
-      // Add special case for =>
-      // We only look behind to match => if we're not at the start of the expression
+    case CODE.CLOSE_ANGLE_BRACKET: {
+      // We only look around the ">" if we're not at the start of the expression
       // otherwise this would match something like "<span class=>".
-      return pos === this.start || data.charCodeAt(pos - 1) !== CODE.EQUAL;
+      if (pos === this.start) return true;
+      // Add special case for =>
+      if (data.charCodeAt(pos - 1) === CODE.EQUAL) return false;
+      // A whitespace preceded ">" immediately followed by "=" is always a ">="
+      // comparison operator, since a closed tag would instead put the "=" in
+      // its body content, eg `<if=count >= 10>`.
+      return !(
+        isWhitespaceCode(data.charCodeAt(pos - 1)) &&
+        data.charCodeAt(pos + 1) === CODE.EQUAL
+      );
+    }
     default:
       return false;
   }
