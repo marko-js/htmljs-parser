@@ -1,0 +1,7 @@
+1╭─ <div class=x + y </div>
+ │  ││   │    ││     ╰─ error(MALFORMED_OPEN_TAG:A close tag was found before the "div" open tag was closed. If the "</" was intended as part of an attribute expression (eg a less-than comparison), wrap the value in parentheses.)
+ │  ││   │    │╰─ attrValue.value "x + y"
+ │  ││   │    ╰─ attrValue "=x + y"
+ │  ││   ╰─ attrName "class"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
