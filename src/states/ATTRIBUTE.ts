@@ -131,6 +131,15 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         return;
       } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
         if (code === CODE.OPEN_ANGLE_BRACKET) {
+          if (data.charCodeAt(this.pos + 1) === CODE.FORWARD_SLASH) {
+            return this.emitError(
+              this.pos,
+              ErrorCode.MALFORMED_OPEN_TAG,
+              'A close tag was found before the "' +
+                this.read(this.activeTag!.tagName) +
+                '" open tag was closed. If the "</" was intended as part of an attribute expression (eg a less-than comparison), wrap the value in parentheses.',
+            );
+          }
           return this.emitError(
             this.pos,
             ErrorCode.INVALID_ATTRIBUTE_NAME,

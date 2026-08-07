@@ -1,0 +1,11 @@
+1╭─ <if=a < /b/.test(c)>Hi</if>
+ │  ││ ││              ││ │ │ ╰─ closeTagEnd(if)
+ │  ││ ││              ││ │ ╰─ closeTagName "if"
+ │  ││ ││              ││ ╰─ closeTagStart "</"
+ │  ││ ││              │╰─ text "Hi"
+ │  ││ ││              ╰─ openTagEnd
+ │  ││ │╰─ attrValue.value "a < /b/.test(c)"
+ │  ││ ├─ attrValue "=a < /b/.test(c)"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName "if"
+ ╰─ ╰─ openTagStart
