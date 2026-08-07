@@ -191,17 +191,14 @@
   │       │╰─ openTagEnd:selfClosed "/>"
   ╰─      ╰─ attrName
 45╭─ <a=x
-  │  │││╰─ attrValue.value
-  │  ││├─ attrValue "=x"
+  │  │││╰─ attrValue.value "x\n>= y"
+  │  ││├─ attrValue "=x\n>= y"
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart
-46╭─ >= y </a>
-  │  ││   │ │╰─ closeTagEnd(a)
-  │  ││   │ ╰─ closeTagName
-  │  ││   ╰─ closeTagStart "</"
-  │  │╰─ text "= y "
-  ╰─ ╰─ openTagEnd
+46╭─ >= y a/>
+  │       │╰─ openTagEnd:selfClosed "/>"
+  ╰─      ╰─ attrName
 47╭─ <a=x
   │  │││╰─ attrValue.value "x\n&= y"
   │  ││├─ attrValue "=x\n&= y"

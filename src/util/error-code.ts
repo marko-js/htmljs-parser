@@ -27,3 +27,4 @@ export const ROOT_TAG_ONLY = 25;
 export const INVALID_TAG_PARAMS = 26;
 export const INVALID_TAG_TYPES = 27;
 export const INVALID_ATTR_TYPE_PARAMS = 28;
+export const AMBIGUOUS_ATTRIBUTE_VALUE = 29;
