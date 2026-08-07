@@ -1,5 +1,15 @@
 # htmljs-parser
 
+## 5.13.0
+
+### Minor Changes
+
+- [#234](https://github.com/marko-js/htmljs-parser/pull/234) [`d67f9e6`](https://github.com/marko-js/htmljs-parser/commit/d67f9e60ee82110d7156e0c7f73374ea5e66df4a) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - In HTML mode, a whitespace-preceded `>=` in an unenclosed attribute value is now parsed as a comparison operator (eg `<if=count >= 10>`), and a whitespace-preceded `>` that looks like a split comparison (eg `<if=count > 10>`) now reports an error suggesting parentheses instead of silently ending the tag.
+
+### Patch Changes
+
+- [#234](https://github.com/marko-js/htmljs-parser/pull/234) [`c2e874c`](https://github.com/marko-js/htmljs-parser/commit/c2e874cf53e2d9166af5f3c3999885ec5a277d1f) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - In HTML mode, a "</" after a whitespace-terminated unenclosed attribute value is now treated as a close tag instead of being consumed as a less-than operator, and a close tag found before the open tag is closed reports a targeted error suggesting parentheses.
+
 ## 5.12.1
 
 ### Patch Changes
