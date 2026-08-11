@@ -1,0 +1,118 @@
+1╭─ <script async src="x"/>
+ │  ││      │     │  ││  ╰─ openTagEnd:selfClosed "/>"
+ │  ││      │     │  │╰─ attrValue.value "\"x\""
+ │  ││      │     │  ╰─ attrValue "=\"x\""
+ │  ││      │     ╰─ attrName "src"
+ │  ││      ╰─ attrName "async"
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+2├─ 
+3╭─ <div async/>
+ │  ││   │    ╰─ openTagEnd:selfClosed "/>"
+ │  ││   ╰─ attrName "async"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4├─ 
+5╭─ <div async>hi</div>
+ │  ││   │    ││ │ │  ╰─ closeTagEnd(div)
+ │  ││   │    ││ │ ╰─ closeTagName "div"
+ │  ││   │    ││ ╰─ closeTagStart "</"
+ │  ││   │    │╰─ text "hi"
+ │  ││   │    ╰─ openTagEnd
+ │  ││   ╰─ attrName "async"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+6├─ 
+7╭─ <div async=true/>
+ │  ││   │    ││   ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │╰─ attrValue.value "true"
+ │  ││   │    ╰─ attrValue "=true"
+ │  ││   ╰─ attrName "async"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+8├─ 
+9╭─ <div async foo bar/>
+ │  ││   │     │   │  ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │     │   ╰─ attrName "bar"
+ │  ││   │     ╰─ attrName "foo"
+ │  ││   ╰─ attrName "async"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+10├─ 
+11╭─ <div async foo(1)/>
+  │  ││   │     │  ││ ╰─ openTagEnd:selfClosed "/>"
+  │  ││   │     │  │╰─ attrArgs.value
+  │  ││   │     │  ╰─ attrArgs "(1)"
+  │  ││   │     ╰─ attrName "foo"
+  │  ││   ╰─ attrName "async"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+12├─ 
+13╭─ <div async foo=1/>
+  │  ││   │     │  ││╰─ openTagEnd:selfClosed "/>"
+  │  ││   │     │  │╰─ attrValue.value
+  │  ││   │     │  ╰─ attrValue "=1"
+  │  ││   │     ╰─ attrName "foo"
+  │  ││   ╰─ attrName "async"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+14├─ 
+15╭─ <div async ...spread/>
+  │  ││   │     │  │     ╰─ openTagEnd:selfClosed "/>"
+  │  ││   │     │  ╰─ attrSpread.value "spread"
+  │  ││   │     ╰─ attrSpread "...spread"
+  │  ││   ╰─ attrName "async"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+16├─ 
+17╭─ <div async:mod onClick() {}/>
+  │  ││   │         │      ││ ││╰─ openTagEnd:selfClosed "/>"
+  │  ││   │         │      ││ │╰─ attrMethod.body.value
+  │  ││   │         │      ││ ╰─ attrMethod.body "{}"
+  │  ││   │         │      │╰─ attrMethod.params.value
+  │  ││   │         │      ├─ attrMethod.params "()"
+  │  ││   │         │      ╰─ attrMethod "() {}"
+  │  ││   │         ╰─ attrName "onClick"
+  │  ││   ╰─ attrName "async:mod"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+18├─ 
+19╭─ <div asyncfoo onClick() {}/>
+  │  ││   │        │      ││ ││╰─ openTagEnd:selfClosed "/>"
+  │  ││   │        │      ││ │╰─ attrMethod.body.value
+  │  ││   │        │      ││ ╰─ attrMethod.body "{}"
+  │  ││   │        │      │╰─ attrMethod.params.value
+  │  ││   │        │      ├─ attrMethod.params "()"
+  │  ││   │        │      ╰─ attrMethod "() {}"
+  │  ││   │        ╰─ attrName "onClick"
+  │  ││   ╰─ attrName "asyncfoo"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+20├─ 
+21╭─ <foo async(1)/>
+  │  ││   │    ││ ╰─ openTagEnd:selfClosed "/>"
+  │  ││   │    │╰─ attrArgs.value
+  │  ││   │    ╰─ attrArgs "(1)"
+  │  ││   ╰─ attrName "async"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+22├─ 
+23╭─ <foo async (1)/>
+  │  ││   │     ││ ╰─ openTagEnd:selfClosed "/>"
+  │  ││   │     │╰─ attrArgs.value
+  │  ││   │     ╰─ attrArgs "(1)"
+  │  ││   ╰─ attrName "async"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+24├─ 
+25╭─ <foo async<T> />
+  │  ││   │     ╰─ error(INVALID_ATTR_TYPE_PARAMS:Attribute cannot contain type parameters unless it is a shorthand method)
+  │  ││   ╰─ attrName "async"
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+26├─ 
+27├─ div [
+28├─   async
+29├─   onClick() {}
+30├─ ]
+31╰─ 

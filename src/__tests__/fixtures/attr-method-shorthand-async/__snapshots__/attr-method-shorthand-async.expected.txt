@@ -1,0 +1,168 @@
+1╭─ <button async onClick() {}/>
+ │  ││      │     │      ││ ││╰─ openTagEnd:selfClosed "/>"
+ │  ││      │     │      ││ │╰─ attrMethod.body.value
+ │  ││      │     │      ││ ╰─ attrMethod.body "{}"
+ │  ││      │     │      │╰─ attrMethod.params.value
+ │  ││      │     │      ╰─ attrMethod.params "()"
+ │  ││      │     ╰─ attrName "onClick"
+ │  ││      ╰─ attrMethod:async "async onClick() {}"
+ │  │╰─ tagName "button"
+ ╰─ ╰─ openTagStart
+2├─ 
+3╭─ <button async onClick(event) {
+ │  ││      │     │      ││      ╰─ attrMethod.body "{\n  await save(event);\n}"
+ │  ││      │     │      │╰─ attrMethod.params.value "event"
+ │  ││      │     │      ╰─ attrMethod.params "(event)"
+ │  ││      │     ╰─ attrName "onClick"
+ │  ││      ╰─ attrMethod:async "async onClick(event) {\n  await save(event);\n}"
+ │  │╰─ tagName "button"
+ ╰─ ╰─ openTagStart
+4╭─   await save(event);
+ ╰─ ╰─ attrMethod.body.value "\n  await save(event);\n"
+5╭─ }/>
+ ╰─  ╰─ openTagEnd:selfClosed "/>"
+6├─ 
+7╭─ <button async onClick<T>(event: T) {
+ │  ││      │     │      ││ ││         ╰─ attrMethod.body "{\n  await save(event);\n}"
+ │  ││      │     │      ││ │╰─ attrMethod.params.value "event: T"
+ │  ││      │     │      ││ ╰─ attrMethod.params "(event: T)"
+ │  ││      │     │      │╰─ attrMethod.typeParams.value
+ │  ││      │     │      ╰─ attrMethod.typeParams "<T>"
+ │  ││      │     ╰─ attrName "onClick"
+ │  ││      ╰─ attrMethod:async "async onClick<T>(event: T) {\n  await save(event);\n}"
+ │  │╰─ tagName "button"
+ ╰─ ╰─ openTagStart
+8╭─   await save(event);
+ ╰─ ╰─ attrMethod.body.value "\n  await save(event);\n"
+9╭─ }/>
+ ╰─  ╰─ openTagEnd:selfClosed "/>"
+10├─ 
+11╭─ <button
+  │  │╰─ tagName "button"
+  ╰─ ╰─ openTagStart
+12╭─   async
+  ╰─   ╰─ attrMethod:async "async\n  onClick() {}"
+13╭─   onClick() {}
+  │    │      ││ │╰─ attrMethod.body.value
+  │    │      ││ ╰─ attrMethod.body "{}"
+  │    │      │╰─ attrMethod.params.value
+  │    │      ╰─ attrMethod.params "()"
+  ╰─   ╰─ attrName "onClick"
+14╭─ />
+  ╰─ ╰─ openTagEnd:selfClosed "/>"
+15├─ 
+16╭─ button async onClick() {}
+  │  │      │     │      ││ │╰─ attrMethod.body.value
+  │  │      │     │      ││ ╰─ attrMethod.body "{}"
+  │  │      │     │      │╰─ attrMethod.params.value
+  │  │      │     │      ╰─ attrMethod.params "()"
+  │  │      │     ╰─ attrName "onClick"
+  │  │      ╰─ attrMethod:async "async onClick() {}"
+  ╰─ ╰─ tagName "button"
+17╭─ 
+  ╰─ ╰─ openTagEnd
+18╭─ button async onClick(event) {
+  │  │      │     │      ││      ╰─ attrMethod.body "{\n  await save(event);\n}"
+  │  │      │     │      │╰─ attrMethod.params.value "event"
+  │  │      │     │      ╰─ attrMethod.params "(event)"
+  │  │      │     ╰─ attrName "onClick"
+  │  │      ╰─ attrMethod:async "async onClick(event) {\n  await save(event);\n}"
+  │  ├─ closeTagEnd(button)
+  ╰─ ╰─ tagName "button"
+19╭─   await save(event);
+  ╰─ ╰─ attrMethod.body.value "\n  await save(event);\n"
+20├─ }
+21╭─ 
+  ╰─ ╰─ openTagEnd
+22╭─ <a async b() {} async c() {}/>
+  │  ││ │     │││ ││ │     │││ ││╰─ openTagEnd:selfClosed "/>"
+  │  ││ │     │││ ││ │     │││ │╰─ attrMethod.body.value
+  │  ││ │     │││ ││ │     │││ ╰─ attrMethod.body "{}"
+  │  ││ │     │││ ││ │     ││╰─ attrMethod.params.value
+  │  ││ │     │││ ││ │     │╰─ attrMethod.params "()"
+  │  ││ │     │││ ││ │     ╰─ attrName
+  │  ││ │     │││ ││ ╰─ attrMethod:async "async c() {}"
+  │  ││ │     │││ │╰─ attrMethod.body.value
+  │  ││ │     │││ ╰─ attrMethod.body "{}"
+  │  ││ │     ││╰─ attrMethod.params.value
+  │  ││ │     │╰─ attrMethod.params "()"
+  │  ││ │     ╰─ attrName
+  │  ││ ╰─ attrMethod:async "async b() {}"
+  │  │╰─ tagName
+  │  ├─ closeTagEnd(button)
+  ╰─ ╰─ openTagStart
+23├─ 
+24╭─ <foo async (event) {
+  │  ││   │     ││      ╰─ attrMethod.body "{\n  await save(event);\n}"
+  │  ││   │     │╰─ attrMethod.params.value "event"
+  │  ││   │     ╰─ attrMethod.params "(event)"
+  │  ││   ├─ attrMethod:async "async (event) {\n  await save(event);\n}"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+25╭─   await save(event);
+  ╰─ ╰─ attrMethod.body.value "\n  await save(event);\n"
+26╭─ }/>
+  ╰─  ╰─ openTagEnd:selfClosed "/>"
+27├─ 
+28╭─ <foo async(event) {}/>
+  │  ││   │    ││      ││╰─ openTagEnd:selfClosed "/>"
+  │  ││   │    ││      │╰─ attrMethod.body.value
+  │  ││   │    ││      ╰─ attrMethod.body "{}"
+  │  ││   │    │╰─ attrMethod.params.value "event"
+  │  ││   │    ╰─ attrMethod.params "(event)"
+  │  ││   ├─ attrMethod:async "async(event) {}"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+29├─ 
+30╭─ <foo async<T>(a: T) {}/>
+  │  ││   │    ││ ││     ││╰─ openTagEnd:selfClosed "/>"
+  │  ││   │    ││ ││     │╰─ attrMethod.body.value
+  │  ││   │    ││ ││     ╰─ attrMethod.body "{}"
+  │  ││   │    ││ │╰─ attrMethod.params.value "a: T"
+  │  ││   │    ││ ╰─ attrMethod.params "(a: T)"
+  │  ││   │    │╰─ attrMethod.typeParams.value
+  │  ││   │    ╰─ attrMethod.typeParams "<T>"
+  │  ││   ├─ attrMethod:async "async<T>(a: T) {}"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+31├─ 
+32╭─ <foo async <T>(a: T) {}/>
+  │  ││   │     ││ ││     ││╰─ openTagEnd:selfClosed "/>"
+  │  ││   │     ││ ││     │╰─ attrMethod.body.value
+  │  ││   │     ││ ││     ╰─ attrMethod.body "{}"
+  │  ││   │     ││ │╰─ attrMethod.params.value "a: T"
+  │  ││   │     ││ ╰─ attrMethod.params "(a: T)"
+  │  ││   │     │╰─ attrMethod.typeParams.value
+  │  ││   │     ╰─ attrMethod.typeParams "<T>"
+  │  ││   ├─ attrMethod:async "async <T>(a: T) {}"
+  │  ││   ╰─ attrName
+  │  │╰─ tagName "foo"
+  ╰─ ╰─ openTagStart
+33├─ 
+34╭─ foo async (event) {
+  │  │   │     ││      ╰─ attrMethod.body "{\n  await save(event);\n}"
+  │  │   │     │╰─ attrMethod.params.value "event"
+  │  │   │     ╰─ attrMethod.params "(event)"
+  │  │   ├─ attrMethod:async "async (event) {\n  await save(event);\n}"
+  │  │   ╰─ attrName
+  ╰─ ╰─ tagName "foo"
+35╭─   await save(event);
+  ╰─ ╰─ attrMethod.body.value "\n  await save(event);\n"
+36├─ }
+37╭─ 
+  ╰─ ╰─ openTagEnd
+38╭─ foo async(event) {}
+  │  │   │    ││      │╰─ attrMethod.body.value
+  │  │   │    ││      ╰─ attrMethod.body "{}"
+  │  │   │    │╰─ attrMethod.params.value "event"
+  │  │   │    ╰─ attrMethod.params "(event)"
+  │  │   ├─ attrMethod:async "async(event) {}"
+  │  │   ╰─ attrName
+  │  ├─ closeTagEnd(foo)
+  ╰─ ╰─ tagName "foo"
+39╭─ 
+  │  ├─ openTagEnd
+  ╰─ ╰─ closeTagEnd(foo)
