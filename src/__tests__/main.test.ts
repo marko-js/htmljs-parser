@@ -178,7 +178,7 @@ for (const entry of fs.readdirSync(FIXTURES)) {
         addValueRange(range.bound ? `attrValue:bound` : `attrValue`, range);
       },
       onAttrMethod(range) {
-        addRange("attrMethod", range);
+        addRange(range.async ? "attrMethod:async" : "attrMethod", range);
         if (range.typeParams)
           addValueRange("attrMethod.typeParams", range.typeParams);
         addValueRange("attrMethod.params", range.params);

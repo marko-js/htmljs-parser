@@ -25,6 +25,10 @@ export interface AttrMeta extends Meta {
   typeParams: undefined | Ranges.Value;
   spread: boolean;
   bound: boolean;
+  /** A pending `async`, held until the args close reveals what it modifies. */
+  async: undefined | Range;
+  /** Range of an `async` keyword already confirmed to modify a method. */
+  asyncMethod: undefined | Range;
 }
 
 // We enter STATE.ATTRIBUTE when we see a non-whitespace
@@ -45,10 +49,15 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       typeParams: undefined,
       bound: false,
       spread: false,
+      async: undefined,
+      asyncMethod: undefined,
     });
   },
 
-  exit() {
+  exit(attr) {
+    // Catches the paths that leave the attribute without resolving a pending
+    // `async`, notably EOF part way through typing `<div async onCl`.
+    flushPendingAsync(this, attr);
     this.activeAttr = undefined;
   },
 
@@ -80,6 +89,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         (code === CODE.PERIOD && this.lookAheadFor(".."))
       ) {
         attr.valueStart = this.pos;
+        flushPendingAsync(this, attr); // a value means no method follows
 
         if (code === CODE.COLON) {
           ensureAttrName(this, attr);
@@ -106,14 +116,18 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           : shouldTerminateHtmlAttrValue;
         return;
       } else if (code === CODE.OPEN_PAREN) {
-        ensureAttrName(this, attr);
+        // With a pending `async` the name is emitted once we know whether this
+        // is a method, since `<foo async(1)/>` is an attribute named `async`.
+        if (!attr.async) ensureAttrName(this, attr);
         attr.stage = ATTR_STAGE.ARGUMENT;
         this.pos++; // skip (
         this.enterState(STATE.EXPRESSION).shouldTerminate = matchesCloseParen;
         return;
       } else if (
         code === CODE.OPEN_ANGLE_BRACKET &&
-        attr.stage === ATTR_STAGE.NAME
+        // A pending `async` leaves the stage UNKNOWN, but type params can
+        // still follow it for a default attribute method.
+        (attr.stage === ATTR_STAGE.NAME || attr.async)
       ) {
         attr.stage = ATTR_STAGE.TYPE_PARAMS;
         this.pos++; // skip <
@@ -158,12 +172,14 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           : shouldTerminateHtmlAttrName;
         return;
       } else {
+        flushPendingAsync(this, attr);
         this.exitState();
         return;
       }
     }
 
     // EOF
+    flushPendingAsync(this, attr);
     if (this.isConcise) {
       this.exitState();
     } else {
@@ -182,12 +198,24 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
   return(child, attr) {
     switch (attr.stage) {
       case ATTR_STAGE.NAME: {
-        attr.name = {
+        const name = {
           start: child.start,
           end: child.end,
         };
 
-        this.options.onAttrName?.(attr.name);
+        if (!attr.async && !attr.name && isAsyncMethodPrefix(this, name)) {
+          // Both names stay unemitted until a method is confirmed or
+          // flushPendingAsync replays them as ordinary attributes.
+          attr.async = name;
+          attr.stage = ATTR_STAGE.UNKNOWN;
+          return;
+        }
+
+        attr.name = name;
+
+        // With a pending `async` this name is emitted later, once we know
+        // which attribute it belongs to.
+        if (!attr.async) this.options.onAttrName?.(attr.name);
 
         if (!this.isConcise && detectAmbiguousCloseAngleBracket(this, child)) {
           return;
@@ -212,18 +240,30 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         };
 
         if (this.consumeWhitespaceIfBefore("{")) {
+          // A shorthand method: any pending `async` is a modifier on this
+          // method rather than an attribute, so only the name is emitted.
+          if (attr.async) {
+            // A default attribute method has no name to emit here; the "{"
+            // branch of parse emits its empty name range.
+            if (attr.name) this.options.onAttrName?.(attr.name);
+            attr.asyncMethod = attr.async;
+            attr.async = undefined;
+          }
+
           attr.args = {
             start,
             end,
             value,
           };
         } else if (attr.typeParams) {
+          flushPendingAsync(this, attr);
           this.emitError(
             child,
             ErrorCode.INVALID_ATTRIBUTE_ARGUMENT,
             "An attribute cannot have both type parameters and arguments",
           );
         } else {
+          flushPendingAsync(this, attr); // args without a body is not a method
           attr.args = true;
           this.options.onAttrArgs?.({
             start,
@@ -237,14 +277,19 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
       case ATTR_STAGE.BLOCK: {
         const params = attr.args as Ranges.Value;
         const end = ++this.pos; // include }
-        const { typeParams } = attr;
-        const start = typeParams ? typeParams.start : params.start;
+        const { typeParams, asyncMethod } = attr;
+        const start = asyncMethod
+          ? asyncMethod.start
+          : typeParams
+            ? typeParams.start
+            : params.start;
 
         this.options.onAttrMethod?.({
           start,
           end,
           params,
           typeParams,
+          async: asyncMethod !== undefined,
           body: {
             start: child.start - 1, // include {
             end,
@@ -263,6 +308,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         const end = ++this.pos; // include >
 
         if (!this.consumeWhitespaceIfBefore("(")) {
+          flushPendingAsync(this, attr);
           return this.emitError(
             child,
             ErrorCode.INVALID_ATTR_TYPE_PARAMS,
@@ -476,6 +522,50 @@ function isOperandEndCode(code: number) {
       return true;
     default:
       return isWordCode(code);
+  }
+}
+
+/**
+ * Whether a method name, or a default attribute method's params, follows the
+ * keyword. Anything else keeps `async` ordinary, eg `<script async src=x>`.
+ */
+function isAsyncMethodPrefix(parser: Parser, name: Range) {
+  const { data } = parser;
+  if (
+    name.end - name.start !== 5 ||
+    // Cheap reject for the many five character attribute names, eg
+    // "class", "style", "value", before comparing the rest.
+    data.charCodeAt(name.start) !== CODE.LOWER_A ||
+    !parser.lookAheadFor("async", name.start)
+  ) {
+    return false;
+  }
+
+  // In concise mode a newline ends the attribute, so a name on the following
+  // line belongs to a separate attribute and cannot be this method's name.
+  const skip = parser.isConcise ? isIndentCode : isWhitespaceCode;
+  let pos = parser.pos;
+  while (skip(data.charCodeAt(pos))) pos++;
+
+  const code = data.charCodeAt(pos);
+  return (
+    isWordCode(code) || // the method name
+    code === CODE.OPEN_PAREN || // a default attribute method's params
+    // a default attribute method's type params, but not a close tag
+    (code === CODE.OPEN_ANGLE_BRACKET &&
+      data.charCodeAt(pos + 1) !== CODE.FORWARD_SLASH)
+  );
+}
+
+/**
+ * Replays a deferred `async`, and the name held behind it, as attribute names
+ * once the attribute turns out not to be a shorthand method.
+ */
+function flushPendingAsync(parser: Parser, attr: AttrMeta) {
+  if (attr.async) {
+    parser.options.onAttrName?.(attr.async);
+    attr.async = undefined;
+    if (attr.name) parser.options.onAttrName?.(attr.name);
   }
 }
 

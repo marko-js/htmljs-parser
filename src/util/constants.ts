@@ -61,6 +61,8 @@ export namespace Ranges {
     body: Value;
     params: Value;
     typeParams: Value | undefined;
+    /** Whether an `async` keyword preceded it; the range starts there. */
+    async: boolean;
   }
 
   export interface OpenTagEnd extends Range {
