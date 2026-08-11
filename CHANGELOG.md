@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.14.0
+
+### Minor Changes
+
+- [#236](https://github.com/marko-js/htmljs-parser/pull/236) [`39fc50b`](https://github.com/marko-js/htmljs-parser/commit/39fc50b38adde4ab00e47880d13f2048794e1805) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Support an `async` keyword before shorthand methods, eg `<button async onClick() {}>` and the default attribute form `<foo async (event) {}>`. `onAttrMethod` reports these with `async: true` and a range starting at the keyword. A shorthand method can no longer be named `async`, but an `async` that is not followed by a shorthand method is still an ordinary attribute, so `<script async src="x">` is unchanged.
+
 ## 5.13.0
 
 ### Minor Changes
