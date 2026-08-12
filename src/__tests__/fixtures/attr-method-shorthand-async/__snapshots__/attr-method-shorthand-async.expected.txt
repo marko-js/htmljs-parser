@@ -164,5 +164,62 @@
   │  ├─ closeTagEnd(foo)
   ╰─ ╰─ tagName "foo"
 39╭─ 
-  │  ├─ openTagEnd
-  ╰─ ╰─ closeTagEnd(foo)
+  ╰─ ╰─ openTagEnd
+40╭─ <button async onClick(value = ")") { await save() }/>
+  │  ││      │     │      ││            ││              ╰─ openTagEnd:selfClosed "/>"
+  │  ││      │     │      ││            │╰─ attrMethod.body.value " await save() "
+  │  ││      │     │      ││            ╰─ attrMethod.body "{ await save() }"
+  │  ││      │     │      │╰─ attrMethod.params.value "value = \")\""
+  │  ││      │     │      ╰─ attrMethod.params "(value = \")\")"
+  │  ││      │     ╰─ attrName "onClick"
+  │  ││      ╰─ attrMethod:async "async onClick(value = \")\") { await save() }"
+  │  │╰─ tagName "button"
+  │  ├─ closeTagEnd(foo)
+  ╰─ ╰─ openTagStart
+41├─ 
+42╭─ <button async onClick(v = `a${ ")" }b`) { await save() }/>
+  │  ││      │     │      ││                 ││              ╰─ openTagEnd:selfClosed "/>"
+  │  ││      │     │      ││                 │╰─ attrMethod.body.value " await save() "
+  │  ││      │     │      ││                 ╰─ attrMethod.body "{ await save() }"
+  │  ││      │     │      │╰─ attrMethod.params.value "v = `a${ \")\" }b`"
+  │  ││      │     │      ╰─ attrMethod.params "(v = `a${ \")\" }b`)"
+  │  ││      │     ╰─ attrName "onClick"
+  │  ││      ╰─ attrMethod:async "async onClick(v = `a${ \")\" }b`) { await save() }"
+  │  │╰─ tagName "button"
+  ╰─ ╰─ openTagStart
+43├─ 
+44╭─ <button async onClick(v = /\)/) { await save() }/>
+  │  ││      │     │      ││         ││              ╰─ openTagEnd:selfClosed "/>"
+  │  ││      │     │      ││         │╰─ attrMethod.body.value " await save() "
+  │  ││      │     │      ││         ╰─ attrMethod.body "{ await save() }"
+  │  ││      │     │      │╰─ attrMethod.params.value "v = /\\)/"
+  │  ││      │     │      ╰─ attrMethod.params "(v = /\\)/)"
+  │  ││      │     ╰─ attrName "onClick"
+  │  ││      ╰─ attrMethod:async "async onClick(v = /\\)/) { await save() }"
+  │  │╰─ tagName "button"
+  ╰─ ╰─ openTagStart
+45├─ 
+46╭─ <button async onClick(v /* ) */ = 1) { await save() }/>
+  │  ││      │     │      ││              ││              ╰─ openTagEnd:selfClosed "/>"
+  │  ││      │     │      ││              │╰─ attrMethod.body.value " await save() "
+  │  ││      │     │      ││              ╰─ attrMethod.body "{ await save() }"
+  │  ││      │     │      │╰─ attrMethod.params.value "v /* ) */ = 1"
+  │  ││      │     │      ╰─ attrMethod.params "(v /* ) */ = 1)"
+  │  ││      │     ╰─ attrName "onClick"
+  │  ││      ╰─ attrMethod:async "async onClick(v /* ) */ = 1) { await save() }"
+  │  │╰─ tagName "button"
+  ╰─ ╰─ openTagStart
+47├─ 
+48╭─ <button async onClick<T extends ")">(v: T) { await save() }/>
+  │  ││      │     │      ││             ││     ││              ╰─ openTagEnd:selfClosed "/>"
+  │  ││      │     │      ││             ││     │╰─ attrMethod.body.value " await save() "
+  │  ││      │     │      ││             ││     ╰─ attrMethod.body "{ await save() }"
+  │  ││      │     │      ││             │╰─ attrMethod.params.value "v: T"
+  │  ││      │     │      ││             ╰─ attrMethod.params "(v: T)"
+  │  ││      │     │      │╰─ attrMethod.typeParams.value "T extends \")\""
+  │  ││      │     │      ╰─ attrMethod.typeParams "<T extends \")\">"
+  │  ││      │     ╰─ attrName "onClick"
+  │  ││      ╰─ attrMethod:async "async onClick<T extends \")\">(v: T) { await save() }"
+  │  │╰─ tagName "button"
+  ╰─ ╰─ openTagStart
+49╰─ 
