@@ -36,3 +36,13 @@ foo async (event) {
 }
 
 foo async(event) {}
+
+<button async onClick(value = ")") { await save() }/>
+
+<button async onClick(v = `a${ ")" }b`) { await save() }/>
+
+<button async onClick(v = /\)/) { await save() }/>
+
+<button async onClick(v /* ) */ = 1) { await save() }/>
+
+<button async onClick<T extends ")">(v: T) { await save() }/>
