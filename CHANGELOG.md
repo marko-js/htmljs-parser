@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.15.0
+
+### Minor Changes
+
+- [#239](https://github.com/marko-js/htmljs-parser/pull/239) [`2d413ae`](https://github.com/marko-js/htmljs-parser/commit/2d413ae118200294fe76d5f867616d8abc7b781a) Thanks [@LuLaValva](https://github.com/LuLaValva)! - An `<!--` inside an open tag now reports a targeted `INVALID_HTML_COMMENT` error pointing at the comment, instead of being read as tag type arguments, as attribute type parameters, or (after a whitespace-terminated attribute value) consumed as a less-than operator. Like `</`, a `<!--` no longer continues an unenclosed attribute value, so `<div class="a" <!-- note --> id="b">` reports the comment rather than silently parsing as `class=("a" < !--note)` plus two junk attributes.
+
 ## 5.14.0
 
 ### Minor Changes
