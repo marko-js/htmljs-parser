@@ -420,14 +420,20 @@ function checkForOperators(
       pos + 1,
     );
 
-    // In HTML mode a "</" is a close tag rather than a less-than operator
-    // (which lookAheadForOperator would otherwise continue across).
-    if (
-      !parser.isConcise &&
-      data.charCodeAt(nextNonSpace) === CODE.OPEN_ANGLE_BRACKET &&
-      data.charCodeAt(nextNonSpace + 1) === CODE.FORWARD_SLASH
-    ) {
-      return false;
+    // A "</" close tag (html mode) or a "<!--" html comment is markup rather
+    // than a less-than operator, which lookAheadForOperator would otherwise
+    // continue across.
+    if (data.charCodeAt(nextNonSpace) === CODE.OPEN_ANGLE_BRACKET) {
+      if (
+        !parser.isConcise &&
+        data.charCodeAt(nextNonSpace + 1) === CODE.FORWARD_SLASH
+      ) {
+        return false;
+      }
+
+      if (parser.lookAheadFor("!--", nextNonSpace + 1)) {
+        return false;
+      }
     }
 
     if (

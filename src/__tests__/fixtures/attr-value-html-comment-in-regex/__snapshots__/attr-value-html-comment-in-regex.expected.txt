@@ -1,0 +1,10 @@
+1╭─ <div hidden=/<!--/.test(s) title="<!-- x -->"/>
+ │  ││   │     ││              │    ││           ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │     ││              │    │╰─ attrValue.value "\"<!-- x -->\""
+ │  ││   │     ││              │    ╰─ attrValue "=\"<!-- x -->\""
+ │  ││   │     ││              ╰─ attrName "title"
+ │  ││   │     │╰─ attrValue.value "/<!--/.test(s)"
+ │  ││   │     ╰─ attrValue "=/<!--/.test(s)"
+ │  ││   ╰─ attrName "hidden"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

@@ -1,0 +1,7 @@
+1╭─ <div
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─   <!-- the label -->
+ ╰─   ╰─ error(INVALID_HTML_COMMENT:An html comment cannot be used within an open tag. Use a JavaScript comment (// or /* */) instead.)
+3├─   class="foo"
+4╰─ >hi</div>

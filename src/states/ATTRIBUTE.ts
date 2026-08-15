@@ -83,6 +83,11 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         continue;
       }
 
+      if (code === CODE.OPEN_ANGLE_BRACKET && this.lookAheadFor("!--")) {
+        this.exitState();
+        return; // the open tag reports the html comment
+      }
+
       if (
         code === CODE.EQUAL ||
         (code === CODE.COLON && data.charCodeAt(this.pos + 1) === CODE.EQUAL) ||

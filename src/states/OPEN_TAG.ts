@@ -280,6 +280,12 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             this.pos += 2; // skip /*
             return;
         }
+      } else if (code === CODE.OPEN_ANGLE_BRACKET && this.lookAheadFor("!--")) {
+        return this.emitError(
+          this.pos,
+          ErrorCode.INVALID_HTML_COMMENT,
+          "An html comment cannot be used within an open tag. Use a JavaScript comment (// or /* */) instead.",
+        );
       }
 
       if (isWhitespaceCode(code)) {
