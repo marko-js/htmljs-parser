@@ -1,0 +1,5 @@
+1╭─ <div hidden <!-- the label --> id="b">hi</div>
+ │  ││   │      ╰─ error(INVALID_HTML_COMMENT:An html comment cannot be used within an open tag. Use a JavaScript comment (// or /* */) instead.)
+ │  ││   ╰─ attrName "hidden"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart

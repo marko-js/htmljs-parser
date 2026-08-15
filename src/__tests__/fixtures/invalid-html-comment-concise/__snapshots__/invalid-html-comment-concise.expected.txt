@@ -1,0 +1,6 @@
+1╭─ div class="foo" <!-- the label --> id="b"
+ │  │   │    ││     ╰─ error(INVALID_HTML_COMMENT:An html comment cannot be used within an open tag. Use a JavaScript comment (// or /* */) instead.)
+ │  │   │    │╰─ attrValue.value "\"foo\""
+ │  │   │    ╰─ attrValue "=\"foo\""
+ │  │   ╰─ attrName "class"
+ ╰─ ╰─ tagName "div"
