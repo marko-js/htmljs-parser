@@ -11,6 +11,7 @@ export {
   type Ranges,
   TagType,
 } from "./internal.ts";
+export { escapeText } from "./util/escape.ts";
 export {
   isValidAttrValue,
   isValidScriptlet,

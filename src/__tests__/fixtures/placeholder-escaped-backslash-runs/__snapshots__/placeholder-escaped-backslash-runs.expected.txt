@@ -1,0 +1,63 @@
+1╭─ <div>\${a}</div>
+ │  ││  │ │   │ │  ╰─ closeTagEnd(div)
+ │  ││  │ │   │ ╰─ closeTagName "div"
+ │  ││  │ │   ╰─ closeTagStart "</"
+ │  ││  │ ╰─ text "${a}"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <div>\\${b}</div>
+ │  ││  ││ │ │ │ │  ╰─ closeTagEnd(div)
+ │  ││  ││ │ │ │ ╰─ closeTagName "div"
+ │  ││  ││ │ │ ╰─ closeTagStart "</"
+ │  ││  ││ │ ╰─ placeholder:escape.value
+ │  ││  ││ ╰─ placeholder:escape "${b}"
+ │  ││  │╰─ text
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╭─ <div>\\\${c}</div>
+ │  ││  │  │    │ │  ╰─ closeTagEnd(div)
+ │  ││  │  │    │ ╰─ closeTagName "div"
+ │  ││  │  │    ╰─ closeTagStart "</"
+ │  ││  │  ╰─ text "\\${c}"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╭─ <div>\\\\${d}</div>
+ │  ││  ││   │ │ │ │  ╰─ closeTagEnd(div)
+ │  ││  ││   │ │ │ ╰─ closeTagName "div"
+ │  ││  ││   │ │ ╰─ closeTagStart "</"
+ │  ││  ││   │ ╰─ placeholder:escape.value
+ │  ││  ││   ╰─ placeholder:escape "${d}"
+ │  ││  │╰─ text "\\\\"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+5╭─ <div>\\\\\${e}</div>
+ │  ││  │   │     │ │  ╰─ closeTagEnd(div)
+ │  ││  │   │     │ ╰─ closeTagName "div"
+ │  ││  │   │     ╰─ closeTagStart "</"
+ │  ││  │   ╰─ text "\\\\${e}"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+6╭─ <div>\\\\\\${f}</div>
+ │  ││  ││     │ │ │ │  ╰─ closeTagEnd(div)
+ │  ││  ││     │ │ │ ╰─ closeTagName "div"
+ │  ││  ││     │ │ ╰─ closeTagStart "</"
+ │  ││  ││     │ ╰─ placeholder:escape.value
+ │  ││  ││     ╰─ placeholder:escape "${f}"
+ │  ││  │╰─ text "\\\\\\"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+7╭─ <div>\\\\\\\$!{g}</div>
+ │  ││  │    │       │ │  ╰─ closeTagEnd(div)
+ │  ││  │    │       │ ╰─ closeTagName "div"
+ │  ││  │    │       ╰─ closeTagStart "</"
+ │  ││  │    ╰─ text "\\\\\\$!{g}"
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+8╰─ 
