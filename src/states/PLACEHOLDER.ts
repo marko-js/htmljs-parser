@@ -81,7 +81,8 @@ export function checkForPlaceholder(parser: Parser, code: number) {
           parser.endText();
           parser.pos += extra;
           parser.startText();
-          parser.pos += escape ? 2 : 3; // skip the ${ or $!{
+          // the kept half of the backslashes, then the ${ or $!{
+          parser.pos += ahead - extra + (escape ? 2 : 3);
           return true;
         }
 
