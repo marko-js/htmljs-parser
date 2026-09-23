@@ -1,6 +1,6 @@
 1╭─ $ var str = '' // a string
- │   │╰─ scriptlet.value "var str = '' // a string"
- ╰─  ╰─ scriptlet " var str = '' // a string"
+ │  │ ╰─ scriptlet.value "var str = '' // a string"
+ ╰─ ╰─ scriptlet "$ var str = '' // a string"
 2├─ 
 3╭─ <div>
  │  ││  ╰─ openTagEnd

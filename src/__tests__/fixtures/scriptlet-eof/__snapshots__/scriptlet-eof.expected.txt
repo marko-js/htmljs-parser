@@ -1,6 +1,6 @@
 1╭─ $ $global.
- │   │╰─ scriptlet.value "$global."
- ╰─  ╰─ scriptlet " $global."
+ │  │ ╰─ scriptlet.value "$global."
+ ╰─ ╰─ scriptlet "$ $global."
 2├─ 
 3╭─ <header>
  │  ││     ╰─ openTagEnd

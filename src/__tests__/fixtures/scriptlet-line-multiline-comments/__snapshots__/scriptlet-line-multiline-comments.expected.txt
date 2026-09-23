@@ -1,6 +1,6 @@
 1╭─ $ var str /* test */ = '' /**
- │   │╰─ scriptlet.value "var str /* test */ = '' /**\n* Test\n*/"
- ╰─  ╰─ scriptlet " var str /* test */ = '' /**\n* Test\n*/"
+ │  │ ╰─ scriptlet.value "var str /* test */ = '' /**\n* Test\n*/"
+ ╰─ ╰─ scriptlet "$ var str /* test */ = '' /**\n* Test\n*/"
 2├─ * Test
 3├─ */
 4├─ 

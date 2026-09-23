@@ -21,7 +21,7 @@
 14├─   foo: string;
 15├─ }
 16╭─ $ const bar = "bar"
-  │  ││╰─ scriptlet.value "const bar = \"bar\""
-  │  │╰─ scriptlet " const bar = \"bar\""
-  ╰─ ╰─ openTagEnd
+  │  │ ╰─ scriptlet.value "const bar = \"bar\""
+  │  ├─ openTagEnd
+  ╰─ ╰─ scriptlet "$ const bar = \"bar\""
 17╰─ 

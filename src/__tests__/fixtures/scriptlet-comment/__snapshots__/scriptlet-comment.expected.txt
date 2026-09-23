@@ -1,6 +1,6 @@
 1╭─ $ // +
- │   │╰─ scriptlet.value "// +"
- ╰─  ╰─ scriptlet " // +"
+ │  │ ╰─ scriptlet.value "// +"
+ ╰─ ╰─ scriptlet "$ // +"
 2╭─ a
  │  │├─ closeTagEnd(a)
  │  │╰─ openTagEnd
