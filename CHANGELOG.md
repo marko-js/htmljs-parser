@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.17.1
+
+### Patch Changes
+
+- [#250](https://github.com/marko-js/htmljs-parser/pull/250) [`83e9907`](https://github.com/marko-js/htmljs-parser/commit/83e99070f64de535722c069e4177f00f84f5de15) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Report the comments on the lines before a comma-continued concise attr line through `onOpenTagComment`. They were skipped without an event, so consumers dropped them.
+
 ## 5.17.0
 
 ### Minor Changes
