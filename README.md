@@ -384,6 +384,19 @@ const parser = createParser({
   },
 
   /**
+   * Called after parsing a JavaScript comment that stands alone in an open tag.
+   * A comment that follows a value is part of that value instead.
+   *
+   * @example
+   * 1╭─ <div /* hi */ class="x">
+   *  │       │ ╰─ openTagComment.value " hi "
+   *  ╰─      ╰─ openTagComment "/* hi */"
+   */
+  onOpenTagComment(range) {
+    range.value; // Another range that only includes the contents of the comment.
+  },
+
+  /**
    * Called once we've completed parsing the open tag.
    *
    * @example

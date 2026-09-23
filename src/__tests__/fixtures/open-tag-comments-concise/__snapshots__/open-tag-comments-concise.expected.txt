@@ -1,9 +1,13 @@
 1╭─ div /* c */ a=1
- │  │           ││╰─ attrValue.value
- │  │           │╰─ attrValue "=1"
- │  │           ╰─ attrName
+ │  │   │ │     ││╰─ attrValue.value
+ │  │   │ │     │╰─ attrValue "=1"
+ │  │   │ │     ╰─ attrName
+ │  │   │ ╰─ openTagComment.value " c "
+ │  │   ╰─ openTagComment "/* c */"
  ╰─ ╰─ tagName "div"
 2╭─ span // d
+ │  │    │ ╰─ openTagComment.value " d"
+ │  │    ╰─ openTagComment "// d"
  │  ├─ closeTagEnd(div)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "span"
