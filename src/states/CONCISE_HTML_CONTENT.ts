@@ -112,8 +112,8 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           return;
         case CODE.DOLLAR:
           if (isWhitespaceCode(data.charCodeAt(this.pos + 1))) {
-            this.pos++; // skip $, INLINE_SCRIPT starts at space
             this.enterState(STATE.INLINE_SCRIPT);
+            this.pos++; // skip $
             return;
           }
           break; // fall through to enter OPEN_TAG
