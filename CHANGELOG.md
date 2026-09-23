@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.15.1
+
+### Patch Changes
+
+- [#244](https://github.com/marko-js/htmljs-parser/pull/244) [`9d46912`](https://github.com/marko-js/htmljs-parser/commit/9d46912da3b52b28c70bdeaea76acba48409f34e) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - A scriptlet's range now starts at its `$` at the root and in concise content, as it already did in an HTML body, so `onScriptlet` reports `$ var a = 1;` rather than ` var a = 1;` there. Its `value` range is unchanged.
+
 ## 5.15.0
 
 ### Minor Changes
