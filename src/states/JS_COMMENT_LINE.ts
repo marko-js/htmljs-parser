@@ -1,4 +1,9 @@
-import { STATE, type StateDefinition } from "../internal.ts";
+import {
+  type Meta,
+  type Ranges,
+  STATE,
+  type StateDefinition,
+} from "../internal.ts";
 import * as CODE from "../util/codes.ts";
 import * as TagType from "../util/tag-type.ts";
 
@@ -47,3 +52,21 @@ export const JS_COMMENT_LINE: StateDefinition = {
   /* node:coverage ignore next */ // never has child states
   return() {},
 };
+
+/**
+ * The range of a JavaScript line or block comment that a state returned from,
+ * with the delimiters stripped from its value.
+ */
+export function getJSCommentRange(comment: Meta): Ranges.Value {
+  return {
+    start: comment.start,
+    end: comment.end,
+    value: {
+      start: comment.start + 2, // strip // or /*
+      end:
+        comment.state === STATE.JS_COMMENT_BLOCK
+          ? comment.end - 2 // strip */
+          : comment.end,
+    },
+  };
+}

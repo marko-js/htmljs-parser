@@ -98,6 +98,7 @@ export interface ParserOptions {
   onAttrValue?(data: Ranges.AttrValue): void;
   onAttrMethod?(data: Ranges.AttrMethod): void;
   onAttrSpread?(data: Ranges.Value): void;
+  onOpenTagComment?(data: Ranges.Value): void;
   onOpenTagEnd?(data: Ranges.OpenTagEnd): void;
   onCloseTagStart?(data: Range): void;
   onCloseTagName?(data: Range): void;

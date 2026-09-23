@@ -178,24 +178,10 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
   return(child) {
     switch (child.state) {
       case STATE.JS_COMMENT_LINE:
-        this.options.onComment?.({
-          start: child.start,
-          end: child.end,
-          value: {
-            start: child.start + 2, // strip //
-            end: child.end,
-          },
-        });
+        this.options.onComment?.(STATE.getJSCommentRange(child));
         break;
       case STATE.JS_COMMENT_BLOCK: {
-        this.options.onComment?.({
-          start: child.start,
-          end: child.end,
-          value: {
-            start: child.start + 2, // strip /*
-            end: child.end - 2, // strip */,
-          },
-        });
+        this.options.onComment?.(STATE.getJSCommentRange(child));
         break;
       }
     }

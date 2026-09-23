@@ -401,7 +401,18 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
   },
 
   return(child, tag) {
-    if (child.state !== STATE.EXPRESSION) return;
+    switch (child.state) {
+      case STATE.JS_COMMENT_LINE:
+      case STATE.JS_COMMENT_BLOCK:
+        // A separate event, since a consumer that adds every `onComment` to
+        // the current body would otherwise put these in the tag's body.
+        this.options.onOpenTagComment?.(STATE.getJSCommentRange(child));
+        return;
+      case STATE.EXPRESSION:
+        break;
+      default:
+        return;
+    }
 
     switch (tag.stage) {
       case TAG_STAGE.VAR: {

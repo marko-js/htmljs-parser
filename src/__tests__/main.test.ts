@@ -105,6 +105,9 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       onComment(range) {
         addValueRange("comment", range);
       },
+      onOpenTagComment(range) {
+        addValueRange("openTagComment", range);
+      },
       onOpenTagStart(range) {
         addRange("openTagStart", range);
       },

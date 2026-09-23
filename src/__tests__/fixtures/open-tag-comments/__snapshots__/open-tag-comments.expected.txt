@@ -1,0 +1,47 @@
+1╭─ <div /* after the name */ class="box">x</div>
+ │  ││   │ │                  │    ││    │││ │  ╰─ closeTagEnd(div)
+ │  ││   │ │                  │    ││    │││ ╰─ closeTagName "div"
+ │  ││   │ │                  │    ││    ││╰─ closeTagStart "</"
+ │  ││   │ │                  │    ││    │╰─ text
+ │  ││   │ │                  │    ││    ╰─ openTagEnd
+ │  ││   │ │                  │    │╰─ attrValue.value "\"box\""
+ │  ││   │ │                  │    ╰─ attrValue "=\"box\""
+ │  ││   │ │                  ╰─ attrName "class"
+ │  ││   │ ╰─ openTagComment.value " after the name "
+ │  ││   ╰─ openTagComment "/* after the name */"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <div
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╭─   // why the attrs
+ │    │ ╰─ openTagComment.value " why the attrs"
+ ╰─   ╰─ openTagComment "// why the attrs"
+4╭─   class="box"/>
+ │    │    ││    ╰─ openTagEnd:selfClosed "/>"
+ │    │    │╰─ attrValue.value "\"box\""
+ │    │    ╰─ attrValue "=\"box\""
+ ╰─   ╰─ attrName "class"
+5╭─ <input hidden // after a name-only attr
+ │  ││     │      │ ╰─ openTagComment.value " after a name-only attr"
+ │  ││     │      ╰─ openTagComment "// after a name-only attr"
+ │  ││     ╰─ attrName "hidden"
+ │  │╰─ tagName "input"
+ ╰─ ╰─ openTagStart
+6╭─   type="text">
+ │    │   ││     ╰─ openTagEnd
+ │    │   │╰─ attrValue.value "\"text\""
+ │    │   ╰─ attrValue "=\"text\""
+ ╰─   ╰─ attrName "type"
+7╭─ <a href="/" // follows a value, so part of it
+ │  ││ │   │╰─ attrValue.value "\"/\" // follows a value, so part of it"
+ │  ││ │   ╰─ attrValue "=\"/\" // follows a value, so part of it"
+ │  ││ ╰─ attrName "href"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
+8╭─   title="home"/>
+ │    │    ││     ╰─ openTagEnd:selfClosed "/>"
+ │    │    │╰─ attrValue.value "\"home\""
+ │    │    ╰─ attrValue "=\"home\""
+ ╰─   ╰─ attrName "title"
+9╰─ 
