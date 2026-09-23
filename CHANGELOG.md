@@ -1,5 +1,15 @@
 # htmljs-parser
 
+## 5.16.0
+
+### Minor Changes
+
+- [#246](https://github.com/marko-js/htmljs-parser/pull/246) [`402c94f`](https://github.com/marko-js/htmljs-parser/commit/402c94f224eb0e99dab492026d03d8cfd7e84a38) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Export `escapeText`, which escapes text content so the parser reads it back as the same text, for tools that print Marko source. Only a backslash run before `${` or `$!{` is changed; pass the content printed after the text as the second argument so that a backslash run ending the text does not escape a placeholder it leads into.
+
+### Patch Changes
+
+- [#246](https://github.com/marko-js/htmljs-parser/pull/246) [`402c94f`](https://github.com/marko-js/htmljs-parser/commit/402c94f224eb0e99dab492026d03d8cfd7e84a38) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Read an odd run of five or more backslashes before `${` or `$!{` as escapes, like a run of one or three: `\\\\\${x}` is now the text `\\${x}` rather than two backslashes and a placeholder.
+
 ## 5.15.1
 
 ### Patch Changes
