@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.17.0
+
+### Minor Changes
+
+- [#248](https://github.com/marko-js/htmljs-parser/pull/248) [`430e74d`](https://github.com/marko-js/htmljs-parser/commit/430e74d6a6e4de6d2820ca96ed48ea29070654f3) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Add an `onOpenTagComment` handler for a JavaScript comment that stands alone in an open tag, eg `<div /* c */ class="box">` or a `// why` line between attributes, which the parser used to consume without an event. A comment that follows a value is still part of that value. It is a separate handler from `onComment`, so a consumer only sees these comments once it handles them.
+
 ## 5.16.0
 
 ### Minor Changes
