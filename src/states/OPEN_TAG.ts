@@ -131,10 +131,10 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             }
           }
 
-          // comma continues the open tag with another line attribute
+          // comma continues the open tag with another line attribute, so
+          // the comments before it are parsed as part of the open tag
           if (data.charCodeAt(cur) === CODE.COMMA) {
-            this.pos = cur + 1;
-            this.consumeWhitespace();
+            this.pos += len;
             continue;
           }
 

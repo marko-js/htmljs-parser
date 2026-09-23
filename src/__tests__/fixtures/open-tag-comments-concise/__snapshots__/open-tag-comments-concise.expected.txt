@@ -11,6 +11,19 @@
  │  ├─ closeTagEnd(div)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "span"
-3╭─ 
+3╭─ input
+ │  ├─ closeTagEnd(span)
  │  ├─ openTagEnd
- ╰─ ╰─ closeTagEnd(span)
+ ╰─ ╰─ tagName "input"
+4╭─   // e
+ │    │ ╰─ openTagComment.value " e"
+ ╰─   ╰─ openTagComment "// e"
+5╭─   /* f */
+ │    │ ╰─ openTagComment.value " f "
+ ╰─   ╰─ openTagComment "/* f */"
+6╭─   ,type="text"
+ │     │   │╰─ attrValue.value "\"text\""
+ │     │   ╰─ attrValue "=\"text\""
+ ╰─    ╰─ attrName "type"
+7╭─ 
+ ╰─ ╰─ openTagEnd

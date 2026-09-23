@@ -4,12 +4,16 @@
  │     │  │╰─ attrValue.value "bar"
  │     │  ╰─ attrValue "=bar"
  ╰─    ╰─ attrName "foo"
-3├─   // comment
+3╭─   // comment
+ │    │ ╰─ openTagComment.value " comment"
+ ╰─   ╰─ openTagComment "// comment"
 4╭─   ,bar=baz
  │     │  │╰─ attrValue.value "baz"
  │     │  ╰─ attrValue "=baz"
  ╰─    ╰─ attrName "bar"
-5├─   /* block */
+5╭─   /* block */
+ │    │ ╰─ openTagComment.value " block "
+ ╰─   ╰─ openTagComment "/* block */"
 6╭─   ,qux=qux
  │     │  │╰─ attrValue.value "qux"
  │     │  ╰─ attrValue "=qux"
