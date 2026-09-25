@@ -1,0 +1,6 @@
+1╭─ <div class=`a`id="b"/>
+ │  ││   │        ╰─ error(MALFORMED_OPEN_TAG:Attributes must be separated by whitespace; add a space before "id".) "id"
+ │  ││   ╰─ attrName "class"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 

@@ -1,0 +1,6 @@
+1╭─ <div value=fn()next=1/>
+ │  ││   │         ╰─ error(MALFORMED_OPEN_TAG:Attributes must be separated by whitespace; add a space before "next".) "next"
+ │  ││   ╰─ attrName "value"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 

@@ -1,0 +1,6 @@
+1╭─ <input value="a"disabled/>
+ │  ││     │        ╰─ error(MALFORMED_OPEN_TAG:Attributes must be separated by whitespace; add a space before "disabled".) "disabled"
+ │  ││     ╰─ attrName "value"
+ │  │╰─ tagName "input"
+ ╰─ ╰─ openTagStart
+2╰─ 

@@ -1,0 +1,6 @@
+1╭─ <input class="a"value:=text/>
+ │  ││     │        ╰─ error(MALFORMED_OPEN_TAG:Attributes must be separated by whitespace; add a space before "value".) "value"
+ │  ││     ╰─ attrName "class"
+ │  │╰─ tagName "input"
+ ╰─ ╰─ openTagStart
+2╰─ 

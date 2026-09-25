@@ -332,6 +332,13 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           }
 
           this.pos++;
+          if (
+            !expression.groupStack.length &&
+            (code === CODE.CLOSE_PAREN || code === CODE.CLOSE_SQUARE_BRACKET) &&
+            checkForGluedAttr(this, expression)
+          ) {
+            return;
+          }
           break;
         }
 
@@ -416,9 +423,67 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           expression.leadingCommentsEnd = child.end;
         }
         break;
+      case STATE.STRING:
+      case STATE.TEMPLATE_STRING:
+        if (!expression.groupStack.length) checkForGluedAttr(this, expression);
+        break;
     }
   },
 };
+
+// A name right after a closed string or group, eg `id` in `class="a"id="b"`, is
+// the next attribute missing its whitespace, unless it is an operator like `in`.
+function checkForGluedAttr(parser: Parser, expression: ExpressionMeta) {
+  const { data, maxPos, pos } = parser;
+  const code = data.charCodeAt(pos);
+  if (
+    !isWordCode(code) ||
+    (code >= CODE.NUMBER_0 && code <= CODE.NUMBER_9) ||
+    !expression.operators ||
+    expression.parent.state !== STATE.ATTRIBUTE
+  ) {
+    return false;
+  }
+
+  for (const keyword of binaryKeywords) {
+    const keywordEnd = lookAheadFor(data, pos, keyword);
+    if (keywordEnd !== -1 && !isWordCode(data.charCodeAt(keywordEnd + 1))) {
+      return false;
+    }
+  }
+
+  let nameEnd = pos;
+  while (++nameEnd < maxPos && !isAttrNameEnd(data, nameEnd));
+  const name = { start: pos, end: nameEnd };
+  parser.emitError(
+    name,
+    ErrorCode.MALFORMED_OPEN_TAG,
+    'Attributes must be separated by whitespace; add a space before "' +
+      parser.read(name) +
+      '".',
+  );
+  return true;
+}
+
+function isAttrNameEnd(data: string, pos: number) {
+  const code = data.charCodeAt(pos);
+  switch (code) {
+    case CODE.COMMA:
+    case CODE.EQUAL:
+    case CODE.OPEN_PAREN:
+    case CODE.OPEN_ANGLE_BRACKET:
+    case CODE.CLOSE_ANGLE_BRACKET:
+    case CODE.SEMICOLON:
+    case CODE.CLOSE_SQUARE_BRACKET:
+      return true;
+    case CODE.COLON:
+      return data.charCodeAt(pos + 1) === CODE.EQUAL;
+    case CODE.FORWARD_SLASH:
+      return data.charCodeAt(pos + 1) === CODE.CLOSE_ANGLE_BRACKET;
+    default:
+      return isWhitespaceCode(code);
+  }
+}
 
 // Whitespace after the comments that lead an expression, eg the " " in
 // `x=/* c */ 1`, does not end it the way whitespace after a value does, since

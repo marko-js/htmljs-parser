@@ -1,0 +1,5 @@
+1╭─ div class='a'data-id=1
+ │  │   │        ╰─ error(MALFORMED_OPEN_TAG:Attributes must be separated by whitespace; add a space before "data-id".) "data-id"
+ │  │   ╰─ attrName "class"
+ ╰─ ╰─ tagName "div"
+2╰─ 

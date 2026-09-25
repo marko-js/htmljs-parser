@@ -1,0 +1,14 @@
+1╭─ <div one="a"in(obj) two=[c]in(d) three=("e")instanceof(F)/>
+ │  ││   │  ││          │  ││        │    ││                 ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │  ││          │  ││        │    │╰─ attrValue.value "(\"e\")instanceof(F)"
+ │  ││   │  ││          │  ││        │    ╰─ attrValue "=(\"e\")instanceof(F)"
+ │  ││   │  ││          │  ││        ╰─ attrName "three"
+ │  ││   │  ││          │  │╰─ attrValue.value "[c]in(d)"
+ │  ││   │  ││          │  ╰─ attrValue "=[c]in(d)"
+ │  ││   │  ││          ╰─ attrName "two"
+ │  ││   │  │╰─ attrValue.value "\"a\"in(obj)"
+ │  ││   │  ╰─ attrValue "=\"a\"in(obj)"
+ │  ││   ╰─ attrName "one"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 
