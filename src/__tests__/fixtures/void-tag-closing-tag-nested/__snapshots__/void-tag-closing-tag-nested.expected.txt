@@ -1,0 +1,14 @@
+1╭─ <div><img src="a.png">caption</img></div>
+ │  ││  │││   │  ││      ││      ├─ error(EXTRA_CLOSING_TAG:The "img" tag does not support body content, so it has no closing tag.) "</img>"
+ │  ││  │││   │  ││      ││      ╰─ closeTagStart "</"
+ │  ││  │││   │  ││      │╰─ text "caption"
+ │  ││  │││   │  ││      ╰─ openTagEnd
+ │  ││  │││   │  │╰─ attrValue.value "\"a.png\""
+ │  ││  │││   │  ╰─ attrValue "=\"a.png\""
+ │  ││  │││   ╰─ attrName "src"
+ │  ││  ││╰─ tagName "img"
+ │  ││  │╰─ openTagStart
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 

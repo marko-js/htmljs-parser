@@ -1,0 +1,9 @@
+1╭─ div
+ ╰─ ╰─ tagName "div"
+2╭─   input
+ │  │ ╰─ tagName "input"
+ ╰─ ╰─ openTagEnd
+3╭─     -- text
+ │  │   ╰─ error(INVALID_INDENTATION:The "input" tag does not support body content.)
+ ╰─ ╰─ openTagEnd
+4╰─ 

@@ -35,6 +35,7 @@ export class Parser {
   declare public activeRange: Meta;
   declare public activeTag: STATE.OpenTagMeta | undefined; // Used to reference the closest open tag
   declare public activeAttr: STATE.AttrMeta | undefined; // Used to reference the current attribute that is being parsed
+  declare public voidTag: STATE.OpenTagMeta | undefined; // The last void tag, used to explain a body given to it
   declare public indent: string; // Used to build the indent for the current concise line
   declare public isConcise: boolean; // Set to true if parser is currently in concise mode
   declare public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
@@ -284,7 +285,7 @@ export class Parser {
     this.textPos = -1;
     this.isConcise = true;
     this.beginMixedMode = this.endingMixedModeAtEOL = false;
-    this.lines = this.activeTag = this.activeAttr = undefined;
+    this.lines = this.activeTag = this.activeAttr = this.voidTag = undefined;
     // Drop any state left over from a previous parse so reusing a parser
     // does not chain (and retain) the old state metas via parent references.
     this.activeRange = undefined as unknown as Meta;

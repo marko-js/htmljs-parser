@@ -1,6 +1,7 @@
 import {
   htmlEOF,
   isWhitespaceCode,
+  type Parser,
   STATE,
   type StateDefinition,
 } from "../internal.ts";
@@ -77,7 +78,8 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           this.emitError(
             this.pos,
             ErrorCode.INVALID_INDENTATION,
-            "Line has extra indentation at the beginning",
+            getVoidTagBodyError(this, parentTag, curIndent) ||
+              "Line has extra indentation at the beginning",
           );
           return;
         }
@@ -99,7 +101,8 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           this.emitError(
             this.pos,
             ErrorCode.INVALID_INDENTATION,
-            "Line indentation does match indentation of previous line",
+            getVoidTagBodyError(this, parentTag, curIndent) ||
+              "Line indentation does match indentation of previous line",
           );
           return;
         }
@@ -180,3 +183,31 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
     }
   },
 };
+
+// A line indented under a void tag that ended the previous line, eg text under
+// a concise `input`, is a body that tag cannot have.
+function getVoidTagBodyError(
+  parser: Parser,
+  parentTag: STATE.OpenTagMeta | undefined,
+  indent: number,
+) {
+  const { data, voidTag } = parser;
+  if (
+    !voidTag ||
+    voidTag.selfClosed ||
+    voidTag.parentTag !== parentTag ||
+    voidTag.indent.length >= indent
+  ) {
+    return;
+  }
+
+  for (let pos = voidTag.end; pos < parser.pos; pos++) {
+    if (!isWhitespaceCode(data.charCodeAt(pos))) return;
+  }
+
+  return (
+    'The "' +
+    parser.read(voidTag.tagName) +
+    '" tag does not support body content.'
+  );
+}

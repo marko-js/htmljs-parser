@@ -1,0 +1,13 @@
+1╭─ <div><input></div></input>
+ │  ││  │││    ││ │  │├─ error(EXTRA_CLOSING_TAG:The closing "input" tag was not expected) "</input>"
+ │  ││  │││    ││ │  │╰─ closeTagStart "</"
+ │  ││  │││    ││ │  ╰─ closeTagEnd(div)
+ │  ││  │││    ││ ╰─ closeTagName "div"
+ │  ││  │││    │╰─ closeTagStart "</"
+ │  ││  │││    ╰─ openTagEnd
+ │  ││  ││╰─ tagName "input"
+ │  ││  │╰─ openTagStart
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 

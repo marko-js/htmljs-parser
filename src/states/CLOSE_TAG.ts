@@ -82,22 +82,24 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
   const closeTagNameStart = closeTag.start + 2; // strip </
   const closeTagNameEnd = closeTag.end - 1; // strip >
 
-  if (!activeTag) {
-    parser.emitError(
-      closeTag!,
-      ErrorCode.EXTRA_CLOSING_TAG,
-      'The closing "' +
-        parser.read({ start: closeTagNameStart, end: closeTagNameEnd }) +
-        '" tag was not expected',
-    );
-
-    return false;
-  }
-
   const closeTagNamePos = {
     start: closeTagNameStart,
     end: closeTagNameEnd,
   };
+
+  if (!activeTag) {
+    if (!checkForVoidTagClose(parser, closeTag, closeTagNamePos)) {
+      parser.emitError(
+        closeTag!,
+        ErrorCode.EXTRA_CLOSING_TAG,
+        'The closing "' +
+          parser.read(closeTagNamePos) +
+          '" tag was not expected',
+      );
+    }
+
+    return false;
+  }
 
   if (closeTagNameStart < closeTagNameEnd!) {
     if (
@@ -115,6 +117,10 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
           end: activeTag.shorthandEnd,
         })
       ) {
+        if (checkForVoidTagClose(parser, closeTag, closeTagNamePos)) {
+          return false;
+        }
+
         parser.emitError(
           closeTag,
           ErrorCode.MISMATCHED_CLOSING_TAG,
@@ -132,4 +138,31 @@ function ensureExpectedCloseTag(parser: Parser, closeTag: Range) {
 
   parser.closeTagEnd(closeTagNameEnd, closeTag.end, closeTagNamePos);
   return true;
+}
+
+// A closing tag naming the last void tag at this level, eg the `</input>` in
+// `<input>hi</input>`, gives that tag a body it cannot have.
+function checkForVoidTagClose(
+  parser: Parser,
+  closeTag: Range,
+  closeTagName: Range,
+) {
+  const { voidTag } = parser;
+  if (
+    voidTag &&
+    voidTag.parentTag === parser.activeTag &&
+    closeTagName.start < closeTagName.end &&
+    parser.matchAtPos(closeTagName, voidTag.tagName)
+  ) {
+    parser.emitError(
+      closeTag,
+      ErrorCode.EXTRA_CLOSING_TAG,
+      'The "' +
+        parser.read(voidTag.tagName) +
+        '" tag does not support body content, so it has no closing tag.',
+    );
+    return true;
+  }
+
+  return false;
 }

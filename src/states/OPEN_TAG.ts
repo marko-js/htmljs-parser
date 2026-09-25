@@ -77,6 +77,8 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       selfClosed,
     });
 
+    if (tag.type === TagType.void) this.voidTag = tag;
+
     switch (selfClosed ? TagType.void : tag.type) {
       case TagType.void:
       case TagType.statement: {
