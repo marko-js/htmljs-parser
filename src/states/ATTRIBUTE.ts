@@ -342,6 +342,20 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           );
         }
 
+        if ((child as STATE.ExpressionMeta).leadingCommentsEnd === child.end) {
+          return this.emitError(
+            child,
+            ErrorCode.INVALID_ATTRIBUTE_VALUE,
+            `The ${
+              attr.spread
+                ? "spread"
+                : attr.name
+                  ? `"${this.read(attr.name)}"`
+                  : "default"
+            } attribute value is only a comment; add a value after it.`,
+          );
+        }
+
         if (!this.isConcise && detectAmbiguousCloseAngleBracket(this, child)) {
           return;
         }

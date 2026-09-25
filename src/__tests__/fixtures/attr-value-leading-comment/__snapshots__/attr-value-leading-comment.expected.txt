@@ -60,31 +60,4 @@
   │    │   │╰─ attrValue.value
   │    │   ╰─ attrValue "=2"
   ╰─   ╰─ attrName "next"
-11╭─ <div empty=/* c */>
-  │  ││   │    ││      ╰─ openTagEnd
-  │  ││   │    │╰─ attrValue.value "/* c */"
-  │  ││   │    ╰─ attrValue "=/* c */"
-  │  ││   ╰─ attrName "empty"
-  │  │╰─ tagName "div"
-  ╰─ ╰─ openTagStart
-12╭─ </div>
-  │  │ │  ╰─ closeTagEnd(div)
-  │  │ ╰─ closeTagName "div"
-  │  ├─ text "\n"
-  ╰─ ╰─ closeTagStart "</"
-13╭─ <div empty=/* c */ />
-  │  ││   │    ││       ╰─ openTagEnd:selfClosed "/>"
-  │  ││   │    │╰─ attrValue.value "/* c */"
-  │  ││   │    ╰─ attrValue "=/* c */"
-  │  ││   ╰─ attrName "empty"
-  │  │╰─ tagName "div"
-  ╰─ ╰─ openTagStart
-14╭─ <div empty=// c
-  │  ││   │    │╰─ attrValue.value "// c"
-  │  ││   │    ╰─ attrValue "=// c"
-  │  ││   ╰─ attrName "empty"
-  │  │╰─ tagName "div"
-  ╰─ ╰─ openTagStart
-15╭─ />
-  ╰─ ╰─ openTagEnd:selfClosed "/>"
-16╰─ 
+11╰─ 

@@ -1,0 +1,5 @@
+1╭─ div empty=/* c */ -- text
+ │  │   │     ╰─ error(INVALID_ATTRIBUTE_VALUE:The "empty" attribute value is only a comment; add a value after it.) "/* c */"
+ │  │   ╰─ attrName "empty"
+ ╰─ ╰─ tagName "div"
+2╰─ 

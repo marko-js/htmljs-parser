@@ -1,0 +1,6 @@
+1╭─ div class=// todo
+ │  │   │     ╰─ error(INVALID_ATTRIBUTE_VALUE:The "class" attribute value is only a comment; add a value after it.) "// todo"
+ │  │   ╰─ attrName "class"
+ ╰─ ╰─ tagName "div"
+2├─   span
+3╰─ 

@@ -1,0 +1,6 @@
+1╭─ <div .../* c */>
+ │  ││      ╰─ error(INVALID_ATTRIBUTE_VALUE:The spread attribute value is only a comment; add a value after it.) "/* c */"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2├─ </div>
+3╰─ 

@@ -1,0 +1,6 @@
+1╭─ <input value:=/* c */ />
+ │  ││     │      ╰─ error(INVALID_ATTRIBUTE_VALUE:The "value" attribute value is only a comment; add a value after it.) "/* c */"
+ │  ││     ╰─ attrName "value"
+ │  │╰─ tagName "input"
+ ╰─ ╰─ openTagStart
+2╰─ 

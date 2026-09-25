@@ -1,0 +1,8 @@
+1╭─ <const/x=/* pre */>
+ │  ││    │││╰─ error(INVALID_ATTRIBUTE_VALUE:The default attribute value is only a comment; add a value after it.) "/* pre */"
+ │  ││    ││╰─ attrName
+ │  ││    │╰─ tagVar.value
+ │  ││    ╰─ tagVar "/x"
+ │  │╰─ tagName "const"
+ ╰─ ╰─ openTagStart
+2╰─ 

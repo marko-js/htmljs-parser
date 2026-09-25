@@ -1,0 +1,6 @@
+1╭─ <div class=/* a */ /* b */ />
+ │  ││   │     ╰─ error(INVALID_ATTRIBUTE_VALUE:The "class" attribute value is only a comment; add a value after it.) "/* a */ /* b */"
+ │  ││   ╰─ attrName "class"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 

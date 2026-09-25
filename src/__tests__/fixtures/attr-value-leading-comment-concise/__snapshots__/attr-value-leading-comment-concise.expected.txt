@@ -45,32 +45,6 @@
  │  ├─ closeTagEnd(div)
  │  ├─ openTagEnd
  ╰─ ╰─ tagName "div"
-7╭─ div line=// c
- │  │   │   │╰─ attrValue.value "// c"
- │  │   │   ╰─ attrValue "=// c"
- │  │   ╰─ attrName "line"
- │  ├─ closeTagEnd(div)
+7╭─ 
  │  ├─ openTagEnd
- ╰─ ╰─ tagName "div"
-8╭─   span
- │  │ ╰─ tagName "span"
- ╰─ ╰─ openTagEnd
-9╭─ div empty=/* c */
- │  │   │    │╰─ attrValue.value "/* c */"
- │  │   │    ╰─ attrValue "=/* c */"
- │  │   ╰─ attrName "empty"
- │  ├─ closeTagEnd(div)
- │  ├─ closeTagEnd(span)
- │  ├─ openTagEnd
- ╰─ ╰─ tagName "div"
-10╭─ div empty=/* c */ -- text
-  │  │   │    ││       │  ╰─ text "text"
-  │  │   │    ││       ╰─ openTagEnd
-  │  │   │    │╰─ attrValue.value "/* c */"
-  │  │   │    ╰─ attrValue "=/* c */"
-  │  │   ╰─ attrName "empty"
-  │  ├─ closeTagEnd(div)
-  │  ├─ openTagEnd
-  ╰─ ╰─ tagName "div"
-11╭─ 
-  ╰─ ╰─ closeTagEnd(div)
+ ╰─ ╰─ closeTagEnd(div)
