@@ -1,0 +1,90 @@
+1╭─ <const/x=/* pre */ 1 /* post */ />
+ │  ││    ││││                      ╰─ openTagEnd:selfClosed "/>"
+ │  ││    │││╰─ attrValue.value "/* pre */ 1 /* post */"
+ │  ││    ││├─ attrValue "=/* pre */ 1 /* post */"
+ │  ││    ││╰─ attrName
+ │  ││    │╰─ tagVar.value
+ │  ││    ╰─ tagVar "/x"
+ │  │╰─ tagName "const"
+ ╰─ ╰─ openTagStart
+2╭─ <div cast=/** @type {Foo} */ (bar)/>
+ │  ││   │   ││                       ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │   │╰─ attrValue.value "/** @type {Foo} */ (bar)"
+ │  ││   │   ╰─ attrValue "=/** @type {Foo} */ (bar)"
+ │  ││   ╰─ attrName "cast"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╭─ <div pure=/* @__PURE__ */ fn() next=1/>
+ │  ││   │   ││                    │   ││╰─ openTagEnd:selfClosed "/>"
+ │  ││   │   ││                    │   │╰─ attrValue.value
+ │  ││   │   ││                    │   ╰─ attrValue "=1"
+ │  ││   │   ││                    ╰─ attrName "next"
+ │  ││   │   │╰─ attrValue.value "/* @__PURE__ */ fn()"
+ │  ││   │   ╰─ attrValue "=/* @__PURE__ */ fn()"
+ │  ││   ╰─ attrName "pure"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╭─ <div bound:=/* c */ value/>
+ │  ││   │    │ │            ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    │ ╰─ attrValue:bound.value "/* c */ value"
+ │  ││   │    ╰─ attrValue:bound ":=/* c */ value"
+ │  ││   ╰─ attrName "bound"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+5╭─ <div .../* c */ attrs/>
+ │  ││   │  │            ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │  ╰─ attrSpread.value "/* c */ attrs"
+ │  ││   ╰─ attrSpread ".../* c */ attrs"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+6╭─ <div a=/* a */ /* b */ 1 b=2/>
+ │  ││   │││                 │││╰─ openTagEnd:selfClosed "/>"
+ │  ││   │││                 ││╰─ attrValue.value
+ │  ││   │││                 │╰─ attrValue "=2"
+ │  ││   │││                 ╰─ attrName
+ │  ││   ││╰─ attrValue.value "/* a */ /* b */ 1"
+ │  ││   │╰─ attrValue "=/* a */ /* b */ 1"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+7╭─ <div
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+8╭─   line=// c
+ │    │   │╰─ attrValue.value "// c\n    1"
+ │    │   ╰─ attrValue "=// c\n    1"
+ ╰─   ╰─ attrName "line"
+9├─     1
+10╭─   next=2/>
+  │    │   ││╰─ openTagEnd:selfClosed "/>"
+  │    │   │╰─ attrValue.value
+  │    │   ╰─ attrValue "=2"
+  ╰─   ╰─ attrName "next"
+11╭─ <div empty=/* c */>
+  │  ││   │    ││      ╰─ openTagEnd
+  │  ││   │    │╰─ attrValue.value "/* c */"
+  │  ││   │    ╰─ attrValue "=/* c */"
+  │  ││   ╰─ attrName "empty"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+12╭─ </div>
+  │  │ │  ╰─ closeTagEnd(div)
+  │  │ ╰─ closeTagName "div"
+  │  ├─ text "\n"
+  ╰─ ╰─ closeTagStart "</"
+13╭─ <div empty=/* c */ />
+  │  ││   │    ││       ╰─ openTagEnd:selfClosed "/>"
+  │  ││   │    │╰─ attrValue.value "/* c */"
+  │  ││   │    ╰─ attrValue "=/* c */"
+  │  ││   ╰─ attrName "empty"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+14╭─ <div empty=// c
+  │  ││   │    │╰─ attrValue.value "// c"
+  │  ││   │    ╰─ attrValue "=// c"
+  │  ││   ╰─ attrName "empty"
+  │  │╰─ tagName "div"
+  ╰─ ╰─ openTagStart
+15╭─ />
+  ╰─ ╰─ openTagEnd:selfClosed "/>"
+16╰─ 

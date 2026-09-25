@@ -1,5 +1,6 @@
 import {
   isIndentCode,
+  isLineCode,
   isWhitespaceCode,
   isWordCode,
   type Meta,
@@ -14,6 +15,11 @@ export interface ExpressionMeta extends Meta {
   groupStack: number[];
   operators: boolean;
   wasComment: boolean;
+  /**
+   * Where the comments that lead the expression end, including whitespace
+   * between them. While `pos` is still here nothing else has been consumed.
+   */
+  leadingCommentsEnd: number;
   hadUnguardedNewline: boolean;
   inType: boolean;
   forceType: boolean;
@@ -73,6 +79,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       shouldTerminate,
       operators: false,
       wasComment: false,
+      leadingCommentsEnd: start,
       hadUnguardedNewline: false,
       inType: false,
       forceType: false,
@@ -101,12 +108,15 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         if (
           !expression.groupStack.length &&
           (expression.terminatedByEOL || expression.terminatedByWhitespace) &&
-          (expression.wasComment ||
-            !checkForOperators(this, expression, true)) &&
-          !(
-            expression.consumeIndentedContent &&
-            isIndentCode(data.charCodeAt(prevPos + len))
-          )
+          (expression.terminatedByWhitespace &&
+          this.pos === expression.leadingCommentsEnd
+            ? !skipWhitespaceAfterLeadingComments(this, expression)
+            : (expression.wasComment ||
+                !checkForOperators(this, expression, true)) &&
+              !(
+                expression.consumeIndentedContent &&
+                isIndentCode(data.charCodeAt(prevPos + len))
+              ))
         ) {
           // Don't advance past the newline.
           this.exitState();
@@ -134,11 +144,15 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       // Termination checks (no groupStack)
       if (!expression.groupStack.length) {
         if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
-          if (!checkForOperators(this, expression, false)) {
+          if (
+            this.pos === expression.leadingCommentsEnd
+              ? !skipWhitespaceAfterLeadingComments(this, expression)
+              : !checkForOperators(this, expression, false)
+          ) {
             this.exitState();
             return;
           }
-          // checkForOperators already advanced this.pos
+          // Either check already advanced this.pos
           continue;
         }
 
@@ -384,20 +398,78 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   },
 
   return(child, expression) {
-    if (child.state === STATE.JS_COMMENT_LINE) {
-      expression.wasComment = true;
-      // A line comment that runs to the end of the input (rather than being
-      // terminated by a newline or a closing tag) consumes everything that
-      // would follow it on the line, exactly like an unguarded newline. Flag
-      // it as unguarded so the value is not classified as `enclosed` (safe to
-      // inline verbatim) by the validation helpers — otherwise emitting it
-      // bare would comment out whatever comes next.
-      if (this.pos === this.maxPos && !expression.groupStack.length) {
-        expression.hadUnguardedNewline = true;
-      }
+    switch (child.state) {
+      case STATE.JS_COMMENT_LINE:
+        expression.wasComment = true;
+        // A line comment that runs to the end of the input (rather than being
+        // terminated by a newline or a closing tag) consumes everything that
+        // would follow it on the line, exactly like an unguarded newline. Flag
+        // it as unguarded so the value is not classified as `enclosed` (safe to
+        // inline verbatim) by the validation helpers — otherwise emitting it
+        // bare would comment out whatever comes next.
+        if (this.pos === this.maxPos && !expression.groupStack.length) {
+          expression.hadUnguardedNewline = true;
+        }
+      // falls through
+      case STATE.JS_COMMENT_BLOCK:
+        if (child.start === expression.leadingCommentsEnd) {
+          expression.leadingCommentsEnd = child.end;
+        }
+        break;
     }
   },
 };
+
+// Whitespace after the comments that lead an expression, eg the " " in
+// `x=/* c */ 1`, does not end it the way whitespace after a value does, since
+// comments alone are not a value. The comments stay in the expression, so
+// annotations like `/* @__PURE__ */ fn()` keep applying to what follows. The
+// whitespace still ends it before a terminator, markup or the end of the
+// input, eg `x=/* c */ />`, and at a newline wherever a newline ends the
+// expression, so a concise `x=// c` never continues onto the next line.
+function skipWhitespaceAfterLeadingComments(
+  parser: Parser,
+  expression: ExpressionMeta,
+) {
+  const { data, maxPos } = parser;
+  const terminatedByEOL = expression.terminatedByEOL || parser.isConcise;
+  let hadNewline = false;
+  let pos = parser.pos;
+  let code = data.charCodeAt(pos);
+
+  do {
+    if (isLineCode(code)) {
+      if (terminatedByEOL) return false;
+      hadNewline = true;
+    }
+    code = data.charCodeAt(++pos);
+  } while (isWhitespaceCode(code));
+
+  if (
+    pos >= maxPos ||
+    isMarkupAt(parser, pos) ||
+    expression.shouldTerminate(code, data, pos, expression)
+  ) {
+    return false;
+  }
+
+  if (hadNewline) expression.hadUnguardedNewline = true;
+  parser.pos = expression.leadingCommentsEnd = pos;
+  return true;
+}
+
+/**
+ * A "</" close tag (html mode) or a "<!--" html comment is markup rather than
+ * a less-than operator.
+ */
+function isMarkupAt(parser: Parser, pos: number) {
+  const { data } = parser;
+  return (
+    data.charCodeAt(pos) === CODE.OPEN_ANGLE_BRACKET &&
+    ((!parser.isConcise && data.charCodeAt(pos + 1) === CODE.FORWARD_SLASH) ||
+      parser.lookAheadFor("!--", pos + 1) !== undefined)
+  );
+}
 
 function checkForOperators(
   parser: Parser,
@@ -420,21 +492,8 @@ function checkForOperators(
       pos + 1,
     );
 
-    // A "</" close tag (html mode) or a "<!--" html comment is markup rather
-    // than a less-than operator, which lookAheadForOperator would otherwise
-    // continue across.
-    if (data.charCodeAt(nextNonSpace) === CODE.OPEN_ANGLE_BRACKET) {
-      if (
-        !parser.isConcise &&
-        data.charCodeAt(nextNonSpace + 1) === CODE.FORWARD_SLASH
-      ) {
-        return false;
-      }
-
-      if (parser.lookAheadFor("!--", nextNonSpace + 1)) {
-        return false;
-      }
-    }
+    // lookAheadForOperator would otherwise continue across markup.
+    if (isMarkupAt(parser, nextNonSpace)) return false;
 
     if (
       !expression.shouldTerminate(

@@ -385,7 +385,7 @@ const parser = createParser({
 
   /**
    * Called after parsing a JavaScript comment that stands alone in an open tag.
-   * A comment that follows a value is part of that value instead.
+   * A comment that leads or follows a value, eg `x=/* hi */ y`, is part of that value instead.
    *
    * @example
    * 1╭─ <div /* hi */ class="x">

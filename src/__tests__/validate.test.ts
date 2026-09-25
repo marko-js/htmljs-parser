@@ -144,6 +144,21 @@ describe("validation helpers", () => {
     it("treats a newline after a value as unguarded", () => {
       assert.equal(isValidAttrValue('"hello"\n// c', false), 1);
     });
+
+    it("continues past whitespace after leading comments", () => {
+      assert.equal(isValidAttrValue("/* @__PURE__ */ fn()", false), 2);
+      assert.equal(isValidAttrValue("/* @__PURE__ */ fn()", true), 2);
+      assert.equal(isValidAttrValue("/* a */ /* b */ 1", false), 2);
+    });
+
+    it("treats a newline after a leading line comment as unguarded", () => {
+      assert.equal(isValidAttrValue("// c\n1", false), 1);
+    });
+
+    it("ends concise attr values at a newline after leading comments", () => {
+      assert.equal(isValidAttrValue("// c\n1", true), 0);
+      assert.equal(isValidAttrValue("/* c */\n1", true), 0);
+    });
   });
 
   describe("trailing line comments", () => {

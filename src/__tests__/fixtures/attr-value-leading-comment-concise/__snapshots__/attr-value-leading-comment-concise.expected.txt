@@ -1,0 +1,76 @@
+1╭─ const/x=/* pre */ 1 /* post */
+ │  │    │││╰─ attrValue.value "/* pre */ 1 /* post */"
+ │  │    ││├─ attrValue "=/* pre */ 1 /* post */"
+ │  │    ││╰─ attrName
+ │  │    │╰─ tagVar.value
+ │  │    ╰─ tagVar "/x"
+ ╰─ ╰─ tagName "const"
+2╭─ div cast=/** @type {Foo} */ (bar)
+ │  │   │   │╰─ attrValue.value "/** @type {Foo} */ (bar)"
+ │  │   │   ╰─ attrValue "=/** @type {Foo} */ (bar)"
+ │  │   ╰─ attrName "cast"
+ │  ├─ closeTagEnd(const)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+3╭─ div pure=/* @__PURE__ */ fn() next=1
+ │  │   │   ││                    │   │╰─ attrValue.value
+ │  │   │   ││                    │   ╰─ attrValue "=1"
+ │  │   │   ││                    ╰─ attrName "next"
+ │  │   │   │╰─ attrValue.value "/* @__PURE__ */ fn()"
+ │  │   │   ╰─ attrValue "=/* @__PURE__ */ fn()"
+ │  │   ╰─ attrName "pure"
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+4╭─ div bound:=/* c */ value
+ │  │   │    │ ╰─ attrValue:bound.value "/* c */ value"
+ │  │   │    ╰─ attrValue:bound ":=/* c */ value"
+ │  │   ╰─ attrName "bound"
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+5╭─ div .../* c */ attrs
+ │  │   │  ╰─ attrSpread.value "/* c */ attrs"
+ │  │   ╰─ attrSpread ".../* c */ attrs"
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+6╭─ div [a=/* c */ 1 b=2]
+ │  │    │││         ││╰─ attrValue.value
+ │  │    │││         │╰─ attrValue "=2"
+ │  │    │││         ╰─ attrName
+ │  │    ││╰─ attrValue.value "/* c */ 1"
+ │  │    │╰─ attrValue "=/* c */ 1"
+ │  │    ╰─ attrName
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+7╭─ div line=// c
+ │  │   │   │╰─ attrValue.value "// c"
+ │  │   │   ╰─ attrValue "=// c"
+ │  │   ╰─ attrName "line"
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+8╭─   span
+ │  │ ╰─ tagName "span"
+ ╰─ ╰─ openTagEnd
+9╭─ div empty=/* c */
+ │  │   │    │╰─ attrValue.value "/* c */"
+ │  │   │    ╰─ attrValue "=/* c */"
+ │  │   ╰─ attrName "empty"
+ │  ├─ closeTagEnd(div)
+ │  ├─ closeTagEnd(span)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+10╭─ div empty=/* c */ -- text
+  │  │   │    ││       │  ╰─ text "text"
+  │  │   │    ││       ╰─ openTagEnd
+  │  │   │    │╰─ attrValue.value "/* c */"
+  │  │   │    ╰─ attrValue "=/* c */"
+  │  │   ╰─ attrName "empty"
+  │  ├─ closeTagEnd(div)
+  │  ├─ openTagEnd
+  ╰─ ╰─ tagName "div"
+11╭─ 
+  ╰─ ╰─ closeTagEnd(div)
