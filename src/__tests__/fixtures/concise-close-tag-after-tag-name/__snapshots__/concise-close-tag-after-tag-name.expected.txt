@@ -1,0 +1,7 @@
+1╭─ div
+ ╰─ ╰─ tagName "div"
+2╭─   hello</div>
+ │  │ │    ╰─ error(EXTRA_CLOSING_TAG:Unexpected closing tag "</div>": in concise mode this line is the "hello" tag, not text. Prefix text with "--" or wrap it in an element.) "</div>"
+ │  │ ╰─ tagName "hello"
+ ╰─ ╰─ openTagEnd
+3╰─ 

@@ -1,0 +1,8 @@
+1╭─ span.note/x </span>
+ │  │   ││   ││ ╰─ error(EXTRA_CLOSING_TAG:Unexpected closing tag "</span>": in concise mode this line is the "span" tag, not text. Prefix text with "--" or wrap it in an element.) "</span>"
+ │  │   ││   │╰─ tagVar.value
+ │  │   ││   ╰─ tagVar "/x"
+ │  │   │╰─ tagShorthandClass.quasis[0] "note"
+ │  │   ╰─ tagShorthandClass ".note"
+ ╰─ ╰─ tagName "span"
+2╰─ 

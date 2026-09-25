@@ -1,0 +1,5 @@
+1╭─ Click here</a> to continue
+ │  │     │   ╰─ error(EXTRA_CLOSING_TAG:Unexpected closing tag "</a>": in concise mode this line is the "Click" tag, not text. Prefix text with "--" or wrap it in an element.) "</a>"
+ │  │     ╰─ attrName "here"
+ ╰─ ╰─ tagName "Click"
+2╰─ 

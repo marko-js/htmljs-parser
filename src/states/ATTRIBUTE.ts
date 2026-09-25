@@ -134,6 +134,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         // still follow it for a default attribute method.
         (attr.stage === ATTR_STAGE.NAME || attr.async)
       ) {
+        if (STATE.checkForConciseCloseTag(this)) return;
         attr.stage = ATTR_STAGE.TYPE_PARAMS;
         this.pos++; // skip <
         const expr = this.enterState(STATE.EXPRESSION);
@@ -150,6 +151,7 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
         return;
       } else if (attr.stage === ATTR_STAGE.UNKNOWN) {
         if (code === CODE.OPEN_ANGLE_BRACKET) {
+          if (STATE.checkForConciseCloseTag(this)) return;
           if (data.charCodeAt(this.pos + 1) === CODE.FORWARD_SLASH) {
             return this.emitError(
               this.pos,

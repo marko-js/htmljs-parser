@@ -6,6 +6,7 @@ import {
   matchesCloseParen,
   matchesPipe,
   type Meta,
+  type Parser,
   type Ranges,
   STATE,
   type StateDefinition,
@@ -358,6 +359,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             }
 
             case CODE.OPEN_ANGLE_BRACKET: {
+              if (checkForConciseCloseTag(this)) return;
               tag.stage = TAG_STAGE.TYPES;
               this.pos++; // skip <
               const expr = this.enterState(STATE.EXPRESSION);
@@ -526,6 +528,37 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     }
   },
 };
+
+/**
+ * A concise line is one open tag, so a "</" in it, eg `hello</div>`, is a
+ * closing tag written as if the line were text, never the start of types.
+ */
+export function checkForConciseCloseTag(parser: Parser) {
+  const { data, maxPos, pos } = parser;
+  if (!parser.isConcise || data.charCodeAt(pos + 1) !== CODE.FORWARD_SLASH) {
+    return false;
+  }
+
+  let end = pos + 2;
+  while (end < maxPos) {
+    const code = data.charCodeAt(end);
+    if (isWhitespaceCode(code) || code === CODE.OPEN_ANGLE_BRACKET) break;
+    end++;
+    if (code === CODE.CLOSE_ANGLE_BRACKET) break;
+  }
+
+  const closeTag = { start: pos, end };
+  parser.emitError(
+    closeTag,
+    ErrorCode.EXTRA_CLOSING_TAG,
+    'Unexpected closing tag "' +
+      parser.read(closeTag) +
+      '": in concise mode this line is the "' +
+      (parser.read(parser.activeTag!.tagName) || "div") +
+      '" tag, not text. Prefix text with "--" or wrap it in an element.',
+  );
+  return true;
+}
 
 function shouldTerminateConciseTagVar(
   code: number,
