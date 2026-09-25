@@ -358,7 +358,11 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           );
         }
 
-        if (!this.isConcise && detectAmbiguousCloseAngleBracket(this, child)) {
+        if (
+          !this.isConcise &&
+          (detectAmbiguousCloseAngleBracket(this, child) ||
+            detectSplitTypeArgument(this, child as STATE.ExpressionMeta))
+        ) {
           return;
         }
 
@@ -534,6 +538,111 @@ function detectAmbiguousCloseAngleBracket(parser: Parser, child: Meta) {
   }
 
   return false;
+}
+
+/**
+ * An html tag ends at the ">" meant to close a lone type argument, eg in
+ * `<let/s=new Set<string>()>`. It misfires only on a body like `(c)>` after `a<b`.
+ */
+function detectSplitTypeArgument(parser: Parser, value: STATE.ExpressionMeta) {
+  const { data, maxPos } = parser;
+  const tagEnd = value.end;
+  if (
+    data.charCodeAt(tagEnd) !== CODE.CLOSE_ANGLE_BRACKET ||
+    data.charCodeAt(tagEnd + 1) !== CODE.OPEN_PAREN
+  ) {
+    return false;
+  }
+
+  // Leading comments, eg `/* @__PURE__ */`, may precede the call.
+  const callStart = value.leadingCommentsEnd;
+  const typeStart = lookBehindForName(data, callStart, tagEnd);
+  if (data.charCodeAt(typeStart - 1) !== CODE.OPEN_ANGLE_BRACKET) return false;
+
+  const calleeStart = lookBehindForName(data, callStart, typeStart - 1);
+  if (calleeStart === -1) return false;
+
+  // Only `new` may come before the callee.
+  if (calleeStart !== callStart) {
+    let newEnd = calleeStart;
+    while (isWhitespaceCode(data.charCodeAt(newEnd - 1))) newEnd--;
+    if (
+      newEnd === calleeStart ||
+      newEnd - 3 !== callStart ||
+      !parser.lookAheadFor("new", callStart)
+    ) {
+      return false;
+    }
+  }
+
+  // The call's arguments, then the ">" or "/>" meant to end the tag.
+  let groupEnd = tagEnd + 1;
+  let depth = 0;
+  do {
+    const code = data.charCodeAt(groupEnd);
+    switch (code) {
+      case CODE.OPEN_PAREN:
+        depth++;
+        break;
+      case CODE.CLOSE_PAREN:
+        depth--;
+        break;
+      case CODE.DOUBLE_QUOTE:
+      case CODE.SINGLE_QUOTE:
+      case CODE.BACKTICK:
+        while (++groupEnd < maxPos && data.charCodeAt(groupEnd) !== code) {
+          if (data.charCodeAt(groupEnd) === CODE.BACK_SLASH) groupEnd++;
+        }
+        break;
+    }
+    groupEnd++;
+  } while (depth && groupEnd < maxPos);
+
+  let pos = groupEnd;
+  while (isIndentCode(data.charCodeAt(pos))) pos++;
+  if (
+    depth ||
+    !(
+      data.charCodeAt(pos) === CODE.CLOSE_ANGLE_BRACKET ||
+      (data.charCodeAt(pos) === CODE.FORWARD_SLASH &&
+        data.charCodeAt(pos + 1) === CODE.CLOSE_ANGLE_BRACKET)
+    )
+  ) {
+    return false;
+  }
+
+  const call = data.slice(value.start, groupEnd);
+  parser.emitError(
+    { start: value.start, end: groupEnd },
+    ErrorCode.AMBIGUOUS_ATTRIBUTE_VALUE,
+    'The ">" closing this type argument ends the tag, leaving a "<" comparison. Wrap the value in parentheses: "(' +
+      (call.includes("\n")
+        ? data.slice(value.start, tagEnd + 2) + "…)"
+        : call) +
+      ')".',
+  );
+  return true;
+}
+
+/**
+ * The start of the identifier or dotted member name, eg `Foo.Bar`, that ends at
+ * `end` and starts no earlier than `min`, or -1 if there is none.
+ */
+function lookBehindForName(data: string, min: number, end: number) {
+  let pos = end;
+  for (;;) {
+    const segmentEnd = pos;
+    while (pos > min && isWordCode(data.charCodeAt(pos - 1))) pos--;
+    const code = data.charCodeAt(pos);
+    if (
+      pos === segmentEnd ||
+      (code >= CODE.NUMBER_0 && code <= CODE.NUMBER_9)
+    ) {
+      return -1;
+    }
+    if (pos === min || data.charCodeAt(pos - 1) !== CODE.PERIOD) return pos;
+    pos--; // skip .
+  }
 }
 
 function isOperandEndCode(code: number) {

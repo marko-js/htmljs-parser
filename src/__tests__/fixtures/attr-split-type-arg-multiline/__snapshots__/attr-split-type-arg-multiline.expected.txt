@@ -1,0 +1,10 @@
+1╭─ <const/me=api.get<Api.User>(
+ │  ││    ││ │╰─ error(AMBIGUOUS_ATTRIBUTE_VALUE:The ">" closing this type argument ends the tag, leaving a "<" comparison. Wrap the value in parentheses: "(api.get<Api.User>(…))".) "api.get<Api.User>(\n  \"/me\"\n)"
+ │  ││    ││ ╰─ attrName
+ │  ││    │╰─ tagVar.value "me"
+ │  ││    ╰─ tagVar "/me"
+ │  │╰─ tagName "const"
+ ╰─ ╰─ openTagStart
+2├─   "/me"
+3├─ )>
+4╰─ 

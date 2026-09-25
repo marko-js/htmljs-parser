@@ -1,0 +1,9 @@
+1╭─ <let/s=new Set<string>()>
+ │  ││  │││╰─ error(AMBIGUOUS_ATTRIBUTE_VALUE:The ">" closing this type argument ends the tag, leaving a "<" comparison. Wrap the value in parentheses: "(new Set<string>())".) "new Set<string>()"
+ │  ││  ││╰─ attrName
+ │  ││  │╰─ tagVar.value
+ │  ││  ╰─ tagVar "/s"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
+2├─ <div>${s.size}</div>
+3╰─ 

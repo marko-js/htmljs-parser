@@ -1,0 +1,58 @@
+1╭─ <span title=a<b>(c)</span>
+ │  ││    │    ││  ││  │ │   ╰─ closeTagEnd(span)
+ │  ││    │    ││  ││  │ ╰─ closeTagName "span"
+ │  ││    │    ││  ││  ╰─ closeTagStart "</"
+ │  ││    │    ││  │╰─ text "(c)"
+ │  ││    │    ││  ╰─ openTagEnd
+ │  ││    │    │╰─ attrValue.value "a<b"
+ │  ││    │    ╰─ attrValue "=a<b"
+ │  ││    ╰─ attrName "title"
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
+2╭─ <if=a<b>(c)</if>
+ │  ││ ││  ││  │ │ ╰─ closeTagEnd(if)
+ │  ││ ││  ││  │ ╰─ closeTagName "if"
+ │  ││ ││  ││  ╰─ closeTagStart "</"
+ │  ││ ││  │╰─ text "(c)"
+ │  ││ ││  ╰─ openTagEnd
+ │  ││ │╰─ attrValue.value "a<b"
+ │  ││ ├─ attrValue "=a<b"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName "if"
+ ╰─ ╰─ openTagStart
+3╭─ <if=a<b>
+ │  ││ ││  ╰─ openTagEnd
+ │  ││ │╰─ attrValue.value "a<b"
+ │  ││ ├─ attrValue "=a<b"
+ │  ││ ╰─ attrName
+ │  │╰─ tagName "if"
+ ╰─ ╰─ openTagStart
+4╭─   (c)
+ ╰─ ╰─ text "\n  (c)\n"
+5╭─ </if>
+ │  │ │ ╰─ closeTagEnd(if)
+ │  │ ╰─ closeTagName "if"
+ ╰─ ╰─ closeTagStart "</"
+6╭─ <span title=a+b<c>(d)>x</span>
+ │  ││    │    ││    ││    │ │   ╰─ closeTagEnd(span)
+ │  ││    │    ││    ││    │ ╰─ closeTagName "span"
+ │  ││    │    ││    ││    ╰─ closeTagStart "</"
+ │  ││    │    ││    │╰─ text "(d)>x"
+ │  ││    │    ││    ╰─ openTagEnd
+ │  ││    │    │╰─ attrValue.value "a+b<c"
+ │  ││    │    ╰─ attrValue "=a+b<c"
+ │  ││    ╰─ attrName "title"
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
+7╭─ <span title=1<b>(c)>x</span>
+ │  ││    │    ││  ││    │ │   ╰─ closeTagEnd(span)
+ │  ││    │    ││  ││    │ ╰─ closeTagName "span"
+ │  ││    │    ││  ││    ╰─ closeTagStart "</"
+ │  ││    │    ││  │╰─ text "(c)>x"
+ │  ││    │    ││  ╰─ openTagEnd
+ │  ││    │    │╰─ attrValue.value "1<b"
+ │  ││    │    ╰─ attrValue "=1<b"
+ │  ││    ╰─ attrName "title"
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
+8╰─ 

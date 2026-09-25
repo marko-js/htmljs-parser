@@ -1,0 +1,8 @@
+1╭─ <const/user=/* @__PURE__ */ fetchJson<User>(url)/>
+ │  ││    ││   │╰─ error(AMBIGUOUS_ATTRIBUTE_VALUE:The ">" closing this type argument ends the tag, leaving a "<" comparison. Wrap the value in parentheses: "(/* @__PURE__ */ fetchJson<User>(url))".) "/* @__PURE__ */ fetchJson<User>(url)"
+ │  ││    ││   ╰─ attrName
+ │  ││    │╰─ tagVar.value "user"
+ │  ││    ╰─ tagVar "/user"
+ │  │╰─ tagName "const"
+ ╰─ ╰─ openTagStart
+2╰─ 
