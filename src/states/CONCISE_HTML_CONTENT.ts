@@ -102,7 +102,7 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
             this.pos,
             ErrorCode.INVALID_INDENTATION,
             getVoidTagBodyError(this, parentTag, curIndent) ||
-              "Line indentation does match indentation of previous line",
+              "Line indentation does not match indentation of previous line",
           );
           return;
         }

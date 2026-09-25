@@ -10,4 +10,4 @@
  │  │   ╰─ openTagStart
  ╰─ ╰─ openTagEnd
 3╭─         BAD
- ╰─         ╰─ error(INVALID_INDENTATION:Line indentation does match indentation of previous line)
+ ╰─         ╰─ error(INVALID_INDENTATION:Line indentation does not match indentation of previous line)
