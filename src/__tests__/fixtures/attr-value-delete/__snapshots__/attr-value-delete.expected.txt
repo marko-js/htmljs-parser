@@ -1,0 +1,16 @@
+1╭─ <div a=delete x.y b=delete! y c/>
+ │  ││   │││          │││         │╰─ openTagEnd:selfClosed "/>"
+ │  ││   │││          │││         ╰─ attrName
+ │  ││   │││          ││╰─ attrValue.value "delete! y"
+ │  ││   │││          │╰─ attrValue "=delete! y"
+ │  ││   │││          ╰─ attrName
+ │  ││   ││╰─ attrValue.value "delete x.y"
+ │  ││   │╰─ attrValue "=delete x.y"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ static const d = delete
+ ╰─ ╰─ tagName "static"
+3├─ e.f
+4╭─ 
+ ╰─ ╰─ openTagEnd

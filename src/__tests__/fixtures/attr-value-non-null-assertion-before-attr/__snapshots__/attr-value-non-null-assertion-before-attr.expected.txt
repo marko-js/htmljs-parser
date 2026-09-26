@@ -1,0 +1,11 @@
+1╭─ <div title=input.x! id="a"/>
+ │  ││   │    ││        │ ││  ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │    ││        │ │╰─ attrValue.value "\"a\""
+ │  ││   │    ││        │ ╰─ attrValue "=\"a\""
+ │  ││   │    ││        ╰─ attrName "id"
+ │  ││   │    │╰─ attrValue.value "input.x!"
+ │  ││   │    ╰─ attrValue "=input.x!"
+ │  ││   ╰─ attrName "title"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 

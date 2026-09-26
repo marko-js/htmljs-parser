@@ -1,0 +1,11 @@
+1╭─ <div a=a[0]! b=f()!/>
+ │  ││   │││     │││   ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │││     ││╰─ attrValue.value "f()!"
+ │  ││   │││     │╰─ attrValue "=f()!"
+ │  ││   │││     ╰─ attrName
+ │  ││   ││╰─ attrValue.value "a[0]!"
+ │  ││   │╰─ attrValue "=a[0]!"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╰─ 

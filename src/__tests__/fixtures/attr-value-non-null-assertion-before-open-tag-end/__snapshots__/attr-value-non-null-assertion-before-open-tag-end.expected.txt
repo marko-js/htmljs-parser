@@ -1,0 +1,15 @@
+1╭─ <const/z=input.x!>
+ │  ││    ││││       ╰─ openTagEnd
+ │  ││    │││╰─ attrValue.value "input.x!"
+ │  ││    ││├─ attrValue "=input.x!"
+ │  ││    ││╰─ attrName
+ │  ││    │╰─ tagVar.value
+ │  ││    ╰─ tagVar "/z"
+ │  │╰─ tagName "const"
+ ╰─ ╰─ openTagStart
+2╭─ </const>
+ │  │ │    ╰─ closeTagEnd(const)
+ │  │ ╰─ closeTagName "const"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTagStart "</"
+3╰─ 

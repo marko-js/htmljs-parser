@@ -1,0 +1,7 @@
+1╭─ static type F = () => void
+ ╰─ ╰─ tagName "static"
+2╭─ static const x = 1
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "static"
+3╭─ 
+ ╰─ ╰─ openTagEnd

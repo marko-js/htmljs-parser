@@ -39,8 +39,12 @@ const unaryKeywords = [
   "function",
   "new",
   "typeof",
-  "void",
 ] as const;
+
+// Only JavaScript has `delete` and `void` operators; in a type `void` is the
+// `void` type. `return`, `throw` and `yield` are left out: JavaScript allows
+// no line break after them, so they never continue an expression.
+const jsUnaryKeywords = [...unaryKeywords, "delete", "void"] as const;
 
 const tsUnaryKeywords = [
   ...unaryKeywords,
@@ -59,6 +63,8 @@ const binaryKeywords = [
   "in",
   "satisfies",
 ] as const;
+
+const relationalKeywords = ["in", "instanceof"] as const;
 
 export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   name: "EXPRESSION",
@@ -469,13 +475,29 @@ function lookBehindForOperator(
     case CODE.CARET:
     case CODE.COLON:
     case CODE.EQUAL:
-    case CODE.EXCLAMATION:
     case CODE.OPEN_ANGLE_BRACKET:
     case CODE.PERCENT:
     case CODE.PIPE:
     case CODE.QUESTION:
     case CODE.TILDE:
       return curPos;
+
+    case CODE.EXCLAMATION: {
+      // After an operand, `!` is a TypeScript non-null assertion (postfix);
+      // after a keyword operator (`typeof!a`, `a in!b`) it is the prefix `!`.
+      const prevCode = data.charCodeAt(curPos - 1);
+      switch (prevCode) {
+        case CODE.CLOSE_PAREN:
+        case CODE.CLOSE_SQUARE_BRACKET:
+          return -1;
+        default:
+          return isWordCode(prevCode) &&
+            lookBehindForOperator(expression, data, curPos) === -1 &&
+            lookBehindForKeyword(data, curPos - 1, relationalKeywords) === -1
+            ? -1
+            : curPos;
+      }
+    }
 
     case CODE.CLOSE_ANGLE_BRACKET:
       return data.charCodeAt(curPos - 1) === CODE.EQUAL
@@ -511,17 +533,11 @@ function lookBehindForOperator(
       // before `pos` is not one, no keyword can match.
       if (code < CODE.LOWER_A || code > CODE.LOWER_Z) return -1;
 
-      for (const keyword of expression.inType
-        ? tsUnaryKeywords
-        : unaryKeywords) {
-        const keywordPos = lookBehindFor(data, curPos, keyword);
-        if (keywordPos !== -1) {
-          return isWordOrPeriodCode(data.charCodeAt(keywordPos - 1))
-            ? -1
-            : keywordPos;
-        }
-      }
-      return -1;
+      return lookBehindForKeyword(
+        data,
+        curPos,
+        expression.inType ? tsUnaryKeywords : jsUnaryKeywords,
+      );
     }
   }
 }
@@ -652,6 +668,23 @@ function lookBehindWhile(
   } while (i--);
 
   return 0;
+}
+
+// Returns where a whole keyword ending at `pos` starts, or -1.
+function lookBehindForKeyword(
+  data: string,
+  pos: number,
+  keywords: readonly string[],
+) {
+  for (const keyword of keywords) {
+    const keywordPos = lookBehindFor(data, pos, keyword);
+    if (keywordPos !== -1) {
+      return isWordOrPeriodCode(data.charCodeAt(keywordPos - 1))
+        ? -1
+        : keywordPos;
+    }
+  }
+  return -1;
 }
 
 function lookBehindFor(data: string, pos: number, str: string) {
