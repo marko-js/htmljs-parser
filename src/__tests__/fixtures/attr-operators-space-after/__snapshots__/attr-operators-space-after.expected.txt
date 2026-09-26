@@ -5,9 +5,10 @@
  │  │╰─ attrName
  ╰─ ╰─ tagName
 2╭─ a=x! y a
- │  │││    ╰─ attrName
- │  ││╰─ attrValue.value "x! y"
- │  │├─ attrValue "=x! y"
+ │  │││  │ ╰─ attrName
+ │  │││  ╰─ attrName
+ │  ││╰─ attrValue.value "x!"
+ │  │├─ attrValue "=x!"
  │  │╰─ attrName
  │  ├─ closeTagEnd(a)
  │  ├─ openTagEnd
@@ -368,10 +369,11 @@
   │  ├─ closeTagEnd(a)
   ╰─ ╰─ openTagStart
 48╭─ <a=x! y a/>
-  │  ││││    │╰─ openTagEnd:selfClosed "/>"
-  │  ││││    ╰─ attrName
-  │  │││╰─ attrValue.value "x! y"
-  │  ││├─ attrValue "=x! y"
+  │  ││││  │ │╰─ openTagEnd:selfClosed "/>"
+  │  ││││  │ ╰─ attrName
+  │  ││││  ╰─ attrName
+  │  │││╰─ attrValue.value "x!"
+  │  ││├─ attrValue "=x!"
   │  ││╰─ attrName
   │  │╰─ tagName
   ╰─ ╰─ openTagStart

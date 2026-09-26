@@ -1,0 +1,10 @@
+1╭─ static function foo(): void {
+ ╰─ ╰─ tagName "static"
+2├─   if (a < b) {}
+3├─ }
+4╭─ <div/>
+ │  ││  ╰─ openTagEnd:selfClosed "/>"
+ │  │╰─ tagName "div"
+ │  ├─ openTagEnd
+ ╰─ ╰─ openTagStart
+5╰─ 

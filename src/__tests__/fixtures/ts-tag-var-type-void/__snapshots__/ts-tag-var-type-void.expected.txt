@@ -1,0 +1,12 @@
+1╭─ <let/x: void>
+ │  ││  ││      ╰─ openTagEnd
+ │  ││  │╰─ tagVar.value "x: void"
+ │  ││  ╰─ tagVar "/x: void"
+ │  │╰─ tagName "let"
+ ╰─ ╰─ openTagStart
+2╭─ </let>
+ │  │ │  ╰─ closeTagEnd(let)
+ │  │ ╰─ closeTagName "let"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTagStart "</"
+3╰─ 

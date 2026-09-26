@@ -1,7 +1,5 @@
 1╭─ <div>${}</div>
- │  ││  ││ ├─ placeholder:escape.value "}</div>"
- │  ││  ││ ╰─ error(MALFORMED_PLACEHOLDER:Invalid placeholder, the expression cannot be missing)
- │  ││  │╰─ placeholder:escape "${}</div>"
+ │  ││  │  ╰─ error(MALFORMED_PLACEHOLDER:Invalid placeholder, the expression cannot be missing)
  │  ││  ╰─ openTagEnd
  │  │╰─ tagName "div"
  ╰─ ╰─ openTagStart

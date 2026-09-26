@@ -1,0 +1,8 @@
+1╭─ export type H = (v: string) => void
+ ╰─ ╰─ tagName "export"
+2╭─ <div/>
+ │  ││  ╰─ openTagEnd:selfClosed "/>"
+ │  │╰─ tagName "div"
+ │  ├─ openTagEnd
+ ╰─ ╰─ openTagStart
+3╰─ 
