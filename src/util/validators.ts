@@ -1,5 +1,6 @@
 import { type Meta, Parser, STATE, type StateDefinition } from "../internal.ts";
 import {
+  prepareStatement,
   shouldTerminateConciseAttrValue,
   shouldTerminateHtmlAttrValue,
 } from "../states/index.ts";
@@ -33,12 +34,6 @@ export function isValidStatement(code: string): Validity {
   return isValid(code, true, prepareStatement);
 }
 
-function prepareStatement(expr: STATE.ExpressionMeta) {
-  expr.operators = true;
-  expr.terminatedByEOL = true;
-  expr.consumeIndentedContent = true;
-}
-
 export function isValidScriptlet(code: string): Validity {
   return isValid(code, true, prepareScriptlet);
 }
@@ -52,10 +47,10 @@ export function isValidAttrValue(code: string, concise: boolean): Validity {
   return isValid(code, concise, prepareAttrValue);
 }
 
-function prepareAttrValue(expr: STATE.ExpressionMeta, concise: boolean) {
+function prepareAttrValue(expr: STATE.ExpressionMeta, parser: Parser) {
   expr.operators = true;
   expr.terminatedByWhitespace = true;
-  expr.shouldTerminate = concise
+  expr.shouldTerminate = parser.isConcise
     ? shouldTerminateConciseAttrValue
     : shouldTerminateHtmlAttrValue;
 }
@@ -63,7 +58,7 @@ function prepareAttrValue(expr: STATE.ExpressionMeta, concise: boolean) {
 function isValid(
   data: string,
   concise: boolean,
-  prepare: (expr: STATE.ExpressionMeta, concise: boolean) => void,
+  prepare: (expr: STATE.ExpressionMeta, parser: Parser) => void,
 ): Validity {
   let hasError = false;
   const parser = new Parser({
@@ -85,7 +80,7 @@ function isValid(
   parser.activeState = ROOT_STATE;
   parser.activeRange = ROOT_RANGE;
   const expr = parser.enterState(STATE.EXPRESSION);
-  prepare(expr, concise);
+  prepare(expr, parser);
 
   while (parser.pos <= maxPos) {
     const childActive = parser.activeRange !== expr;

@@ -1,0 +1,15 @@
+1╭─ static const a = b!
+ ╰─ ╰─ tagName "static"
+2╭─ div title=input.x!
+ │  │   │    │╰─ attrValue.value "input.x!"
+ │  │   │    ╰─ attrValue "=input.x!"
+ │  │   ╰─ attrName "title"
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+3╭─   span
+ │  │ ╰─ tagName "span"
+ ╰─ ╰─ openTagEnd
+4╭─ 
+ │  ├─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ closeTagEnd(span)

@@ -40,6 +40,17 @@ describe("validation helpers", () => {
     it("treats newlines in enclosed template literals as guarded", () => {
       assert.equal(isValidStatement("(`foo\nbar`)"), 2);
     });
+
+    it("reads type arguments in a type statement as a group", () => {
+      assert.equal(
+        isValidStatement("type A = Record<\n  string,\n  number\n>"),
+        2,
+      );
+    });
+
+    it("ends a type statement at an unindented newline", () => {
+      assert.equal(isValidStatement("type A = B<C>\nfoo"), 0);
+    });
   });
 
   describe("isValidScriptlet", () => {

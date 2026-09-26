@@ -2,6 +2,7 @@ import {
   isWhitespaceCode,
   matchesCloseCurlyBrace,
   type Meta,
+  Parser,
   type Ranges,
   STATE,
   type StateDefinition,
@@ -96,21 +97,11 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
               );
             }
 
-            const expr = this.enterState(STATE.EXPRESSION);
-            expr.operators = true;
-            expr.terminatedByEOL = true;
-            expr.consumeIndentedContent = true;
-
-            const typeStatementMatch =
-              this.lookAheadFor("declare ") ||
-              this.lookAheadFor("interface ") ||
-              this.lookAheadFor("type ");
-            if (typeStatementMatch) {
-              expr.inType = true;
-              expr.forceType = true;
-              this.pos += typeStatementMatch.length;
-              this.consumeWhitespace();
-            }
+            prepareStatement(
+              this.enterState(STATE.EXPRESSION),
+              this,
+              this.pos + 1,
+            );
           }
         }
 
@@ -197,3 +188,25 @@ export const TAG_NAME: StateDefinition<TagNameMeta> = {
     quasis.push({ start: nextStart, end: nextStart });
   },
 };
+
+// Sets up a root statement's expression, whose code starts at `pos`.
+export function prepareStatement(
+  expr: STATE.ExpressionMeta,
+  parser: Parser,
+  pos = parser.pos,
+) {
+  expr.operators = true;
+  expr.terminatedByEOL = true;
+  expr.consumeIndentedContent = true;
+
+  const typeStatementMatch =
+    parser.lookAheadFor("declare ", pos) ||
+    parser.lookAheadFor("interface ", pos) ||
+    parser.lookAheadFor("type ", pos);
+  if (typeStatementMatch) {
+    expr.inType = true;
+    expr.forceType = true;
+    parser.pos = pos + typeStatementMatch.length;
+    parser.consumeWhitespace();
+  }
+}

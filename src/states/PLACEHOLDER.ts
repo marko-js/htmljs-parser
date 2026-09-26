@@ -43,7 +43,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
 
   return(child) {
     if (child.start === child.end) {
-      this.emitError(
+      return this.emitError(
         child,
         ErrorCode.MALFORMED_PLACEHOLDER,
         "Invalid placeholder, the expression cannot be missing",
