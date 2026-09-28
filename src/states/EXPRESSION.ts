@@ -483,17 +483,28 @@ function lookBehindForOperator(
       return curPos;
 
     case CODE.EXCLAMATION: {
-      // After an operand, `!` is a TypeScript non-null assertion (postfix);
-      // after a keyword operator (`typeof!a`, `a in!b`) it is the prefix `!`.
-      const prevCode = data.charCodeAt(curPos - 1);
-      switch (prevCode) {
+      // After an operand, `!` is a TypeScript non-null assertion (postfix),
+      // as is each `!` of a run after one (`x!!`); after a keyword operator
+      // (`typeof!a`, `a in!b`) it is the prefix `!`.
+      let operandEnd = curPos - 1;
+      while (data.charCodeAt(operandEnd) === CODE.EXCLAMATION) operandEnd--;
+      const operandCode = data.charCodeAt(operandEnd);
+      switch (operandCode) {
         case CODE.CLOSE_PAREN:
         case CODE.CLOSE_SQUARE_BRACKET:
+        case CODE.DOUBLE_QUOTE:
+        case CODE.SINGLE_QUOTE:
+        case CODE.BACKTICK:
           return -1;
         default:
-          return isWordCode(prevCode) &&
-            lookBehindForOperator(expression, data, curPos) === -1 &&
-            lookBehindForKeyword(data, curPos - 1, relationalKeywords) === -1
+          return isWordCode(operandCode) &&
+            lookBehindForOperator(expression, data, operandEnd + 1) === -1 &&
+            lookBehindForKeyword(
+              expression,
+              data,
+              operandEnd,
+              relationalKeywords,
+            ) === -1
             ? -1
             : curPos;
       }
@@ -534,6 +545,7 @@ function lookBehindForOperator(
       if (code < CODE.LOWER_A || code > CODE.LOWER_Z) return -1;
 
       return lookBehindForKeyword(
+        expression,
         data,
         curPos,
         expression.inType ? tsUnaryKeywords : jsUnaryKeywords,
@@ -670,8 +682,10 @@ function lookBehindWhile(
   return 0;
 }
 
-// Returns where a whole keyword ending at `pos` starts, or -1.
+// Returns where a whole keyword ending at `pos` starts, or -1. A keyword that
+// starts the expression is whole even after a `.` (a spread's `...new x`).
 function lookBehindForKeyword(
+  expression: ExpressionMeta,
   data: string,
   pos: number,
   keywords: readonly string[],
@@ -679,7 +693,9 @@ function lookBehindForKeyword(
   for (const keyword of keywords) {
     const keywordPos = lookBehindFor(data, pos, keyword);
     if (keywordPos !== -1) {
-      return isWordOrPeriodCode(data.charCodeAt(keywordPos - 1))
+      return keywordPos < expression.start ||
+        (keywordPos > expression.start &&
+          isWordOrPeriodCode(data.charCodeAt(keywordPos - 1)))
         ? -1
         : keywordPos;
     }
