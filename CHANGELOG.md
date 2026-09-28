@@ -1,5 +1,25 @@
 # htmljs-parser
 
+## 5.18.0
+
+### Minor Changes
+
+- [`6f82a36`](https://github.com/marko-js/htmljs-parser/commit/6f82a367c62a2dff4e01af52c72c4821db4d4b5d) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Read `delete` as a prefix operator, like `typeof` and `void`, so `<div a=delete x.y/>` is one attribute value and a statement ending in `delete` continues onto the next line.
+
+- [`6f82a36`](https://github.com/marko-js/htmljs-parser/commit/6f82a367c62a2dff4e01af52c72c4821db4d4b5d) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - An empty placeholder (`${}`) now stops at its error instead of also emitting an `onPlaceholder` whose end is past the input.
+
+- [#256](https://github.com/marko-js/htmljs-parser/pull/256) [`ac8fa1c`](https://github.com/marko-js/htmljs-parser/commit/ac8fa1c8e1b24e680e4bd41e8122bcd3c792fd65) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Export `./package.json`, so tools can read which parser version they run on with `require("htmljs-parser/package.json")`.
+
+- [#254](https://github.com/marko-js/htmljs-parser/pull/254) [`0602e70`](https://github.com/marko-js/htmljs-parser/commit/0602e70917b11cebd66945544958af4e6a0f150c) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Read a `type`, `interface` or `declare` scriptlet as a type, as statements already are, so `$ type H = () => void` or `$ type A = B<C>` no longer swallows the next line; `$ type = x` stays JavaScript. A statement also finds its type keyword after extra whitespace (`static  type F = () => void`), and `isValidScriptlet` matches the parser.
+
+- [#255](https://github.com/marko-js/htmljs-parser/pull/255) [`278f259`](https://github.com/marko-js/htmljs-parser/commit/278f2598ffe60894618293166b907ca1af5727ca) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - A keyword operator directly after a spread's `...` is an operator, so `<div ...new Attrs()/>` is one spread rather than `...new` plus an attribute `Attrs()`. A run of non-null assertions (`x!!`) and one after a string or template literal (`"s"!`, `` `s`! ``) now ends an unenclosed value like `x!` does.
+
+- [`6f82a36`](https://github.com/marko-js/htmljs-parser/commit/6f82a367c62a2dff4e01af52c72c4821db4d4b5d) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Treat a trailing TypeScript non-null assertion directly after an operand (`x!`, `f()!`, `a[0]!`) as postfix, so it ends an unenclosed attribute, tag variable or statement value. `<div title=x! id="a"/>` now reports two attributes rather than one value `x! id="a"`, and `<div title=x!/>` no longer fails as an unterminated regular expression.
+
+- [`6f82a36`](https://github.com/marko-js/htmljs-parser/commit/6f82a367c62a2dff4e01af52c72c4821db4d4b5d) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - End a type at a line-final `void`. A type statement such as `export type H = () => void` carried on into the next line, and a `void` return type before `{` (`function foo(): void {`) read the body as a type; `void` inside a type is now always the `void` type rather than a prefix operator.
+
+- [`6f82a36`](https://github.com/marko-js/htmljs-parser/commit/6f82a367c62a2dff4e01af52c72c4821db4d4b5d) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - `isValidStatement` now reads a statement starting with `type `, `interface ` or `declare ` as a type, as the parser does, so a multi-line type argument list is `enclosed` and a type followed by an unindented line is `invalid`.
+
 ## 5.17.1
 
 ### Patch Changes
