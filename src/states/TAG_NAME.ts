@@ -10,6 +10,7 @@ import {
 import * as CODE from "../util/codes.ts";
 import * as ErrorCode from "../util/error-code.ts";
 import * as TagType from "../util/tag-type.ts";
+import { prepareScriptlet } from "./INLINE_SCRIPT.ts";
 
 export interface TagNameMeta extends Meta, Ranges.Template {
   shorthandCode: -1 | typeof CODE.NUMBER_SIGN | typeof CODE.PERIOD;
@@ -195,18 +196,6 @@ export function prepareStatement(
   parser: Parser,
   pos = parser.pos,
 ) {
-  expr.operators = true;
-  expr.terminatedByEOL = true;
   expr.consumeIndentedContent = true;
-
-  const typeStatementMatch =
-    parser.lookAheadFor("declare ", pos) ||
-    parser.lookAheadFor("interface ", pos) ||
-    parser.lookAheadFor("type ", pos);
-  if (typeStatementMatch) {
-    expr.inType = true;
-    expr.forceType = true;
-    parser.pos = pos + typeStatementMatch.length;
-    parser.consumeWhitespace();
-  }
+  prepareScriptlet(expr, parser, pos);
 }
