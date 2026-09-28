@@ -1,5 +1,6 @@
 import { type Meta, Parser, STATE, type StateDefinition } from "../internal.ts";
 import {
+  prepareScriptlet,
   prepareStatement,
   shouldTerminateConciseAttrValue,
   shouldTerminateHtmlAttrValue,
@@ -36,11 +37,6 @@ export function isValidStatement(code: string): Validity {
 
 export function isValidScriptlet(code: string): Validity {
   return isValid(code, true, prepareScriptlet);
-}
-
-function prepareScriptlet(expr: STATE.ExpressionMeta) {
-  expr.operators = true;
-  expr.terminatedByEOL = true;
 }
 
 export function isValidAttrValue(code: string, concise: boolean): Validity {

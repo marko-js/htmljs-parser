@@ -1,0 +1,27 @@
+1╭─ $ type H = () => void
+ │  │ ╰─ scriptlet.value "type H = () => void"
+ ╰─ ╰─ scriptlet "$ type H = () => void"
+2╭─ <div>
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╭─   $ type A = B<C>
+ │  │ │ ╰─ scriptlet.value "type A = B<C>"
+ │  │ ╰─ scriptlet "$ type A = B<C>"
+ ╰─ ╰─ text "\n  "
+4╭─ </div>
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
+ │  ├─ text "\n"
+ ╰─ ╰─ closeTagStart "</"
+5╭─ $ interface I { a(): void }
+ │  │ ╰─ scriptlet.value "interface I { a(): void }"
+ ╰─ ╰─ scriptlet "$ interface I { a(): void }"
+6╭─ $ declare const d: void
+ │  │ ╰─ scriptlet.value "declare const d: void"
+ ╰─ ╰─ scriptlet "$ declare const d: void"
+7╭─ <span/>
+ │  ││   ╰─ openTagEnd:selfClosed "/>"
+ │  │╰─ tagName "span"
+ ╰─ ╰─ openTagStart
+8╰─ 

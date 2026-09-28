@@ -51,11 +51,23 @@ describe("validation helpers", () => {
     it("ends a type statement at an unindented newline", () => {
       assert.equal(isValidStatement("type A = B<C>\nfoo"), 0);
     });
+
+    it("reads a type statement after extra whitespace", () => {
+      assert.equal(isValidStatement("  type A = B<C>\nfoo"), 0);
+    });
   });
 
   describe("isValidScriptlet", () => {
     it("accepts single-line expressions", () => {
       assert.equal(isValidScriptlet("foo + bar"), 2);
+    });
+
+    it("ends a type scriptlet at a line-final void", () => {
+      assert.equal(isValidScriptlet("type H = () => void\nfoo"), 0);
+    });
+
+    it("reads an assignment to a variable named type as JavaScript", () => {
+      assert.equal(isValidScriptlet("type = a < b"), 2);
     });
 
     it("rejects indented continuation lines", () => {

@@ -56,7 +56,7 @@ const tsUnaryKeywords = [
   "unique",
 ] as const;
 
-const binaryKeywords = [
+export const binaryKeywords = [
   "as",
   "extends",
   "instanceof", // Note: instanceof must be checked before `in`

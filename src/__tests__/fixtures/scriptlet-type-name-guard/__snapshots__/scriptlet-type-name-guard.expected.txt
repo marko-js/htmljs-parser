@@ -1,0 +1,14 @@
+1╭─ $ type = a < b
+ │  │ ╰─ scriptlet.value "type = a < b"
+ ╰─ ╰─ scriptlet "$ type = a < b"
+2╭─ $ type in obj && go()
+ │  │ ╰─ scriptlet.value "type in obj && go()"
+ ╰─ ╰─ scriptlet "$ type in obj && go()"
+3╭─ $ type (x)
+ │  │ ╰─ scriptlet.value "type (x)"
+ ╰─ ╰─ scriptlet "$ type (x)"
+4╭─ <div/>
+ │  ││  ╰─ openTagEnd:selfClosed "/>"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+5╰─ 
