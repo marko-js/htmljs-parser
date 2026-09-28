@@ -1,0 +1,22 @@
+1╭─ <div ...new Attrs() a/>
+ │  ││   │  │           │╰─ openTagEnd:selfClosed "/>"
+ │  ││   │  │           ╰─ attrName
+ │  ││   │  ╰─ attrSpread.value "new Attrs()"
+ │  ││   ╰─ attrSpread "...new Attrs()"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <div ...await load() b/>
+ │  ││   │  │            │╰─ openTagEnd:selfClosed "/>"
+ │  ││   │  │            ╰─ attrName
+ │  ││   │  ╰─ attrSpread.value "await load()"
+ │  ││   ╰─ attrSpread "...await load()"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╭─ <div ...input.new c/>
+ │  ││   │  │         │╰─ openTagEnd:selfClosed "/>"
+ │  ││   │  │         ╰─ attrName
+ │  ││   │  ╰─ attrSpread.value "input.new"
+ │  ││   ╰─ attrSpread "...input.new"
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╰─ 

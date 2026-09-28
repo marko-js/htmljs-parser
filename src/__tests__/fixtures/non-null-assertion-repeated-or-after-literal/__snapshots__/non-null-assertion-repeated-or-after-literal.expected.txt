@@ -1,0 +1,35 @@
+1╭─ <div a=x!! b="s"! c=`t`! d=f()!! e=!!x f/>
+ │  ││   │││   │││    │││    │││     │││   │╰─ openTagEnd:selfClosed "/>"
+ │  ││   │││   │││    │││    │││     │││   ╰─ attrName
+ │  ││   │││   │││    │││    │││     ││╰─ attrValue.value "!!x"
+ │  ││   │││   │││    │││    │││     │╰─ attrValue "=!!x"
+ │  ││   │││   │││    │││    │││     ╰─ attrName
+ │  ││   │││   │││    │││    ││╰─ attrValue.value "f()!!"
+ │  ││   │││   │││    │││    │╰─ attrValue "=f()!!"
+ │  ││   │││   │││    │││    ╰─ attrName
+ │  ││   │││   │││    ││╰─ attrValue.value "`t`!"
+ │  ││   │││   │││    │╰─ attrValue "=`t`!"
+ │  ││   │││   │││    ╰─ attrName
+ │  ││   │││   ││╰─ attrValue.value "\"s\"!"
+ │  ││   │││   │╰─ attrValue "=\"s\"!"
+ │  ││   │││   ╰─ attrName
+ │  ││   ││╰─ attrValue.value "x!!"
+ │  ││   │╰─ attrValue "=x!!"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ static const g = h!!
+ ╰─ ╰─ tagName "static"
+3╭─ static const i = "j"!
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "static"
+4╭─ <div k=typeof!! l m/>
+ │  ││   │││          │╰─ openTagEnd:selfClosed "/>"
+ │  ││   │││          ╰─ attrName
+ │  ││   ││╰─ attrValue.value "typeof!! l"
+ │  ││   │╰─ attrValue "=typeof!! l"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ │  ├─ openTagEnd
+ ╰─ ╰─ openTagStart
+5╰─ 
