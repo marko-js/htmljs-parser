@@ -24,7 +24,8 @@
     ".": {
       "import": "./dist/index.mjs",
       "default": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
