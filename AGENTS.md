@@ -4,7 +4,7 @@ An HTML parser recognizes content and string placeholders and allows JavaScript 
 
 ## Conventions
 
-When the parser misreports a structure, fix it here rather than working around it in prettier, the compiler, or language-tools. Changing which events existing input produces breaks every consumer: treat it as a breaking change.
+When the parser misreports a structure, fix it here rather than working around it in prettier, the compiler, or language-tools. Changing the events for input that already parses and compiles correctly breaks every consumer: treat it as a breaking change. Fixing a misparse (input that errored, or compiled to the wrong code) is a feature, not a breaking change: release it as a minor, and raise the htmljs-parser floor in the compiler and prettier-plugin-marko together, since both decide what is valid with this parser.
 
 ## Agent feedback
 
