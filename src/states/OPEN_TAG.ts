@@ -6,6 +6,7 @@ import {
   matchesCloseParen,
   matchesPipe,
   type Meta,
+  type Parser,
   type Ranges,
   STATE,
   type StateDefinition,
@@ -138,7 +139,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             continue;
           }
 
-          this.exitState();
+          exitConciseOpenTag(this, tag);
           return;
         }
 
@@ -149,7 +150,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
       if (this.isConcise) {
         if (code === CODE.SEMICOLON) {
           this.pos++; // skip ;
-          this.exitState();
+          if (!exitConciseOpenTag(this, tag)) return;
           if (!this.consumeWhitespaceOnLine(0)) {
             switch (data.charCodeAt(this.pos)) {
               case CODE.FORWARD_SLASH:
@@ -201,31 +202,8 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
             return;
           }
 
-          // The open tag is complete; compute nested indent from next line
-          this.exitState();
-
-          let curPos = this.pos + 1;
-          // Skip until the next newline.
-          while (curPos < maxPos && data.charCodeAt(++curPos) !== CODE.NEWLINE);
-          // Skip the newline itself.
-          const indentStart = ++curPos;
-
-          // Count how many spaces/tabs we have after the newline.
-          while (curPos < maxPos) {
-            if (isIndentCode(data.charCodeAt(curPos))) {
-              curPos++;
-            } else {
-              break;
-            }
-          }
-
-          const indentSize = curPos - indentStart;
-          if (indentSize > this.indent.length) {
-            this.indent = data.slice(indentStart, curPos);
-          }
-
-          this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
-          return; // pos still at the first -, BEGIN_DELIMITED_HTML_BLOCK parses it
+          beginTextAfterOpenTag(this, tag);
+          return;
         } else if (code === CODE.OPEN_SQUARE_BRACKET) {
           if (tag.stage === TAG_STAGE.ATTR_GROUP) {
             this.emitError(
@@ -390,7 +368,7 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         return;
       }
 
-      this.exitState();
+      exitConciseOpenTag(this, tag);
     } else {
       this.emitError(
         tag,
@@ -526,6 +504,41 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     }
   },
 };
+
+function exitConciseOpenTag(parser: Parser, tag: OpenTagMeta) {
+  if (tag.tagName) {
+    parser.exitState();
+    return true;
+  }
+
+  parser.emitError(
+    tag,
+    ErrorCode.MALFORMED_OPEN_TAG,
+    "A concise tag must start with a tag name",
+  );
+  return false;
+}
+
+function beginTextAfterOpenTag(parser: Parser, tag: OpenTagMeta) {
+  const { data, maxPos } = parser;
+  if (!exitConciseOpenTag(parser, tag)) return;
+
+  let curPos = parser.pos;
+  // Skip until the next newline.
+  while (curPos < maxPos && data.charCodeAt(curPos) !== CODE.NEWLINE) curPos++;
+  // Skip the newline itself.
+  const indentStart = ++curPos;
+
+  // Count how many spaces/tabs we have after the newline.
+  while (curPos < maxPos && isIndentCode(data.charCodeAt(curPos))) curPos++;
+
+  const indentSize = curPos - indentStart;
+  if (indentSize > parser.indent.length) {
+    parser.indent = data.slice(indentStart, curPos);
+  }
+
+  parser.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
+}
 
 function shouldTerminateConciseTagVar(
   code: number,
