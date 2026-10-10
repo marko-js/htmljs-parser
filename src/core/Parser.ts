@@ -161,7 +161,11 @@ export class Parser {
    * return back to the previous parsing mode and to ensure that all
    * tags within a block are properly closed.
    */
-  beginHtmlBlock(delimiter: string | undefined, singleLine: boolean) {
+  beginHtmlBlock(
+    delimiter: string | undefined,
+    singleLine: boolean,
+    closingDelimiter?: string,
+  ) {
     const content = this.enterState(
       this.activeTag?.type === TagType.text
         ? STATE.PARSED_TEXT_CONTENT
@@ -170,6 +174,7 @@ export class Parser {
 
     content.singleLine = singleLine;
     content.delimiter = delimiter;
+    content.closingDelimiter = closingDelimiter;
     content.indent = this.indent;
   }
 

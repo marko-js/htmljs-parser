@@ -204,6 +204,13 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
 
           beginTextAfterOpenTag(this, tag);
           return;
+        } else if (
+          code === CODE.BACKTICK &&
+          tag.stage !== TAG_STAGE.ATTR_GROUP &&
+          isWhitespaceCode(data.charCodeAt(this.pos - 1))
+        ) {
+          beginTextAfterOpenTag(this, tag);
+          return;
         } else if (code === CODE.OPEN_SQUARE_BRACKET) {
           if (tag.stage === TAG_STAGE.ATTR_GROUP) {
             this.emitError(

@@ -1,0 +1,46 @@
+1╭─ div -- hello
+ │  │   │  ╰─ text "hello"
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─ div
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+3╭─   -- hello
+ │  │    ╰─ text "hello"
+ ╰─ ╰─ openTagEnd
+4╭─ div --
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+5╭─   hello
+ ╰─   ╰─ text "hello"
+6╭─ div `hello
+ │  │   │╰─ text "hello"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+7╭─ div `hello`
+ │  │   │╰─ text "hello"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+8╭─ div `
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+9╭─   hello
+ ╰─   ╰─ text "hello"
+10╭─ div
+  │  ├─ closeTagEnd(div)
+  ╰─ ╰─ tagName "div"
+11╭─   `hello
+  │  │  ╰─ text "hello"
+  ╰─ ╰─ openTagEnd
+12╭─ div
+  │  ├─ closeTagEnd(div)
+  ╰─ ╰─ tagName "div"
+13╭─   `hello`
+  │  │  ╰─ text "hello"
+  ╰─ ╰─ openTagEnd
+14╭─ 
+  ╰─ ╰─ closeTagEnd(div)

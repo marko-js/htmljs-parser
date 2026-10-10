@@ -51,7 +51,7 @@ export namespace Ranges {
 
   export interface Text extends Range {
     /**
-     * The `--` run that begins the concise text block holding this
+     * The `--` or backtick run that begins the concise text block holding this
      * text, or undefined outside of one.
      */
     delimiter: Range | undefined;

@@ -1,0 +1,46 @@
+1╭─ div `hello`
+ │  │   │╰─ text "hello"
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─ div `hello
+ │  │   │╰─ text "hello"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+3╭─ div ` hello `
+ │  │   │╰─ text " hello "
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+4╭─ div `a ${b} c`
+ │  │   ││ │ │ ╰─ text " c"
+ │  │   ││ │ ╰─ placeholder:escape.value
+ │  │   ││ ╰─ placeholder:escape "${b}"
+ │  │   │╰─ text "a "
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+5╭─ div `${a}`
+ │  │   ││ ╰─ placeholder:escape.value
+ │  │   │╰─ placeholder:escape "${a}"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+6╭─ div `<b>hi</b>`
+ │  │   │││││ │ │╰─ closeTagEnd(b)
+ │  │   │││││ │ ╰─ closeTagName
+ │  │   │││││ ╰─ closeTagStart "</"
+ │  │   ││││╰─ text "hi"
+ │  │   │││╰─ openTagEnd
+ │  │   ││╰─ tagName
+ │  │   │╰─ openTagStart
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+7╭─ div `$ not a scriptlet`
+ │  │   │╰─ text "$ not a scriptlet"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+8╭─ 
+ ╰─ ╰─ closeTagEnd(div)

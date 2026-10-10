@@ -1,0 +1,51 @@
+1╭─ div --
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─   hello
+ ╰─   ╰─ text "hello\n"
+3╭─   world
+ ╰─   ╰─ text "world"
+4├─   --
+5╭─ span
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "span"
+6╭─ div `
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(span)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+7╭─   hello
+ ╰─   ╰─ text "hello\n"
+8╭─   world
+ ╰─   ╰─ text "world"
+9├─   `
+10╭─ span
+  │  ├─ closeTagEnd(div)
+  ╰─ ╰─ tagName "span"
+11╭─ div
+  │  ├─ closeTagEnd(span)
+  │  ├─ openTagEnd
+  ╰─ ╰─ tagName "div"
+12╭─   --
+  ╰─ ╰─ openTagEnd
+13╭─     hello
+  ╰─   ╰─ text "  hello"
+14├─   --
+15╭─   span
+  ╰─   ╰─ tagName "span"
+16╭─ div
+  │  ├─ closeTagEnd(div)
+  │  ├─ closeTagEnd(span)
+  │  ├─ openTagEnd
+  ╰─ ╰─ tagName "div"
+17╭─   `
+  ╰─ ╰─ openTagEnd
+18╭─     hello
+  ╰─   ╰─ text "  hello"
+19├─   `
+20╭─   span
+  ╰─   ╰─ tagName "span"
+21╭─ 
+  │  ├─ openTagEnd
+  │  ├─ closeTagEnd(div)
+  ╰─ ╰─ closeTagEnd(span)

@@ -1,0 +1,16 @@
+1╭─ div class=a ? `x` : `y`
+ │  │   │    │╰─ attrValue.value "a ? `x` : `y`"
+ │  │   │    ╰─ attrValue "=a ? `x` : `y`"
+ │  │   ╰─ attrName "class"
+ ╰─ ╰─ tagName "div"
+2╭─ div class=a ?
+ │  │   │    │╰─ attrValue.value "a ?\n  `x` : `y`"
+ │  │   │    ╰─ attrValue "=a ?\n  `x` : `y`"
+ │  │   ╰─ attrName "class"
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+3├─   `x` : `y`
+4╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)

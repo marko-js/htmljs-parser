@@ -1,0 +1,26 @@
+1╭─ div ``a`b``
+ │  │   │ ╰─ text "a`b"
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─ div ``a ` b``
+ │  │   │ ╰─ text "a ` b"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+3╭─ div ```a``b```
+ │  │   │  ╰─ text "a``b"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+4╭─ div `a``b`
+ │  │   │╰─ text "a``b"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+5╭─ div ``a`
+ │  │   │ ╰─ text "a`"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+6╭─ 
+ ╰─ ╰─ closeTagEnd(div)

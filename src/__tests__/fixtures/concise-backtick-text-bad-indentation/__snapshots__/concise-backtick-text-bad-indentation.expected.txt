@@ -1,0 +1,8 @@
+1╭─ div
+ ╰─ ╰─ tagName "div"
+2╭─   `a`
+ │  │  ╰─ text
+ ╰─ ╰─ openTagEnd
+3╭─     `b`
+ ╰─     ╰─ error(INVALID_INDENTATION:Line indentation does match indentation of previous line)
+4╰─ 

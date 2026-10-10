@@ -1,0 +1,8 @@
+1╭─ `top`
+ ╰─  ╰─ text "top"
+2├─ `
+3╭─   multi
+ ╰─ ╰─ text "  multi\n  line"
+4├─   line
+5├─ `
+6╰─ 

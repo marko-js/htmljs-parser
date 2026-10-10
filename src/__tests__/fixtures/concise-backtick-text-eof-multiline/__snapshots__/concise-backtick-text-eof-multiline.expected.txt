@@ -1,0 +1,6 @@
+1╭─ div `
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─   hello
+ │    │    ╰─ closeTagEnd(div)
+ ╰─   ╰─ text "hello"

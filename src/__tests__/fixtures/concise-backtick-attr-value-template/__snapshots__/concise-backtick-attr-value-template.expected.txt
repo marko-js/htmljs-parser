@@ -1,0 +1,19 @@
+1╭─ div a=`x` b=`y` `text`
+ │  │   │││   │││   │╰─ text "text"
+ │  │   │││   │││   ╰─ openTagEnd
+ │  │   │││   ││╰─ attrValue.value "`y`"
+ │  │   │││   │╰─ attrValue "=`y`"
+ │  │   │││   ╰─ attrName
+ │  │   ││╰─ attrValue.value "`x`"
+ │  │   │╰─ attrValue "=`x`"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "div"
+2╭─ div a=`x ${y} z`
+ │  │   ││╰─ attrValue.value "`x ${y} z`"
+ │  │   │╰─ attrValue "=`x ${y} z`"
+ │  │   ╰─ attrName
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+3╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)

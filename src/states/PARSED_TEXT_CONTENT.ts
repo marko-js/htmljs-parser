@@ -10,6 +10,7 @@ export interface ParsedTextContentMeta extends Meta {
   indent: string;
   singleLine: boolean;
   delimiter: undefined | string;
+  closingDelimiter: undefined | string;
 }
 
 // We enter STATE.PARSED_TEXT_CONTENT when we are parsing
@@ -27,6 +28,7 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
       indent: "",
       singleLine: false,
       delimiter: undefined,
+      closingDelimiter: undefined,
     };
   },
 
@@ -86,6 +88,13 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
           this.pos++;
           continue;
         case CODE.BACKTICK:
+          if (
+            content.closingDelimiter &&
+            STATE.checkForBacktickCloser(this, content.closingDelimiter)
+          ) {
+            return;
+          }
+
           this.startText();
           this.enterState(STATE.TEMPLATE_STRING);
           this.pos++; // skip `
