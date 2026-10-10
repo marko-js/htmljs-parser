@@ -29,6 +29,7 @@ export const PLACEHOLDER: StateDefinition<PlaceholderMeta> = {
       start: placeholder.start,
       end: placeholder.end,
       escape: placeholder.escape,
+      delimiter: this.textDelimiter,
       value: {
         start: placeholder.start + (placeholder.escape ? 2 : 3), // ignore ${ or $!{
         end: placeholder.end - 1, // ignore }

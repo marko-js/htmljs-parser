@@ -39,6 +39,7 @@ export class Parser {
   declare public isConcise: boolean; // Set to true if parser is currently in concise mode
   declare public beginMixedMode?: boolean; // Used as a flag to mark that the next HTML block should enter the parser into HTML mode
   declare public endingMixedModeAtEOL?: boolean; // Used as a flag to record that the next EOL to exit HTML mode and go back to concise
+  declare public textDelimiter: undefined | Range; // The delimiter of the concise text block being parsed
   declare public textPos: number; // Used to buffer text that is found within the body of a tag
   declare public lines: undefined | number[]; // Keeps track of line indexes to provide line/column info.
   declare public options: Options;
@@ -144,7 +145,11 @@ export class Parser {
     const start = this.textPos;
     if (start !== -1) {
       if (start !== this.pos) {
-        this.options.onText?.({ start, end: this.pos });
+        this.options.onText?.({
+          start,
+          end: this.pos,
+          delimiter: this.textDelimiter,
+        });
       }
       this.textPos = -1;
     }
@@ -284,7 +289,11 @@ export class Parser {
     this.textPos = -1;
     this.isConcise = true;
     this.beginMixedMode = this.endingMixedModeAtEOL = false;
-    this.lines = this.activeTag = this.activeAttr = undefined;
+    this.lines =
+      this.activeTag =
+      this.activeAttr =
+      this.textDelimiter =
+        undefined;
     // Drop any state left over from a previous parse so reusing a parser
     // does not chain (and retain) the old state metas via parent references.
     this.activeRange = undefined as unknown as Meta;

@@ -31,7 +31,9 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
       };
     },
 
-    exit() {},
+    exit() {
+      this.textDelimiter = undefined;
+    },
 
     parse(data, maxPos, block) {
       if (this.pos === maxPos) {
@@ -50,7 +52,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
               ? 2
               : 1;
           const prevPos = this.pos;
-          this.beginHtmlBlock(block.delimiter, false);
+          beginText(this, block, false);
           handleDelimitedBlockEOL(this, true, len, block);
           if (this.pos === prevPos) this.pos += len; // advance past newline if not already advanced
           return;
@@ -67,7 +69,7 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
         if (!this.consumeWhitespaceOnLine()) {
           // Non-whitespace content on this line: start single-line HTML block
           this.pos = startPos + 1;
-          this.beginHtmlBlock(undefined, true);
+          beginText(this, block, true);
           return;
         }
         // Only whitespace to EOL: consumeWhitespaceOnLine set pos to newline
@@ -77,6 +79,18 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
 
     return() {},
   };
+
+function beginText(
+  parser: Parser,
+  block: DelimitedHTMLBlockMeta,
+  singleLine: boolean,
+) {
+  parser.textDelimiter = {
+    start: block.start,
+    end: block.start + block.delimiter.length,
+  };
+  parser.beginHtmlBlock(singleLine ? undefined : block.delimiter, singleLine);
+}
 
 export function handleDelimitedEOL(
   parser: Parser,
