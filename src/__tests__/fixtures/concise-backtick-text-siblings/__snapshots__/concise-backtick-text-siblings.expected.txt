@@ -1,0 +1,26 @@
+1╭─ ul
+ ╰─ ╰─ tagName "ul"
+2╭─   li `a`
+ │  │ │  │╰─ text
+ │  │ │  ╰─ openTagEnd
+ │  │ ╰─ tagName "li"
+ ╰─ ╰─ openTagEnd
+3╭─   li `b`
+ │  │ │  │╰─ text
+ │  │ │  ╰─ openTagEnd
+ │  │ ╰─ tagName "li"
+ ╰─ ╰─ closeTagEnd(li)
+4╭─     span `c`
+ │      │    │╰─ text
+ │      │    ╰─ openTagEnd
+ ╰─     ╰─ tagName "span"
+5╭─   li
+ │  │ ╰─ tagName "li"
+ │  ├─ closeTagEnd(li)
+ ╰─ ╰─ closeTagEnd(span)
+6╭─     `d`
+ │  │    ╰─ text
+ ╰─ ╰─ openTagEnd
+7╭─ 
+ │  ├─ closeTagEnd(ul)
+ ╰─ ╰─ closeTagEnd(li)

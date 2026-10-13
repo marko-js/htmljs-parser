@@ -84,11 +84,15 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       }
 
       if (parentTag) {
-        if (parentTag.type === TagType.text && code !== CODE.HYPHEN) {
+        if (
+          parentTag.type === TagType.text &&
+          code !== CODE.HYPHEN &&
+          code !== CODE.BACKTICK
+        ) {
           this.emitError(
             this.pos,
             ErrorCode.INVALID_LINE_START,
-            'A line within a tag that only allows text content must begin with a "-" character',
+            'A line within a tag that only allows text content must begin with "--" or a backtick',
           );
           return;
         }
@@ -129,6 +133,9 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
             );
             return;
           }
+        case CODE.BACKTICK:
+          this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
+          return; // pos stays at the first `, BEGIN_DELIMITED_HTML_BLOCK parses it
         case CODE.FORWARD_SLASH:
           switch (data.charCodeAt(this.pos + 1)) {
             case CODE.FORWARD_SLASH:

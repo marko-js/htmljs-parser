@@ -12,6 +12,7 @@ export interface HTMLContentMeta extends Meta {
   indent: string;
   singleLine: boolean;
   delimiter: undefined | string;
+  closingDelimiter: undefined | string;
 }
 
 // In STATE.HTML_CONTENT we are looking for tags and placeholders but
@@ -29,6 +30,7 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       indent: "",
       singleLine: false,
       delimiter: undefined,
+      closingDelimiter: undefined,
     };
   },
 
@@ -76,6 +78,17 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
 
         this.startText();
         this.pos += len;
+        continue;
+      }
+
+      if (code === CODE.BACKTICK && content.closingDelimiter) {
+        if (STATE.checkForBacktickCloser(this, content.closingDelimiter))
+          return;
+
+        this.startText();
+        do {
+          this.pos++;
+        } while (this.pos < maxPos && data.charCodeAt(this.pos) === code);
         continue;
       }
 
@@ -165,13 +178,9 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
       }
 
       this.startText();
-      // Eagerly consume the run of chars that cannot match a branch above.
-      do {
-        this.pos++;
-      } while (
-        this.pos < maxPos &&
-        !isSpecialHtmlContentCode(data.charCodeAt(this.pos))
-      );
+      this.pos = content.closingDelimiter
+        ? skipTextToBacktick(data, this.pos, maxPos)
+        : skipText(data, this.pos, maxPos);
     }
   },
 
@@ -187,6 +196,27 @@ export const HTML_CONTENT: StateDefinition<HTMLContentMeta> = {
     }
   },
 };
+
+// Eagerly consume the run of chars that cannot match a branch above.
+function skipText(data: string, pos: number, maxPos: number) {
+  do {
+    pos++;
+  } while (pos < maxPos && !isSpecialHtmlContentCode(data.charCodeAt(pos)));
+
+  return pos;
+}
+
+function skipTextToBacktick(data: string, pos: number, maxPos: number) {
+  do {
+    pos++;
+  } while (
+    pos < maxPos &&
+    !isSpecialHtmlContentCode(data.charCodeAt(pos)) &&
+    data.charCodeAt(pos) !== CODE.BACKTICK
+  );
+
+  return pos;
+}
 
 // Matches every char that can begin one of the parse branches above.
 function isSpecialHtmlContentCode(code: number) {

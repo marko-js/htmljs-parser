@@ -1,0 +1,9 @@
+1╭─ div `<b>x`
+ │  │   ││││╰─ text
+ │  │   │││╰─ openTagEnd
+ │  │   ││╰─ tagName
+ │  │   │├─ error(MISSING_END_TAG:Missing ending "b" tag) "<b>"
+ │  │   │╰─ openTagStart
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╰─ 

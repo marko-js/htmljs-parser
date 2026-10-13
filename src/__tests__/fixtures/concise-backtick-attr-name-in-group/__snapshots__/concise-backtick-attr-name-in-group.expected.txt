@@ -1,0 +1,14 @@
+1╭─ div [a `t`]
+ │  │    │ ╰─ attrName "`t`"
+ │  │    ╰─ attrName
+ ╰─ ╰─ tagName "div"
+2╭─ div [a, `t`] `text`
+ │  │    │  │    │╰─ text "text"
+ │  │    │  │    ╰─ openTagEnd
+ │  │    │  ╰─ attrName "`t`"
+ │  │    ╰─ attrName
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+3╭─ 
+ ╰─ ╰─ closeTagEnd(div)

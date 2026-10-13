@@ -1,0 +1,18 @@
+1╭─ div a=1, `t`
+ │  │   │││  │╰─ text
+ │  │   │││  ╰─ openTagEnd
+ │  │   ││╰─ attrValue.value
+ │  │   │╰─ attrValue "=1"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "div"
+2╭─ div a=1,
+ │  │   ││╰─ attrValue.value
+ │  │   │╰─ attrValue "=1"
+ │  │   ╰─ attrName
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+3╭─   `t`
+ │    │╰─ text
+ ╰─   ╰─ openTagEnd
+4╭─ 
+ ╰─ ╰─ closeTagEnd(div)

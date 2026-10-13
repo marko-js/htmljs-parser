@@ -1,0 +1,16 @@
+1╭─ div a=b` hi`
+ │  │   ││╰─ attrValue.value "b` hi`"
+ │  │   │╰─ attrValue "=b` hi`"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "div"
+2╭─ div a=b`hi` `text`
+ │  │   │││     │╰─ text "text"
+ │  │   │││     ╰─ openTagEnd
+ │  │   ││╰─ attrValue.value "b`hi`"
+ │  │   │╰─ attrValue "=b`hi`"
+ │  │   ╰─ attrName
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+3╭─ 
+ ╰─ ╰─ closeTagEnd(div)

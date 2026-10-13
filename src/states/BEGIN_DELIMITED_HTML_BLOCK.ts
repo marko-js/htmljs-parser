@@ -1,5 +1,6 @@
 import {
   htmlEOF,
+  isIndentCode,
   isLineCode,
   type Meta,
   Parser,
@@ -12,10 +13,12 @@ import * as ErrorCode from "../util/error-code.ts";
 export interface DelimitedHTMLBlockMeta extends Meta {
   delimiter: string;
   indent: string;
+  delimiterCode: number;
 }
 
-// In STATE.BEGIN_DELIMITED_HTML_BLOCK we have already found two consecutive hyphens. We expect
-// to reach the end of the line with only whitespace characters
+// In STATE.BEGIN_DELIMITED_HTML_BLOCK we have already found the start of a delimiter: either two
+// consecutive hyphens, or one or more backticks. We expect to reach the end of the line with
+// only whitespace characters
 export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta> =
   {
     name: "BEGIN_DELIMITED_HTML_BLOCK",
@@ -28,10 +31,13 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
         end: start,
         indent: this.indent,
         delimiter: "",
+        delimiterCode: this.data.charCodeAt(start),
       };
     },
 
-    exit() {},
+    exit() {
+      this.textDelimiter = undefined;
+    },
 
     parse(data, maxPos, block) {
       if (this.pos === maxPos) {
@@ -50,24 +56,31 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
               ? 2
               : 1;
           const prevPos = this.pos;
-          this.beginHtmlBlock(block.delimiter, false);
-          handleDelimitedBlockEOL(this, true, len, block);
+          beginText(this, block, false);
+          handleDelimitedBlockEOL(
+            this,
+            true,
+            len,
+            block.indent,
+            block.delimiter,
+          );
           if (this.pos === prevPos) this.pos += len; // advance past newline if not already advanced
           return;
         }
 
-        if (code === CODE.HYPHEN) {
-          block.delimiter += "-";
+        if (code === block.delimiterCode) {
+          block.delimiter += String.fromCharCode(code);
           this.pos++;
           continue;
         }
 
-        // Non-hyphen, non-newline: check if whitespace-only remains on line
+        // Non-delimiter, non-newline: check if whitespace-only remains on line
         const startPos = this.pos;
-        if (!this.consumeWhitespaceOnLine()) {
+        const textOffset = block.delimiterCode === CODE.BACKTICK ? 0 : 1;
+        if (!this.consumeWhitespaceOnLine(textOffset)) {
           // Non-whitespace content on this line: start single-line HTML block
-          this.pos = startPos + 1;
-          this.beginHtmlBlock(undefined, true);
+          this.pos = startPos + textOffset;
+          beginText(this, block, true);
           return;
         }
         // Only whitespace to EOL: consumeWhitespaceOnLine set pos to newline
@@ -77,6 +90,24 @@ export const BEGIN_DELIMITED_HTML_BLOCK: StateDefinition<DelimitedHTMLBlockMeta>
 
     return() {},
   };
+
+function beginText(
+  parser: Parser,
+  block: DelimitedHTMLBlockMeta,
+  singleLine: boolean,
+) {
+  parser.textDelimiter = {
+    start: block.start,
+    end: block.start + block.delimiter.length,
+  };
+  parser.beginHtmlBlock(
+    singleLine ? undefined : block.delimiter,
+    singleLine,
+    singleLine && block.delimiterCode === CODE.BACKTICK
+      ? block.delimiter
+      : undefined,
+  );
+}
 
 export function handleDelimitedEOL(
   parser: Parser,
@@ -91,7 +122,13 @@ export function handleDelimitedEOL(
   }
 
   if (content.delimiter) {
-    handleDelimitedBlockEOL(parser, false, newLineLength, content);
+    handleDelimitedBlockEOL(
+      parser,
+      false,
+      newLineLength,
+      content.indent,
+      content.delimiter,
+    );
     return true;
   }
 
@@ -102,13 +139,8 @@ function handleDelimitedBlockEOL(
   parser: Parser,
   first: boolean,
   newLineLength: number,
-  {
-    indent,
-    delimiter,
-  }:
-    | STATE.ParsedTextContentMeta
-    | STATE.HTMLContentMeta
-    | DelimitedHTMLBlockMeta,
+  indent: string,
+  delimiter: string,
 ) {
   // If we are within a delimited HTML block then we want to check if the next line is the end
   // delimiter. Since we are currently positioned at the start of the new line character our lookahead
@@ -116,7 +148,14 @@ function handleDelimitedBlockEOL(
   // the delimiter.
   const endHtmlBlockLookahead = indent + delimiter;
 
-  if (parser.lookAheadFor(endHtmlBlockLookahead, parser.pos + newLineLength)) {
+  const isClosingLine =
+    parser.lookAheadFor(endHtmlBlockLookahead, parser.pos + newLineLength) &&
+    (delimiter.charCodeAt(0) !== CODE.BACKTICK ||
+      parser.onlyWhitespaceRemainsOnLine(
+        newLineLength + endHtmlBlockLookahead.length,
+      ));
+
+  if (isClosingLine) {
     parser.endText();
     parser.pos += newLineLength + endHtmlBlockLookahead.length;
 
@@ -143,7 +182,7 @@ function handleDelimitedBlockEOL(
   } else if (indent && !parser.onlyWhitespaceRemainsOnLine(newLineLength)) {
     // the next line does not have enough indentation
     // so unless it is blank (whitespace only),
-    // we will end the block
+    // we will end the block. A delimiter there is not a closer, it starts the next block.
     const pos = parser.pos;
     let cur = parser.pos;
     while (cur && isLineCode(parser.data.charCodeAt(cur - 1))) {
@@ -158,4 +197,38 @@ function handleDelimitedBlockEOL(
   } else if (!first && parser.pos + newLineLength !== parser.maxPos) {
     parser.startText();
   }
+}
+
+export function checkForBacktickCloser(parser: Parser, delimiter: string) {
+  const { data } = parser;
+  const start = parser.pos;
+  let end = start;
+  while (data.charCodeAt(end) === CODE.BACKTICK) end++;
+  if (end - start !== delimiter.length) return false;
+
+  let next = end;
+  while (isIndentCode(data.charCodeAt(next))) next++;
+
+  const code = data.charCodeAt(next);
+  const afterSlash =
+    code === CODE.FORWARD_SLASH ? data.charCodeAt(next + 1) : undefined;
+  const startsLineComment = afterSlash === CODE.FORWARD_SLASH;
+  const startsBlockComment = afterSlash === CODE.ASTERISK;
+  const endsLine = next >= parser.maxPos || isLineCode(code);
+  if (!endsLine && !startsLineComment && !startsBlockComment) return false;
+
+  parser.endText();
+  parser.exitState();
+  parser.exitState();
+  parser.pos = next;
+
+  if (startsLineComment) {
+    parser.enterState(STATE.JS_COMMENT_LINE);
+    parser.pos += 2;
+  } else if (startsBlockComment) {
+    parser.enterState(STATE.JS_COMMENT_BLOCK);
+    parser.pos += 2;
+  }
+
+  return true;
 }

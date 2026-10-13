@@ -1,0 +1,11 @@
+1╭─ script
+ ╰─ ╰─ tagName "script"
+2╭─   `x`
+ │  │  ╰─ text
+ ╰─ ╰─ openTagEnd
+3╭─   `y`
+ ╰─    ╰─ text
+4╭─   -- z
+ ╰─      ╰─ text
+5╭─ 
+ ╰─ ╰─ closeTagEnd(script)

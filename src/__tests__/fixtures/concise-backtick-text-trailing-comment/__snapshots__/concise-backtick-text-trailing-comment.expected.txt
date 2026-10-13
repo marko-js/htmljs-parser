@@ -1,0 +1,29 @@
+1╭─ div `hello` // note
+ │  │   ││      │ ╰─ comment.value " note"
+ │  │   ││      ╰─ comment "// note"
+ │  │   │╰─ text "hello"
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─ div `hello`// note
+ │  │   ││     │ ╰─ comment.value " note"
+ │  │   ││     ╰─ comment "// note"
+ │  │   │╰─ text "hello"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+3╭─ div `hello` /* note */
+ │  │   ││      │ ╰─ comment.value " note "
+ │  │   ││      ╰─ comment "/* note */"
+ │  │   │╰─ text "hello"
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+4╭─ div `hello // note
+ │  │   ││     │ ╰─ comment.value " note"
+ │  │   ││     ╰─ comment "// note"
+ │  │   │╰─ text "hello "
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+5╭─ 
+ ╰─ ╰─ closeTagEnd(div)

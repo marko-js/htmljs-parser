@@ -1,0 +1,6 @@
+1╭─ div
+ ╰─ ╰─ tagName "div"
+2╭─   ;
+ │  │ ╰─ error(MALFORMED_OPEN_TAG:A concise tag must start with a tag name)
+ ╰─ ╰─ openTagEnd
+3╰─ 

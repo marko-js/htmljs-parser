@@ -1,0 +1,27 @@
+1╭─ <div> `a` </div>
+ │  ││  ││    │ │  ╰─ closeTagEnd(div)
+ │  ││  ││    │ ╰─ closeTagName "div"
+ │  ││  ││    ╰─ closeTagStart "</"
+ │  ││  │╰─ text " `a` "
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <script>`a`</script>
+ │  ││     ││  │ │     ╰─ closeTagEnd(script)
+ │  ││     ││  │ ╰─ closeTagName "script"
+ │  ││     ││  ╰─ closeTagStart "</"
+ │  ││     │╰─ text "`a`"
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+3╭─ <div>
+ │  ││  ╰─ openTagEnd
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╭─   `a`
+ ╰─ ╰─ text "\n  `a`\n"
+5╭─ </div>
+ │  │ │  ╰─ closeTagEnd(div)
+ │  │ ╰─ closeTagName "div"
+ ╰─ ╰─ closeTagStart "</"
+6╰─ 

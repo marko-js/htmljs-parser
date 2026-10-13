@@ -66,6 +66,14 @@ const parser = createParser({
    * @example
    * 1╭─ <div>Hi</div>
    *  ╰─      ╰─ text "Hi"
+   *
+   * Text within a concise mode `--` or backtick block also has the
+   * `range.delimiter` that began the block.
+   *
+   * @example
+   * 1╭─ div `Hi`
+   *  │      │╰─ text "Hi"
+   *  ╰─     ╰─ text.delimiter "`"
    */
   onText(range) {},
 

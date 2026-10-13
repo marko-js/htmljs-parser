@@ -1,0 +1,79 @@
+1╭─ div class=a id=b `hello`
+ │  │   │    ││ │ ││ │╰─ text "hello"
+ │  │   │    ││ │ ││ ╰─ openTagEnd
+ │  │   │    ││ │ │╰─ attrValue.value
+ │  │   │    ││ │ ╰─ attrValue "=b"
+ │  │   │    ││ ╰─ attrName "id"
+ │  │   │    │╰─ attrValue.value
+ │  │   │    ╰─ attrValue "=a"
+ │  │   ╰─ attrName "class"
+ ╰─ ╰─ tagName "div"
+2╭─ div class="a" `hello`
+ │  │   │    ││   │╰─ text "hello"
+ │  │   │    ││   ╰─ openTagEnd
+ │  │   │    │╰─ attrValue.value "\"a\""
+ │  │   │    ╰─ attrValue "=\"a\""
+ │  │   ╰─ attrName "class"
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+3╭─ div disabled `hello`
+ │  │   │        │╰─ text "hello"
+ │  │   │        ╰─ openTagEnd
+ │  │   ╰─ attrName "disabled"
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+4╭─ div(x) `hello`
+ │  │  ││  │╰─ text "hello"
+ │  │  ││  ╰─ openTagEnd
+ │  │  │╰─ tagArgs.value
+ │  │  ╰─ tagArgs "(x)"
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+5╭─ div/v `hello`
+ │  │  ││ │╰─ text "hello"
+ │  │  ││ ╰─ openTagEnd
+ │  │  │╰─ tagVar.value
+ │  │  ╰─ tagVar "/v"
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+6╭─ div|p| `hello`
+ │  │  ││  │╰─ text "hello"
+ │  │  ││  ╰─ openTagEnd
+ │  │  │╰─ tagParams.value
+ │  │  ╰─ tagParams "|p|"
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+7╭─ div [a, b] `hello`
+ │  │    │  │  │╰─ text "hello"
+ │  │    │  │  ╰─ openTagEnd
+ │  │    │  ╰─ attrName
+ │  │    ╰─ attrName
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+8╭─ div.a#b `hello`
+ │  │  ││││ │╰─ text "hello"
+ │  │  ││││ ╰─ openTagEnd
+ │  │  │││╰─ tagShorthandId.quasis[0]
+ │  │  ││╰─ tagShorthandId "#b"
+ │  │  │╰─ tagShorthandClass.quasis[0]
+ │  │  ╰─ tagShorthandClass ".a"
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+9╭─ ${tag} `hello`
+ │  │     ││╰─ text "hello"
+ │  │     │╰─ openTagEnd
+ │  │     ╰─ tagName.quasis[1]
+ │  ├─ closeTagEnd(div)
+ │  ├─ tagName.expressions[0] "${tag}"
+ │  ├─ tagName.quasis[0]
+ ╰─ ╰─ tagName "${tag}"
+10╭─ div a=1 /* c */ `hello`
+  │  │   │││         │╰─ text "hello"
+  │  │   │││         ╰─ openTagEnd
+  │  │   ││╰─ attrValue.value "1 /* c */"
+  │  │   │╰─ attrValue "=1 /* c */"
+  │  │   ╰─ attrName
+  │  ├─ closeTagEnd(${tag})
+  ╰─ ╰─ tagName "div"
+11╭─ 
+  ╰─ ╰─ closeTagEnd(div)

@@ -1,0 +1,18 @@
+1╭─ div -- `t`
+ │  │   │  ╰─ text "`t`"
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─ div
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+3╭─   -- `t` and `u`
+ │  │    ╰─ text "`t` and `u`"
+ ╰─ ╰─ openTagEnd
+4╭─ div --
+ │  │   ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+5╭─   `t`
+ ╰─   ╰─ text "`t`"
+6╭─ 
+ ╰─ ╰─ closeTagEnd(div)

@@ -1,0 +1,14 @@
+1╭─ div(`x`) `text`
+ │  │  ││    │╰─ text "text"
+ │  │  ││    ╰─ openTagEnd
+ │  │  │╰─ tagArgs.value "`x`"
+ │  │  ╰─ tagArgs "(`x`)"
+ ╰─ ╰─ tagName "div"
+2╭─ div(`x`)
+ │  │  │╰─ tagArgs.value "`x`"
+ │  │  ╰─ tagArgs "(`x`)"
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "div"
+3╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)

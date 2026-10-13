@@ -49,8 +49,18 @@ export namespace Ranges {
     block: boolean;
   }
 
+  export interface Text extends Range {
+    /**
+     * The `--` or backtick run that begins the concise text block holding this
+     * text, or undefined outside of one.
+     */
+    delimiter: Range | undefined;
+  }
+
   export interface Placeholder extends Value {
     escape: boolean;
+    /** See {@link Text.delimiter}. */
+    delimiter: Range | undefined;
   }
 
   export interface AttrValue extends Value {
@@ -77,7 +87,7 @@ export type TagType = (typeof _TagType)[keyof typeof _TagType];
 
 export interface ParserOptions {
   onError?(data: Ranges.Error): void;
-  onText?(data: Range): void;
+  onText?(data: Ranges.Text): void;
   onPlaceholder?(data: Ranges.Placeholder): void;
   onComment?(data: Ranges.Value): void;
   onCDATA?(data: Ranges.Value): void;

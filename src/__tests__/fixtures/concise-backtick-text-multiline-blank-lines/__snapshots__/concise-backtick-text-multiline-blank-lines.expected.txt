@@ -1,0 +1,16 @@
+1╭─ div `
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─   a
+ ╰─   ╰─ text "a\n\n"
+3├─ 
+4╭─   b
+ ╰─   ╰─ text
+5├─ 
+6├─ 
+7╭─ span
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "span"
+8╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(span)

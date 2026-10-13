@@ -41,6 +41,48 @@ describe("api", () => {
   });
 });
 
+describe("text delimiters", () => {
+  function delimiters(src: string) {
+    const out: (string | undefined)[] = [];
+    const read = (range: { start: number; end: number } | undefined) =>
+      range && src.slice(range.start, range.end);
+    const parser = createParser({
+      onText: (range) => out.push(read(range.delimiter)),
+      onPlaceholder: (range) => out.push(read(range.delimiter)),
+    });
+    parser.parse(src);
+    return out;
+  }
+
+  it("is the hyphens or backticks that begin the text", () => {
+    assert.deepEqual(delimiters("a -- x"), ["--"]);
+    assert.deepEqual(delimiters("a ---- x"), ["----"]);
+    assert.deepEqual(delimiters("a `x`"), ["`"]);
+    assert.deepEqual(delimiters("a ``x``"), ["``"]);
+    assert.deepEqual(delimiters("-- x\n`y`"), ["--", "`"]);
+  });
+
+  it("applies to every line of a block and to placeholders", () => {
+    assert.deepEqual(delimiters("a `\n  x ${y}\n  z\n  `"), [
+      "`",
+      "`",
+      "`",
+      "`",
+    ]);
+    assert.deepEqual(delimiters("a --\n  x\n  z\n  --"), ["--", "--"]);
+  });
+
+  it("is absent outside of a block", () => {
+    assert.deepEqual(delimiters("<a>x ${y}</a>"), [undefined, undefined]);
+    assert.deepEqual(delimiters("a `x`\n<b>y</b>"), ["`", undefined]);
+    assert.deepEqual(delimiters("a -- x\nb\n  <c>y</c>"), ["--", undefined]);
+  });
+
+  it("covers text until the end of the input", () => {
+    assert.deepEqual(delimiters("a `\n  x"), ["`"]);
+  });
+});
+
 describe("validation internals", () => {
   it("rejects doubled operators followed by a terminator", () => {
     assert.equal(isValidAttrValue(" ++ ,", true), 0);
