@@ -188,6 +188,11 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
 
         break;
       }
+      case STATE.HTML_COMMENT:
+        // Only reached after a ";" (a line starting with "<" is an html
+        // block), so only comments may follow it either.
+        STATE.endConciseLine(this, this.data);
+        break;
     }
   },
 };
