@@ -1,0 +1,20 @@
+1╭─ ,;
+2╭─ <,/>
+ │  │ ├─ openTagEnd:selfClosed "/>"
+ │  │ ╰─ tagName
+ │  ├─ closeTagEnd()
+ │  ├─ openTagEnd
+ │  ├─ tagName
+ ╰─ ╰─ openTagStart
+3╭─ <,></>
+ │  │ ││ ├─ closeTagEnd()
+ │  │ ││ ╰─ closeTagName
+ │  │ │╰─ closeTagStart "</"
+ │  │ ├─ openTagEnd
+ │  │ ╰─ tagName
+ ╰─ ╰─ openTagStart
+4├─ ,
+5╭─ 
+ │  ├─ closeTagEnd()
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName

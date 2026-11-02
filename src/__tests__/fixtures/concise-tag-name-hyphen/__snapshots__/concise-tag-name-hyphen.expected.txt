@@ -1,0 +1,21 @@
+1╭─ -if(x)
+ │  │  │╰─ tagArgs.value
+ │  │  ╰─ tagArgs "(x)"
+ ╰─ ╰─ tagName "-if"
+2╭─   span
+ │  │ ╰─ tagName "span"
+ ╰─ ╰─ openTagEnd
+3╭─ -else-if(y)
+ │  │       │╰─ tagArgs.value
+ │  │       ╰─ tagArgs "(y)"
+ │  ├─ closeTagEnd(-if)
+ │  ├─ closeTagEnd(span)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "-else-if"
+4╭─   -my-tag
+ │  │ ╰─ tagName "-my-tag"
+ ╰─ ╰─ openTagEnd
+5╭─ 
+ │  ├─ openTagEnd
+ │  ├─ closeTagEnd(-else-if)
+ ╰─ ╰─ closeTagEnd(-my-tag)

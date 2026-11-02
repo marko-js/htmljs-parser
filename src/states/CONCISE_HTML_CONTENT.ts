@@ -1,6 +1,7 @@
 import {
   htmlEOF,
   isWhitespaceCode,
+  isWordCode,
   STATE,
   type StateDefinition,
 } from "../internal.ts";
@@ -106,6 +107,11 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
       }
 
       switch (code) {
+        case CODE.SEMICOLON:
+          // An empty line, as after a tag ended by ";".
+          this.pos++; // skip ;
+          STATE.endConciseLine(this, data);
+          return;
         case CODE.OPEN_ANGLE_BRACKET:
           this.beginMixedMode = true;
           this.beginHtmlBlock(undefined, false); // pos stays at <
@@ -121,6 +127,11 @@ export const CONCISE_HTML_CONTENT: StateDefinition = {
           if (data.charCodeAt(this.pos + 1) === CODE.HYPHEN) {
             this.enterState(STATE.BEGIN_DELIMITED_HTML_BLOCK);
             return; // pos stays at the first -, BEGIN_DELIMITED_HTML_BLOCK parses it
+          } else if (
+            parentTag?.type !== TagType.text &&
+            isWordCode(data.charCodeAt(this.pos + 1))
+          ) {
+            break; // a tag name starting with "-" (eg "-if")
           } else {
             this.emitError(
               this.pos,

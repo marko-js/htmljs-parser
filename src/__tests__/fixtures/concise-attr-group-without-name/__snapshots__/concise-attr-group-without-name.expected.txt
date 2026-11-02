@@ -1,0 +1,21 @@
+1╭─ [a=1]
+ │  │││╰─ attrValue.value
+ │  ││╰─ attrValue "=1"
+ │  │╰─ attrName
+ ╰─ ╰─ tagName
+2╭─ [
+ │  ├─ closeTagEnd()
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName
+3╭─   class="x"
+ │    │    │╰─ attrValue.value "\"x\""
+ │    │    ╰─ attrValue "=\"x\""
+ ╰─   ╰─ attrName "class"
+4├─ ]
+5╭─ []
+ │  ├─ closeTagEnd()
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName
+6╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd()
