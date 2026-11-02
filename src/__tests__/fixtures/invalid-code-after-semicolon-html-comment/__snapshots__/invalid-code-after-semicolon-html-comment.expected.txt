@@ -1,0 +1,17 @@
+1╭─ div; <!-- a --> <!-- b --> // c
+ │  │   ││   │      │   │      │ ╰─ comment.value " c"
+ │  │   ││   │      │   │      ╰─ comment "// c"
+ │  │   ││   │      │   ╰─ comment.value " b "
+ │  │   ││   │      ╰─ comment "<!-- b -->"
+ │  │   ││   ╰─ comment.value " a "
+ │  │   │╰─ comment "<!-- a -->"
+ │  │   ╰─ openTagEnd
+ ╰─ ╰─ tagName "div"
+2╭─ span; <!-- d --> p
+ │  │    ││   │      ╰─ error(INVALID_CODE_AFTER_SEMICOLON:A semicolon indicates the end of a line. Only comments may follow it.)
+ │  │    ││   ╰─ comment.value " d "
+ │  │    │╰─ comment "<!-- d -->"
+ │  │    ╰─ openTagEnd
+ │  ├─ closeTagEnd(div)
+ ╰─ ╰─ tagName "span"
+3╰─ 
