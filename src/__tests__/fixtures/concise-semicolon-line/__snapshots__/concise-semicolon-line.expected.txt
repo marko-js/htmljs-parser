@@ -1,0 +1,19 @@
+1╭─ ;
+2╭─ div
+ ╰─ ╰─ tagName "div"
+3╭─   ; // comment
+ │  │   │ ╰─ comment.value " comment"
+ │  │   ╰─ comment "// comment"
+ ╰─ ╰─ openTagEnd
+4╭─   span
+ ╰─   ╰─ tagName "span"
+5╭─ ; /* block */
+ │  │ │ ╰─ comment.value " block "
+ │  │ ╰─ comment "/* block */"
+ │  ├─ closeTagEnd(div)
+ │  ├─ closeTagEnd(span)
+ ╰─ ╰─ openTagEnd
+6╭─ ;<!-- html -->
+ │   │   ╰─ comment.value " html "
+ ╰─  ╰─ comment "<!-- html -->"
+7╰─ 

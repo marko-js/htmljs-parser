@@ -2,10 +2,12 @@ import {
   isIndentCode,
   isLineCode,
   isWhitespaceCode,
+  isWordCode,
   matchesCloseAngleBracket,
   matchesCloseParen,
   matchesPipe,
   type Meta,
+  type Parser,
   type Ranges,
   STATE,
   type StateDefinition,
@@ -69,9 +71,22 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
 
   exit(tag) {
     const { selfClosed } = tag;
+    const start = this.pos - (this.isConcise ? 0 : selfClosed ? 2 : 1);
+
+    if (!tag.tagName) {
+      // An open tag can end before a name (eg a concise line of just ",", or
+      // "<,>"), so name it empty where it ends, as one starting with "|" is.
+      tag.tagName = {
+        start,
+        end: start,
+        quasis: [{ start, end: start }],
+        expressions: [],
+      };
+      tag.type = this.options.onOpenTagName?.(tag.tagName) || tag.type;
+    }
 
     this.options.onOpenTagEnd?.({
-      start: this.pos - (this.isConcise ? 0 : selfClosed ? 2 : 1),
+      start,
       end: this.pos,
       selfClosed,
     });
@@ -150,40 +165,17 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
         if (code === CODE.SEMICOLON) {
           this.pos++; // skip ;
           this.exitState();
-          if (!this.consumeWhitespaceOnLine(0)) {
-            switch (data.charCodeAt(this.pos)) {
-              case CODE.FORWARD_SLASH:
-                switch (data.charCodeAt(this.pos + 1)) {
-                  case CODE.FORWARD_SLASH:
-                    this.enterState(STATE.JS_COMMENT_LINE);
-                    this.pos += 2; // skip //
-                    return;
-                  case CODE.ASTERISK:
-                    this.enterState(STATE.JS_COMMENT_BLOCK);
-                    this.pos += 2; // skip /*
-                    return;
-                }
-                break;
-              case CODE.OPEN_ANGLE_BRACKET:
-                if (this.lookAheadFor("!--")) {
-                  this.enterState(STATE.HTML_COMMENT);
-                  this.pos += 4; // skip <!--
-                  return;
-                }
-                break;
-            }
-
-            this.emitError(
-              this.pos,
-              ErrorCode.INVALID_CODE_AFTER_SEMICOLON,
-              "A semicolon indicates the end of a line. Only comments may follow it.",
-            );
-          }
+          endConciseLine(this, data);
           return;
         }
 
         if (code === CODE.HYPHEN) {
           if (data.charCodeAt(this.pos + 1) !== CODE.HYPHEN) {
+            if (!tag.tagName && isWordCode(data.charCodeAt(this.pos + 1))) {
+              this.enterState(STATE.TAG_NAME); // eg "-if"
+              return;
+            }
+
             this.emitError(
               tag,
               ErrorCode.MALFORMED_OPEN_TAG,
@@ -234,6 +226,12 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
               'Unexpected "[" character within open tag.',
             );
             return;
+          }
+
+          if (!tag.tagName) {
+            // eg "[a=1]" at a line start: an empty name, as with "|x|".
+            this.enterState(STATE.TAG_NAME);
+            return; // pos stays at [, which ends the name
           }
 
           tag.stage = TAG_STAGE.ATTR_GROUP;
@@ -526,6 +524,39 @@ export const OPEN_TAG: StateDefinition<OpenTagMeta> = {
     }
   },
 };
+
+/** Only comments may follow the ";" ending a concise line. */
+export function endConciseLine(parser: Parser, data: string) {
+  if (parser.consumeWhitespaceOnLine(0)) return;
+
+  switch (data.charCodeAt(parser.pos)) {
+    case CODE.FORWARD_SLASH:
+      switch (data.charCodeAt(parser.pos + 1)) {
+        case CODE.FORWARD_SLASH:
+          parser.enterState(STATE.JS_COMMENT_LINE);
+          parser.pos += 2; // skip //
+          return;
+        case CODE.ASTERISK:
+          parser.enterState(STATE.JS_COMMENT_BLOCK);
+          parser.pos += 2; // skip /*
+          return;
+      }
+      break;
+    case CODE.OPEN_ANGLE_BRACKET:
+      if (parser.lookAheadFor("!--")) {
+        parser.enterState(STATE.HTML_COMMENT);
+        parser.pos += 4; // skip <!--
+        return;
+      }
+      break;
+  }
+
+  parser.emitError(
+    parser.pos,
+    ErrorCode.INVALID_CODE_AFTER_SEMICOLON,
+    "A semicolon indicates the end of a line. Only comments may follow it.",
+  );
+}
 
 function shouldTerminateConciseTagVar(
   code: number,
