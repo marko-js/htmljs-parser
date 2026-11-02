@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.20.0
+
+### Minor Changes
+
+- [#263](https://github.com/marko-js/htmljs-parser/pull/263) [`f48774c`](https://github.com/marko-js/htmljs-parser/commit/f48774c1a2500f26bdfd33e0c2f7845165c73d83) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Report code after an html comment that follows a concise `;` (eg `div; <!-- a --> span`) as an error, as after any other comment there, instead of reading it as a new line nested in the tag. More comments may still follow.
+
 ## 5.19.0
 
 ### Minor Changes
