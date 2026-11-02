@@ -1,5 +1,17 @@
 # htmljs-parser
 
+## 5.19.0
+
+### Minor Changes
+
+- [#261](https://github.com/marko-js/htmljs-parser/pull/261) [`1773778`](https://github.com/marko-js/htmljs-parser/commit/1773778bf73999acf65046949c5f1d1634168ba7) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Read an attribute group (`[`) at the start of a concise line as following an empty tag name, as `.class` and `|params|` are, rather than reading its first attribute as the tag name.
+
+- [#261](https://github.com/marko-js/htmljs-parser/pull/261) [`1773778`](https://github.com/marko-js/htmljs-parser/commit/1773778bf73999acf65046949c5f1d1634168ba7) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Ignore a concise line that starts with `;`, which opened a tag with no name. As after a tag's `;`, only comments may follow it.
+
+- [#261](https://github.com/marko-js/htmljs-parser/pull/261) [`1773778`](https://github.com/marko-js/htmljs-parser/commit/1773778bf73999acf65046949c5f1d1634168ba7) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Read a concise line starting with `-` and a word character (eg `-if`) as a tag whose name starts with `-`, as `<-if>` already is in HTML mode. A single `-` followed by anything else is still an error, and so is any single `-` within a tag that only allows text.
+
+- [#261](https://github.com/marko-js/htmljs-parser/pull/261) [`1773778`](https://github.com/marko-js/htmljs-parser/commit/1773778bf73999acf65046949c5f1d1634168ba7) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Name an open tag that ends before its name (eg a concise line of just `,`, or `<,>`) empty, so a tag never ends without `onOpenTagName`; the compiler and editor tooling crashed on these, and `<,>` crashed the parser at the end of the template.
+
 ## 5.18.0
 
 ### Minor Changes
