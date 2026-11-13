@@ -1,0 +1,70 @@
+1╭─ <script>s.replace(/["']/g, ""); const r = /[/]/; x = a / b / c; ${z}</script>
+ │  ││     ││                                                       │ │ │ │     ╰─ closeTagEnd(script)
+ │  ││     ││                                                       │ │ │ ╰─ closeTagName "script"
+ │  ││     ││                                                       │ │ ╰─ closeTagStart "</"
+ │  ││     ││                                                       │ ╰─ placeholder:escape.value
+ │  ││     ││                                                       ╰─ placeholder:escape "${z}"
+ │  ││     │╰─ text "s.replace(/[\"']/g, \"\"); const r = /[/]/; x = a / b / c; "
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+2╭─ <script>a + /x</script>
+ │  ││     ││     │ │     ╰─ closeTagEnd(script)
+ │  ││     ││     │ ╰─ closeTagName "script"
+ │  ││     ││     ╰─ closeTagStart "</"
+ │  ││     │╰─ text "a + /x"
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+3╭─ <script>a = /x
+ │  ││     │╰─ text "a = /x\n/ "
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+4╭─ / ${y}</script>
+ │    │ │ │ │     ╰─ closeTagEnd(script)
+ │    │ │ │ ╰─ closeTagName "script"
+ │    │ │ ╰─ closeTagStart "</"
+ │    │ ╰─ placeholder:escape.value
+ ╰─   ╰─ placeholder:escape "${y}"
+5╭─ <script>a = /x\
+ │  ││     │╰─ text "a = /x\\\ny/ "
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+6╭─ y/ ${q}</script>
+ │     │ │ │ │     ╰─ closeTagEnd(script)
+ │     │ │ │ ╰─ closeTagName "script"
+ │     │ │ ╰─ closeTagStart "</"
+ │     │ ╰─ placeholder:escape.value
+ ╰─    ╰─ placeholder:escape "${q}"
+7╭─ <script>r = /<p>$/; ${w}</script>
+ │  ││     ││           │ │ │ │     ╰─ closeTagEnd(script)
+ │  ││     ││           │ │ │ ╰─ closeTagName "script"
+ │  ││     ││           │ │ ╰─ closeTagStart "</"
+ │  ││     ││           │ ╰─ placeholder:escape.value
+ │  ││     ││           ╰─ placeholder:escape "${w}"
+ │  ││     │╰─ text "r = /<p>$/; "
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+8╭─ <style>.a { background: url(/${dir}/a.png) url(/$!{raw}/b.png) }</style>
+ │  ││    ││                     │ │   │            │  │   │        │ │    ╰─ closeTagEnd(style)
+ │  ││    ││                     │ │   │            │  │   │        │ ╰─ closeTagName "style"
+ │  ││    ││                     │ │   │            │  │   │        ╰─ closeTagStart "</"
+ │  ││    ││                     │ │   │            │  │   ╰─ text "/b.png) }"
+ │  ││    ││                     │ │   │            │  ╰─ placeholder.value "raw"
+ │  ││    ││                     │ │   │            ╰─ placeholder "$!{raw}"
+ │  ││    ││                     │ │   ╰─ text "/a.png) url(/"
+ │  ││    ││                     │ ╰─ placeholder:escape.value "dir"
+ │  ││    ││                     ╰─ placeholder:escape "${dir}"
+ │  ││    │╰─ text ".a { background: url(/"
+ │  ││    ╰─ openTagEnd
+ │  │╰─ tagName "style"
+ ╰─ ╰─ openTagStart
+9╭─ <script>a = /x
+ │  ││     │╰─ text "a = /x"
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ │  ├─ error(MISSING_END_TAG:Missing ending "script" tag) "<script>"
+ ╰─ ╰─ openTagStart

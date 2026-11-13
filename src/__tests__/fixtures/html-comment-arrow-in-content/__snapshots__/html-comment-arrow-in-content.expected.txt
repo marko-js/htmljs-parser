@@ -1,0 +1,14 @@
+1╭─ <!-- a->b -->
+ │  │   ╰─ comment.value " a->b "
+ ╰─ ╰─ comment "<!-- a->b -->"
+2╭─ <!-- c --->
+ │  │   ╰─ comment.value " c -"
+ ╰─ ╰─ comment "<!-- c --->"
+3╭─ <!--->
+ │  │   ╰─ comment.value
+ ╰─ ╰─ comment "<!--->"
+4╭─ <p/>
+ │  ││╰─ openTagEnd:selfClosed "/>"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
+5╰─ 

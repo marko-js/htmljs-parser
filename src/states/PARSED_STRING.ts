@@ -34,6 +34,10 @@ export const PARSED_STRING: StateDefinition<ParsedStringMeta> = {
         STATE.checkForPlaceholder(this, code)
       ) {
         return;
+      } else if (code === CODE.BACK_SLASH) {
+        // Any other escape, eg the quote of `"a\"b"`, is text.
+        this.startText();
+        this.pos += 2;
       } else {
         this.startText();
         // Eagerly consume the run of chars that cannot match a branch above.

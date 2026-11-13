@@ -342,6 +342,8 @@ export const ATTRIBUTE: StateDefinition<AttrMeta> = {
           );
         }
 
+        // A value of only comments, or a string glued to the next name
+        // (`"a"id="b"`), is passed on whole: an error here would end the parse.
         if (!this.isConcise && detectAmbiguousCloseAngleBracket(this, child)) {
           return;
         }

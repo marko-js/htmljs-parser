@@ -1,5 +1,6 @@
 import {
   htmlEOF,
+  isLineCode,
   type Meta,
   STATE,
   type StateDefinition,
@@ -14,7 +15,8 @@ export interface ParsedTextContentMeta extends Meta {
 
 // We enter STATE.PARSED_TEXT_CONTENT when we are parsing
 // the body of a tag does not contain HTML tags but may contains
-// placeholders
+// placeholders. It lexes JavaScript strings, comments and regular expressions,
+// so a "</script>" inside one does not end it.
 export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
   name: "PARSED_TEXT_CONTENT",
 
@@ -83,7 +85,12 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
               this.pos += 2; // skip //
               return;
           }
-          this.pos++;
+          // Skip a regular expression whole, so a quote or "//" in it is not
+          // lexed; a "/" that cannot close one on its line stays text.
+          this.pos =
+            (STATE.isRegExpStart(data, this.pos) &&
+              skipRegExp(data, this.pos, maxPos)) ||
+            this.pos + 1;
           continue;
         case CODE.BACKTICK:
           this.startText();
@@ -105,6 +112,16 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
           }
 
           this.startText();
+          if (
+            code === CODE.BACK_SLASH &&
+            isEscapableParsedTextCode(data.charCodeAt(this.pos + 1))
+          ) {
+            // An escaped quote or slash outside a string, eg CSS `.a\"`, is
+            // text rather than the start of a string or comment.
+            this.pos += 2;
+            continue;
+          }
+
           // Eagerly consume the run of chars that cannot match a case above.
           do {
             this.pos++;
@@ -119,6 +136,64 @@ export const PARSED_TEXT_CONTENT: StateDefinition<ParsedTextContentMeta> = {
 
   return() {},
 };
+
+// A backslash before one of these escapes it; before "<" or a newline it does
+// not, so "\</style>" still closes the tag and a delimited block still ends.
+function isEscapableParsedTextCode(code: number) {
+  switch (code) {
+    case CODE.DOUBLE_QUOTE:
+    case CODE.SINGLE_QUOTE:
+    case CODE.BACKTICK:
+    case CODE.FORWARD_SLASH:
+    case CODE.BACK_SLASH:
+      return true;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Where the regular expression whose "/" is at `pos` ends, or 0 when no "/"
+ * closes it on its line before a "</", which may be the closing tag, or a
+ * placeholder, which a CSS body's `url(/${dir}/a.png)` must keep.
+ */
+function skipRegExp(data: string, pos: number, maxPos: number) {
+  let inCharSet = false;
+  for (let i = pos + 1; i < maxPos; i++) {
+    switch (data.charCodeAt(i)) {
+      case CODE.BACK_SLASH:
+        i++; // skip the escaped char, which still cannot be a line terminator
+        if (!isLineCode(data.charCodeAt(i))) break;
+        return 0;
+      case CODE.NEWLINE:
+      case CODE.CARRIAGE_RETURN:
+        return 0;
+      case CODE.OPEN_ANGLE_BRACKET:
+        if (data.charCodeAt(i + 1) === CODE.FORWARD_SLASH) return 0;
+        break;
+      case CODE.DOLLAR:
+        switch (data.charCodeAt(i + 1)) {
+          case CODE.OPEN_CURLY_BRACE: // ${
+            return 0;
+          case CODE.EXCLAMATION: // $!{
+            if (data.charCodeAt(i + 2) === CODE.OPEN_CURLY_BRACE) return 0;
+            break;
+        }
+        break;
+      case CODE.OPEN_SQUARE_BRACKET:
+        inCharSet = true;
+        break;
+      case CODE.CLOSE_SQUARE_BRACKET:
+        inCharSet = false;
+        break;
+      case CODE.FORWARD_SLASH:
+        if (!inCharSet) return i + 1;
+        break;
+    }
+  }
+
+  return 0;
+}
 
 // Matches every char that can begin one of the parse branches above.
 function isSpecialParsedTextCode(code: number) {
