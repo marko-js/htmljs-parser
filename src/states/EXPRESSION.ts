@@ -136,12 +136,12 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
             expression.consumeIndentedContent &&
             isIndentCode(data.charCodeAt(prevPos + len))
           ) &&
-          // In html mode a newline after only comments cannot end the value.
+          // In html mode a newline after only comments does not end the
+          // value when one follows.
           !(
             expression.terminatedByWhitespace &&
             !this.isConcise &&
-            data.charCodeAt(expression.start) === CODE.FORWARD_SLASH &&
-            isOnlyComments(data, expression.start, prevPos)
+            valueFollowsComments(this, expression, prevPos)
           )
         ) {
           // Don't advance past the newline.
@@ -171,11 +171,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       if (!expression.groupStack.length) {
         if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
           if (!checkForOperators(this, expression, false)) {
-            if (
-              data.charCodeAt(expression.start) === CODE.FORWARD_SLASH &&
-              isOnlyComments(data, expression.start, this.pos)
-            ) {
-              // Only comments so far, eg `x=/* note */ 1`: the value follows.
+            if (valueFollowsComments(this, expression, this.pos)) {
               // Skip the whole run so the comments are scanned once; the EOL
               // branch handles a newline.
               do this.pos++;
@@ -742,8 +738,37 @@ export function isRegExpStart(data: string, pos: number) {
     : !canFollowDivision(code);
 }
 
-// Whether the range holds nothing but comments (and whitespace), which cannot
-// end a whitespace terminated value: `x=/* note */ 1` holds `1`.
+// Whether the expression holds only comments before the whitespace at `pos`
+// and a value follows that whitespace, eg `x=/* note */ 1`, which it then
+// continues to. Where nothing follows (`a=/* c */ >`) it ends before the
+// whitespace, as any value does.
+function valueFollowsComments(
+  parser: Parser,
+  expression: ExpressionMeta,
+  pos: number,
+) {
+  const { data } = parser;
+  if (
+    data.charCodeAt(expression.start) !== CODE.FORWARD_SLASH ||
+    !isOnlyComments(data, expression.start, pos)
+  ) {
+    return false;
+  }
+
+  const next = lookAheadWhile(
+    parser.isConcise ? isIndentCode : isWhitespaceCode,
+    data,
+    pos,
+  );
+  const code = data.charCodeAt(next);
+  return (
+    next < parser.maxPos &&
+    !isLineCode(code) &&
+    !expression.shouldTerminate(code, data, next, expression)
+  );
+}
+
+// Whether the range holds nothing but comments (and whitespace).
 function isOnlyComments(data: string, start: number, end: number) {
   let pos = start;
   while (pos < end) {
