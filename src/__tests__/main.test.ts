@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { it } from "node:test";
 
 import fs from "fs";
@@ -23,12 +24,11 @@ for (const entry of fs.readdirSync(FIXTURES)) {
     continue;
   }
 
-  it(entry, async () => {
+  const run = async (crlf: boolean) => {
     const dir = path.join(FIXTURES, entry);
     const filename = path.join(dir, "input.marko");
-    const src = await fs.promises.readFile(filename, "utf-8");
-    // Use this if you want to psuedo test on windows locally.
-    // const src = (await fs.promises.readFile(filename, "utf-8")).replace(/\n/g, "\r\n");
+    const file = await fs.promises.readFile(filename, "utf-8");
+    const src = crlf ? file.replace(/\r?\n/g, "\r\n") : file;
     const lines = getLines(src);
     const partsByLine: {
       range: Range;
@@ -294,6 +294,19 @@ for (const entry of fs.readdirSync(FIXTURES)) {
       }
     }
 
-    await snap(result, { dir, title: entry, ext: ".txt" });
-  });
+    if (crlf) {
+      const expected = await fs.promises.readFile(
+        path.join(dir, "__snapshots__", `${entry}.expected.txt`),
+        "utf-8",
+      );
+      assert.strictEqual(result, expected.replace(/\r\n/g, "\n"));
+    } else {
+      await snap(result, { dir, title: entry, ext: ".txt" });
+    }
+  };
+
+  it(entry, () => run(false));
+  // With CRLF line endings a fixture must snapshot the same: the snapshot
+  // strips CRs and positions newlines at their first char.
+  it(`${entry} (crlf)`, () => run(true));
 }

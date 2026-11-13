@@ -1,0 +1,29 @@
+1╭─ <p title="café ☕" data-x=`naïve ${"😀"}`>Grüße ${name} — 😀</p>
+ │  ││ │    ││        │     ││              ││     │ │    │    │ │╰─ closeTagEnd(p)
+ │  ││ │    ││        │     ││              ││     │ │    │    │ ╰─ closeTagName
+ │  ││ │    ││        │     ││              ││     │ │    │    ╰─ closeTagStart "</"
+ │  ││ │    ││        │     ││              ││     │ │    ╰─ text " — 😀"
+ │  ││ │    ││        │     ││              ││     │ ╰─ placeholder:escape.value "name"
+ │  ││ │    ││        │     ││              ││     ╰─ placeholder:escape "${name}"
+ │  ││ │    ││        │     ││              │╰─ text "Grüße "
+ │  ││ │    ││        │     ││              ╰─ openTagEnd
+ │  ││ │    ││        │     │╰─ attrValue.value "`naïve ${\"😀\"}`"
+ │  ││ │    ││        │     ╰─ attrValue "=`naïve ${\"😀\"}`"
+ │  ││ │    ││        ╰─ attrName "data-x"
+ │  ││ │    │╰─ attrValue.value "\"café ☕\""
+ │  ││ │    ╰─ attrValue "=\"café ☕\""
+ │  ││ ╰─ attrName "title"
+ │  │╰─ tagName
+ ╰─ ╰─ openTagStart
+2╭─ div class="über" -- Ünïcödé ${"text"} 🎉
+ │  │   │    ││      │  │       │ │      ╰─ text " 🎉"
+ │  │   │    ││      │  │       │ ╰─ placeholder:escape.value "\"text\""
+ │  │   │    ││      │  │       ╰─ placeholder:escape "${\"text\"}"
+ │  │   │    ││      │  ╰─ text "Ünïcödé "
+ │  │   │    ││      ╰─ openTagEnd
+ │  │   │    │╰─ attrValue.value "\"über\""
+ │  │   │    ╰─ attrValue "=\"über\""
+ │  │   ╰─ attrName "class"
+ ╰─ ╰─ tagName "div"
+3╭─ 
+ ╰─ ╰─ closeTagEnd(div)

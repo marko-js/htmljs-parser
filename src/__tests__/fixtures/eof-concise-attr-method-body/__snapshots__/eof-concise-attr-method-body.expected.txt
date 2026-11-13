@@ -1,0 +1,4 @@
+1╭─ foo onclick(e) { x
+ │  │   │           ╰─ error(MALFORMED_OPEN_TAG:EOF reached while parsing attribute method body for the "onclick" attribute)
+ │  │   ╰─ attrName "onclick"
+ ╰─ ╰─ tagName "foo"

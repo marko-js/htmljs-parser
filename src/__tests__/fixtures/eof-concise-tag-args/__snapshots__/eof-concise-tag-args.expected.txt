@@ -1,0 +1,3 @@
+1╭─ foo(e
+ │  │   ╰─ error(MALFORMED_OPEN_TAG:EOF reached while parsing tag arguments for the "foo" tag)
+ ╰─ ╰─ tagName "foo"

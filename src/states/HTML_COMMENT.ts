@@ -23,7 +23,8 @@ export const HTML_COMMENT: StateDefinition = {
       end: comment.end,
       value: {
         start: comment.start + 4, // strip <!--
-        end: comment.end - 3, // strip -->
+        // strip -->, which shares a hyphen with the <!-- of "<!--->"
+        end: Math.max(comment.start + 4, comment.end - 3),
       },
     });
   },
