@@ -1,0 +1,42 @@
+1╭─ <const/x=/* pre */ 1/>
+ │  ││    ││││          ╰─ openTagEnd:selfClosed "/>"
+ │  ││    │││╰─ attrValue.value "/* pre */ 1"
+ │  ││    ││├─ attrValue "=/* pre */ 1"
+ │  ││    ││╰─ attrName
+ │  ││    │╰─ tagVar.value
+ │  ││    ╰─ tagVar "/x"
+ │  │╰─ tagName "const"
+ ╰─ ╰─ openTagStart
+2╭─ <div a=/* c */
+ │  ││   ││╰─ attrValue.value "/* c */\n  1"
+ │  ││   │╰─ attrValue "=/* c */\n  1"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╭─   1 b=2/>
+ │      │││╰─ openTagEnd:selfClosed "/>"
+ │      ││╰─ attrValue.value
+ │      │╰─ attrValue "=2"
+ ╰─     ╰─ attrName
+4╭─ <div a=// c
+ │  ││   ││╰─ attrValue.value "// c\n  1"
+ │  ││   │╰─ attrValue "=// c\n  1"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+5╭─   1 b=2/>
+ │      │││╰─ openTagEnd:selfClosed "/>"
+ │      ││╰─ attrValue.value
+ │      │╰─ attrValue "=2"
+ ╰─     ╰─ attrName
+6╭─ div a=/* c */ 1 b=2
+ │  │   │││         ││╰─ attrValue.value
+ │  │   │││         │╰─ attrValue "=2"
+ │  │   │││         ╰─ attrName
+ │  │   ││╰─ attrValue.value "/* c */ 1"
+ │  │   │╰─ attrValue "=/* c */ 1"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "div"
+7╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)

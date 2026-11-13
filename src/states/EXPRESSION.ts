@@ -1,5 +1,6 @@
 import {
   isIndentCode,
+  isLineCode,
   isWhitespaceCode,
   isWordCode,
   type Meta,
@@ -9,6 +10,7 @@ import {
 } from "../internal.ts";
 import * as CODE from "../util/codes.ts";
 import * as ErrorCode from "../util/error-code.ts";
+import * as ATTR_STAGE from "./attr-stage.ts";
 
 export interface ExpressionMeta extends Meta {
   groupStack: number[];
@@ -64,7 +66,23 @@ export const binaryKeywords = [
   "satisfies",
 ] as const;
 
-const relationalKeywords = ["in", "instanceof"] as const;
+// Keywords an operand follows, so a "/" after one starts a regular expression
+// (`return /x/`) and a "!" after one is the prefix operator (`return !x`).
+const operandKeywords = [
+  "await",
+  "case",
+  "delete",
+  "do",
+  "else",
+  "in",
+  "instanceof",
+  "new",
+  "return",
+  "throw",
+  "typeof",
+  "void",
+  "yield",
+] as const;
 
 export const EXPRESSION: StateDefinition<ExpressionMeta> = {
   name: "EXPRESSION",
@@ -112,6 +130,13 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
           !(
             expression.consumeIndentedContent &&
             isIndentCode(data.charCodeAt(prevPos + len))
+          ) &&
+          // In html mode a newline after only comments cannot end the value.
+          !(
+            expression.terminatedByWhitespace &&
+            !this.isConcise &&
+            data.charCodeAt(expression.start) === CODE.FORWARD_SLASH &&
+            isOnlyComments(data, expression.start, prevPos)
           )
         ) {
           // Don't advance past the newline.
@@ -141,6 +166,17 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
       if (!expression.groupStack.length) {
         if (expression.terminatedByWhitespace && isWhitespaceCode(code)) {
           if (!checkForOperators(this, expression, false)) {
+            if (
+              data.charCodeAt(expression.start) === CODE.FORWARD_SLASH &&
+              isOnlyComments(data, expression.start, this.pos)
+            ) {
+              // Only comments so far, eg `x=/* note */ 1`: the value follows.
+              // Skip the whole run so the comments are scanned once; the EOL
+              // branch handles a newline.
+              do this.pos++;
+              while (isIndentCode(data.charCodeAt(this.pos)));
+              continue;
+            }
             this.exitState();
             return;
           }
@@ -241,7 +277,7 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
               this.pos += 2; // skip /*
               return;
             default:
-              if (canFollowDivision(this.getPreviousNonWhitespaceCharCode())) {
+              if (!isRegExpStart(data, this.pos)) {
                 this.pos++;
                 this.consumeWhitespace();
                 continue;
@@ -347,6 +383,13 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
     switch (parent.state) {
       case STATE.ATTRIBUTE: {
         const attr = parent as STATE.AttrMeta;
+        if (attr.stage === ATTR_STAGE.NAME && !expression.groupStack.length) {
+          // Report the name, eg one still being typed in `<div foo`, and let
+          // the attribute report the EOF.
+          this.exitState();
+          return;
+        }
+
         if (!attr.spread && !attr.name) {
           return this.emitError(
             expression,
@@ -484,10 +527,12 @@ function lookBehindForOperator(
 
     case CODE.EXCLAMATION: {
       // After an operand, `!` is a TypeScript non-null assertion (postfix),
-      // as is each `!` of a run after one (`x!!`); after a keyword operator
-      // (`typeof!a`, `a in!b`) it is the prefix `!`.
+      // as is each `!` of a run after one (`x!!`), spaced or not (`x !`);
+      // after an operator or keyword (`typeof!a`, `a in !b`, `return !a`) it
+      // is the prefix `!`.
       let operandEnd = curPos - 1;
       while (data.charCodeAt(operandEnd) === CODE.EXCLAMATION) operandEnd--;
+      operandEnd = lookBehindWhile(isWhitespaceCode, data, operandEnd) - 1;
       const operandCode = data.charCodeAt(operandEnd);
       switch (operandCode) {
         case CODE.CLOSE_PAREN:
@@ -499,12 +544,7 @@ function lookBehindForOperator(
         default:
           return isWordCode(operandCode) &&
             lookBehindForOperator(expression, data, operandEnd + 1) === -1 &&
-            lookBehindForKeyword(
-              expression,
-              data,
-              operandEnd,
-              relationalKeywords,
-            ) === -1
+            !endsWithOperandKeyword(data, operandEnd)
             ? -1
             : curPos;
       }
@@ -631,8 +671,59 @@ function lookAheadForOperator(
   }
 }
 
+/**
+ * Whether a "/" at `pos` (not a comment) starts a regular expression rather
+ * than a division, judged by what precedes it.
+ */
+export function isRegExpStart(data: string, pos: number) {
+  const prevPos = lookBehindWhile(isWhitespaceCode, data, pos - 1) - 1;
+  const code = data.charCodeAt(prevPos);
+  return isWordCode(code)
+    ? endsWithOperandKeyword(data, prevPos)
+    : !canFollowDivision(code);
+}
+
+// Whether the range holds nothing but comments (and whitespace), which cannot
+// end a whitespace terminated value: `x=/* note */ 1` holds `1`.
+function isOnlyComments(data: string, start: number, end: number) {
+  let pos = start;
+  while (pos < end) {
+    const code = data.charCodeAt(pos);
+    if (isWhitespaceCode(code)) {
+      pos++;
+    } else if (code !== CODE.FORWARD_SLASH) {
+      return false;
+    } else if (data.charCodeAt(pos + 1) === CODE.ASTERISK) {
+      const close = data.indexOf("*/", pos + 2);
+      if (close === -1) return false;
+      pos = close + 2;
+    } else if (data.charCodeAt(pos + 1) === CODE.FORWARD_SLASH) {
+      pos += 2;
+      while (pos < end && !isLineCode(data.charCodeAt(pos))) pos++;
+    } else {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Whether a whole operand keyword ends at `pos`; one after a "." is a
+// property name.
+function endsWithOperandKeyword(data: string, pos: number) {
+  const code = data.charCodeAt(pos);
+  if (code < CODE.LOWER_A || code > CODE.LOWER_Z) return false;
+
+  for (const keyword of operandKeywords) {
+    const start = lookBehindFor(data, pos, keyword);
+    if (start !== -1 && !isWordOrPeriodCode(data.charCodeAt(start - 1))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function canFollowDivision(code: number) {
-  if (isWordCode(code)) return true;
   switch (code) {
     case CODE.BACKTICK:
     case CODE.SINGLE_QUOTE:

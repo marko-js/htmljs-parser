@@ -29,9 +29,9 @@ export const HTML_COMMENT: StateDefinition = {
   },
 
   parse(data, _maxPos, comment) {
-    // The comment ends at the first "-" directly followed by ">", which also
-    // matches the final hyphens of "-->", "--->", etc.
-    const idx = data.indexOf("->", this.pos);
+    // The comment ends at the first "-->", so a "->" inside it (eg "a->b") is
+    // content. Searching from the last hyphen of "<!--" also ends "<!--->".
+    const idx = data.indexOf("-->", this.pos - 1);
     if (idx === -1) {
       return this.emitError(
         comment,
@@ -40,7 +40,7 @@ export const HTML_COMMENT: StateDefinition = {
       );
     }
 
-    this.pos = idx + 2; // skip ->
+    this.pos = idx + 3; // skip -->
     this.exitState();
   },
 

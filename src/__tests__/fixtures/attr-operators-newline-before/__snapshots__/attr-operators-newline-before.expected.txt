@@ -28,14 +28,15 @@
  │     │╰─ openTagEnd:selfClosed "/>"
  ╰─    ╰─ attrName
 8╭─ <a=x
- │  │││╰─ attrValue.value "x\n! y"
- │  ││├─ attrValue "=x\n! y"
+ │  │││╰─ attrValue.value "x\n!"
+ │  ││├─ attrValue "=x\n!"
  │  ││╰─ attrName
  │  │╰─ tagName
  ╰─ ╰─ openTagStart
 9╭─ ! y a/>
- │      │╰─ openTagEnd:selfClosed "/>"
- ╰─     ╰─ attrName
+ │    │ │╰─ openTagEnd:selfClosed "/>"
+ │    │ ╰─ attrName
+ ╰─   ╰─ attrName
 10╭─ <a=x
   │  │││╰─ attrValue.value "x\n* y"
   │  ││├─ attrValue "=x\n* y"

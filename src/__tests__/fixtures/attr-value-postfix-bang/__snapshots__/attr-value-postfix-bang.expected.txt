@@ -1,0 +1,18 @@
+1╭─ $ return !
+ │  │ ╰─ scriptlet.value "return !\n  x"
+ ╰─ ╰─ scriptlet "$ return !\n  x"
+2├─   x
+3╭─ <div a=x ! c=x! d=typeof ! e/>
+ │  ││   │││   │││  │││         ╰─ openTagEnd:selfClosed "/>"
+ │  ││   │││   │││  ││╰─ attrValue.value "typeof ! e"
+ │  ││   │││   │││  │╰─ attrValue "=typeof ! e"
+ │  ││   │││   │││  ╰─ attrName
+ │  ││   │││   ││╰─ attrValue.value "x!"
+ │  ││   │││   │╰─ attrValue "=x!"
+ │  ││   │││   ╰─ attrName
+ │  ││   ││╰─ attrValue.value "x !"
+ │  ││   │╰─ attrValue "=x !"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╰─ 

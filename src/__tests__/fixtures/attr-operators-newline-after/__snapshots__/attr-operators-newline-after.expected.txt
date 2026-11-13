@@ -51,19 +51,22 @@
 12╭─ y a
   ╰─   ╰─ attrName
 13╭─ a=x !
-  │  ││╰─ attrValue.value "x !\ny"
-  │  │├─ attrValue "=x !\ny"
+  │  ││╰─ attrValue.value "x !"
+  │  │├─ attrValue "=x !"
   │  │╰─ attrName
   │  ├─ closeTagEnd(a)
   │  ├─ openTagEnd
   ╰─ ╰─ tagName
 14╭─ y a
-  ╰─   ╰─ attrName
+  │  │ ╰─ attrName
+  │  ├─ closeTagEnd(a)
+  │  ├─ openTagEnd
+  ╰─ ╰─ tagName
 15╭─ a=x *
   │  ││╰─ attrValue.value "x *\ny"
   │  │├─ attrValue "=x *\ny"
   │  │╰─ attrName
-  │  ├─ closeTagEnd(a)
+  │  ├─ closeTagEnd(y)
   │  ├─ openTagEnd
   ╰─ ╰─ tagName
 16╭─ y a
@@ -520,14 +523,15 @@
    │    │╰─ openTagEnd:selfClosed "/>"
    ╰─   ╰─ attrName
 122╭─ <a=x !
-   │  │││╰─ attrValue.value "x !\ny"
-   │  ││├─ attrValue "=x !\ny"
+   │  │││╰─ attrValue.value "x !"
+   │  ││├─ attrValue "=x !"
    │  ││╰─ attrName
    │  │╰─ tagName
    ╰─ ╰─ openTagStart
 123╭─ y a/>
-   │    │╰─ openTagEnd:selfClosed "/>"
-   ╰─   ╰─ attrName
+   │  │ │╰─ openTagEnd:selfClosed "/>"
+   │  │ ╰─ attrName
+   ╰─ ╰─ attrName
 124╭─ <a=x *
    │  │││╰─ attrValue.value "x *\ny"
    │  ││├─ attrValue "=x *\ny"

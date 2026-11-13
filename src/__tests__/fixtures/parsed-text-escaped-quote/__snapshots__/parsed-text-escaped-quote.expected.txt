@@ -1,0 +1,15 @@
+1╭─ <script>s.replace(/\"/g, "&quot;"); const a = "it\"s ${x}"; if (/^https?:\/\//.test(u)) go(${y});</script>
+ │  ││     ││                                            │ │ │                                 │ │ │ │ │     ╰─ closeTagEnd(script)
+ │  ││     ││                                            │ │ │                                 │ │ │ │ ╰─ closeTagName "script"
+ │  ││     ││                                            │ │ │                                 │ │ │ ╰─ closeTagStart "</"
+ │  ││     ││                                            │ │ │                                 │ │ ╰─ text ");"
+ │  ││     ││                                            │ │ │                                 │ ╰─ placeholder:escape.value
+ │  ││     ││                                            │ │ │                                 ╰─ placeholder:escape "${y}"
+ │  ││     ││                                            │ │ ╰─ text "\"; if (/^https?:\\/\\//.test(u)) go("
+ │  ││     ││                                            │ ╰─ placeholder:escape.value
+ │  ││     ││                                            ╰─ placeholder:escape "${x}"
+ │  ││     │╰─ text "s.replace(/\\\"/g, \"&quot;\"); const a = \"it\\\"s "
+ │  ││     ╰─ openTagEnd
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+2╰─ 

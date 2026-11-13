@@ -1,0 +1,8 @@
+1╭─ div c=// x
+ │  │   ││╰─ attrValue.value "// x"
+ │  │   │╰─ attrValue "=// x"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "div"
+2╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)

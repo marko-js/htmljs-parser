@@ -1,5 +1,6 @@
 1╭─ <a><b selected
- │  │││││ ╰─ error(MALFORMED_OPEN_TAG:EOF reached while parsing attribute name for the "b" tag)
+ │  │││││ ├─ error(MALFORMED_OPEN_TAG:EOF reached while parsing attribute "selected" for the "b" tag)
+ │  │││││ ╰─ attrName "selected"
  │  ││││╰─ tagName
  │  │││╰─ openTagStart
  │  ││╰─ openTagEnd
