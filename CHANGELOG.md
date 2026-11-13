@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.22.0
+
+### Minor Changes
+
+- [#268](https://github.com/marko-js/htmljs-parser/pull/268) [`f87a4c5`](https://github.com/marko-js/htmljs-parser/commit/f87a4c530945cee4c2f821a1c0d3ef83194a2455) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Report an unfinished construct at EOF in concise mode, as html mode does: unclosed tag or attribute arguments, parameters, type arguments, a method body, a `$ { … }` scriptlet or a `${…}` in a tag name were accepted silently, with a range claiming a closer past the end of the input. EOF errors now name what was being parsed (eg "attribute arguments", "tag parameters"), and the value of an `<!--->` comment is an empty range rather than an inverted one.
+
 ## 5.21.0
 
 ### Minor Changes
