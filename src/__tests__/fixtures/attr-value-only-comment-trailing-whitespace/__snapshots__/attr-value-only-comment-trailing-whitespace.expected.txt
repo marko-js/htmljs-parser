@@ -1,0 +1,43 @@
+1╭─ <div a=/* c */ ></div>
+ │  ││   │││       ││ │  ╰─ closeTagEnd(div)
+ │  ││   │││       ││ ╰─ closeTagName "div"
+ │  ││   │││       │╰─ closeTagStart "</"
+ │  ││   │││       ╰─ openTagEnd
+ │  ││   ││╰─ attrValue.value "/* c */"
+ │  ││   │╰─ attrValue "=/* c */"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+2╭─ <div b=/* c */ />
+ │  ││   │││       ╰─ openTagEnd:selfClosed "/>"
+ │  ││   ││╰─ attrValue.value "/* c */"
+ │  ││   │╰─ attrValue "=/* c */"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+3╭─ <div c=/* c */
+ │  ││   ││╰─ attrValue.value "/* c */"
+ │  ││   │╰─ attrValue "=/* c */"
+ │  ││   ╰─ attrName
+ │  │╰─ tagName "div"
+ ╰─ ╰─ openTagStart
+4╭─ ></div>
+ │  ││ │  ╰─ closeTagEnd(div)
+ │  ││ ╰─ closeTagName "div"
+ │  │╰─ closeTagStart "</"
+ ╰─ ╰─ openTagEnd
+5╭─ div d=/* c */ 
+ │  │   ││╰─ attrValue.value "/* c */"
+ │  │   │╰─ attrValue "=/* c */"
+ │  │   ╰─ attrName
+ ╰─ ╰─ tagName "div"
+6╭─ div e=/* c */ ;
+ │  │   ││╰─ attrValue.value "/* c */"
+ │  │   │╰─ attrValue "=/* c */"
+ │  │   ╰─ attrName
+ │  ├─ closeTagEnd(div)
+ │  ├─ openTagEnd
+ ╰─ ╰─ tagName "div"
+7╭─ 
+ │  ├─ openTagEnd
+ ╰─ ╰─ closeTagEnd(div)
