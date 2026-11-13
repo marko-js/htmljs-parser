@@ -27,6 +27,15 @@ describe("api", () => {
     );
   });
 
+  it("never reports an inverted comment value range", () => {
+    // The "-->" of "<!--->" reuses the last hyphen of its "<!--".
+    const values: { start: number; end: number }[] = [];
+    createParser({ onComment: (range) => values.push(range.value) }).parse(
+      "<!--->",
+    );
+    assert.deepEqual(values, [{ start: 4, end: 4 }]);
+  });
+
   it("reports locations for offset ranges", () => {
     const parser = createParser({});
     parser.parse("<div>\n  hi\n</div>");

@@ -1,5 +1,5 @@
 1╭─ <div =foo
- │  ││   │╰─ error(MALFORMED_OPEN_TAG:EOF reached while parsing attribute name for the "div" tag)
+ │  ││   │╰─ error(MALFORMED_OPEN_TAG:EOF reached while parsing attribute value for the default attribute)
  │  ││   ╰─ attrName
  │  │╰─ tagName "div"
  ╰─ ╰─ openTagStart

@@ -3,6 +3,10 @@ import {
   isLineCode,
   isWhitespaceCode,
   isWordCode,
+  matchesCloseAngleBracket,
+  matchesCloseCurlyBrace,
+  matchesCloseParen,
+  matchesPipe,
   type Meta,
   Parser,
   STATE,
@@ -11,6 +15,7 @@ import {
 import * as CODE from "../util/codes.ts";
 import * as ErrorCode from "../util/error-code.ts";
 import * as ATTR_STAGE from "./attr-stage.ts";
+import * as TAG_STAGE from "./tag-stage.ts";
 
 export interface ExpressionMeta extends Meta {
   groupStack: number[];
@@ -372,7 +377,10 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
     // EOF
     if (
       !expression.groupStack.length &&
-      (this.isConcise || expression.terminatedByEOL)
+      (this.isConcise || expression.terminatedByEOL) &&
+      // One that a closer ends (`(…)`, `{…}`, `<…>`, `|…|`, `${…}`) is
+      // unfinished at EOF, in concise mode too.
+      !isEndedByCloser(expression)
     ) {
       this.exitState();
       return;
@@ -383,14 +391,14 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
     switch (parent.state) {
       case STATE.ATTRIBUTE: {
         const attr = parent as STATE.AttrMeta;
-        if (attr.stage === ATTR_STAGE.NAME && !expression.groupStack.length) {
-          // Report the name, eg one still being typed in `<div foo`, and let
-          // the attribute report the EOF.
-          this.exitState();
-          return;
-        }
+        if (attr.stage === ATTR_STAGE.NAME) {
+          if (!expression.groupStack.length) {
+            // Report the name, eg one still being typed in `<div foo`, and
+            // let the attribute report the EOF.
+            this.exitState();
+            return;
+          }
 
-        if (!attr.spread && !attr.name) {
           return this.emitError(
             expression,
             ErrorCode.MALFORMED_OPEN_TAG,
@@ -403,12 +411,33 @@ export const EXPRESSION: StateDefinition<ExpressionMeta> = {
         return this.emitError(
           expression,
           ErrorCode.MALFORMED_OPEN_TAG,
-          `EOF reached while parsing attribute value for the ${
-            // A missing name was reported above, so this is a spread or named attribute.
-            attr.spread ? "..." : `"${this.read(attr.name!)}"`
+          `EOF reached while parsing attribute ${
+            attrParts[attr.stage]
+          } for the ${
+            attr.spread
+              ? "..."
+              : attr.name
+                ? `"${this.read(attr.name)}"`
+                : "default"
           } attribute`,
         );
       }
+
+      case STATE.OPEN_TAG:
+        return this.emitError(
+          expression,
+          ErrorCode.MALFORMED_OPEN_TAG,
+          `EOF reached while parsing ${
+            tagParts[(parent as STATE.OpenTagMeta).stage]
+          } for the "${this.read(this.activeTag!.tagName)}" tag`,
+        );
+
+      case STATE.INLINE_SCRIPT:
+        return this.emitError(
+          expression,
+          ErrorCode.INVALID_EXPRESSION,
+          "EOF reached while parsing scriptlet",
+        );
 
       case STATE.TAG_NAME:
         return this.emitError(
@@ -668,6 +697,36 @@ function lookAheadForOperator(
 
       return -1;
     }
+  }
+}
+
+// What an unfinished attribute or open tag expression is, by its stage.
+const attrParts: Record<ATTR_STAGE.AttrStage, string> = {
+  [ATTR_STAGE.UNKNOWN]: "value",
+  [ATTR_STAGE.NAME]: "name",
+  [ATTR_STAGE.VALUE]: "value",
+  [ATTR_STAGE.ARGUMENT]: "arguments",
+  [ATTR_STAGE.TYPE_PARAMS]: "type parameters",
+  [ATTR_STAGE.BLOCK]: "method body",
+};
+const tagParts: Record<TAG_STAGE.TagStage, string> = {
+  [TAG_STAGE.UNKNOWN]: "expression",
+  [TAG_STAGE.VAR]: "tag variable",
+  [TAG_STAGE.ARGUMENT]: "tag arguments",
+  [TAG_STAGE.TYPES]: "tag types",
+  [TAG_STAGE.PARAMS]: "tag parameters",
+  [TAG_STAGE.ATTR_GROUP]: "expression",
+};
+
+function isEndedByCloser(expression: ExpressionMeta) {
+  switch (expression.shouldTerminate) {
+    case matchesCloseAngleBracket:
+    case matchesCloseCurlyBrace:
+    case matchesCloseParen:
+    case matchesPipe:
+      return true;
+    default:
+      return false;
   }
 }
 

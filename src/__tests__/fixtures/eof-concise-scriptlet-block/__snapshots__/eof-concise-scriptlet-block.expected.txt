@@ -1,0 +1,2 @@
+1╭─ $ { x
+ ╰─    ╰─ error(INVALID_EXPRESSION:EOF reached while parsing scriptlet)

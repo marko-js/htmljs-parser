@@ -1,0 +1,5 @@
+1╭─ -- text ${x}
+ │     │    │ ╰─ placeholder:escape.value
+ │     │    ╰─ placeholder:escape "${x}"
+ ╰─    ╰─ text "text "
+2╰─ 
