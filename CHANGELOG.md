@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.22.1
+
+### Patch Changes
+
+- [#270](https://github.com/marko-js/htmljs-parser/pull/270) [`b15246b`](https://github.com/marko-js/htmljs-parser/commit/b15246b894f0bce83880e631925a589a2328a4e3) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - An attribute value holding only a comment ends at the comment, like any other value, rather than taking in the whitespace before the `>` that ends the tag (`<div a=/* c */ >` gave the value `"/* c */ "`).
+
 ## 5.22.0
 
 ### Minor Changes
