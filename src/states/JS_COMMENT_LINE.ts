@@ -5,7 +5,6 @@ import {
   type StateDefinition,
 } from "../internal.ts";
 import * as CODE from "../util/codes.ts";
-import * as TagType from "../util/tag-type.ts";
 
 // We enter STATE.JS_COMMENT_LINE after we encounter a "//" sequence
 // when parsing JavaScript code.
@@ -24,7 +23,7 @@ export const JS_COMMENT_LINE: StateDefinition = {
 
   exit() {},
 
-  parse(data, maxPos) {
+  parse(data, maxPos, comment) {
     while (this.pos < maxPos) {
       const code = data.charCodeAt(this.pos);
       if (code === CODE.NEWLINE || code === CODE.CARRIAGE_RETURN) {
@@ -34,10 +33,11 @@ export const JS_COMMENT_LINE: StateDefinition = {
       } else if (
         !this.isConcise &&
         code === CODE.OPEN_ANGLE_BRACKET &&
-        this.activeTag?.type === TagType.text &&
+        comment.parent.state === STATE.PARSED_TEXT_CONTENT &&
         STATE.checkForClosingTag(this)
       ) {
-        // We reached the closing tag of a text-only tag (eg "<script>//foo</script>").
+        // We reached the closing tag of a text-only tag (eg "<script>//foo</script>"),
+        // from its body: a comment in its open tag (eg "<script//foo</script>") goes on.
         // checkForClosingTag exited this comment; also exit the text content state.
         this.exitState();
         return;
