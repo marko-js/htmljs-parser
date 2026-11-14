@@ -1,5 +1,11 @@
 # htmljs-parser
 
+## 5.22.2
+
+### Patch Changes
+
+- [#272](https://github.com/marko-js/htmljs-parser/pull/272) [`12bad89`](https://github.com/marko-js/htmljs-parser/commit/12bad89c2fca3f3077d1628691d061911c7c401b) Thanks [@DylanPiercey](https://github.com/DylanPiercey)! - Fix a crash on a `//` comment holding a text tag's closing tag in its open tag (`<script// a</script>`).
+
 ## 5.22.1
 
 ### Patch Changes
