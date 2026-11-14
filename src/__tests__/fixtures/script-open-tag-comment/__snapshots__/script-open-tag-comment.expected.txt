@@ -1,0 +1,8 @@
+1╭─ <script// a comment</script>
+ │  ││     │ ╰─ openTagComment.value " a comment</script>"
+ │  ││     ╰─ openTagComment "// a comment</script>"
+ │  │╰─ tagName "script"
+ ╰─ ╰─ openTagStart
+2╭─ <div>x</div>
+ ╰─  ╰─ error(INVALID_TAG_TYPES:Unexpected types. Type arguments must directly follow a tag name and type paremeters must precede a method or tag parameters.) "div"
+3╰─ 
